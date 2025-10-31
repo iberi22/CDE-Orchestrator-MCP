@@ -1,0 +1,23 @@
+# .cde/workflow.yml
+name: "Standard Web Application Workflow"
+version: 1.0.0
+
+phases:
+  - id: define
+    description: "Define the high-level feature or epic from a user prompt."
+    handler: "cde_orchestrator.handlers.define_handler"
+    prompt_recipe: ".cde/prompts/01_define.poml"
+    outputs:
+      - type: "file"
+        path: "specs/features/{feature_name}.md"
+
+  - id: decompose
+    description: "Break down the feature specification into granular GitHub Issues."
+    handler: "cde_orchestrator.handlers.decompose_handler"
+    prompt_recipe: ".cde/prompts/02_decompose.poml"
+    inputs:
+      - type: "file"
+        path: "specs/features/{feature_name}.md"
+    outputs:
+      - type: "github_issues"
+        labels: ["cde-task", "{feature_name}"]

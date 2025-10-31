@@ -1,0 +1,5 @@
+fastmcp
+pyyaml
+pydantic
+python-dotenv
+lxml
