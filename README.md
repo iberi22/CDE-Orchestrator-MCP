@@ -15,11 +15,28 @@ It acts as a high-level facade, abstracting away the complexity of underlying to
 
 ## 3. Features (MCP Tools)
 
-The orchestrator will expose the following high-level tools to the AI agent:
+The orchestrator exposes the following high-level tools to the AI agent:
 
-- `cde.startFeature(prompt: str)`: Initiates a new feature development workflow.
-- `cde.getTask()`: Fetches the next available task based on the current workflow state.
-- `cde.submitWork(task_id: str, results: dict)`: Submits the completed work for a given task. The orchestrator validates it and transitions to the next state.
+### Core Workflow Tools
+- `cde_onboardingProject()`: Analyzes project structure and performs onboarding setup with Spec-Kit compatibility.
+- `cde_startFeature(prompt: str)`: Initiates a new feature development workflow.
+- `cde_submitWork(feature_id: str, phase_id: str, results: dict)`: Submits completed work and transitions to the next phase.
+- `cde_getFeatureStatus(feature_id: str)`: Gets the current status of a feature.
+- `cde_listFeatures()`: Lists all features and their status.
+
+### Recipe Management Tools
+- `cde_listRecipes()`: Lists all available POML recipes.
+- `cde_useRecipe(recipe_id: str, user_prompt: str, context: dict)`: Uses a specific recipe to generate a prompt.
+- `cde_suggestRecipe(user_prompt: str, phase_id: str)`: Suggests the best recipe for a task.
+- `cde_startFeatureWithRecipe(user_prompt: str, recipe_id: str)`: Starts a feature using a specific recipe.
+
+### Git & GitHub Integration Tools
+- `cde_createGitBranch(feature_id: str, branch_name: str, base_branch: str)`: Creates a Git branch for a feature.
+- `cde_createGitHubIssue(feature_id: str, title: str, description: str, labels: list)`: Creates GitHub issues (uses external MCP if configured).
+- `cde_commitWork(feature_id: str, message: str, files: list)`: Commits work to Git.
+- `cde_getServiceStatus()`: Gets status of configured integrations.
+
+> **Note:** Git/GitHub tools automatically detect and use external MCP servers when configured. See [INTEGRATION.md](INTEGRATION.md) for details.
 
 ## 4. Getting Started
 
@@ -124,3 +141,43 @@ To use the CDE Orchestrator, you start by defining your workflow in `.cde/workfl
 -   `cde.submitWork(task_id: str, results: dict)`: Once you have completed a task, you use this command to submit your work. The orchestrator will validate the work and, if it's complete, move the project to the next phase in the workflow.
 
 By using the CDE Orchestrator, you can ensure that your project is always in a well-defined state, that all work is tracked, and that your development process is consistent and repeatable.
+
+## 8. External Service Integration
+
+The CDE Orchestrator supports seamless integration with external MCP servers for enhanced functionality:
+
+### Automatic MCP Detection
+
+The orchestrator automatically detects and uses external MCP servers when configured:
+- **GitHub MCP**: Automatically detected from your MCP configuration
+- **Git Operations**: Always available for local repositories
+- **Fallback Mechanisms**: Graceful degradation when services are unavailable
+
+### Quick Setup
+
+1. **Configure GitHub MCP** (optional):
+   ```json
+   {
+     "mcpServers": {
+       "github": {
+         "command": "npx",
+         "args": ["-y", "@modelcontextprotocol/server-github"],
+         "env": {
+           "GITHUB_TOKEN": "your-token-here"
+         }
+       }
+     }
+   }
+   ```
+
+2. **Or use GitHub API** (alternative):
+   ```bash
+   export GITHUB_TOKEN=your-token-here
+   ```
+
+3. **Check service status**:
+   ```
+   cde_getServiceStatus()
+   ```
+
+For detailed integration documentation, see [INTEGRATION.md](INTEGRATION.md). For Codex CLI usage, see [CODEX.md](CODEX.md).

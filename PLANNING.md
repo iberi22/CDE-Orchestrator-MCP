@@ -30,3 +30,19 @@ The Orchestrator MCP will be built using a modular, service-oriented architectur
 - **`PromptManager`:** Responsible for loading `.poml` files, injecting dynamic context, and generating the final prompt for the agent.
 - **`ToolWrapper`:** An internal module that will wrap lower-level clients (like a GitHub client or filesystem tools) to be used by the main orchestrator tools.
 - **`Server`:** The FastMCP server that exposes the high-level `cde.*` tools to the agent.
+
+## 5. LLM-First I/O Contracts
+
+- All MCP tools return JSON strings with a top-level `status` or `error` key.
+- Common fields: `feature_id`, `phase`, `prompt`, `progress`.
+- Error shape: `{ "error": <code>, "message?": <details>, ... }`.
+- Contracts are documented in `CODEX.md` and `AGENTS.md`.
+
+## 6. Roadmap (execution highlights)
+
+1. Harden error handling and timeouts; add logging.
+2. Make repo ingestion `.gitignore` aware; add token-aware chunking.
+3. Cache analysis; add async for I/O heavy ops.
+4. Deepen Spec‑Kit integration: validation and templates.
+5. Extend prompts for full workflow (implement/test/review).
+6. Improve Git/GitHub UX; add PR workflows (future).
