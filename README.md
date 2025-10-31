@@ -1,6 +1,36 @@
 # CDE Orchestrator MCP
 
 ## 1. Overview
+    The main idea:"Proposed Integrated Management System
+    Based on the analysis, I propose a "minimalist yet sufficiently robust" system that evolves with the project. It is inspired by Spec-Kit and best practices in software engineering, utilizing standard tools from the Git ecosystem.
+
+    1. System Philosophy
+    Specification as Code: Requirements and planning reside in the repository, versioned alongside the code.
+    Single Source of Truth: The Git repository and its associated tools (Issues, Projects) centralize all information.
+    Progressive Scalability: The system adapts. It starts lightweight, and layers of formality are added only when necessary.
+    Automation-Friendly: The structure is designed for easy integration with AI assistants and CI/CD workflows.
+    Requirements Management and Planning (/specs): The Spec-Kit approach is adopted. Each new feature or epic is documented in its own Markdown file within specs/features/.
+
+    This file defines the "what" and the "why" (problem to be solved, user stories, acceptance criteria).
+
+    If the project includes APIs, their contract is formally defined in specs/api/ using OpenAPI.
+    Task Management (GitHub Issues): TASK.md is abandoned in favor of GitHub Issues. This is the most critical improvement for scalability.
+
+    Advantages:
+    Traceability: Each issue can be directly linked to commits and pull requests (Closes #123).
+    Organization: Tags (bug, feature, backend), milestones, and assignments can be used.
+    Discussion: Enables contextual conversations about each task. Automation: It can be integrated with GitHub Projects (Kanban boards) and Actions.
+    Flow: A specification in /specs is broken down into concrete tasks as GitHub Issues.
+    Version Control Flow (GitHub Flow):
+    The main branch is always in a deployable state.
+    Every new feature or fix is ​​developed in its own branch (feature/add-user-auth).
+    Work is integrated into main exclusively through Pull Requests (PRs).
+    PRs are the point of code review and automated test execution (CI).
+    Integration with AI Assistants: The "Global Rules" defined in your original document remain valid and powerful.
+    You can ask the AI: "Based on specs/features/auth.md, create the tasks in GitHub Issues to implement user authentication."
+
+    Or: "Implement Issue #42. Here is the relevant code and associated specification in specs/features/auth.md.".
+
 
 The CDE Orchestrator is the reference implementation of the **Context-Driven Engineering (CDE)** methodology. It is a smart MCP (Model Context Protocol) server designed to guide AI coding assistants through a structured, phase-based software development lifecycle.
 
@@ -18,7 +48,7 @@ It acts as a high-level facade, abstracting away the complexity of underlying to
 The orchestrator exposes the following high-level tools to the AI agent:
 
 ### Core Workflow Tools
-- `cde_onboardingProject()`: Analyzes project structure and performs onboarding setup with Spec-Kit compatibility.
+- `cde_onboardingProject()`: Synthesizes the repository, proposes cleanup/relocation actions, and performs Spec-Kit onboarding with automation-ready artifacts.
 - `cde_startFeature(prompt: str)`: Initiates a new feature development workflow.
 - `cde_submitWork(feature_id: str, phase_id: str, results: dict)`: Submits completed work and transitions to the next phase.
 - `cde_getFeatureStatus(feature_id: str)`: Gets the current status of a feature.
@@ -141,6 +171,13 @@ To use the CDE Orchestrator, you start by defining your workflow in `.cde/workfl
 -   `cde.submitWork(task_id: str, results: dict)`: Once you have completed a task, you use this command to submit your work. The orchestrator will validate the work and, if it's complete, move the project to the next phase in the workflow.
 
 By using the CDE Orchestrator, you can ensure that your project is always in a well-defined state, that all work is tracked, and that your development process is consistent and repeatable.
+
+### Repository Onboarding & Cleanup
+
+- **Repository synthesis:** `cde_onboardingProject` summarizes directories, top file types, and tech stack so agents know how to navigate context quickly.
+- **Professional organization prompts:** the onboarding output now includes questions for humans to confirm branch/test cleanups, ensuring alignment with the Integrated Management System philosophy (Spec-as-Code, single source of truth, progressive scalability, automation-friendly).
+- **Automated cleanup plan:** recommended test relocations, obsolete planning files (e.g., `TASK.md`), and documentation refreshes are surfaced in a structured `cleanup_plan` so agents can act deterministically.
+- **Stateful approval:** cleanup recommendations and synthesis data are stored in `.cde/state.json`, keeping the onboarding actions auditable and reproducible for LLM teammates.
 
 ## 8. External Service Integration
 

@@ -68,7 +68,7 @@ Note: Codex can read the same schema and will launch the servers under the given
 
 All CDE tools return JSON strings for machine-readability. Key endpoints:
 
-- `cde_onboardingProject() -> { status, message?, draft_preview? }`
+- `cde_onboardingProject() -> { status, message?, draft_preview? }` (full plan + cleanup recommendations saved under `.cde/state.json` → `onboarding.plan`)
 - `cde_publishOnboarding(documents, approve) -> { status, created, failed }`
 - `cde_startFeature(prompt) -> { feature_id, phase, prompt, progress }`
 - `cde_submitWork(feature_id, phase_id, results) -> { phase, prompt } | { status: "completed" }`
@@ -100,6 +100,8 @@ call: cde_publishOnboarding({ "specs/README.md": "...", "memory/constitution.md"
 -> { status: "applied", created: [ ... ] }
 ```
 
+The onboarding plan (including `cleanup_plan`, `repository_synthesis`, and stakeholder questions) is persisted at `.cde/state.json` under `onboarding.plan`.
+
 2) Start a feature
 
 ```json
@@ -121,6 +123,8 @@ Repeat for subsequent phases.
 - Prefer calling `cde_getServiceStatus()` before GitHub operations
 - Keep `results` payloads small and phase-appropriate
 - Use `cde_suggestRecipe()` to select a tuned recipe for define/decompose/design
+- Repo digest respects `.gitignore` (PathSpec). Use `force_refresh=True` if you need a fresh read.
+- After onboarding, review `state['onboarding']['plan']['cleanup_plan']` to execute test relocations, archive obsolete docs, and refresh READMEs in line with the Integrated Management System principles.
 
 ## Troubleshooting
 
@@ -131,4 +135,3 @@ Repeat for subsequent phases.
 ## Next
 
 See `INTEGRATION.md` for external services and `ONBOARDING_REVIEW_REPORT.md` for roadmap and best practices.
-

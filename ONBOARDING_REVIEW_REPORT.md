@@ -363,5 +363,9 @@ By following the recommended roadmap, the CDE Orchestrator can evolve from a fun
 - Added missing prompts to complete the workflow: `.cde/prompts/04_implement.poml`, `.cde/prompts/05_test.poml`, `.cde/prompts/06_review.poml`.
 - Created `CODEX.md` documenting Codex CLI + MCP usage and LLM-first I/O contracts.
 - Linked `CODEX.md` from `README.md` (see “For Codex CLI usage”).
+- Introduced centralized logging + `tool_handler` decorator for consistent JSON error envelopes and telemetry.
+- Hardened repo ingestion: `.gitignore` awareness (PathSpec), binary detection, lightweight caching, structured logging.
+- Added repository synthesis & cleanup plan generation (test relocations, obsolete planning files, documentation refresh targets).
+- Updated onboarding prompt/output to collect human approvals and reinforce the Integrated Management System philosophy.
 
-Next planned: error handling framework, `.gitignore`-aware ingestion, caching, and performance instrumentation per Sections 4–5.
+Next planned: async/streaming ingestion, Spec-Kit validation hooks, and performance instrumentation per Sections 4–5.

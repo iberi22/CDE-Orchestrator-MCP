@@ -18,7 +18,7 @@ This repository is designed for AI agents. Keep human-facing docs minimal and ma
 
 ## Core Tools
 
-- `cde_onboardingProject()` → Prepare onboarding draft; use with your model to generate documents; apply via `cde_publishOnboarding`.
+- `cde_onboardingProject()` → Prepare onboarding draft, repository synthesis, and cleanup plan (`state['onboarding']['plan']`); use with your model to generate documents; apply via `cde_publishOnboarding`.
 - `cde_startFeature(prompt)` → Returns `feature_id`, `phase`, `prompt`, `progress`.
 - `cde_submitWork(feature_id, phase_id, results)` → Advance phase or complete workflow.
 - `cde_getFeatureStatus(feature_id)`, `cde_listFeatures()` → Inspect current state.
@@ -34,9 +34,16 @@ This repository is designed for AI agents. Keep human-facing docs minimal and ma
 
 ## Workflows
 
-1) Onboard → generate docs → `cde_publishOnboarding`
+1) Onboard → review `state['onboarding']['plan']` (docs + cleanup plan) → generate docs → `cde_publishOnboarding`
 2) Start feature → use returned `prompt` to produce outputs
 3) Submit outputs via `cde_submitWork` to progress
+
+## Onboarding Deliverables
+
+- `cleanup_plan.tests_to_move`: Move stray tests into `tests/` while preserving imports.
+- `cleanup_plan.files_to_archive`: Remove/relocate legacy planning files (e.g., `TASK.md`) that conflict with Spec-as-Code.
+- `cleanup_plan.documentation_updates`: Regenerate READMEs/constitutions to match Integrated Management System principles.
+- `questions_for_human`: Surface approval checkpoints; always pause until the human confirms the recommended action.
 
 ## Integration
 
@@ -47,10 +54,10 @@ This repository is designed for AI agents. Keep human-facing docs minimal and ma
 
 - Prefer small, reversible changes per phase.
 - Respect `.gitignore` and avoid writing binaries.
+- Execute the onboarding `cleanup_plan` (test relocations, obsolete file archiving, doc refresh) with human approval before merging.
 - Keep prompts and outputs under token budgets.
 
 ## Style
 
 - Python: type hints, clear naming, cohesive functions.
 - Docs: concise, action-oriented, example-first.
-

@@ -40,9 +40,9 @@ The Orchestrator MCP will be built using a modular, service-oriented architectur
 
 ## 6. Roadmap (execution highlights)
 
-1. Harden error handling and timeouts; add logging.
-2. Make repo ingestion `.gitignore` aware; add token-aware chunking.
-3. Cache analysis; add async for I/O heavy ops.
-4. Deepen Spec‑Kit integration: validation and templates.
-5. Extend prompts for full workflow (implement/test/review).
+1. ✅ Harden error handling/timeouts; centralized logging + tool decorator.
+2. ✅ Repo ingestion respects `.gitignore`, skips binaries, caches digests.
+3. In progress: async/streaming ingestion + richer token-aware chunking.
+4. Deepen Spec-Kit integration: validation and templates.
+5. Extend prompts for specialized phases (QA, release).
 6. Improve Git/GitHub UX; add PR workflows (future).

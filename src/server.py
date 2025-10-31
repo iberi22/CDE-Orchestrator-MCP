@@ -1,16 +1,18 @@
-# src/server.py
+﻿# src/server.py
+import json
+import logging
 import os
 import uuid
-import json
+from functools import wraps
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 from fastmcp import FastMCP
 from cde_orchestrator.workflow_manager import WorkflowManager
 from cde_orchestrator.prompt_manager import PromptManager
 from cde_orchestrator.state_manager import StateManager
 from cde_orchestrator.recipe_manager import RecipeManager
 from cde_orchestrator.service_connector import ServiceConnectorFactory
-from cde_orchestrator.onboarding_analyzer import OnboardingAnalyzer, SpecKitStructureGenerator
+from cde_orchestrator.onboarding_analyzer import OnboardingAnalyzer
 from cde_orchestrator.repo_ingest import RepoIngestor
 
 # --- Constants and Configuration ---
@@ -20,6 +22,13 @@ STATE_FILE = CDE_ROOT / "state.json"
 PROMPT_RECIPES_DIR = CDE_ROOT / "prompts"
 RECIPES_DIR = CDE_ROOT / "recipes"
 SPECS_DIR = Path("specs")
+
+# --- Logging ---
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(name)s %(levelname)s: %(message)s",
+)
+logger = logging.getLogger("cde_orchestrator")
 
 # --- Application Setup ---
 app = FastMCP()
@@ -32,12 +41,34 @@ try:
     recipe_manager = RecipeManager(RECIPES_DIR)
     service_factory = ServiceConnectorFactory()
 except FileNotFoundError as e:
-    print(f"Error: A required CDE file is missing. {e}")
-    print("Please ensure .cde/workflow.yml exists.")
+    logger.error("Missing required CDE file: %s", e)
+    logger.error("Please ensure .cde/workflow.yml exists.")
     exit(1)
 
 
+def tool_handler(func):
+    """Wrap MCP tools with structured error handling and logging."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            result = func(*args, **kwargs)
+            if isinstance(result, (dict, list)):
+                return json.dumps(result, indent=2)
+            return result
+        except Exception as exc:
+            logger.exception("Tool %s failed", func.__name__)
+            return json.dumps({
+                "error": "internal_error",
+                "message": str(exc),
+                "tool": func.__name__
+            }, indent=2)
+
+    return wrapper
+
+
 @app.tool()
+@tool_handler
 def cde_startFeature(user_prompt: str) -> str:
     """
     Initiates a new feature development workflow based on a user prompt.
@@ -98,6 +129,7 @@ def cde_startFeature(user_prompt: str) -> str:
 
 
 @app.tool()
+@tool_handler
 def cde_submitWork(feature_id: str, phase_id: str, results: Dict[str, Any]) -> str:
     """
     Submits the completed work for a given feature phase and transitions to the next phase.
@@ -190,6 +222,7 @@ def cde_submitWork(feature_id: str, phase_id: str, results: Dict[str, Any]) -> s
 
 
 @app.tool()
+@tool_handler
 def cde_getFeatureStatus(feature_id: str) -> str:
     """
     Gets the current status and progress of a feature.
@@ -210,6 +243,7 @@ def cde_getFeatureStatus(feature_id: str) -> str:
 
 
 @app.tool()
+@tool_handler
 def cde_listFeatures() -> str:
     """
     Lists all features and their current status.
@@ -235,6 +269,7 @@ def cde_listFeatures() -> str:
 
 
 @app.tool()
+@tool_handler
 def cde_listRecipes() -> str:
     """
     Lists all available POML recipes organized by category.
@@ -247,6 +282,7 @@ def cde_listRecipes() -> str:
 
 
 @app.tool()
+@tool_handler
 def cde_useRecipe(recipe_id: str, user_prompt: str, context: Optional[Dict[str, str]] = None) -> str:
     """
     Uses a specific POML recipe to generate a specialized prompt.
@@ -279,6 +315,7 @@ def cde_useRecipe(recipe_id: str, user_prompt: str, context: Optional[Dict[str, 
 
 
 @app.tool()
+@tool_handler
 def cde_createGitBranch(feature_id: str, branch_name: str, base_branch: str = "main") -> str:
     """
     Creates a new Git branch for a feature.
@@ -308,6 +345,7 @@ def cde_createGitBranch(feature_id: str, branch_name: str, base_branch: str = "m
 
 
 @app.tool()
+@tool_handler
 def cde_createGitHubIssue(
     feature_id: str,
     title: str,
@@ -357,6 +395,7 @@ def cde_createGitHubIssue(
 
 
 @app.tool()
+@tool_handler
 def cde_commitWork(feature_id: str, message: str, files: Optional[List[str]] = None) -> str:
     """
     Commits work for a feature to Git.
@@ -389,6 +428,7 @@ def cde_commitWork(feature_id: str, message: str, files: Optional[List[str]] = N
 
 
 @app.tool()
+@tool_handler
 def cde_getServiceStatus() -> str:
     """
     Gets the status of all configured service integrations.
@@ -401,6 +441,7 @@ def cde_getServiceStatus() -> str:
 
 
 @app.tool()
+@tool_handler
 def cde_suggestRecipe(user_prompt: str, phase_id: str = "define") -> str:
     """
     Suggests the best recipe for a given user prompt and workflow phase.
@@ -428,6 +469,7 @@ def cde_suggestRecipe(user_prompt: str, phase_id: str = "define") -> str:
 
 
 @app.tool()
+@tool_handler
 def cde_startFeatureWithRecipe(user_prompt: str, recipe_id: Optional[str] = None) -> str:
     """
     Starts a new feature using a specific recipe or auto-suggested recipe.
@@ -489,12 +531,9 @@ def cde_startFeatureWithRecipe(user_prompt: str, recipe_id: Optional[str] = None
         "progress": state['features'][feature_id]['progress']
     }, indent=2)
 
+
 def _process_phase_results(phase_id: str, results: Dict[str, Any], feature_id: str):
-    """
-    Processes the results of a completed phase and saves artifacts.
-    Also triggers Git/GitHub operations when configured.
-    """
-    # Ensure directories exist
+    """Persist artifacts for each phase and trigger side effects."""
     SPECS_DIR.mkdir(exist_ok=True)
     (SPECS_DIR / "features").mkdir(exist_ok=True)
     (SPECS_DIR / "tasks").mkdir(exist_ok=True)
@@ -502,12 +541,12 @@ def _process_phase_results(phase_id: str, results: Dict[str, Any], feature_id: s
     (SPECS_DIR / "reviews").mkdir(exist_ok=True)
 
     if phase_id == 'define':
-        # Save feature specification
-        if 'specification' in results:
+        spec = results.get('specification')
+        if spec:
             spec_file = SPECS_DIR / "features" / f"{feature_id}.md"
-            spec_file.write_text(results['specification'])
+            spec_file.write_text(spec)
+            logger.debug("Wrote feature spec: %s", spec_file)
 
-        # Auto-create Git branch for new feature
         if service_factory.is_service_available("git"):
             try:
                 git_connector = service_factory.get_connector("git")
@@ -516,34 +555,34 @@ def _process_phase_results(phase_id: str, results: Dict[str, Any], feature_id: s
                     "main"
                 )
                 if branch_result.get("success"):
-                    print(f"✓ Created Git branch for feature {feature_id}")
-            except Exception as e:
-                print(f"Warning: Could not create Git branch: {e}")
+                    logger.info("Created Git branch for feature %s", feature_id)
+                else:
+                    logger.debug("create_branch response: %s", branch_result)
+            except Exception as exc:
+                logger.warning("Could not create Git branch: %s", exc)
 
     elif phase_id == 'decompose':
-        # Save task breakdown
-        if 'task_breakdown' in results:
+        breakdown = results.get('task_breakdown')
+        if breakdown:
             tasks_file = SPECS_DIR / "tasks" / f"{feature_id}_tasks.md"
-            tasks_file.write_text(results['task_breakdown'])
-
-        # Optionally create GitHub issues from tasks
-        # This is disabled by default - user can call cde_createGitHubIssue manually
-        # or enable via configuration
+            tasks_file.write_text(breakdown)
+            logger.debug("Wrote task breakdown: %s", tasks_file)
 
     elif phase_id == 'design':
-        # Save technical design
-        if 'design_document' in results:
+        design_doc = results.get('design_document')
+        if design_doc:
             design_file = SPECS_DIR / "design" / f"{feature_id}_design.md"
-            design_file.write_text(results['design_document'])
+            design_file.write_text(design_doc)
+            logger.debug("Wrote design doc: %s", design_file)
 
     elif phase_id == 'review':
-        # Save review results
-        if 'review_document' in results:
+        review_doc = results.get('review_document')
+        if review_doc:
             review_file = SPECS_DIR / "reviews" / f"{feature_id}_review.md"
-            review_file.write_text(results['review_document'])
-
-
+            review_file.write_text(review_doc)
+            logger.debug("Wrote review doc: %s", review_file)
 @app.tool()
+@tool_handler
 def cde_onboardingProject() -> str:
     """
     Analyzes project structure and performs onboarding setup.
@@ -575,9 +614,11 @@ def cde_onboardingProject() -> str:
     ingestor = RepoIngestor(project_root)
     try:
         repo_digest = ingestor.ingest(max_files=200)
-    except Exception as e:
-        repo_digest = {"summary": f"Error generating digest: {e}", "tree": [], "top_files": []}
+    except Exception as exc:
+        logger.warning("Repo ingestion failed: %s", exc)
+        repo_digest = {"summary": f"Error generating digest: {exc}", "tree": [], "top_files": []}
 
+    plan_context = plan.get("context", {})
     context = {
         "PROJECT_ANALYSIS": json.dumps(analysis, indent=2),
         "GIT_INSIGHTS": json.dumps(analysis["project_info"]["git"], indent=2),
@@ -586,7 +627,13 @@ def cde_onboardingProject() -> str:
         "REPO_DIGEST": json.dumps({
             "summary": repo_digest.get("summary"),
             "top_files": [{"path": f['path'], "snippet": f['snippet'][:1000]} for f in repo_digest.get('top_files', [])[:10]]
-        }, indent=2)
+        }, indent=2),
+        "REPO_SYNTHESIS": json.dumps(plan_context.get("repository_synthesis", {}), indent=2),
+        "CLEANUP_RECOMMENDATIONS": json.dumps(plan.get("cleanup_plan", {}), indent=2),
+        "MANAGEMENT_PRINCIPLES": (
+            "Specification-as-Code, Single Source of Truth (Git + Issues), Progressive Scalability, "
+            "Automation-friendly structure for AI assistants."
+        )
     }
 
     # Load and prepare onboarding prompt
@@ -606,6 +653,8 @@ def cde_onboardingProject() -> str:
             state["onboarding"] = {}
         state["onboarding"]["plan"] = plan
         state["onboarding"]["analysis"] = analysis
+        state["onboarding"]["cleanup_plan"] = plan.get("cleanup_plan", {})
+        state["onboarding"]["repository_synthesis"] = plan_context.get("repository_synthesis", {})
         # store the generated prompt as a draft (not yet applied)
         state["onboarding"]["draft_prompt"] = final_prompt
         state["onboarding"]["repo_digest"] = repo_digest
@@ -620,11 +669,16 @@ def cde_onboardingProject() -> str:
             "message": "Onboarding draft prompt prepared. Use an LLM to generate documents, then call cde_publishOnboarding to apply after human approval.",
             "draft_preview": final_prompt[:2000]
         }, indent=2)
-    except Exception as e:
-        return f"Error generating onboarding prompt: {str(e)}"
+    except Exception as exc:
+        logger.exception("Error generating onboarding prompt")
+        return json.dumps({
+            "error": "onboarding_prompt_failed",
+            "message": str(exc)
+        }, indent=2)
 
 
 @app.tool()
+@tool_handler
 def cde_publishOnboarding(documents: Dict[str, str], approve: bool = True) -> str:
     """Apply onboarding documents generated by an LLM into the repo.
 
@@ -640,14 +694,20 @@ def cde_publishOnboarding(documents: Dict[str, str], approve: bool = True) -> st
     onboarding = state.get("onboarding", {})
 
     if not onboarding.get("awaiting_approval"):
-        return "Error: No onboarding draft awaiting approval. Run cde_onboardingProject first."
+        return json.dumps({
+            "error": "no_onboarding_pending",
+            "message": "Run cde_onboardingProject first."
+        }, indent=2)
 
     if not approve:
         # mark as declined
         onboarding["awaiting_approval"] = False
         onboarding["approved"] = False
         state_manager.save_state(state)
-        return "Onboarding draft declined by user."
+        return json.dumps({
+            "status": "declined",
+            "message": "Onboarding draft declined by user."
+        }, indent=2)
 
     # Apply documents: write files under project_root, but do not commit (user workflow can commit)
     created = []
@@ -673,3 +733,4 @@ def cde_publishOnboarding(documents: Dict[str, str], approve: bool = True) -> st
 if __name__ == "__main__":
     # This allows running the server directly for testing
     app.run()
+
