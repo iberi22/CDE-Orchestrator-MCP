@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "CDE_Orchestrator": {
+      "command": "python",
+      "args": [
+        "src/server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "src"
+      },
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}

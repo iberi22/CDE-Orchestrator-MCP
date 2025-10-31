@@ -72,20 +72,24 @@ To connect to the CDE Orchestrator MCP from VS Code, you need to configure the G
 2. **Open the `settings.json` file:**
     Click the "Open Settings (JSON)" icon in the top right corner.
 
-3. **Add the following configuration to your `settings.json` file:**
+3. **Add the following configuration to your `settings.json` or .vscode/mcp.json file:**
 
     ```json
 
    {
       "mcpServers": {
-         "CDE_Orchestrator": {
-            "command": ".venv\\Scripts\\python.exe",
+        "CDE_Orchestrator": {
+            "command": "python",
             "args": [
-            "src/server.py"
+                "src/server.py"
             ],
-            "cwd": "${workspaceFolder}"
-         }
-      }
+            "env": {
+                "PYTHONPATH": "src"
+            },
+            "disabled": false,
+            "autoApprove": []
+            }
+        }
    }
 
     ```
