@@ -3,7 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class FeatureStatus(str, Enum):
@@ -47,7 +47,8 @@ class FeatureState(BaseModel):
     commits: List[Dict[str, Any]] = Field(default_factory=list)
     completed_at: Optional[datetime] = None
 
-    @validator("created_at", "updated_at", pre=True)
+    @field_validator("created_at", "updated_at", mode="before")
+    @classmethod
     def ensure_datetime(cls, value):
         """Parse datetime strings into datetime objects."""
         if value in (None, "", 0):
@@ -59,16 +60,19 @@ class FeatureState(BaseModel):
         except (ValueError, TypeError):
             raise ValueError("Timestamps must be ISO formatted strings")
 
-    @validator("prompt")
+    @field_validator("prompt")
+    @classmethod
     def ensure_prompt_not_empty(cls, value: str) -> str:
         """Ensure prompts are non-empty strings."""
         if not isinstance(value, str) or not value.strip():
             raise ValueError("Prompt must be a non-empty string")
         return value
 
-    @validator("current_phase")
-    def validate_phase_matches_status(cls, current_phase, values):
+    @field_validator("current_phase", mode="after")
+    @classmethod
+    def validate_phase_matches_status(cls, current_phase, info):
         """Ensure phase is consistent with status."""
+        values = info.data
         if "status" not in values:
             return current_phase
 
@@ -105,7 +109,7 @@ class FeatureState(BaseModel):
 
     def serialize(self) -> Dict[str, Any]:
         """Serialize state to JSON-safe dict."""
-        data = self.dict()
+        data = self.model_dump()
         data["status"] = self.status.value
         data["current_phase"] = self.current_phase.value
         data["created_at"] = self.created_at.isoformat()

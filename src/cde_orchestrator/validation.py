@@ -38,7 +38,7 @@ def validate_input(model: Type[BaseModel]) -> Callable:
                 # Validate kwargs against model
                 validated = model(**kwargs)
                 # Replace kwargs with validated data
-                return func(*args, **validated.dict())
+                return func(*args, **validated.model_dump())
             except ValidationError as e:
                 # Return structured error for AI agent
                 return json.dumps(
@@ -121,14 +121,18 @@ def validate_file_path(path: str, allowed_extensions: list = None) -> bool:
 
 
 # Common validation models for CDE tools
+from pydantic import ConfigDict
+
+
 class StartFeatureInput(BaseModel):
     """Validation model for cde_startFeature."""
 
     user_prompt: str
 
-    class Config:
-        min_anystr_length = 10
-        max_anystr_length = 5000
+    model_config = ConfigDict(
+        str_min_length=10,
+        str_max_length=5000
+    )
 
 
 class SubmitWorkInput(BaseModel):
@@ -138,9 +142,10 @@ class SubmitWorkInput(BaseModel):
     phase_id: str
     results: dict
 
-    class Config:
-        min_anystr_length = 1
-        max_anystr_length = 100
+    model_config = ConfigDict(
+        str_min_length=1,
+        str_max_length=100
+    )
 
 
 class CreateBranchInput(BaseModel):
@@ -150,9 +155,10 @@ class CreateBranchInput(BaseModel):
     branch_name: str
     base_branch: str = "main"
 
-    class Config:
-        min_anystr_length = 1
-        max_anystr_length = 200
+    model_config = ConfigDict(
+        str_min_length=1,
+        str_max_length=200
+    )
 
 
 class CreateIssueInput(BaseModel):
@@ -163,6 +169,7 @@ class CreateIssueInput(BaseModel):
     description: str
     labels: list = []
 
-    class Config:
-        min_anystr_length = 1
-        max_anystr_length = 1000
+    model_config = ConfigDict(
+        str_min_length=1,
+        str_max_length=1000
+    )
