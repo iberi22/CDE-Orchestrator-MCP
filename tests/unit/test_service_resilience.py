@@ -3,7 +3,7 @@ import types
 
 import pytest
 
-from cde_orchestrator.service_connector import CircuitBreaker, GitHubConnector
+from cde_orchestrator.adapters.service import CircuitBreaker, GitHubConnector
 
 
 class DummyTimeout(Exception):

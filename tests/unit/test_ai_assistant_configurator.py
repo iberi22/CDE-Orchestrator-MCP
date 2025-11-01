@@ -1,12 +1,12 @@
 # tests/unit/test_ai_assistant_configurator.py
 """
-Unit tests for AIAssistantConfigurator.
+Unit tests for AIConfigUseCase.
 """
 import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-from src.cde_orchestrator.ai_assistant_configurator import (
-    AIAssistantConfigurator,
+from src.cde_orchestrator.application.ai_config import (
+    AIConfigUseCase,
     AgentConfig,
 )
 
@@ -19,9 +19,9 @@ def temp_project_root(tmp_path):
 
 @pytest.fixture
 def configurator(temp_project_root):
-    """Create an AIAssistantConfigurator instance."""
+    """Create an AIConfigUseCase instance."""
     temp_project_root.mkdir(parents=True, exist_ok=True)
-    return AIAssistantConfigurator(temp_project_root)
+    return AIConfigUseCase(temp_project_root)
 
 
 class TestAgentConfig:
@@ -46,8 +46,8 @@ class TestAgentConfig:
         assert config.config_files == ["TEST.md"]
 
 
-class TestAIAssistantConfigurator:
-    """Tests for AIAssistantConfigurator class."""
+class TestAIConfigUseCase:
+    """Tests for AIConfigUseCase class."""
 
     def test_initialization(self, configurator, temp_project_root):
         """Test configurator initialization."""
@@ -278,11 +278,11 @@ class TestAIAssistantConfigurator:
 
 
 class TestIntegration:
-    """Integration tests for AIAssistantConfigurator."""
+    """Integration tests for AIConfigUseCase."""
 
     def test_full_onboarding_flow(self, temp_project_root):
         """Test complete onboarding flow with AI assistant configuration."""
-        configurator = AIAssistantConfigurator(temp_project_root)
+        configurator = AIConfigUseCase(temp_project_root)
 
         # Generate config files
         results = configurator.generate_config_files(
@@ -306,7 +306,7 @@ class TestIntegration:
 
     def test_template_content_quality(self, temp_project_root):
         """Test that generated templates have expected quality."""
-        configurator = AIAssistantConfigurator(temp_project_root)
+        configurator = AIConfigUseCase(temp_project_root)
         configurator.generate_config_files(agents=["copilot", "gemini"], force=False)
 
         # Check AGENTS.md

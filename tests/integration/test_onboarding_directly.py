@@ -10,10 +10,10 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from cde_orchestrator.onboarding_analyzer import OnboardingAnalyzer
+from cde_orchestrator.application.onboarding import OnboardingUseCase
 from cde_orchestrator.adapters.state import StateAdapter
 from cde_orchestrator.adapters.prompt import PromptAdapter
-from cde_orchestrator.repo_ingest import RepoIngestor
+from cde_orchestrator.adapters.repository import RepoIngestor
 
 
 def test_onboarding():
@@ -24,7 +24,7 @@ def test_onboarding():
 
     # Step 1: Analyze current state
     print("\n1. ANALYZING PROJECT STRUCTURE...")
-    analyzer = OnboardingAnalyzer(project_root)
+    analyzer = OnboardingUseCase(project_root)
     analysis = analyzer.needs_onboarding()
 
     print(f"   Needs onboarding: {analysis['needs_onboarding']}")
@@ -110,7 +110,7 @@ def test_onboarding():
     print("=" * 80)
 
     components_ready = {
-        "OnboardingAnalyzer": True,
+        "OnboardingUseCase": True,
         "needs_onboarding detection": True,
         "plan generation": len(plan.get("docs_to_generate", [])) > 0,
         "cleanup detection": bool(cleanup_plan),

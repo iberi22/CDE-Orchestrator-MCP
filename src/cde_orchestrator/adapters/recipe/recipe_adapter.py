@@ -1,12 +1,12 @@
-# src/cde_orchestrator/recipe_manager.py
+# src/cde_orchestrator/adapters/recipe/recipe_adapter.py
 import re
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from .adapters.serialization import Recipe
+from ..serialization import Recipe
 
 
-class RecipeManager:
+class RecipeAdapter:
     """Manages POML recipes and their selection based on context."""
 
     def __init__(self, recipes_dir: Path):

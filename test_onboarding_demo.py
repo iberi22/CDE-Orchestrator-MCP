@@ -10,8 +10,8 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from cde_orchestrator.ai_assistant_configurator import AIAssistantConfigurator
-from cde_orchestrator.onboarding_analyzer import OnboardingAnalyzer, SpecKitStructureGenerator
+from cde_orchestrator.application.ai_config import AIConfigUseCase
+from cde_orchestrator.application.onboarding import OnboardingUseCase, SpecKitStructureGenerator
 
 
 def print_section(title: str):
@@ -30,7 +30,7 @@ def main():
 
     # Step 1: Analyze project structure
     print_section("📊 Step 1: Analyzing Project Structure")
-    analyzer = OnboardingAnalyzer(project_root)
+    analyzer = OnboardingUseCase(project_root)
     analysis = analyzer.needs_onboarding()
 
     print(f"Needs Onboarding: {analysis['needs_onboarding']}")

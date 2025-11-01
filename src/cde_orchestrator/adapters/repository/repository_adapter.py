@@ -1,5 +1,5 @@
 """
-Lightweight repository ingestion utilities inspired by gitingest.
+Repository Adapter - Lightweight repository ingestion utilities inspired by gitingest.
 Provides a small digest (tree, top files, content snippets) suitable to include in
 LLM prompts. Non-invasive: does not write files or modify repo.
 """

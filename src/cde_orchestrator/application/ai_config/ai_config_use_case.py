@@ -1,6 +1,6 @@
-# src/cde_orchestrator/ai_assistant_configurator.py
+# src/cde_orchestrator/application/ai_config/ai_config_use_case.py
 """
-AI Assistant Configurator - Generates configuration files for various AI coding assistants.
+AI Config Use Case - Generates configuration files for various AI coding assistants.
 Inspired by Spec-Kit's multi-agent support approach.
 """
 import logging
@@ -26,7 +26,7 @@ class AgentConfig:
     ]  # Files to generate (e.g., ["AGENTS.md", "copilot-instructions.md"])
 
 
-class AIAssistantConfigurator:
+class AIConfigUseCase:
     """
     Configures AI coding assistants for a project during onboarding.
 

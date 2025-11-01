@@ -1,6 +1,6 @@
-# src/cde_orchestrator/validation.py
+# src/cde_orchestrator/domain/validation.py
 """
-Input validation decorators and utilities for MCP tools.
+Domain Validation - Input validation decorators and utilities for MCP tools.
 Provides Pydantic-based validation to prevent invalid inputs.
 """
 import json

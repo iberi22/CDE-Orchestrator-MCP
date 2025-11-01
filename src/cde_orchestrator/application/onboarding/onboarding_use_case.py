@@ -1,6 +1,6 @@
-# src/cde_orchestrator/onboarding_analyzer.py
+# src/cde_orchestrator/application/onboarding/onboarding_use_case.py
 """
-Onboarding Analyzer - Detects project structure and analyzes Git history
+Onboarding Use Case - Detects project structure and analyzes Git history
 for intelligent project onboarding aligned with Spec-Kit methodology.
 """
 import logging
@@ -11,12 +11,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .ai_assistant_configurator import AIAssistantConfigurator
+from ...application.ai_config import AIConfigUseCase
 
 logger = logging.getLogger(__name__)
 
 
-class OnboardingAnalyzer:
+class OnboardingUseCase:
     """
     Analyzes project structure and Git history to determine if onboarding is needed
     and what documentation/structure should be created.

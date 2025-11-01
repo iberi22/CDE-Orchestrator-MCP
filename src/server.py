@@ -13,11 +13,11 @@ from contextlib import contextmanager
 from fastmcp import FastMCP
 
 from cde_orchestrator.adapters.serialization import FeatureState, FeatureStatus, PhaseStatus
-from cde_orchestrator.onboarding_analyzer import OnboardingAnalyzer
+from cde_orchestrator.application.onboarding import OnboardingUseCase
 from cde_orchestrator.adapters.prompt import PromptAdapter
-from cde_orchestrator.recipe_manager import RecipeManager
-from cde_orchestrator.repo_ingest import RepoIngestor
-from cde_orchestrator.service_connector import ServiceConnectorFactory
+from cde_orchestrator.adapters.recipe import RecipeAdapter
+from cde_orchestrator.adapters.repository import RepoIngestor
+from cde_orchestrator.adapters.service import ServiceConnectorFactory
 from cde_orchestrator.adapters.state import StateAdapter
 from cde_orchestrator.adapters.workflow import WorkflowAdapter
 
@@ -59,7 +59,7 @@ try:
     workflow_manager = WorkflowAdapter(WORKFLOW_FILE)
     prompt_manager = PromptAdapter()
     state_manager = StateAdapter(STATE_FILE)
-    recipe_manager = RecipeManager(RECIPES_DIR)
+    recipe_manager = RecipeAdapter(RECIPES_DIR)
     service_factory = ServiceConnectorFactory()
 except FileNotFoundError as e:
     logger.error("Missing required CDE file: %s", e)
@@ -122,7 +122,7 @@ def cde_startFeature(user_prompt: str) -> str:
     Returns:
         A fully-contextualized prompt for the AI agent to execute the 'define' phase.
     """
-    from cde_orchestrator.validation import sanitize_string
+    from cde_orchestrator.domain.validation import sanitize_string
 
     # Validate and sanitize input
     if not user_prompt or len(user_prompt.strip()) < 10:
@@ -721,7 +721,7 @@ def cde_onboardingProject() -> str:
         or a message if onboarding is not needed
     """
     project_root = Path.cwd()
-    analyzer = OnboardingAnalyzer(project_root)
+    analyzer = OnboardingUseCase(project_root)
 
     # Check if onboarding is needed
     analysis = analyzer.needs_onboarding()
@@ -740,9 +740,9 @@ def cde_onboardingProject() -> str:
     plan = analyzer.generate_onboarding_plan()
 
     # Detect AI assistants available on the system
-    from .cde_orchestrator.ai_assistant_configurator import AIAssistantConfigurator
+    from .cde_orchestrator.application.ai_config import AIConfigUseCase
 
-    ai_configurator = AIAssistantConfigurator(project_root)
+    ai_configurator = AIConfigUseCase(project_root)
     detected_agents = ai_configurator.detect_installed_agents()
     ai_summary = ai_configurator.get_configuration_summary()
 

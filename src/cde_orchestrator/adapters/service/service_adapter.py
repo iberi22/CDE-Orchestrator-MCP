@@ -1,4 +1,4 @@
-# src/cde_orchestrator/service_connector.py
+# src/cde_orchestrator/adapters/service/service_adapter.py
 """
 Service Connector Module - Handles external MCP service integrations.
 
