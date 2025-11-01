@@ -5,13 +5,13 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from cde_orchestrator.models import FeatureState, FeatureStatus, PhaseStatus
-from cde_orchestrator.state_manager import StateManager
+from cde_orchestrator.adapters.serialization import FeatureState, FeatureStatus, PhaseStatus
+from cde_orchestrator.adapters.state import StateAdapter
 
 
-def _state_manager(tmp_path: Path) -> StateManager:
+def _state_manager(tmp_path: Path) -> StateAdapter:
     state_file = tmp_path / "state.json"
-    return StateManager(state_file)
+    return StateAdapter(state_file)
 
 
 def _feature_state(
@@ -86,7 +86,7 @@ def test_load_state_migrates_legacy_structure(tmp_path):
     }
     state_file.write_text(json.dumps(legacy_state))
 
-    manager = StateManager(state_file)
+    manager = StateAdapter(state_file)
     migrated = manager.load_state()
     feature = migrated["features"]["legacy-feature"]
 

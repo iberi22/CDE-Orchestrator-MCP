@@ -1,22 +1,24 @@
-# src/cde_orchestrator/models.py
+# src/cde_orchestrator/adapters/serialization/models.py
+"""
+Serialization Models - Pydantic models for data persistence.
+
+These models handle JSON serialization/deserialization of domain entities.
+They live in adapters layer because they deal with external data formats.
+
+Design Principles:
+    - Pydantic v2 models for validation
+    - Convert between domain entities and JSON
+    - Handle legacy data migration
+    - No business logic (pure data transformation)
+"""
+
 from datetime import datetime
-from enum import Enum
 from typing import Any, Dict, List, Optional
+from enum import Enum
 
 from pydantic import BaseModel, Field, field_validator
 
-
-class FeatureStatus(str, Enum):
-    """Valid feature status values."""
-
-    DEFINING = "defining"
-    DECOMPOSING = "decomposing"
-    DESIGNING = "designing"
-    IMPLEMENTING = "implementing"
-    TESTING = "testing"
-    REVIEWING = "reviewing"
-    COMPLETED = "completed"
-    FAILED = "failed"
+from ...domain.entities import FeatureStatus
 
 
 class PhaseStatus(str, Enum):
@@ -31,7 +33,7 @@ class PhaseStatus(str, Enum):
 
 
 class FeatureState(BaseModel):
-    """Validated feature state model."""
+    """Validated feature state model for JSON serialization."""
 
     status: FeatureStatus
     current_phase: PhaseStatus

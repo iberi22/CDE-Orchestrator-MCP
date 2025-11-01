@@ -12,14 +12,14 @@ from contextlib import contextmanager
 
 from fastmcp import FastMCP
 
-from cde_orchestrator.models import FeatureState, FeatureStatus, PhaseStatus
+from cde_orchestrator.adapters.serialization import FeatureState, FeatureStatus, PhaseStatus
 from cde_orchestrator.onboarding_analyzer import OnboardingAnalyzer
-from cde_orchestrator.prompt_manager import PromptManager
+from cde_orchestrator.adapters.prompt import PromptAdapter
 from cde_orchestrator.recipe_manager import RecipeManager
 from cde_orchestrator.repo_ingest import RepoIngestor
 from cde_orchestrator.service_connector import ServiceConnectorFactory
-from cde_orchestrator.state_manager import StateManager
-from cde_orchestrator.workflow_manager import WorkflowManager
+from cde_orchestrator.adapters.state import StateAdapter
+from cde_orchestrator.adapters.workflow import WorkflowAdapter
 
 # --- Constants and Configuration ---
 CDE_ROOT = Path(".cde")
@@ -56,9 +56,9 @@ app = FastMCP()
 
 # --- Service Initialization ---
 try:
-    workflow_manager = WorkflowManager(WORKFLOW_FILE)
-    prompt_manager = PromptManager()
-    state_manager = StateManager(STATE_FILE)
+    workflow_manager = WorkflowAdapter(WORKFLOW_FILE)
+    prompt_manager = PromptAdapter()
+    state_manager = StateAdapter(STATE_FILE)
     recipe_manager = RecipeManager(RECIPES_DIR)
     service_factory = ServiceConnectorFactory()
 except FileNotFoundError as e:
@@ -165,7 +165,7 @@ def cde_startFeature(user_prompt: str) -> str:
 
     poml_recipe_path = Path(initial_phase.prompt_recipe)
 
-    # 5. Load and prepare the prompt using the PromptManager
+    # 5. Load and prepare the prompt using the PromptAdapter
     final_prompt = prompt_manager.load_and_prepare(poml_recipe_path, context)
 
     # 6. Update the state

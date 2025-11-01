@@ -6,8 +6,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import pytest
 import yaml
 
-from src.cde_orchestrator.models import Workflow
-from src.cde_orchestrator.workflow_manager import WorkflowManager
+from src.cde_orchestrator.adapters.serialization import Workflow
+from src.cde_orchestrator.adapters.workflow import WorkflowAdapter
 
 
 @pytest.fixture
@@ -40,8 +40,8 @@ def workflow_file(tmp_path: Path) -> Path:
 
 
 def test_load_workflow(workflow_file: Path):
-    """Tests that the WorkflowManager correctly loads a workflow.yml file."""
-    manager = WorkflowManager(workflow_file)
+    """Tests that the WorkflowAdapter correctly loads a workflow.yml file."""
+    manager = WorkflowAdapter(workflow_file)
     assert manager.workflow is not None
     assert isinstance(manager.workflow, Workflow)
     assert manager.workflow.name == "Test Workflow"
@@ -50,7 +50,7 @@ def test_load_workflow(workflow_file: Path):
 
 def test_get_phase(workflow_file: Path):
     """Tests retrieving a specific phase by its ID."""
-    manager = WorkflowManager(workflow_file)
+    manager = WorkflowAdapter(workflow_file)
     phase = manager.get_phase("define")
     assert phase is not None
     assert phase.id == "define"
@@ -58,14 +58,14 @@ def test_get_phase(workflow_file: Path):
 
 def test_get_nonexistent_phase(workflow_file: Path):
     """Tests that getting a nonexistent phase raises a ValueError."""
-    manager = WorkflowManager(workflow_file)
+    manager = WorkflowAdapter(workflow_file)
     with pytest.raises(ValueError):
         manager.get_phase("nonexistent_phase")
 
 
 def test_get_initial_phase(workflow_file: Path):
     """Tests retrieving the initial phase of the workflow."""
-    manager = WorkflowManager(workflow_file)
+    manager = WorkflowAdapter(workflow_file)
     initial_phase = manager.get_initial_phase()
     assert initial_phase is not None
     assert initial_phase.id == "define"

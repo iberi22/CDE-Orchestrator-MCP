@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from .models import Recipe
+from .adapters.serialization import Recipe
 
 
 class RecipeManager:

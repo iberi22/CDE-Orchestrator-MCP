@@ -1,14 +1,14 @@
-# src/cde_orchestrator/workflow_manager.py
+# src/cde_orchestrator/adapters/workflow/workflow_adapter.py
 import re
 from pathlib import Path
 from typing import Dict, List, Optional
 
 import yaml
 
-from .models import Workflow
+from ..serialization import Workflow
 
 
-class WorkflowManager:
+class WorkflowAdapter:
     """Handles loading and parsing of workflow files with intelligent workflow selection."""
 
     def __init__(self, workflow_path: Path):

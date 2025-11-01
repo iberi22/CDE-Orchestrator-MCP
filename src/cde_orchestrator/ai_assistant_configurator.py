@@ -227,6 +227,9 @@ class AIAssistantConfigurator:
 
         # Generate agent-specific configuration files
         for agent_key in agents_to_config:
+            # Skip unknown agents (already logged above)
+            if agent_key not in self.AGENT_CONFIG:
+                continue
             config = self.AGENT_CONFIG[agent_key]
 
             # Create agent folder
@@ -253,6 +256,8 @@ class AIAssistantConfigurator:
         Args:
             filename: Name of the file to generate
         """
+        # Ensure project root exists (especially in temp dirs during tests)
+        self.project_root.mkdir(parents=True, exist_ok=True)
         file_path = self.project_root / filename
 
         # Get project name from directory
@@ -265,6 +270,8 @@ class AIAssistantConfigurator:
         else:
             raise ValueError(f"Unknown instruction file: {filename}")
 
+        # Write text as UTF-8, but ensure content is ASCII-safe to avoid
+        # Windows cp1252 read_text() decoding issues in tests.
         file_path.write_text(content, encoding="utf-8")
 
     def _generate_copilot_config(
@@ -320,22 +327,20 @@ class AIAssistantConfigurator:
         """
         return f"""# {project_name} - Agent Instructions
 
-> **Format**: AGENTS.md (OpenAI Standard)
-> **Target**: AI Coding Agents (Cursor, Windsurf, Aider, Bolt, etc.)
-> **Last Updated**: Auto-generated during onboarding
-> **Priority**: High-level guidelines & project navigation
+> Format: AGENTS.md (OpenAI Standard)
+> Target: AI Coding Agents (Cursor, Windsurf, Aider, Bolt, etc.)
+> Last Updated: Auto-generated during onboarding
+> Priority: High-level guidelines and project navigation
 
 ---
-
 ## 🎯 Project Overview
 
-**What**: [Brief description of what this project does]
-**Scale**: [Project scale/scope information]
-**Architecture**: [Architecture pattern used - e.g., Hexagonal, Clean, MVC]
-**Language**: [Primary language and version]
+What: [Brief description of what this project does]
+Scale: [Project scale/scope information]
+Architecture: [Architecture pattern used - e.g., Hexagonal, Clean, MVC]
+Language: [Primary language and version]
 
 ---
-
 ## 📁 Quick Navigation
 
 ### Start Here (First-time agents)
@@ -360,46 +365,35 @@ tests/               # Test suites
 ```
 
 ---
-
 ## 🏗️ Architecture Rules
 
 [Add architecture-specific rules here based on your project]
 
 ### Example: Dependency Rules
-- **Dependencies point INWARD**: Infrastructure → Application → Domain
-- **Domain layer**: Pure business logic, NO external dependencies
-- **Application layer**: Orchestrates use cases
-
+- Dependencies point INWARD: Infrastructure -> Application -> Domain
 ---
-
 ## 🛠️ Development Workflow
 
 ### Before Any Code Changes
-1. **Check existing specs**: `specs/features/*.md`
-2. **Search codebase**: Use grep or semantic search
-3. **Understand context**: Read related files fully
+1. Check existing specs: `specs/features/*.md`
+2. Search codebase: Use grep or semantic search
+3. Understand context: Read related files fully
 
 ### Making Changes
-1. **Create/update spec**: `specs/features/your-feature.md`
-2. **Follow architecture pattern**: [Your pattern]
-3. **Write tests first**: TDD approach
-4. **Run validation**: Pre-commit hooks
+1. Create/update spec: `specs/features/your-feature.md`
+2. Follow architecture pattern: [Your pattern]
+3. Write tests first: TDD approach
+4. Run validation: Pre-commit hooks
 
 ---
-
 ## 📝 Documentation Rules
 
 ### File Placement (MANDATORY)
-- **Features**: `specs/features/` - User-facing functionality
-- **Design**: `specs/design/` - Architecture & technical decisions
-- **API**: `specs/api/` - API documentation
-- **Reviews**: `specs/reviews/` - Code reviews
-
+- Features: `specs/features/` - User-facing functionality
 ### Metadata Requirement
-**ALL** `.md` files in `specs/` MUST include YAML frontmatter:
+All `.md` files in `specs/` MUST include YAML frontmatter:
 ```yaml
 ---
-title: "Document Title"
 description: "One-sentence summary"
 type: "feature|design|api|review"
 status: "draft|active|deprecated"
@@ -407,10 +401,8 @@ created: "YYYY-MM-DD"
 updated: "YYYY-MM-DD"
 author: "Name or Agent ID"
 ---
-```
 
 ---
-
 ## 🧪 Testing Strategy
 
 ### Test Organization
@@ -422,41 +414,34 @@ tests/
 ```
 
 ---
+## Common Pitfalls
 
-## ⚠️ Common Pitfalls
-
-### ❌ DON'T
+### DON'T
 1. Skip writing specifications before code
 2. Put complex logic in wrong layer
 3. Skip tests for new functionality
 4. Make breaking changes without updating specs
 
-### ✅ DO
+### DO
 1. Follow architecture strictly
 2. Write specs before code
 3. Add tests for all new functionality
 4. Use semantic commit messages: `feat:`, `fix:`, `docs:`, `refactor:`
 
 ---
-
-## 🔍 Finding Information
+## Finding Information
 
 ### Key Documents
-- **Architecture**: `specs/design/ARCHITECTURE.md`
-- **Constitution**: `memory/constitution.md`
-- **Features**: `specs/features/`
+- Architecture: `specs/design/ARCHITECTURE.md`
+---
+## When Stuck
+
+1. Check specs: `specs/features/` or `specs/design/`
+2. Search code: Use semantic search or grep
+3. Review constitution: `memory/constitution.md`
 
 ---
-
-## 🆘 When Stuck
-
-1. **Check specs**: `specs/features/` or `specs/design/`
-2. **Search code**: Use semantic search or grep
-3. **Review constitution**: `memory/constitution.md`
-
----
-
-## 📞 Quick Commands Reference
+## Quick Commands Reference
 
 ```bash
 # Run tests
@@ -470,85 +455,74 @@ tests/
 ```
 
 ---
-
-**For detailed GitHub Copilot instructions**: See `.github/copilot-instructions.md`
-**For Google AI Studio (Gemini) instructions**: See `GEMINI.md` (if using Gemini)
+For detailed GitHub Copilot instructions: see `.github/copilot-instructions.md`
+For Google AI Studio (Gemini) instructions: see `GEMINI.md` (if using Gemini)
 """
-
     def _get_gemini_md_template(self, project_name: str) -> str:
         """
         Generate GEMINI.md content template.
 
         Args:
-            project_name: Name of the project
 
         Returns:
             Content for GEMINI.md
         """
         return f"""# {project_name} - Gemini AI Instructions
+> Format: GEMINI.md (Google AI Studio Standard)
+> Target: Google Gemini AI (AI Studio, Gemini CLI, IDX)
+> Last Updated: Auto-generated during onboarding
+> Context Window: 1M+ tokens
 
-> **Format**: GEMINI.md (Google AI Studio Standard)
-> **Target**: Google Gemini AI (AI Studio, Gemini CLI, IDX)
-> **Last Updated**: Auto-generated during onboarding
-> **Context Window**: 1M+ tokens (leverage this!)
 
----
+## Project Overview
 
-## 🎯 Project Overview
-
-**What**: [Brief description of what this project does]
-**Scale**: [Project scale/scope information]
-**Architecture**: [Architecture pattern used]
-**Language**: [Primary language and version]
+What: [Brief description of what this project does]
+Scale: [Project scale/scope information]
+Language: [Primary language and version]
 
 ---
 
-## 📁 Quick Navigation
-
+## Quick Navigation
 [Same as AGENTS.md - see that file for structure]
 
 ---
 
 ## 🎨 Gemini-Specific Optimizations
-
 ### 1. Large Context Window (1M+ tokens)
 
-**Your Superpower**: Gemini's 1M+ token context window allows you to process entire codebases at once.
-
-**Best Practices**:
+Best Practices:
 - Request FULL file contents instead of summaries
 - Analyze multiple related files simultaneously
 - Process entire feature specs in one go
 - Review complete test suites together
 
-**Example Request**:
-```
-"Show me ALL the code in src/domain/ directory, including ALL files.
-I want to see the complete implementation, not summaries."
+Example Request:
+Show me ALL the code in src/domain/ directory, including ALL files.
+I want to see the complete implementation, not summaries.
 ```
 
 ### 2. Multi-Modal Capabilities
 
-**Use When**:
+Use When:
 - Analyzing architecture diagrams
 - Understanding UML or flow charts
 - Code visualization analysis
 - Documentation with embedded images
 
-**Example**:
+Example:
 ```
-"Here's our architecture diagram [image]. Analyze how the current
-codebase matches this design and identify any discrepancies."
+Here is our architecture diagram [image]. Analyze how the current
+codebase matches this design and identify any discrepancies.
 ```
 
-### 3. Function Calling & Structured Outputs
+### 3. Function Calling and Structured Outputs
 
-**When Generating Code**:
-- Use `response_mime_type="application/json"` for structured data
-- Define `response_schema` for type-safe outputs
+When Generating Code:
+- Use response_mime_type="application/json" for structured data
+- Define response_schema for type-safe outputs
 - Leverage function calling for complex operations
 
-**Example**:
+Example (Python):
 ```python
 # Request structured analysis
 response = model.generate_content(

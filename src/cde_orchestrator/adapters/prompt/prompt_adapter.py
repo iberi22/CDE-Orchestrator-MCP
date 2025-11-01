@@ -1,4 +1,4 @@
-# src/cde_orchestrator/prompt_manager.py
+# src/cde_orchestrator/adapters/prompt/prompt_adapter.py
 import json
 import re
 from pathlib import Path
@@ -11,7 +11,7 @@ class PromptValidationError(ValueError):
     """Raised when a prompt template fails validation or sanitization."""
 
 
-class PromptManager:
+class PromptAdapter:
     """Loads POML recipes and injects sanitized context."""
 
     PLACEHOLDER_PATTERN = re.compile(r"\{\{([A-Z0-9_]+)\}\}")

@@ -1,4 +1,4 @@
-# src/cde_orchestrator/state_manager.py
+# src/cde_orchestrator/adapters/state/state_adapter.py
 import json
 import logging
 import shutil
@@ -8,12 +8,12 @@ from typing import Any, Dict, List, Tuple
 
 from pydantic import ValidationError
 
-from cde_orchestrator.models import FeatureState, FeatureStatus, PhaseStatus
+from ..serialization import FeatureState, FeatureStatus, PhaseStatus
 
 logger = logging.getLogger(__name__)
 
 
-class StateManager:
+class StateAdapter:
     """Manages the project's state by reading/writing to a JSON file."""
 
     def __init__(self, state_file_path: Path):

@@ -160,7 +160,7 @@ class TestAIAssistantConfigurator:
         agents_md = temp_project_root / "AGENTS.md"
         assert agents_md.exists()
 
-        content = agents_md.read_text()
+        content = agents_md.read_text(encoding="utf-8")
         assert "Agent Instructions" in content
         assert "Project Overview" in content
         assert "Architecture Rules" in content
@@ -173,7 +173,7 @@ class TestAIAssistantConfigurator:
         gemini_md = temp_project_root / "GEMINI.md"
         assert gemini_md.exists()
 
-        content = gemini_md.read_text()
+        content = gemini_md.read_text(encoding="utf-8")
         assert "Gemini AI Instructions" in content
         assert "Gemini-Specific Optimizations" in content
         assert "1M+ token" in content or "Large Context Window" in content
@@ -311,7 +311,7 @@ class TestIntegration:
 
         # Check AGENTS.md
         agents_md = temp_project_root / "AGENTS.md"
-        content = agents_md.read_text()
+        content = agents_md.read_text(encoding="utf-8")
 
         # Should have key sections
         assert "## 🎯 Project Overview" in content
@@ -323,7 +323,7 @@ class TestIntegration:
 
         # Check GEMINI.md
         gemini_md = temp_project_root / "GEMINI.md"
-        content = gemini_md.read_text()
+        content = gemini_md.read_text(encoding="utf-8")
 
         # Should have Gemini-specific sections
         assert "## 🎨 Gemini-Specific Optimizations" in content
@@ -334,7 +334,7 @@ class TestIntegration:
 
         # Check Copilot instructions
         copilot_md = temp_project_root / ".github" / "copilot-instructions.md"
-        content = copilot_md.read_text()
+        content = copilot_md.read_text(encoding="utf-8")
 
         # Should have YAML frontmatter
         assert content.startswith("---")

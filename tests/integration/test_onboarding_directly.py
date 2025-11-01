@@ -11,8 +11,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from cde_orchestrator.onboarding_analyzer import OnboardingAnalyzer
-from cde_orchestrator.state_manager import StateManager
-from cde_orchestrator.prompt_manager import PromptManager
+from cde_orchestrator.adapters.state import StateAdapter
+from cde_orchestrator.adapters.prompt import PromptAdapter
 from cde_orchestrator.repo_ingest import RepoIngestor
 
 
@@ -89,7 +89,7 @@ def test_onboarding():
     print("\n6. CHECKING STATE MANAGER...")
     state_file = project_root / ".cde" / "state.json"
     if state_file.exists():
-        state_mgr = StateManager(state_file)
+        state_mgr = StateAdapter(state_file)
         state = state_mgr.load_state()
         onboarding_data = state.get("onboarding", {})
 
