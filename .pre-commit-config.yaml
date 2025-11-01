@@ -1,0 +1,78 @@
+# Pre-commit hooks configuration for CDE Orchestrator MCP
+# Install with: pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # DOCUMENTATION GOVERNANCE
+  - repo: local
+    hooks:
+      # Prevent .md files outside designated directories
+      - id: check-doc-governance
+        name: Check Documentation Governance Rules
+        entry: bash scripts/check-governance.sh
+        language: system
+        files: '\.md$'
+        pass_filenames: true
+
+  # MARKDOWN LINTING
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.45.0
+    hooks:
+      - id: markdownlint
+        name: Markdown Lint
+        args: ['--config=.markdownlintrc']
+        exclude: |
+          (?x)^(
+            node_modules/|
+            \.venv/|
+            build/|
+            dist/
+          )
+
+  # STANDARD HOOKS
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      # Identify files that would conflict in merge
+      - id: check-merge-conflict
+
+      # Ensure files end with newline
+      - id: end-of-file-fixer
+
+      # Trailing whitespace (allow markdown double-space line breaks)
+      - id: trailing-whitespace
+        args: ['--markdown-linebreak-ext=md']
+
+      # Check YAML
+      - id: check-yaml
+        args: ['--safe']
+
+      # Check JSON
+      - id: check-json
+
+      # Check TOML
+      - id: check-toml
+
+      # Detect private keys
+      - id: detect-private-key
+
+  # PYTHON LINTING
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        language_version: python3
+        exclude: '^(venv|\.venv|migrations)'
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ['--profile', 'black']
+
+# CONFIGURATION
+default_language_version:
+  python: python3.12
+
+# Fail fast to give user quick feedback
+fail_fast: false
