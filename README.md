@@ -7,6 +7,8 @@
 
 The CDE Orchestrator is the reference implementation of the **Context-Driven Engineering (CDE)** methodology. It is a smart MCP (Model Context Protocol) server designed to guide AI coding assistants through a structured, phase-based software development lifecycle.
 
+> **📋 Project Status:** Currently in active improvement phase. See [Executive Summary](EXECUTIVE_SUMMARY.md) for roadmap and [Improvement Roadmap](specs/tasks/improvement-roadmap.md) for detailed tasks.
+
 ## Core Concepts
 
 ### Context-Driven Engineering (CDE)
@@ -147,3 +149,45 @@ export GITHUB_TOKEN=your-token-here
 ```
 
 For detailed integration documentation, see [INTEGRATION.md](INTEGRATION.md). For Codex CLI usage, see [CODEX.md](CODEX.md).
+
+## 📚 Documentation
+
+### Core Documentation
+- **[Executive Summary](EXECUTIVE_SUMMARY.md)** - Project status, roadmap and metrics
+- **[Improvement Roadmap](specs/tasks/improvement-roadmap.md)** - Detailed task breakdown and tracking
+- **[Technical Review](INFORME_REVISION_PROFESIONAL.md)** - Comprehensive technical analysis
+- **[Agent Guide](AGENTS.md)** - Guide for AI agents using this MCP
+
+### Feature Documentation
+- **[Onboarding System](ONBOARDING_FEATURE.md)** - Repository onboarding feature details
+- **[Integration Guide](INTEGRATION.md)** - External service integration
+- **[Codex Integration](CODEX.md)** - Using with Codex CLI
+- **[Planning Document](PLANNING.md)** - Original project vision and architecture
+
+### Specifications (Spec-Kit)
+- **[specs/](specs/)** - Feature specifications and designs
+- **[memory/constitution.md](memory/constitution.md)** - Project principles and rules
+
+## 🚧 Current Improvements
+
+The project is undergoing professional hardening to reach production-ready status. Key areas of focus:
+
+### Phase 1: Critical Fixes (Weeks 1-2) 🔴
+- ✅ Comprehensive analysis completed
+- ⏳ State validation with Pydantic models
+- ⏳ Error handling with retry logic
+- ⏳ Prompt sanitization against injection
+
+### Phase 2: Testing Infrastructure (Weeks 3-4) 🟠
+- ⏳ Pytest setup with 80% coverage target
+- ⏳ Unit tests for all managers
+- ⏳ Integration tests for workflows
+- ⏳ CI/CD pipeline with GitHub Actions
+
+### Phase 3-5: Performance & Features (Weeks 5-8) 🟡
+- ⏳ Async/await migration
+- ⏳ Intelligent caching
+- ⏳ Documentation restructuring
+- ⏳ Advanced features (streaming, webhooks)
+
+**Quick Wins Available:** 3 tasks totaling 5 hours can eliminate 70% of current errors. See [roadmap](specs/tasks/improvement-roadmap.md#-quick-wins---implementación-inmediata) for details.

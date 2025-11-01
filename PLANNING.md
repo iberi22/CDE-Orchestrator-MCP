@@ -1,5 +1,10 @@
 # CDE Orchestrator MCP - Planning Document
 
+> **📋 Note:** This document contains the original project vision and architecture. For current status and detailed improvement plans, see:
+> - [Executive Summary](EXECUTIVE_SUMMARY.md) - Current status and roadmap
+> - [Improvement Roadmap](specs/tasks/improvement-roadmap.md) - Detailed task breakdown
+> - [Technical Review](INFORME_REVISION_PROFESIONAL.md) - Comprehensive analysis
+
 ## 1. Project Vision
 
 To create a robust, open-source MCP that serves as the reference implementation for the Context-Driven Engineering (CDE) methodology. This tool will empower AI agents to build complex software with high quality and consistency by managing the development workflow and context for them.
@@ -40,9 +45,32 @@ The Orchestrator MCP will be built using a modular, service-oriented architectur
 
 ## 6. Roadmap (execution highlights)
 
+> **🔄 Updated Roadmap:** See [Improvement Roadmap](specs/tasks/improvement-roadmap.md) for the current 8-week plan.
+
+### Original Roadmap Status
+
 1. ✅ Harden error handling/timeouts; centralized logging + tool decorator.
 2. ✅ Repo ingestion respects `.gitignore`, skips binaries, caches digests.
-3. In progress: async/streaming ingestion + richer token-aware chunking.
-4. Deepen Spec-Kit integration: validation and templates.
-5. Extend prompts for specialized phases (QA, release).
-6. Improve Git/GitHub UX; add PR workflows (future).
+3. ⏳ In progress: async/streaming ingestion + richer token-aware chunking (PERF-01, PERF-03).
+4. ⏳ Deepen Spec-Kit integration: validation and templates (DOC-01).
+5. ⏳ Extend prompts for specialized phases (QA, release).
+6. ⏳ Improve Git/GitHub UX; add PR workflows (future - FEAT-02).
+
+### Current Focus (2025)
+
+**Phase 1 - Critical Fixes (Weeks 1-2):** 🔴
+- State validation with Pydantic
+- Error handling with retry logic
+- Prompt sanitization
+
+**Phase 2 - Testing (Weeks 3-4):** 🟠
+- 80% test coverage
+- CI/CD pipeline
+- Integration tests
+
+**Phase 3 - Performance (Week 5):** 🟡
+- Async/await migration
+- Intelligent caching
+- Token estimation with tiktoken
+
+See full details in [Improvement Roadmap](specs/tasks/improvement-roadmap.md).
