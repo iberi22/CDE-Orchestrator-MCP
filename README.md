@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/workflows/ci.yml/badge.svg)](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/iberi22/CDE-Orchestrator-MCP/branch/main/graph/badge.svg)](https://codecov.io/gh/iberi22/CDE-Orchestrator-MCP)
-[![Python Versions](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org/)
+[![Python Versions](https://img.shields.io/badge/python-3.14+-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 The CDE Orchestrator is the reference implementation of the **Context-Driven Engineering (CDE)** methodology. It is a smart MCP (Model Context Protocol) server designed to guide AI coding assistants through a structured, phase-based software development lifecycle.
@@ -46,15 +46,28 @@ This MCP doesn't just provide tools; it manages the project's state and guides t
 
 > **Note:** Git/GitHub tools automatically detect and use external MCP servers when configured. See [INTEGRATION.md](INTEGRATION.md) for details.
 
+## Requirements
+
+- **Python 3.14+** (minimum required version)
+- Git (for repository operations)
+- GitHub CLI or GitHub Personal Access Token (optional, for GitHub integration)
+
+> **Note**: Python 3.14 is required for optimal performance. This version provides 10-20% faster asyncio operations and improved garbage collection for long-running servers.
+
 ## Quick Start
 
-1. **Clone the repository:**
+1. **Ensure Python 3.14 is installed:**
+   ```bash
+   python --version  # Should show Python 3.14.x
+   ```
+
+2. **Clone the repository:**
    ```bash
    git clone https://github.com/iberi22/CDE-Orchestrator-MCP.git
    cd CDE-Orchestrator-MCP
    ```
 
-2. **Set up the environment:**
+3. **Set up the environment:**
    ```bash
    python -m venv .venv
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate

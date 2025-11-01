@@ -1,0 +1,1423 @@
+# CDE Orchestrator MCP - Hexagonal Architecture
+
+> **Target Audience**: Large Language Models, AI Coding Agents
+> **Design Philosophy**: Stateless, Simple, LLM-Driven
+> **Scale Target**: Unlimited projects (agent knows context)
+
+## Executive Summary
+
+CDE Orchestrator follows **Hexagonal Architecture (Ports & Adapters)** with a radical simplification:
+
+### Core Philosophy: **Agent Knows, CDE Executes**
+
+- **LLM has context**: Agent knows project names, locations, what needs to be done
+- **CDE validates & executes**: Just check project exists and run workflows
+- **Stateless**: No registries, no caching, no complex state management
+- **Simple**: Each operation independent, minimal dependencies
+
+### What This Enables
+
+- **Multi-project support** WITHOUT complexity (agent provides project path/name)
+- **Bidirectional MCP** (in/out) for agent composition
+- **Copilot CLI integration** for headless code generation
+- **Zero state** between business logic and infrastructure
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     EXTERNAL AGENTS                          │
+│         (Claude, GPT-4, Copilot, Custom LLMs)                │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+        ┌──────────────┴──────────────┐
+        │   PRIMARY ADAPTER (IN)      │
+        │      MCP Server             │
+        │  (FastMCP Implementation)   │
+        └──────────────┬──────────────┘
+                       │
+   ┌───────────────────┴───────────────────┐
+   │         APPLICATION CORE               │
+   │                                        │
+   │  ┌──────────────────────────────┐     │
+   │  │      DOMAIN LAYER            │     │
+   │  │  - Project                   │     │
+   │  │  - Feature                   │     │
+   │  │  - Workflow                  │     │
+   │  │  - Task                      │     │
+   │  │  - CodeArtifact              │     │
+   │  └──────────────────────────────┘     │
+   │                                        │
+   │  ┌──────────────────────────────┐     │
+   │  │   USE CASES (Application)    │     │
+   │  │  - StartFeatureUseCase       │     │
+   │  │  - SubmitWorkUseCase         │     │
+   │  │  - ManageProjectUseCase      │     │
+   │  │  - ExecuteCodeUseCase        │     │
+   │  │  - OnboardProjectUseCase     │     │
+   │  └──────────────────────────────┘     │
+   │                                        │
+   │  ┌──────────────────────────────┐     │
+   │  │    PORTS (Interfaces)        │     │
+   │  │  - IProjectRepository        │     │
+   │  │  - IWorkflowEngine           │     │
+   │  │  - ICodeExecutor             │     │
+   │  │  - IAgentOrchestrator        │     │
+   │  │  - IServiceConnector         │     │
+   │  │  - IPromptRenderer           │     │
+   │  └──────────────────────────────┘     │
+   └────────────┬───────────┬───────────────┘
+                │           │
+      ┌─────────┴───┐   ┌───┴──────────┐
+      │  SECONDARY  │   │  SECONDARY   │
+      │  ADAPTERS   │   │  ADAPTERS    │
+      │   (OUT)     │   │   (OUT)      │
+      └─────────────┘   └──────────────┘
+           │                   │
+    ┌──────┴─────┐      ┌──────┴────────┐
+    │ FileSystem │      │ Copilot CLI   │
+    │  Adapter   │      │   Adapter     │
+    └────────────┘      └───────────────┘
+           │                   │
+    ┌──────┴─────┐      ┌──────┴────────┐
+    │   GitHub   │      │   External    │
+    │   Adapter  │      │  MCP Servers  │
+    └────────────┘      └───────────────┘
+```
+
+## Core Principles
+
+### 1. LLM-First Design
+
+Every interface, model, and function is designed for LLM consumption:
+
+```python
+# ❌ BAD: Implicit, human-oriented
+def process(data):
+    return do_something(data)
+
+# ✅ GOOD: Explicit, machine-readable
+class ProcessDataUseCase:
+    """
+    Process incoming data according to CDE workflow rules.
+
+    Contract:
+        Input: Dict[str, Any] with keys: project_id, phase, artifacts
+        Output: ProcessResult with status, next_phase, generated_artifacts
+        Raises: ValidationError if input schema invalid
+
+    Example:
+        >>> use_case = ProcessDataUseCase(repo, engine)
+        >>> result = use_case.execute({
+        ...     "project_id": "abc-123",
+        ...     "phase": "define",
+        ...     "artifacts": {"spec": "content"}
+        ... })
+        >>> assert result.status == "success"
+    """
+    def execute(self, input_data: Dict[str, Any]) -> ProcessResult:
+        ...
+```
+
+### 2. Dependency Rule
+
+Dependencies point **inward only**:
+- Domain knows NOTHING about adapters
+- Use cases depend only on port interfaces
+- Adapters depend on use cases and external libraries
+
+### 3. Multi-Project Isolation
+
+Each project maintains isolated state:
+
+```python
+# Project context is injected, never global
+class StartFeatureUseCase:
+    def __init__(
+        self,
+        project_repo: IProjectRepository,
+        workflow_engine: IWorkflowEngine
+    ):
+        self.projects = project_repo
+        self.workflows = workflow_engine
+
+    def execute(self, project_id: str, prompt: str) -> FeatureResult:
+        project = self.projects.get_by_id(project_id)
+        workflow = self.workflows.load_for_project(project)
+        # Execute in isolated context
+        return workflow.start_feature(prompt)
+```
+
+### 4. Bidirectional MCP
+
+MCP acts as both:
+- **Primary Adapter (IN)**: Receives commands from external agents
+- **Secondary Adapter (OUT)**: Orchestrates other MCP servers via clients
+
+```python
+class MCPServerAdapter(IPrimaryAdapter):
+    """Exposes use cases as MCP tools."""
+
+    def expose_tool(self, use_case: UseCase):
+        @app.tool()
+        def tool_function(**kwargs):
+            return use_case.execute(kwargs)
+
+class MCPClientAdapter(IAgentOrchestrator):
+    """Calls external MCP servers (GitHub, etc)."""
+
+    async def execute_on_copilot(self, command: CodegenCommand) -> CodegenResult:
+        # Launches Copilot CLI headless
+        return await self.copilot_client.run(command)
+```
+
+## Domain Layer
+
+### Entities
+
+Pure business logic with zero infrastructure dependencies.
+
+```python
+# src/cde_orchestrator/domain/entities.py
+
+from dataclasses import dataclass
+from datetime import datetime
+from enum import Enum
+from typing import List, Optional, Dict, Any
+
+class ProjectStatus(Enum):
+    """All possible project states."""
+    ONBOARDING = "onboarding"
+    ACTIVE = "active"
+    ARCHIVED = "archived"
+    ERROR = "error"
+
+@dataclass(frozen=True)
+class ProjectId:
+    """Value object for project identification."""
+    value: str
+
+    def __post_init__(self):
+        if not self.value or len(self.value) < 3:
+            raise ValueError(f"Invalid project ID: {self.value}")
+
+@dataclass
+class Project:
+    """
+    Aggregate root for a managed project.
+
+    Invariants:
+        - Must have unique ID
+        - Path must exist on filesystem
+        - Can have 0+ active features
+        - Status transitions are controlled
+    """
+    id: ProjectId
+    name: str
+    path: str
+    status: ProjectStatus
+    created_at: datetime
+    updated_at: datetime
+    features: List['Feature']
+    metadata: Dict[str, Any]
+
+    def start_feature(self, prompt: str) -> 'Feature':
+        """Business rule: Create new feature in this project."""
+        if self.status != ProjectStatus.ACTIVE:
+            raise ValueError(f"Cannot start feature in {self.status} project")
+
+        feature = Feature.create(
+            project_id=self.id,
+            prompt=prompt,
+            workflow_type=self.metadata.get("default_workflow", "default")
+        )
+        self.features.append(feature)
+        self.updated_at = datetime.utcnow()
+        return feature
+
+    def can_execute_code(self) -> bool:
+        """Business rule: Determine if code execution is allowed."""
+        return (
+            self.status == ProjectStatus.ACTIVE
+            and self.path is not None
+        )
+
+class FeatureStatus(Enum):
+    """Feature lifecycle states."""
+    DEFINING = "defining"
+    DECOMPOSING = "decomposing"
+    DESIGNING = "designing"
+    IMPLEMENTING = "implementing"
+    TESTING = "testing"
+    REVIEWING = "reviewing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+@dataclass
+class Feature:
+    """
+    Represents a unit of work within a project.
+
+    Lifecycle: DEFINING → DECOMPOSING → DESIGNING →
+               IMPLEMENTING → TESTING → REVIEWING → COMPLETED
+    """
+    id: str
+    project_id: ProjectId
+    prompt: str
+    status: FeatureStatus
+    current_phase: str
+    workflow_type: str
+    created_at: datetime
+    updated_at: datetime
+    artifacts: Dict[str, Any]
+
+    @classmethod
+    def create(cls, project_id: ProjectId, prompt: str, workflow_type: str) -> 'Feature':
+        """Factory method: Enforce creation invariants."""
+        import uuid
+        return cls(
+            id=str(uuid.uuid4()),
+            project_id=project_id,
+            prompt=prompt,
+            status=FeatureStatus.DEFINING,
+            current_phase="define",
+            workflow_type=workflow_type,
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow(),
+            artifacts={}
+        )
+
+    def advance_phase(self, next_phase: str, results: Dict[str, Any]):
+        """Business rule: Transition to next workflow phase."""
+        phase_to_status = {
+            "define": FeatureStatus.DEFINING,
+            "decompose": FeatureStatus.DECOMPOSING,
+            "design": FeatureStatus.DESIGNING,
+            "implement": FeatureStatus.IMPLEMENTING,
+            "test": FeatureStatus.TESTING,
+            "review": FeatureStatus.REVIEWING,
+        }
+
+        self.current_phase = next_phase
+        self.status = phase_to_status.get(next_phase, self.status)
+        self.artifacts.update(results)
+        self.updated_at = datetime.utcnow()
+
+    def complete(self):
+        """Business rule: Mark feature as completed."""
+        if self.status != FeatureStatus.REVIEWING:
+            raise ValueError(f"Cannot complete feature in {self.status} status")
+        self.status = FeatureStatus.COMPLETED
+        self.updated_at = datetime.utcnow()
+
+@dataclass
+class CodeArtifact:
+    """Represents generated code or documentation."""
+    path: str
+    content: str
+    language: str
+    metadata: Dict[str, Any]
+```
+
+## Port Interfaces
+
+Contracts that adapters must implement.
+
+```python
+# src/cde_orchestrator/domain/ports.py
+
+from abc import ABC, abstractmethod
+from typing import List, Optional, Dict, Any
+from .entities import Project, ProjectId, Feature
+
+class IProjectRepository(ABC):
+    """
+    Port for project persistence.
+
+    Implementations: FileSystemProjectRepository, DatabaseProjectRepository
+    """
+
+    @abstractmethod
+    def get_by_id(self, project_id: ProjectId) -> Optional[Project]:
+        """Retrieve project by ID. Returns None if not found."""
+        pass
+
+    @abstractmethod
+    def get_by_path(self, path: str) -> Optional[Project]:
+        """Find project by filesystem path."""
+        pass
+
+    @abstractmethod
+    def list_all(self) -> List[Project]:
+        """Get all registered projects."""
+        pass
+
+    @abstractmethod
+    def save(self, project: Project) -> None:
+        """Persist project state."""
+        pass
+
+    @abstractmethod
+    def delete(self, project_id: ProjectId) -> None:
+        """Remove project from registry."""
+        pass
+
+class IWorkflowEngine(ABC):
+    """
+    Port for workflow execution.
+
+    Implementations: YAMLWorkflowEngine, PythonWorkflowEngine
+    """
+
+    @abstractmethod
+    def load_for_project(self, project: Project) -> 'Workflow':
+        """Load workflow definition for given project."""
+        pass
+
+    @abstractmethod
+    def get_next_phase(self, current_phase: str) -> Optional[str]:
+        """Determine next phase in workflow sequence."""
+        pass
+
+    @abstractmethod
+    def validate_results(self, phase: str, results: Dict[str, Any]) -> bool:
+        """Check if results satisfy phase requirements."""
+        pass
+
+class ICodeExecutor(ABC):
+    """
+    Port for executing code generation agents.
+
+    Implementations: CopilotCLIAdapter, LocalLLMAdapter
+    """
+
+    @abstractmethod
+    async def execute_prompt(
+        self,
+        project_path: str,
+        prompt: str,
+        context: Dict[str, Any]
+    ) -> 'ExecutionResult':
+        """
+        Execute code generation with given prompt.
+
+        Args:
+            project_path: Absolute path to project directory
+            prompt: Natural language instruction
+            context: Additional context (files, specs, etc)
+
+        Returns:
+            ExecutionResult with generated code and metadata
+        """
+        pass
+
+    @abstractmethod
+    def supports_yolo_mode(self) -> bool:
+        """Check if executor supports auto-apply without confirmation."""
+        pass
+
+class IAgentOrchestrator(ABC):
+    """
+    Port for orchestrating external agents/tools.
+
+    Implementations: MCPClientAdapter, DirectAPIAdapter
+    """
+
+    @abstractmethod
+    async def call_github(self, operation: str, params: Dict[str, Any]) -> Any:
+        """Execute GitHub operation via MCP or API."""
+        pass
+
+    @abstractmethod
+    async def call_copilot(self, command: str, args: Dict[str, Any]) -> Any:
+        """Execute Copilot CLI command."""
+        pass
+
+    @abstractmethod
+    def is_service_available(self, service_name: str) -> bool:
+        """Check if external service is accessible."""
+        pass
+
+class IPromptRenderer(ABC):
+    """
+    Port for rendering POML templates.
+
+    Implementations: POM LRenderer, JinjaRenderer
+    """
+
+    @abstractmethod
+    def render(self, template_path: str, context: Dict[str, Any]) -> str:
+        """Render prompt template with given context."""
+        pass
+
+    @abstractmethod
+    def validate_template(self, template_path: str) -> bool:
+        """Check if template is well-formed."""
+        pass
+
+class IStateStore(ABC):
+    """
+    Port for persisting application state.
+
+    Implementations: JSONStateStore, DatabaseStateStore
+    """
+
+    @abstractmethod
+    def load(self, key: str) -> Optional[Dict[str, Any]]:
+        """Load state by key."""
+        pass
+
+    @abstractmethod
+    def save(self, key: str, data: Dict[str, Any]) -> None:
+        """Persist state."""
+        pass
+
+    @abstractmethod
+    def delete(self, key: str) -> None:
+        """Remove state."""
+        pass
+```
+
+## Use Cases (Application Layer)
+
+```python
+# src/cde_orchestrator/application/use_cases.py
+
+from typing import Dict, Any
+from ..domain.ports import IProjectRepository, IWorkflowEngine, IPromptRenderer
+from ..domain.entities import Project, Feature, ProjectId
+
+class StartFeatureUseCase:
+    """
+    Use case: Start a new feature in a project.
+
+    Flow:
+        1. Validate project exists and is active
+        2. Create feature entity
+        3. Load initial workflow phase
+        4. Render phase prompt
+        5. Return prompt to agent
+    """
+
+    def __init__(
+        self,
+        project_repo: IProjectRepository,
+        workflow_engine: IWorkflowEngine,
+        prompt_renderer: IPromptRenderer
+    ):
+        self.projects = project_repo
+        self.workflows = workflow_engine
+        self.prompts = prompt_renderer
+
+    def execute(self, project_id: str, user_prompt: str) -> Dict[str, Any]:
+        """
+        Execute use case.
+
+        Input Schema:
+            {
+                "project_id": str,  # Project identifier
+                "user_prompt": str  # Feature description from user
+            }
+
+        Output Schema:
+            {
+                "status": "success" | "error",
+                "feature_id": str,
+                "phase": str,
+                "prompt": str,
+                "error": str  # Only if status=error
+            }
+        """
+        # 1. Load project
+        project = self.projects.get_by_id(ProjectId(project_id))
+        if not project:
+            return {"status": "error", "error": f"Project {project_id} not found"}
+
+        # 2. Create feature (business logic in entity)
+        try:
+            feature = project.start_feature(user_prompt)
+        except ValueError as e:
+            return {"status": "error", "error": str(e)}
+
+        # 3. Save updated project
+        self.projects.save(project)
+
+        # 4. Load workflow
+        workflow = self.workflows.load_for_project(project)
+        initial_phase = workflow.get_initial_phase()
+
+        # 5. Render prompt
+        context = {
+            "USER_PROMPT": user_prompt,
+            "PROJECT_NAME": project.name,
+            "FEATURE_ID": feature.id
+        }
+        prompt = self.prompts.render(initial_phase.prompt_recipe, context)
+
+        return {
+            "status": "success",
+            "feature_id": feature.id,
+            "phase": initial_phase.id,
+            "prompt": prompt
+        }
+
+class SubmitWorkUseCase:
+    """
+    Use case: Submit completed work and advance to next phase.
+
+    Flow:
+        1. Load feature
+        2. Validate phase matches current state
+        3. Process results (save artifacts)
+        4. Advance to next phase
+        5. Render next prompt or mark complete
+    """
+
+    def __init__(
+        self,
+        project_repo: IProjectRepository,
+        workflow_engine: IWorkflowEngine,
+        prompt_renderer: IPromptRenderer
+    ):
+        self.projects = project_repo
+        self.workflows = workflow_engine
+        self.prompts = prompt_renderer
+
+    def execute(
+        self,
+        project_id: str,
+        feature_id: str,
+        phase_id: str,
+        results: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Submit work results.
+
+        Input Schema:
+            {
+                "project_id": str,
+                "feature_id": str,
+                "phase_id": str,
+                "results": {
+                    "specification": str,  # For define phase
+                    "task_breakdown": str,  # For decompose phase
+                    # ... phase-specific keys
+                }
+            }
+
+        Output Schema:
+            {
+                "status": "success" | "completed" | "error",
+                "phase": str,  # Next phase ID
+                "prompt": str,  # Next phase prompt
+                "progress": Dict[str, Any]
+            }
+        """
+        # Implementation similar to above
+        # Business logic delegated to entities
+        pass
+
+class ManageProjectUseCase:
+    """
+    Use case: Register, update, or remove projects.
+
+    Operations: register, update, archive, delete
+    """
+
+    def __init__(self, project_repo: IProjectRepository):
+        self.projects = project_repo
+
+    def register_project(self, path: str, name: str) -> Dict[str, Any]:
+        """
+        Register new project for CDE management.
+
+        Input:
+            {
+                "path": "/absolute/path/to/project",
+                "name": "My Project"
+            }
+
+        Output:
+            {
+                "status": "success",
+                "project_id": "generated-uuid",
+                "message": "Project registered"
+            }
+        """
+        # Check if already exists
+        existing = self.projects.get_by_path(path)
+        if existing:
+            return {"status": "error", "error": "Project already registered"}
+
+        # Create new project entity
+        import uuid
+        from datetime import datetime
+        from ..domain.entities import Project, ProjectId, ProjectStatus
+
+        project = Project(
+            id=ProjectId(str(uuid.uuid4())),
+            name=name,
+            path=path,
+            status=ProjectStatus.ONBOARDING,
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow(),
+            features=[],
+            metadata={}
+        )
+
+        self.projects.save(project)
+
+        return {
+            "status": "success",
+            "project_id": project.id.value,
+            "message": f"Project '{name}' registered"
+        }
+
+    def list_all_projects(self) -> Dict[str, Any]:
+        """List all managed projects."""
+        projects = self.projects.list_all()
+        return {
+            "status": "success",
+            "count": len(projects),
+            "projects": [
+                {
+                    "id": p.id.value,
+                    "name": p.name,
+                    "path": p.path,
+                    "status": p.status.value,
+                    "feature_count": len(p.features)
+                }
+                for p in projects
+            ]
+        }
+
+class ExecuteCodeUseCase:
+    """
+    Use case: Execute code generation via Copilot CLI or other executor.
+    """
+
+    def __init__(
+        self,
+        project_repo: IProjectRepository,
+        code_executor: ICodeExecutor
+    ):
+        self.projects = project_repo
+        self.executor = code_executor
+
+    async def execute(
+        self,
+        project_id: str,
+        prompt: str,
+        yolo_mode: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Execute code generation.
+
+        Input:
+            {
+                "project_id": str,
+                "prompt": str,
+                "yolo_mode": bool  # Auto-apply without confirmation
+            }
+
+        Output:
+            {
+                "status": "success" | "error",
+                "files_changed": List[str],
+                "diff": str,
+                "execution_log": str
+            }
+        """
+        project = self.projects.get_by_id(ProjectId(project_id))
+        if not project:
+            return {"status": "error", "error": "Project not found"}
+
+        if not project.can_execute_code():
+            return {"status": "error", "error": "Project not ready for code execution"}
+
+        result = await self.executor.execute_prompt(
+            project_path=project.path,
+            prompt=prompt,
+            context={"yolo": yolo_mode}
+        )
+
+        return {
+            "status": "success" if result.success else "error",
+            "files_changed": result.modified_files,
+            "diff": result.diff,
+            "execution_log": result.log
+        }
+```
+
+## Multi-Project Management
+
+```python
+# src/cde_orchestrator/application/project_registry.py
+
+from typing import List, Dict, Any, Optional
+from pathlib import Path
+from ..domain.entities import Project, ProjectId
+from ..domain.ports import IProjectRepository
+
+class ProjectRegistry:
+    """
+    Manages multiple projects simultaneously.
+
+    Features:
+        - Auto-discovery of projects in a root folder
+        - Lazy loading (load project state only when needed)
+        - Context isolation (each project has independent state)
+        - Concurrent operations support
+    """
+
+    def __init__(self, repository: IProjectRepository):
+        self.repo = repository
+        self._loaded_projects: Dict[str, Project] = {}
+
+    def scan_directory(self, root_path: str) -> List[Project]:
+        """
+        Scan directory tree for Git repositories and register as projects.
+
+        Example: Scan "E:\\scripts-python" for all projects
+
+        Args:
+            root_path: Absolute path to scan (e.g., "E:\\scripts-python")
+
+        Returns:
+            List of discovered/registered projects
+        """
+        root = Path(root_path)
+        if not root.exists():
+            raise ValueError(f"Path does not exist: {root_path}")
+
+        discovered = []
+
+        # Find all .git directories (indicates a project)
+        for git_dir in root.rglob(".git"):
+            project_path = str(git_dir.parent)
+
+            # Check if already registered
+            existing = self.repo.get_by_path(project_path)
+            if existing:
+                discovered.append(existing)
+                continue
+
+            # Register new project
+            project_name = git_dir.parent.name
+            project = self._create_project_from_path(project_path, project_name)
+            self.repo.save(project)
+            discovered.append(project)
+
+        return discovered
+
+    def get_project(self, project_id: str) -> Optional[Project]:
+        """Get project with lazy loading."""
+        # Check cache first
+        if project_id in self._loaded_projects:
+            return self._loaded_projects[project_id]
+
+        # Load from repository
+        project = self.repo.get_by_id(ProjectId(project_id))
+        if project:
+            self._loaded_projects[project_id] = project
+        return project
+
+    def get_project_by_path(self, path: str) -> Optional[Project]:
+        """Find project by filesystem path."""
+        return self.repo.get_by_path(path)
+
+    def list_all(self) -> List[Project]:
+        """Get all registered projects (from persistence)."""
+        return self.repo.list_all()
+
+    def _create_project_from_path(self, path: str, name: str) -> Project:
+        """Factory method for creating projects from discovered paths."""
+        import uuid
+        from datetime import datetime
+        from ..domain.entities import Project, ProjectId, ProjectStatus
+
+        return Project(
+            id=ProjectId(str(uuid.uuid4())),
+            name=name,
+            path=path,
+            status=ProjectStatus.ONBOARDING,
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow(),
+            features=[],
+            metadata={"auto_discovered": True}
+        )
+```
+
+## Copilot CLI Adapter
+
+```python
+# src/cde_orchestrator/adapters/copilot_cli_adapter.py
+
+import asyncio
+import json
+from typing import Dict, Any, List
+from dataclasses import dataclass
+from ..domain.ports import ICodeExecutor
+
+@dataclass
+class ExecutionResult:
+    """Result of code execution."""
+    success: bool
+    modified_files: List[str]
+    diff: str
+    log: str
+    metadata: Dict[str, Any]
+
+class CopilotCLIAdapter(ICodeExecutor):
+    """
+    Adapter for GitHub Copilot CLI headless execution.
+
+    Features:
+        - YOLO mode support (auto-apply changes)
+        - Workflow-driven prompts
+        - Context injection from CDE state
+
+    Requirements:
+        - `gh copilot` CLI installed
+        - Authentication configured
+    """
+
+    def __init__(self, yolo_default: bool = False):
+        self.yolo_default = yolo_default
+        self._check_cli_available()
+
+    def _check_cli_available(self):
+        """Verify Copilot CLI is installed."""
+        import shutil
+        if not shutil.which("gh"):
+            raise RuntimeError("GitHub CLI (gh) not found in PATH")
+        # Could also check: gh copilot --version
+
+    async def execute_prompt(
+        self,
+        project_path: str,
+        prompt: str,
+        context: Dict[str, Any]
+    ) -> ExecutionResult:
+        """
+        Execute code generation with Copilot.
+
+        Implementation:
+            1. Build Copilot CLI command
+            2. Inject context from workflow
+            3. Execute in project directory
+            4. Parse output and collect changes
+        """
+        yolo = context.get("yolo", self.yolo_default)
+
+        # Build command
+        cmd = self._build_copilot_command(prompt, yolo)
+
+        # Execute
+        process = await asyncio.create_subprocess_exec(
+            *cmd,
+            cwd=project_path,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+
+        stdout, stderr = await process.communicate()
+
+        # Parse results
+        result = self._parse_execution_result(
+            stdout.decode(),
+            stderr.decode(),
+            process.returncode
+        )
+
+        return result
+
+    def _build_copilot_command(self, prompt: str, yolo: bool) -> List[str]:
+        """
+        Build Copilot CLI command.
+
+        Examples:
+            Normal: gh copilot suggest "create user auth"
+            YOLO:   gh copilot suggest --apply "create user auth"
+        """
+        cmd = ["gh", "copilot", "suggest"]
+
+        if yolo:
+            cmd.append("--apply")  # Auto-apply without confirmation
+
+        cmd.append(prompt)
+        return cmd
+
+    def _parse_execution_result(
+        self,
+        stdout: str,
+        stderr: str,
+        return_code: int
+    ) -> ExecutionResult:
+        """Parse Copilot CLI output into structured result."""
+        success = return_code == 0
+
+        # Extract modified files from output
+        # (This is simplified; actual parsing depends on Copilot output format)
+        modified_files = []
+        if "Modified:" in stdout:
+            # Parse file list
+            pass
+
+        return ExecutionResult(
+            success=success,
+            modified_files=modified_files,
+            diff=stdout,  # Copilot may include diff in output
+            log=f"{stdout}\n{stderr}",
+            metadata={"return_code": return_code}
+        )
+
+    def supports_yolo_mode(self) -> bool:
+        """Copilot CLI supports auto-apply."""
+        return True
+```
+
+## Adapter Implementations
+
+### FileSystem Project Repository
+
+```python
+# src/cde_orchestrator/adapters/filesystem_project_repository.py
+
+import json
+from pathlib import Path
+from typing import List, Optional, Dict, Any
+from ..domain.ports import IProjectRepository
+from ..domain.entities import Project, ProjectId, ProjectStatus, Feature, FeatureStatus
+from datetime import datetime
+
+class FileSystemProjectRepository(IProjectRepository):
+    """
+    Stores projects as JSON files in a registry directory.
+
+    Structure:
+        .cde_registry/
+            projects/
+                <project-id>.json
+                <project-id>.json
+            index.json  # Fast lookup: path -> project_id
+    """
+
+    def __init__(self, registry_path: Path):
+        self.registry_path = registry_path
+        self.projects_dir = registry_path / "projects"
+        self.index_file = registry_path / "index.json"
+        self._ensure_structure()
+
+    def _ensure_structure(self):
+        """Create registry directories if they don't exist."""
+        self.projects_dir.mkdir(parents=True, exist_ok=True)
+        if not self.index_file.exists():
+            self.index_file.write_text(json.dumps({}, indent=2))
+
+    def get_by_id(self, project_id: ProjectId) -> Optional[Project]:
+        """Load project from JSON file."""
+        project_file = self.projects_dir / f"{project_id.value}.json"
+        if not project_file.exists():
+            return None
+
+        data = json.loads(project_file.read_text())
+        return self._deserialize_project(data)
+
+    def get_by_path(self, path: str) -> Optional[Project]:
+        """Use index to find project by path."""
+        index = json.loads(self.index_file.read_text())
+        project_id = index.get(path)
+        if not project_id:
+            return None
+        return self.get_by_id(ProjectId(project_id))
+
+    def list_all(self) -> List[Project]:
+        """Load all projects from registry."""
+        projects = []
+        for project_file in self.projects_dir.glob("*.json"):
+            data = json.loads(project_file.read_text())
+            projects.append(self._deserialize_project(data))
+        return projects
+
+    def save(self, project: Project) -> None:
+        """Persist project to JSON file and update index."""
+        # Serialize project
+        data = self._serialize_project(project)
+
+        # Write to file
+        project_file = self.projects_dir / f"{project.id.value}.json"
+        project_file.write_text(json.dumps(data, indent=2))
+
+        # Update index
+        index = json.loads(self.index_file.read_text())
+        index[project.path] = project.id.value
+        self.index_file.write_text(json.dumps(index, indent=2))
+
+    def delete(self, project_id: ProjectId) -> None:
+        """Remove project file and index entry."""
+        # Get project to find path
+        project = self.get_by_id(project_id)
+        if not project:
+            return
+
+        # Delete file
+        project_file = self.projects_dir / f"{project_id.value}.json"
+        if project_file.exists():
+            project_file.unlink()
+
+        # Update index
+        index = json.loads(self.index_file.read_text())
+        if project.path in index:
+            del index[project.path]
+        self.index_file.write_text(json.dumps(index, indent=2))
+
+    def _serialize_project(self, project: Project) -> Dict[str, Any]:
+        """Convert Project entity to JSON-serializable dict."""
+        return {
+            "id": project.id.value,
+            "name": project.name,
+            "path": project.path,
+            "status": project.status.value,
+            "created_at": project.created_at.isoformat(),
+            "updated_at": project.updated_at.isoformat(),
+            "features": [self._serialize_feature(f) for f in project.features],
+            "metadata": project.metadata
+        }
+
+    def _deserialize_project(self, data: Dict[str, Any]) -> Project:
+        """Convert JSON dict to Project entity."""
+        return Project(
+            id=ProjectId(data["id"]),
+            name=data["name"],
+            path=data["path"],
+            status=ProjectStatus(data["status"]),
+            created_at=datetime.fromisoformat(data["created_at"]),
+            updated_at=datetime.fromisoformat(data["updated_at"]),
+            features=[self._deserialize_feature(f) for f in data.get("features", [])],
+            metadata=data.get("metadata", {})
+        )
+
+    def _serialize_feature(self, feature: Feature) -> Dict[str, Any]:
+        return {
+            "id": feature.id,
+            "project_id": feature.project_id.value,
+            "prompt": feature.prompt,
+            "status": feature.status.value,
+            "current_phase": feature.current_phase,
+            "workflow_type": feature.workflow_type,
+            "created_at": feature.created_at.isoformat(),
+            "updated_at": feature.updated_at.isoformat(),
+            "artifacts": feature.artifacts
+        }
+
+    def _deserialize_feature(self, data: Dict[str, Any]) -> Feature:
+        return Feature(
+            id=data["id"],
+            project_id=ProjectId(data["project_id"]),
+            prompt=data["prompt"],
+            status=FeatureStatus(data["status"]),
+            current_phase=data["current_phase"],
+            workflow_type=data["workflow_type"],
+            created_at=datetime.fromisoformat(data["created_at"]),
+            updated_at=datetime.fromisoformat(data["updated_at"]),
+            artifacts=data.get("artifacts", {})
+        )
+```
+
+## Dependency Injection Container
+
+```python
+# src/cde_orchestrator/infrastructure/di_container.py
+
+from pathlib import Path
+from typing import Optional
+from ..domain.ports import (
+    IProjectRepository,
+    IWorkflowEngine,
+    ICodeExecutor,
+    IPromptRenderer,
+    IAgentOrchestrator
+)
+from ..adapters.filesystem_project_repository import FileSystemProjectRepository
+from ..adapters.copilot_cli_adapter import CopilotCLIAdapter
+from ..application.use_cases import (
+    StartFeatureUseCase,
+    SubmitWorkUseCase,
+    ManageProjectUseCase,
+    ExecuteCodeUseCase
+)
+
+class DIContainer:
+    """
+    Dependency Injection Container for Hexagonal Architecture.
+
+    Wires together:
+        - Domain (entities)
+        - Application (use cases)
+        - Adapters (implementations)
+
+    Usage:
+        container = DIContainer.create_default()
+        start_feature = container.get_start_feature_use_case()
+        result = start_feature.execute(project_id, prompt)
+    """
+
+    def __init__(
+        self,
+        project_repo: IProjectRepository,
+        workflow_engine: IWorkflowEngine,
+        code_executor: ICodeExecutor,
+        prompt_renderer: IPromptRenderer,
+        agent_orchestrator: IAgentOrchestrator
+    ):
+        self._project_repo = project_repo
+        self._workflow_engine = workflow_engine
+        self._code_executor = code_executor
+        self._prompt_renderer = prompt_renderer
+        self._agent_orchestrator = agent_orchestrator
+
+    @classmethod
+    def create_default(cls, registry_path: Optional[Path] = None) -> 'DIContainer':
+        """
+        Factory method: Create container with default implementations.
+
+        For testing, pass mock implementations instead.
+        """
+        if registry_path is None:
+            registry_path = Path.home() / ".cde_registry"
+
+        # Wire adapters
+        project_repo = FileSystemProjectRepository(registry_path)
+
+        # Import other adapters
+        from ..adapters.yaml_workflow_engine import YAMLWorkflowEngine
+        from ..adapters.poml_prompt_renderer import POMLPromptRenderer
+        from ..adapters.mcp_client_adapter import MCPClientAdapter
+
+        workflow_engine = YAMLWorkflowEngine(Path(".cde/workflow.yml"))
+        code_executor = CopilotCLIAdapter(yolo_default=False)
+        prompt_renderer = POMLPromptRenderer(Path(".cde/prompts"))
+        agent_orchestrator = MCPClientAdapter()
+
+        return cls(
+            project_repo=project_repo,
+            workflow_engine=workflow_engine,
+            code_executor=code_executor,
+            prompt_renderer=prompt_renderer,
+            agent_orchestrator=agent_orchestrator
+        )
+
+    # Use case factories
+
+    def get_start_feature_use_case(self) -> StartFeatureUseCase:
+        return StartFeatureUseCase(
+            self._project_repo,
+            self._workflow_engine,
+            self._prompt_renderer
+        )
+
+    def get_submit_work_use_case(self) -> SubmitWorkUseCase:
+        return SubmitWorkUseCase(
+            self._project_repo,
+            self._workflow_engine,
+            self._prompt_renderer
+        )
+
+    def get_manage_project_use_case(self) -> ManageProjectUseCase:
+        return ManageProjectUseCase(self._project_repo)
+
+    def get_execute_code_use_case(self) -> ExecuteCodeUseCase:
+        return ExecuteCodeUseCase(
+            self._project_repo,
+            self._code_executor
+        )
+
+    # Direct access for testing
+
+    @property
+    def project_repo(self) -> IProjectRepository:
+        return self._project_repo
+
+    @property
+    def code_executor(self) -> ICodeExecutor:
+        return self._code_executor
+```
+
+## Migration Strategy
+
+### Phase 1: Create New Structure (Non-Breaking)
+
+1. Add new `domain/`, `application/`, `adapters/`, `infrastructure/` packages
+2. Implement ports and core entities
+3. Keep existing code functional
+
+### Phase 2: Implement Adapters
+
+1. Wrap existing managers (StateManager, WorkflowManager) as adapters
+2. Implement FileSystemProjectRepository
+3. Implement CopilotCLIAdapter
+
+### Phase 3: Wire with DI
+
+1. Create DIContainer
+2. Refactor `server.py` to use use cases instead of direct manager calls
+3. Maintain backward compatibility
+
+### Phase 4: Multi-Project Support
+
+1. Add project registry scanning
+2. Update MCP tools to accept `project_id` parameter
+3. Default to current directory if not specified
+
+## LLM Interaction Patterns
+
+### Pattern 1: Project Discovery
+
+```
+Agent: "I want to manage all my Python projects in E:\scripts-python"
+
+System: Uses ManageProjectUseCase.scan_directory()
+        Returns list of discovered projects
+
+Agent receives: {
+    "status": "success",
+    "discovered": 47,
+    "projects": [
+        {"id": "uuid-1", "name": "CDE Orchestrator", "path": "E:\\scripts-python\\CDE Orchestrator MCP"},
+        {"id": "uuid-2", "name": "Data Pipeline", "path": "E:\\scripts-python\\data-pipeline"},
+        ...
+    ]
+}
+
+Agent: Now understands all managed projects
+```
+
+### Pattern 2: Feature Development Across Projects
+
+```
+Agent: "Start authentication feature in project uuid-1"
+
+System: start_feature_use_case.execute("uuid-1", "user authentication")
+
+Agent receives prompt for define phase in that specific project
+
+Agent: Completes spec, submits work
+
+System: Saves artifacts to E:\scripts-python\CDE Orchestrator MCP\specs\features\
+        Advances to decompose phase
+
+Agent: Receives decompose prompt with context from define phase
+```
+
+### Pattern 3: Copilot Integration
+
+```
+Agent: "Implement the database models for project uuid-2"
+
+System: execute_code_use_case.execute(
+    project_id="uuid-2",
+    prompt="Create SQLAlchemy models for user, post, comment tables",
+    yolo_mode=True  # Agent trusts Copilot
+)
+
+System: Launches `gh copilot suggest --apply "..."` in E:\scripts-python\data-pipeline\
+
+Copilot: Generates models.py, applies changes
+
+System returns: {
+    "status": "success",
+    "files_changed": ["src/models.py"],
+    "diff": "...",
+    "log": "Generated 3 models with relationships"
+}
+
+Agent: Updates feature status, proceeds to next task
+```
+
+## Testing Strategy
+
+### Unit Tests (Domain Layer)
+
+```python
+def test_project_start_feature():
+    project = Project(
+        id=ProjectId("test-123"),
+        name="Test",
+        path="/tmp/test",
+        status=ProjectStatus.ACTIVE,
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+        features=[],
+        metadata={}
+    )
+
+    feature = project.start_feature("add login")
+
+    assert feature.status == FeatureStatus.DEFINING
+    assert feature.current_phase == "define"
+    assert len(project.features) == 1
+```
+
+### Integration Tests (Adapters)
+
+```python
+def test_filesystem_repository():
+    repo = FileSystemProjectRepository(Path("/tmp/test_registry"))
+
+    project = Project(...)
+    repo.save(project)
+
+    loaded = repo.get_by_id(project.id)
+    assert loaded.name == project.name
+```
+
+### End-to-End Tests (Use Cases)
+
+```python
+async def test_execute_code_use_case():
+    container = DIContainer.create_default()
+    use_case = container.get_execute_code_use_case()
+
+    result = await use_case.execute(
+        project_id="test-id",
+        prompt="create hello world",
+        yolo_mode=False
+    )
+
+    assert result["status"] == "success"
+```
+
+## Context Budget Management
+
+For 1000+ projects, context is critical:
+
+1. **Lazy Loading**: Only load project state when accessed
+2. **Incremental Updates**: Save only changed features, not entire state
+3. **Summary Views**: Provide project summaries without loading full state
+4. **Parallel Processing**: Use asyncio for concurrent operations
+
+```python
+async def process_multiple_projects(project_ids: List[str]):
+    tasks = [
+        process_single_project(pid)
+        for pid in project_ids
+    ]
+    results = await asyncio.gather(*tasks)
+    return results
+```
+
+## Next Steps
+
+1. ✅ Create domain entities in `src/cde_orchestrator/domain/entities.py`
+2. ✅ Define port interfaces in `src/cde_orchestrator/domain/ports.py`
+3. ⏳ Implement use cases in `src/cde_orchestrator/application/use_cases.py`
+4. ⏳ Build adapters (FileSystem, Copilot, MCP Client)
+5. ⏳ Create DI container
+6. ⏳ Refactor `server.py` to use hexagonal architecture
+7. ⏳ Add multi-project management tools
+8. ⏳ Implement Copilot CLI integration
+9. ⏳ Test with E:\scripts-python scan
+
+---
+
+**This architecture is designed for LLMs to understand and extend.**
+All contracts are explicit. All dependencies point inward. All code is testable.

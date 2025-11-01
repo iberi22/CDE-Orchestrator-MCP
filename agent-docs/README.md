@@ -178,13 +178,13 @@ All agent-docs are validated on commit:
 
 ## 📊 Statistics
 
-*To be updated automatically*
+**Last Updated**: 2025-11-01
 
-- **Total Sessions**: TBD
-- **Total Execution Reports**: TBD
-- **Total Feedback Reports**: TBD
-- **Active Research**: TBD
-- **Archived Research**: TBD
+- **Total Sessions**: 4
+- **Total Execution Reports**: 4
+- **Total Feedback Reports**: 3
+- **Active Research**: 1
+- **Archived Research**: 0
 
 ---
 

@@ -7,7 +7,7 @@ import logging
 import subprocess
 import time
 from collections import Counter
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -137,7 +137,11 @@ class OnboardingAnalyzer:
                 if lines:
                     try:
                         first_commit = datetime.fromisoformat(lines[0])
-                        git_info["project_age_days"] = (datetime.utcnow() - first_commit).days
+                        if first_commit.tzinfo is None:
+                            first_commit = first_commit.replace(tzinfo=timezone.utc)
+                        git_info["project_age_days"] = (
+                            datetime.now(timezone.utc) - first_commit.astimezone(timezone.utc)
+                        ).days
                     except ValueError:
                         logger.debug("Unable to parse first commit date: %s", lines[0])
 

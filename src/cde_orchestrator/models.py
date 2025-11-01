@@ -1,7 +1,115 @@
 # src/cde_orchestrator/models.py
+from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, validator
+
+
+class FeatureStatus(str, Enum):
+    """Valid feature status values."""
+    DEFINING = "defining"
+    DECOMPOSING = "decomposing"
+    DESIGNING = "designing"
+    IMPLEMENTING = "implementing"
+    TESTING = "testing"
+    REVIEWING = "reviewing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
+class PhaseStatus(str, Enum):
+    """Valid workflow phase identifiers."""
+    DEFINE = "define"
+    DECOMPOSE = "decompose"
+    DESIGN = "design"
+    IMPLEMENT = "implement"
+    TEST = "test"
+    REVIEW = "review"
+
+
+class FeatureState(BaseModel):
+    """Validated feature state model."""
+    status: FeatureStatus
+    current_phase: PhaseStatus
+    workflow_type: str = "default"
+    prompt: str
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    branch: Optional[str] = None
+    recipe_id: Optional[str] = None
+    recipe_name: Optional[str] = None
+    issues: List[Dict[str, Any]] = Field(default_factory=list)
+    progress: Dict[str, Any] = Field(default_factory=dict)
+    commits: List[Dict[str, Any]] = Field(default_factory=list)
+    completed_at: Optional[datetime] = None
+
+    @validator("created_at", "updated_at", pre=True)
+    def ensure_datetime(cls, value):
+        """Parse datetime strings into datetime objects."""
+        if value in (None, "", 0):
+            return None
+        if isinstance(value, datetime):
+            return value
+        try:
+            return datetime.fromisoformat(str(value))
+        except (ValueError, TypeError):
+            raise ValueError("Timestamps must be ISO formatted strings")
+
+    @validator("prompt")
+    def ensure_prompt_not_empty(cls, value: str) -> str:
+        """Ensure prompts are non-empty strings."""
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("Prompt must be a non-empty string")
+        return value
+
+    @validator("current_phase")
+    def validate_phase_matches_status(cls, current_phase, values):
+        """Ensure phase is consistent with status."""
+        if "status" not in values:
+            return current_phase
+
+        status = values["status"]
+        phase_mapping = {
+            FeatureStatus.DEFINING: PhaseStatus.DEFINE,
+            FeatureStatus.DECOMPOSING: PhaseStatus.DECOMPOSE,
+            FeatureStatus.DESIGNING: PhaseStatus.DESIGN,
+            FeatureStatus.IMPLEMENTING: PhaseStatus.IMPLEMENT,
+            FeatureStatus.TESTING: PhaseStatus.TEST,
+            FeatureStatus.REVIEWING: PhaseStatus.REVIEW,
+            FeatureStatus.COMPLETED: PhaseStatus.REVIEW,
+            FeatureStatus.FAILED: current_phase,  # Allow any phase for failed
+        }
+
+        expected = phase_mapping.get(status)
+        if (
+            expected
+            and isinstance(expected, PhaseStatus)
+            and current_phase != expected
+            and status != FeatureStatus.FAILED
+        ):
+            # Log warning but don't fail - allow migration
+            import logging
+            logging.warning(
+                "Phase %s may be inconsistent with status %s, expected %s",
+                current_phase,
+                status,
+                expected,
+            )
+
+        return current_phase
+
+    def serialize(self) -> Dict[str, Any]:
+        """Serialize state to JSON-safe dict."""
+        data = self.dict()
+        data["status"] = self.status.value
+        data["current_phase"] = self.current_phase.value
+        data["created_at"] = self.created_at.isoformat()
+        if data.get("updated_at"):
+            data["updated_at"] = self.updated_at.isoformat()  # type: ignore[attr-defined]
+        if data.get("completed_at"):
+            data["completed_at"] = self.completed_at.isoformat()  # type: ignore[attr-defined]
+        return data
 
 
 class WorkflowInput(BaseModel):

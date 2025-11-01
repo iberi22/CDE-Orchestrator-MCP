@@ -2,13 +2,17 @@
 import json
 import logging
 import os
+import time
 import uuid
+from datetime import datetime, timezone
 from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from contextlib import contextmanager
 
 from fastmcp import FastMCP
 
+from cde_orchestrator.models import FeatureState, FeatureStatus, PhaseStatus
 from cde_orchestrator.onboarding_analyzer import OnboardingAnalyzer
 from cde_orchestrator.prompt_manager import PromptManager
 from cde_orchestrator.recipe_manager import RecipeManager
@@ -24,6 +28,20 @@ STATE_FILE = CDE_ROOT / "state.json"
 PROMPT_RECIPES_DIR = CDE_ROOT / "prompts"
 RECIPES_DIR = CDE_ROOT / "recipes"
 SPECS_DIR = Path("specs")
+
+FEATURE_STATUS_BY_PHASE = {
+    PhaseStatus.DEFINE.value: FeatureStatus.DEFINING,
+    PhaseStatus.DECOMPOSE.value: FeatureStatus.DECOMPOSING,
+    PhaseStatus.DESIGN.value: FeatureStatus.DESIGNING,
+    PhaseStatus.IMPLEMENT.value: FeatureStatus.IMPLEMENTING,
+    PhaseStatus.TEST.value: FeatureStatus.TESTING,
+    PhaseStatus.REVIEW.value: FeatureStatus.REVIEWING,
+}
+
+
+def _status_for_phase(phase_id: str) -> FeatureStatus:
+    """Map workflow phase identifiers to canonical feature status."""
+    return FEATURE_STATUS_BY_PHASE.get(phase_id, FeatureStatus.FAILED)
 
 # --- Logging ---
 logging.basicConfig(
@@ -48,16 +66,39 @@ except FileNotFoundError as e:
     exit(1)
 
 
+@contextmanager
+def tool_execution_context(tool_name: str):
+    """Context manager to log tool execution lifecycle."""
+    start = time.perf_counter()
+    logger.info("Tool %s started", tool_name)
+    try:
+        yield
+        duration = time.perf_counter() - start
+        logger.info("Tool %s completed in %.2fs", tool_name, duration)
+    except Exception:
+        duration = time.perf_counter() - start
+        logger.exception("Tool %s failed after %.2fs", tool_name, duration)
+        raise
+
+
 def tool_handler(func):
     """Wrap MCP tools with structured error handling and logging."""
 
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
-            result = func(*args, **kwargs)
-            if isinstance(result, (dict, list)):
-                return json.dumps(result, indent=2)
-            return result
+            with tool_execution_context(func.__name__):
+                result = func(*args, **kwargs)
+                if isinstance(result, (dict, list)):
+                    return json.dumps(result, indent=2)
+                return result
+        except TimeoutError as exc:
+            logger.error("Tool %s timed out: %s", func.__name__, exc)
+            return json.dumps({
+                "error": "timeout",
+                "message": str(exc),
+                "tool": func.__name__
+            }, indent=2)
         except Exception as exc:
             logger.exception("Tool %s failed", func.__name__)
             return json.dumps({
@@ -77,11 +118,28 @@ def cde_startFeature(user_prompt: str) -> str:
     This is the entry point for starting any new work.
 
     Args:
-        user_prompt: A high-level description of the feature to be built.
+        user_prompt: A high-level description of the feature to be built (10-5000 chars).
 
     Returns:
         A fully-contextualized prompt for the AI agent to execute the 'define' phase.
     """
+    from cde_orchestrator.validation import sanitize_string
+
+    # Validate and sanitize input
+    if not user_prompt or len(user_prompt.strip()) < 10:
+        return json.dumps({
+            "error": "validation_error",
+            "message": "user_prompt must be at least 10 characters"
+        }, indent=2)
+
+    if len(user_prompt) > 5000:
+        return json.dumps({
+            "error": "validation_error",
+            "message": "user_prompt must not exceed 5000 characters"
+        }, indent=2)
+
+    user_prompt = sanitize_string(user_prompt, max_length=5000)
+
     # 1. Generate a unique ID for the new feature
     feature_id = str(uuid.uuid4())
 
@@ -107,16 +165,18 @@ def cde_startFeature(user_prompt: str) -> str:
 
     # 6. Update the state
     state = state_manager.load_state()
-    if 'features' not in state:
-        state['features'] = {}
-    state['features'][feature_id] = {
-        "status": "defining",
-        "current_phase": initial_phase.id,
-        "prompt": user_prompt,
-        "workflow_type": workflow_type,
-        "created_at": str(uuid.uuid4()),  # Timestamp placeholder
-        "progress": workflow_manager.get_workflow_progress(initial_phase.id)
-    }
+    if "features" not in state:
+        state["features"] = {}
+
+    feature_state = FeatureState(
+        status=FeatureStatus.DEFINING,
+        current_phase=PhaseStatus(initial_phase.id),
+        prompt=user_prompt,
+        workflow_type=workflow_type,
+        created_at=datetime.now(timezone.utc),
+        progress=workflow_manager.get_workflow_progress(initial_phase.id),
+    )
+    state["features"][feature_id] = feature_state.serialize()
     state_manager.save_state(state)
 
     # 7. Return structured JSON for the AI to execute
@@ -171,8 +231,10 @@ def cde_submitWork(feature_id: str, phase_id: str, results: Dict[str, Any]) -> s
 
     if next_phase_id is None:
         # Workflow complete
-        feature_state['status'] = 'completed'
-        feature_state['completed_at'] = str(uuid.uuid4())  # Timestamp placeholder
+        feature_state['status'] = FeatureStatus.COMPLETED.value
+        feature_state['current_phase'] = PhaseStatus.REVIEW.value
+        feature_state['completed_at'] = datetime.now(timezone.utc).isoformat()
+        feature_state['progress'] = workflow_manager.get_workflow_progress(phase_id)
         state_manager.save_state(state)
         return json.dumps({
             "status": "completed",
@@ -182,7 +244,7 @@ def cde_submitWork(feature_id: str, phase_id: str, results: Dict[str, Any]) -> s
     # 5. Transition to next phase
     next_phase = workflow_manager.get_phase(next_phase_id)
     feature_state['current_phase'] = next_phase_id
-    feature_state['status'] = f"executing_{next_phase_id}"
+    feature_state['status'] = _status_for_phase(next_phase_id).value
     feature_state['progress'] = workflow_manager.get_workflow_progress(next_phase_id)
 
     # 6. Prepare context for next phase
@@ -248,11 +310,13 @@ def cde_getFeatureStatus(feature_id: str) -> str:
 @tool_handler
 def cde_listFeatures() -> str:
     """
-    Lists all features and their current status.
+    Lists all features and their current status with full validation.
 
     Returns:
         JSON string with all features information
     """
+    from pydantic import ValidationError
+
     state = state_manager.load_state()
 
     if 'features' not in state:
@@ -260,12 +324,30 @@ def cde_listFeatures() -> str:
 
     features_summary = {}
     for feature_id, feature_data in state['features'].items():
-        features_summary[feature_id] = {
-            "status": feature_data.get('status', 'unknown'),
-            "current_phase": feature_data.get('current_phase', 'unknown'),
-            "workflow_type": feature_data.get('workflow_type', 'default'),
-            "prompt": feature_data.get('prompt', '')[:100] + "..." if len(feature_data.get('prompt', '')) > 100 else feature_data.get('prompt', '')
-        }
+        try:
+            # Validate state structure
+            validated = FeatureState(**feature_data)
+
+            features_summary[feature_id] = {
+                "status": validated.status.value,
+                "current_phase": validated.current_phase.value,
+                "workflow_type": validated.workflow_type,
+                "created_at": validated.created_at.isoformat(),
+                "updated_at": validated.updated_at.isoformat() if validated.updated_at else None,
+                "progress": validated.progress,
+                "branch": validated.branch,
+                "recipe_id": validated.recipe_id,
+                "recipe_name": validated.recipe_name,
+                "prompt_preview": validated.prompt[:200] + "..." if len(validated.prompt) > 200 else validated.prompt
+            }
+        except ValidationError as e:
+            logger.error(f"Invalid feature state for {feature_id}: {e}")
+            # Return error info for corrupted features
+            features_summary[feature_id] = {
+                "status": "CORRUPTED",
+                "error": str(e),
+                "raw_data": feature_data
+            }
 
     return json.dumps(features_summary, indent=2)
 
@@ -422,7 +504,7 @@ def cde_commitWork(feature_id: str, message: str, files: Optional[List[str]] = N
         state['features'][feature_id]['commits'].append({
             "message": message,
             "result": result,
-            "timestamp": str(uuid.uuid4())  # Placeholder for timestamp
+            "timestamp": datetime.now(timezone.utc).isoformat()
         })
         state_manager.save_state(state)
 
@@ -508,18 +590,20 @@ def cde_startFeatureWithRecipe(user_prompt: str, recipe_id: Optional[str] = None
         return json.dumps({"error": "recipe_load_failed", "message": str(e)}, indent=2)
 
     state = state_manager.load_state()
-    if 'features' not in state:
-        state['features'] = {}
-    state['features'][feature_id] = {
-        "status": "defining",
-        "current_phase": "define",
-        "prompt": user_prompt,
-        "workflow_type": workflow_type,
-        "recipe_id": selected_recipe.id,
-        "recipe_name": selected_recipe.name,
-        "created_at": str(uuid.uuid4()),
-        "progress": workflow_manager.get_workflow_progress("define")
-    }
+    if "features" not in state:
+        state["features"] = {}
+
+    feature_state = FeatureState(
+        status=FeatureStatus.DEFINING,
+        current_phase=PhaseStatus.DEFINE,
+        prompt=user_prompt,
+        workflow_type=workflow_type,
+        recipe_id=selected_recipe.id,
+        recipe_name=selected_recipe.name,
+        created_at=datetime.now(timezone.utc),
+        progress=workflow_manager.get_workflow_progress("define"),
+    )
+    state["features"][feature_id] = feature_state.serialize()
     state_manager.save_state(state)
 
     return json.dumps({

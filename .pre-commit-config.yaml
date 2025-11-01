@@ -9,10 +9,26 @@ repos:
       # Prevent .md files outside designated directories
       - id: check-doc-governance
         name: Check Documentation Governance Rules
-        entry: bash scripts/check-governance.sh
+        entry: bash scripts/validation/check-governance.sh
         language: system
         files: '\.md$'
         pass_filenames: true
+
+      # Validate document metadata (YAML frontmatter)
+      - id: validate-metadata
+        name: Validate Document Metadata
+        entry: python scripts/validation/validate-metadata.py --staged
+        language: system
+        files: '\.md$'
+        pass_filenames: false
+
+      # Validate test structure
+      - id: validate-test-structure
+        name: Validate Test Structure
+        entry: python scripts/validation/validate-test-structure.py --staged
+        language: system
+        files: 'test_.*\.py$'
+        pass_filenames: false
 
   # MARKDOWN LINTING
   - repo: https://github.com/igorshubovych/markdownlint-cli

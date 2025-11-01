@@ -6,7 +6,7 @@ LLM prompts. Non-invasive: does not write files or modify repo.
 import json
 import logging
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -173,7 +173,7 @@ class RepoIngestor:
         summary_lines.append(f"Estimated tokens (repo): {total_tokens}")
 
         # timestamp
-        summary_lines.append(f"Generated at: {datetime.utcnow().isoformat()}Z")
+        summary_lines.append(f"Generated at: {datetime.now(timezone.utc).isoformat()}Z")
 
         summary = " | ".join(summary_lines)
 

@@ -22,8 +22,8 @@ Allowed root-level .md files:
 See: specs/governance/DOCUMENTATION_GOVERNANCE.md
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Ensure UTF-8 encoding on Windows
@@ -164,6 +164,52 @@ def is_governance_compliant(file_path: str) -> tuple[bool, str]:
     )
 
 
+def validate_script_location(file_path: str) -> tuple[bool, str]:
+    """
+    Check if Python script is in correct location.
+
+    Args:
+        file_path: Path to the file to check
+
+    Returns:
+        (is_compliant, reason) tuple
+    """
+    path = Path(file_path)
+
+    # Only check Python files (except __init__.py)
+    if path.suffix != ".py" or path.name == "__init__.py":
+        return True, "Not a standalone script"
+
+    path_str = str(path).replace("\\", "/")
+
+    # Scripts should be in scripts/ subdirectories
+    if path_str.startswith("scripts/"):
+        # Check if in proper subdirectory
+        valid_script_dirs = ["scripts/validation/", "scripts/metadata/", "scripts/setup/"]
+        in_valid_dir = any(path_str.startswith(d) for d in valid_script_dirs)
+
+        if not in_valid_dir and not path_str == "scripts/README.md":
+            return False, (
+                f"Script '{file_path}' should be in organized subdirectory.\n"
+                f"  Valid locations:\n"
+                f"    - scripts/validation/ (validation and linting scripts)\n"
+                f"    - scripts/metadata/ (metadata management scripts)\n"
+                f"    - scripts/setup/ (setup and installation scripts)\n"
+            )
+
+        return True, f"Script in organized location: {path_str}"
+
+    # Test files should be in tests/
+    if path.name.startswith("test_"):
+        if not path_str.startswith("tests/"):
+            return False, (
+                f"Test file '{file_path}' must be in tests/ directory.\n"
+                f"  Recommended: tests/unit/ or tests/integration/\n"
+            )
+
+    return True, "File location OK"
+
+
 def main():
     """
     Entry point for pre-commit hook.
@@ -179,23 +225,33 @@ def main():
         if not file_path:
             continue
 
-        is_compliant, reason = is_governance_compliant(file_path)
+        # Check documentation governance
+        is_doc_compliant, doc_reason = is_governance_compliant(file_path)
 
-        if not is_compliant:
-            violations.append((file_path, reason))
+        if not is_doc_compliant:
+            violations.append((file_path, doc_reason))
         else:
-            # Verbose output (can be disabled with pre-commit config)
-            print(f"[OK] {file_path}: {reason}")
+            print(f"[OK] {file_path}: {doc_reason}")
+
+        # Check script organization
+        is_script_compliant, script_reason = validate_script_location(file_path)
+
+        if not is_script_compliant:
+            violations.append((file_path, script_reason))
 
     # Report violations
     if violations:
-        print("\n[ERROR] DOCUMENTATION GOVERNANCE VIOLATIONS FOUND:\n")
+        print("\n[ERROR] GOVERNANCE VIOLATIONS FOUND:\n")
         for file_path, reason in violations:
             print(f"[FAIL] {file_path}")
             print(f"  {reason}\n")
+        print("\n[HINT] Run these commands to fix:")
+        print("  - Metadata: python scripts/metadata/add-metadata.py --path <file>")
+        print("  - Tests: python scripts/validation/validate-test-structure.py --fix")
+        print("  - Scripts: Move to appropriate scripts/ subdirectory")
         return 1
 
-    print("\n[OK] All files pass documentation governance checks")
+    print("\n[OK] All files pass governance checks")
     return 0
 
 

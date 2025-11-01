@@ -13,11 +13,22 @@ The connector works by:
 4. Providing results back to the workflow engine
 """
 import json
+import logging
 import os
 import subprocess
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+from tenacity import (
+    Retrying,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
+
+
+logger = logging.getLogger(__name__)
 
 
 class MCPDetector:
@@ -86,16 +97,88 @@ class MCPDetector:
         return None
 
 
+class CircuitBreakerOpenError(Exception):
+    """Raised when the circuit breaker is open and calls are disallowed."""
+
+
+class CircuitBreaker:
+    """Simple circuit breaker to prevent cascading failures."""
+
+    def __init__(
+        self,
+        failure_threshold: int = 3,
+        recovery_timeout: int = 60,
+    ):
+        self.failure_threshold = failure_threshold
+        self.recovery_timeout = timedelta(seconds=recovery_timeout)
+        self.failure_count = 0
+        self.state = "closed"
+        self.last_failure: Optional[datetime] = None
+
+    def allow(self) -> None:
+        """Raise if the breaker is open and still within the cooldown period."""
+        if self.state == "open":
+            assert self.last_failure is not None
+            elapsed = datetime.now(timezone.utc) - self.last_failure
+            if elapsed >= self.recovery_timeout:
+                # Allow a trial call in half-open state
+                self.state = "half_open"
+                return
+            raise CircuitBreakerOpenError("Circuit breaker is open")
+
+    def record_success(self) -> None:
+        """Reset breaker after a successful call."""
+        self.failure_count = 0
+        self.state = "closed"
+        self.last_failure = None
+
+    def record_failure(self) -> None:
+        """Increment failure counter and trip breaker if threshold reached."""
+        self.failure_count += 1
+        self.last_failure = datetime.now(timezone.utc)
+        if self.failure_count >= self.failure_threshold:
+            self.state = "open"
+
+    def snapshot(self) -> Dict[str, Any]:
+        """Expose breaker status for diagnostics."""
+        return {
+            "state": self.state,
+            "failure_count": self.failure_count,
+            "last_failure": self.last_failure.isoformat() if self.last_failure else None,
+            "failure_threshold": self.failure_threshold,
+            "recovery_timeout_seconds": int(self.recovery_timeout.total_seconds()),
+        }
+
+
 class GitHubConnector:
     """
     GitHub service connector that uses external MCP when available.
     Falls back to local implementations when MCP is not configured.
     """
 
-    def __init__(self):
+    def __init__(
+        self,
+        circuit_breaker: Optional[CircuitBreaker] = None,
+        default_timeout: int = 10,
+        retry_attempts: int = 3,
+    ):
         self.mcp_available = MCPDetector.is_github_mcp_available()
         self.mcp_config = MCPDetector.get_github_mcp_config() if self.mcp_available else None
         self.token = os.getenv("GITHUB_TOKEN")
+        self.circuit_breaker = circuit_breaker or CircuitBreaker()
+        self.default_timeout = default_timeout
+        self.retry_attempts = retry_attempts
+        self._retry_wait = wait_exponential(multiplier=1, min=1, max=10)
+
+    # --- Circuit breaker helpers -------------------------------------------------
+
+    def _record_success(self) -> None:
+        if self.circuit_breaker:
+            self.circuit_breaker.record_success()
+
+    def _record_failure(self) -> None:
+        if self.circuit_breaker:
+            self.circuit_breaker.record_failure()
 
     def create_issue(
         self,
@@ -116,16 +199,32 @@ class GitHubConnector:
         Returns:
             Issue creation result
         """
+        if self.circuit_breaker:
+            try:
+                self.circuit_breaker.allow()
+            except CircuitBreakerOpenError:
+                logger.warning("GitHub circuit breaker open; using local issue fallback")
+                return self._create_issue_local(title, body, labels, reason="circuit_open")
+
         # Try MCP first
         if self.mcp_available:
-            return self._create_issue_via_mcp(title, body, labels)
+            result = self._create_issue_via_mcp(title, body, labels)
+            self._record_success()
+            return result
 
         # Try GitHub API
         if self.token:
-            return self._create_issue_via_api(repo_owner, repo_name, title, body, labels)
+            return self._create_issue_via_api(
+                repo_owner,
+                repo_name,
+                title,
+                body,
+                labels,
+                timeout=self.default_timeout,
+            )
 
         # Fallback to local
-        return self._create_issue_local(title, body, labels)
+        return self._create_issue_local(title, body, labels, reason="no_remote_service")
 
     def _create_issue_via_mcp(
         self,
@@ -138,14 +237,17 @@ class GitHubConnector:
         Note: In a real implementation, this would use the MCP client library
         to communicate with the external GitHub MCP server.
         """
-        return {
-            "id": f"mcp-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
+        response = {
+            "id": f"mcp-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}",
             "title": title,
             "body": body,
             "labels": labels or [],
             "method": "mcp",
             "message": "Issue created via external GitHub MCP server"
         }
+        if self.circuit_breaker:
+            self.circuit_breaker.record_success()
+        return response
 
     def _create_issue_via_api(
         self,
@@ -153,13 +255,15 @@ class GitHubConnector:
         repo_name: str,
         title: str,
         body: str,
-        labels: Optional[List[str]] = None
+        labels: Optional[List[str]] = None,
+        timeout: int = 10
     ) -> Dict[str, Any]:
-        """Create issue via GitHub API."""
+        """Create issue via GitHub API with timeout, retries, and fallback."""
         try:
             import requests
         except ImportError:
-            return self._create_issue_local(title, body, labels)
+            logger.warning("requests library not available; falling back to local issue storage")
+            return self._create_issue_local(title, body, labels, reason="requests_not_available")
 
         url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues"
         headers = {
@@ -175,18 +279,53 @@ class GitHubConnector:
             data["labels"] = labels
 
         try:
-            response = requests.post(url, headers=headers, json=data)
-            response.raise_for_status()
+            timeout_value = timeout or self.default_timeout
+            retrying = Retrying(
+                stop=stop_after_attempt(self.retry_attempts),
+                wait=self._retry_wait,
+                retry=retry_if_exception_type(
+                    (requests.exceptions.Timeout, requests.exceptions.ConnectionError)
+                ),
+                reraise=True,
+            )
+
+            response = None
+            for attempt in retrying:
+                with attempt:
+                    response = requests.post(
+                        url,
+                        headers=headers,
+                        json=data,
+                        timeout=timeout_value,
+                    )
+                    response.raise_for_status()
+
+            assert response is not None
+            self._record_success()
             return response.json()
-        except Exception as e:
-            print(f"Error creating GitHub issue via API: {e}")
-            return self._create_issue_local(title, body, labels)
+        except requests.exceptions.Timeout as exc:
+            logger.warning("GitHub API timeout (%ss): %s", timeout_value, exc)
+            self._record_failure()
+            return self._create_issue_local(title, body, labels, reason="timeout")
+        except requests.exceptions.ConnectionError as exc:
+            logger.error("GitHub API connection error: %s", exc)
+            self._record_failure()
+            return self._create_issue_local(title, body, labels, reason="connection_error")
+        except requests.exceptions.HTTPError as exc:
+            logger.error("GitHub API HTTP error: %s", exc)
+            self._record_failure()
+            return self._create_issue_local(title, body, labels, reason="http_error")
+        except Exception as exc:
+            logger.exception("Unexpected error creating GitHub issue: %s", exc)
+            self._record_failure()
+            return self._create_issue_local(title, body, labels, reason="unexpected_error")
 
     def _create_issue_local(
         self,
         title: str,
         body: str,
-        labels: Optional[List[str]] = None
+        labels: Optional[List[str]] = None,
+        reason: str = "fallback"
     ) -> Dict[str, Any]:
         """
         Fallback: Create issue as local file.
@@ -195,7 +334,7 @@ class GitHubConnector:
         issues_dir = Path(".cde") / "issues"
         issues_dir.mkdir(exist_ok=True)
 
-        issue_id = f"local-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        issue_id = f"local-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}"
         issue_file = issues_dir / f"{issue_id}.md"
 
         issue_content = f"# {title}\n\n{body}\n\n"
@@ -209,9 +348,9 @@ class GitHubConnector:
             "title": title,
             "body": body,
             "labels": labels or [],
-            "url": str(issue_file),
             "method": "local",
-            "message": "Issue created locally (GitHub MCP not configured)"
+            "fallback_reason": reason,
+            "message": f"Issue stored locally at {issue_file}"
         }
 
     def get_status(self) -> Dict[str, Any]:
@@ -220,7 +359,10 @@ class GitHubConnector:
             "mcp_available": self.mcp_available,
             "mcp_config": self.mcp_config is not None,
             "api_available": self.token is not None,
-            "fallback": not self.mcp_available and not self.token
+            "fallback": not self.mcp_available and not self.token,
+            "default_timeout": self.default_timeout,
+            "retry_attempts": self.retry_attempts,
+            "circuit_breaker": self.circuit_breaker.snapshot(),
         }
 
 
@@ -360,6 +502,20 @@ class ServiceConnectorFactory:
 
     def __init__(self):
         self._connectors: Dict[str, Any] = {}
+        self._circuit_breakers: Dict[str, CircuitBreaker] = {}
+        self.default_timeout = int(os.getenv("CDE_SERVICE_TIMEOUT", "10"))
+        self.retry_attempts = int(os.getenv("CDE_SERVICE_RETRIES", "3"))
+        self.failure_threshold = int(os.getenv("CDE_SERVICE_FAILURE_THRESHOLD", "3"))
+        self.recovery_timeout = int(os.getenv("CDE_SERVICE_RECOVERY_SECONDS", "60"))
+
+    def _get_breaker(self, service_type: str) -> CircuitBreaker:
+        """Return (or create) a circuit breaker for the service."""
+        if service_type not in self._circuit_breakers:
+            self._circuit_breakers[service_type] = CircuitBreaker(
+                failure_threshold=self.failure_threshold,
+                recovery_timeout=self.recovery_timeout,
+            )
+        return self._circuit_breakers[service_type]
 
     def get_connector(self, service_type: str):
         """
@@ -375,7 +531,11 @@ class ServiceConnectorFactory:
             return self._connectors[service_type]
 
         if service_type == "github":
-            connector = GitHubConnector()
+            connector = GitHubConnector(
+                circuit_breaker=self._get_breaker("github"),
+                default_timeout=self.default_timeout,
+                retry_attempts=self.retry_attempts,
+            )
         elif service_type == "git":
             connector = GitConnector()
         else:
@@ -390,6 +550,9 @@ class ServiceConnectorFactory:
             connector = self.get_connector(service_type)
             if service_type == "github":
                 status = connector.get_status()
+                breaker_state = status.get("circuit_breaker", {}).get("state", "closed")
+                if breaker_state == "open":
+                    return False
                 return status["mcp_available"] or status["api_available"]
             elif service_type == "git":
                 return True  # Git is always available (local)
@@ -405,8 +568,13 @@ class ServiceConnectorFactory:
         try:
             github_connector = self.get_connector("github")
             status["github"] = github_connector.get_status()
-        except:
-            status["github"] = {"available": False, "error": "Not configured"}
+        except Exception as exc:
+            breaker = self._circuit_breakers.get("github")
+            status["github"] = {
+                "available": False,
+                "error": str(exc),
+                "circuit_breaker": breaker.snapshot() if breaker else None,
+            }
 
         # Check Git
         status["git"] = {"available": True, "message": "Local git repository"}
