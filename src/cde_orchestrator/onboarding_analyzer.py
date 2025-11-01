@@ -3,11 +3,10 @@
 Onboarding Analyzer - Detects project structure and analyzes Git history
 for intelligent project onboarding aligned with Spec-Kit methodology.
 """
-import json
 import logging
 import subprocess
 import time
-from collections import Counter, defaultdict
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional

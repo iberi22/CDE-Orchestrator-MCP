@@ -1,6 +1,7 @@
 # src/cde_orchestrator/prompt_manager.py
 from pathlib import Path
 
+
 class PromptManager:
     """Loads POML recipes and injects dynamic context."""
 

@@ -6,14 +6,16 @@ import uuid
 from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
 from fastmcp import FastMCP
-from cde_orchestrator.workflow_manager import WorkflowManager
-from cde_orchestrator.prompt_manager import PromptManager
-from cde_orchestrator.state_manager import StateManager
-from cde_orchestrator.recipe_manager import RecipeManager
-from cde_orchestrator.service_connector import ServiceConnectorFactory
+
 from cde_orchestrator.onboarding_analyzer import OnboardingAnalyzer
+from cde_orchestrator.prompt_manager import PromptManager
+from cde_orchestrator.recipe_manager import RecipeManager
 from cde_orchestrator.repo_ingest import RepoIngestor
+from cde_orchestrator.service_connector import ServiceConnectorFactory
+from cde_orchestrator.state_manager import StateManager
+from cde_orchestrator.workflow_manager import WorkflowManager
 
 # --- Constants and Configuration ---
 CDE_ROOT = Path(".cde")

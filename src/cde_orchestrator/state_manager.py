@@ -1,7 +1,8 @@
 # src/cde_orchestrator/state_manager.py
 import json
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
+
 
 class StateManager:
     """Manages the project's state by reading/writing to a JSON file."""

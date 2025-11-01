@@ -1,40 +1,12 @@
 # CDE Orchestrator MCP
 
-## 1. Overview
-    The main idea:"Proposed Integrated Management System
-    Based on the analysis, I propose a "minimalist yet sufficiently robust" system that evolves with the project. It is inspired by Spec-Kit and best practices in software engineering, utilizing standard tools from the Git ecosystem.
-
-    1. System Philosophy
-    Specification as Code: Requirements and planning reside in the repository, versioned alongside the code.
-    Single Source of Truth: The Git repository and its associated tools (Issues, Projects) centralize all information.
-    Progressive Scalability: The system adapts. It starts lightweight, and layers of formality are added only when necessary.
-    Automation-Friendly: The structure is designed for easy integration with AI assistants and CI/CD workflows.
-    Requirements Management and Planning (/specs): The Spec-Kit approach is adopted. Each new feature or epic is documented in its own Markdown file within specs/features/.
-
-    This file defines the "what" and the "why" (problem to be solved, user stories, acceptance criteria).
-
-    If the project includes APIs, their contract is formally defined in specs/api/ using OpenAPI.
-    Task Management (GitHub Issues): TASK.md is abandoned in favor of GitHub Issues. This is the most critical improvement for scalability.
-
-    Advantages:
-    Traceability: Each issue can be directly linked to commits and pull requests (Closes #123).
-    Organization: Tags (bug, feature, backend), milestones, and assignments can be used.
-    Discussion: Enables contextual conversations about each task. Automation: It can be integrated with GitHub Projects (Kanban boards) and Actions.
-    Flow: A specification in /specs is broken down into concrete tasks as GitHub Issues.
-    Version Control Flow (GitHub Flow):
-    The main branch is always in a deployable state.
-    Every new feature or fix is ​​developed in its own branch (feature/add-user-auth).
-    Work is integrated into main exclusively through Pull Requests (PRs).
-    PRs are the point of code review and automated test execution (CI).
-    Integration with AI Assistants: The "Global Rules" defined in your original document remain valid and powerful.
-    You can ask the AI: "Based on specs/features/auth.md, create the tasks in GitHub Issues to implement user authentication."
-
-    Or: "Implement Issue #42. Here is the relevant code and associated specification in specs/features/auth.md.".
-
+## Overview
 
 The CDE Orchestrator is the reference implementation of the **Context-Driven Engineering (CDE)** methodology. It is a smart MCP (Model Context Protocol) server designed to guide AI coding assistants through a structured, phase-based software development lifecycle.
 
 It acts as a high-level facade, abstracting away the complexity of underlying tools (like GitHub, file systems, etc.) and ensuring that the AI agent always has the precise context needed for its current task.
+
+The system implements the Integrated Management System described in [`specs/features/integrated-management-system.md`](specs/features/integrated-management-system.md), providing a complete solution for specification-as-code, automated workflows, and AI-assisted development.
 
 ## 2. Core Concepts
 
@@ -48,6 +20,7 @@ It acts as a high-level facade, abstracting away the complexity of underlying to
 The orchestrator exposes the following high-level tools to the AI agent:
 
 ### Core Workflow Tools
+
 - `cde_onboardingProject()`: Synthesizes the repository, proposes cleanup/relocation actions, and performs Spec-Kit onboarding with automation-ready artifacts.
 - `cde_startFeature(prompt: str)`: Initiates a new feature development workflow.
 - `cde_submitWork(feature_id: str, phase_id: str, results: dict)`: Submits completed work and transitions to the next phase.
@@ -55,12 +28,14 @@ The orchestrator exposes the following high-level tools to the AI agent:
 - `cde_listFeatures()`: Lists all features and their status.
 
 ### Recipe Management Tools
+
 - `cde_listRecipes()`: Lists all available POML recipes.
 - `cde_useRecipe(recipe_id: str, user_prompt: str, context: dict)`: Uses a specific recipe to generate a prompt.
 - `cde_suggestRecipe(user_prompt: str, phase_id: str)`: Suggests the best recipe for a task.
 - `cde_startFeatureWithRecipe(user_prompt: str, recipe_id: str)`: Starts a feature using a specific recipe.
 
 ### Git & GitHub Integration Tools
+
 - `cde_createGitBranch(feature_id: str, branch_name: str, base_branch: str)`: Creates a Git branch for a feature.
 - `cde_createGitHubIssue(feature_id: str, title: str, description: str, labels: list)`: Creates GitHub issues (uses external MCP if configured).
 - `cde_commitWork(feature_id: str, message: str, files: list)`: Commits work to Git.
@@ -72,10 +47,10 @@ The orchestrator exposes the following high-level tools to the AI agent:
 
 1. **Clone the repository:**
 
-    ```bash
-    git clone [your-repo-url]
-    cd cde-orchestrator-mcp
-    ```
+   ```bash
+   git clone [your-repo-url]
+   cd cde-orchestrator-mcp
+   ```
 
 2. **Set up the environment:**
 
