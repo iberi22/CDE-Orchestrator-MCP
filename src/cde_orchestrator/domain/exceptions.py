@@ -32,7 +32,7 @@ class DomainError(Exception):
         self,
         message: str,
         code: str = "DOMAIN_ERROR",
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[Dict[str, Any]] = None,
     ):
         self.message = message
         self.code = code
@@ -45,7 +45,7 @@ class DomainError(Exception):
             "error_type": self.__class__.__name__,
             "code": self.code,
             "message": self.message,
-            "context": self.context
+            "context": self.context,
         }
 
 
@@ -62,7 +62,7 @@ class ProjectNotFoundError(DomainError):
         super().__init__(
             message=f"Project '{project_id}' not found",
             code="PROJECT_NOT_FOUND",
-            context={"project_id": project_id}
+            context={"project_id": project_id},
         )
 
 
@@ -79,10 +79,7 @@ class FeatureNotFoundError(DomainError):
         super().__init__(
             message=f"Feature '{feature_id}' not found in project '{project_id}'",
             code="FEATURE_NOT_FOUND",
-            context={
-                "feature_id": feature_id,
-                "project_id": project_id
-            }
+            context={"feature_id": feature_id, "project_id": project_id},
         )
 
 
@@ -104,8 +101,8 @@ class InvalidStateTransitionError(DomainError):
             context={
                 "entity_type": entity_type,
                 "from_status": from_status,
-                "to_status": to_status
-            }
+                "to_status": to_status,
+            },
         )
 
 
@@ -123,7 +120,7 @@ class WorkflowValidationError(DomainError):
         super().__init__(
             message=message,
             code="WORKFLOW_VALIDATION_ERROR",
-            context={"workflow_name": workflow_name} if workflow_name else {}
+            context={"workflow_name": workflow_name} if workflow_name else {},
         )
 
 
@@ -140,10 +137,7 @@ class PhaseNotFoundError(DomainError):
         super().__init__(
             message=f"Phase '{phase_id}' not found in workflow '{workflow_name}'",
             code="PHASE_NOT_FOUND",
-            context={
-                "phase_id": phase_id,
-                "workflow_name": workflow_name
-            }
+            context={"phase_id": phase_id, "workflow_name": workflow_name},
         )
 
 
@@ -167,8 +161,8 @@ class ArtifactValidationError(DomainError):
                 "phase_id": phase_id,
                 "required": required,
                 "provided": provided,
-                "missing": list(missing)
-            }
+                "missing": list(missing),
+            },
         )
 
 
@@ -184,7 +178,7 @@ class CodeExecutionError(DomainError):
         super().__init__(
             message=message,
             code="CODE_EXECUTION_ERROR",
-            context={"execution_log": execution_log} if execution_log else {}
+            context={"execution_log": execution_log} if execution_log else {},
         )
 
 
@@ -201,5 +195,5 @@ class RepositoryError(DomainError):
         super().__init__(
             message=f"Repository operation '{operation}' failed: {details}",
             code="REPOSITORY_ERROR",
-            context={"operation": operation, "details": details}
+            context={"operation": operation, "details": details},
         )

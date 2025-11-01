@@ -19,12 +19,13 @@ Design for LLMs:
 
 from abc import ABC, abstractmethod
 from typing import List, Optional, Dict, Any, AsyncIterator
-from .entities import Project, ProjectId, Feature, Workflow, WorkflowPhase, CodeArtifact
+from .entities import Project, ProjectId, Workflow, WorkflowPhase
 
 
 # ============================================================================
 # PERSISTENCE PORTS
 # ============================================================================
+
 
 class IProjectRepository(ABC):
     """
@@ -93,8 +94,7 @@ class IProjectRepository(ABC):
 
     @abstractmethod
     async def list_all_async(
-        self,
-        limit: Optional[int] = None
+        self, limit: Optional[int] = None
     ) -> AsyncIterator[Project]:
         """
         Stream all projects asynchronously.
@@ -220,6 +220,7 @@ class IStateStore(ABC):
 # WORKFLOW ENGINE PORT
 # ============================================================================
 
+
 class IWorkflowEngine(ABC):
     """
     Port: Workflow definition and execution logic.
@@ -275,9 +276,7 @@ class IWorkflowEngine(ABC):
 
     @abstractmethod
     def get_next_phase(
-        self,
-        workflow: Workflow,
-        current_phase_id: str
+        self, workflow: Workflow, current_phase_id: str
     ) -> Optional[WorkflowPhase]:
         """
         Determine next phase in workflow sequence.
@@ -295,11 +294,7 @@ class IWorkflowEngine(ABC):
         pass
 
     @abstractmethod
-    def validate_results(
-        self,
-        phase: WorkflowPhase,
-        results: Dict[str, Any]
-    ) -> bool:
+    def validate_results(self, phase: WorkflowPhase, results: Dict[str, Any]) -> bool:
         """
         Check if results satisfy phase requirements.
 
@@ -337,6 +332,7 @@ class IWorkflowEngine(ABC):
 # CODE EXECUTION PORT
 # ============================================================================
 
+
 class ICodeExecutor(ABC):
     """
     Port: Execute code generation agents.
@@ -355,11 +351,8 @@ class ICodeExecutor(ABC):
 
     @abstractmethod
     async def execute_prompt(
-        self,
-        project_path: str,
-        prompt: str,
-        context: Dict[str, Any]
-    ) -> 'ExecutionResult':
+        self, project_path: str, prompt: str, context: Dict[str, Any]
+    ) -> "ExecutionResult":
         """
         Execute code generation with given prompt.
 
@@ -419,6 +412,7 @@ class ICodeExecutor(ABC):
 # AGENT ORCHESTRATION PORT
 # ============================================================================
 
+
 class IAgentOrchestrator(ABC):
     """
     Port: Orchestrate external agents and services.
@@ -436,11 +430,7 @@ class IAgentOrchestrator(ABC):
     """
 
     @abstractmethod
-    async def call_github(
-        self,
-        operation: str,
-        params: Dict[str, Any]
-    ) -> Any:
+    async def call_github(self, operation: str, params: Dict[str, Any]) -> Any:
         """
         Execute GitHub operation via MCP or API.
 
@@ -464,11 +454,7 @@ class IAgentOrchestrator(ABC):
         pass
 
     @abstractmethod
-    async def call_copilot(
-        self,
-        command: str,
-        args: Dict[str, Any]
-    ) -> Any:
+    async def call_copilot(self, command: str, args: Dict[str, Any]) -> Any:
         """
         Execute Copilot CLI command.
 
@@ -508,6 +494,7 @@ class IAgentOrchestrator(ABC):
 # ============================================================================
 # PROMPT RENDERING PORT
 # ============================================================================
+
 
 class IPromptRenderer(ABC):
     """
@@ -584,6 +571,7 @@ class IPromptRenderer(ABC):
 # RESULT VALUE OBJECTS
 # ============================================================================
 
+
 class ExecutionResult:
     """
     Value object: Result of code execution.
@@ -598,7 +586,7 @@ class ExecutionResult:
         modified_files: List[str],
         diff: str,
         log: str,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ):
         self.success = success
         self.modified_files = modified_files
@@ -613,16 +601,16 @@ class ExecutionResult:
             "modified_files": self.modified_files,
             "diff": self.diff,
             "log": self.log,
-            "metadata": self.metadata
+            "metadata": self.metadata,
         }
 
     @classmethod
-    def failure(cls, error_message: str, log: str = "") -> 'ExecutionResult':
+    def failure(cls, error_message: str, log: str = "") -> "ExecutionResult":
         """Factory: Create failed result."""
         return cls(
             success=False,
             modified_files=[],
             diff="",
             log=log,
-            metadata={"error": error_message}
+            metadata={"error": error_message},
         )

@@ -28,7 +28,7 @@ class RecipeManager:
 
     def _parse_recipe(self, poml_file: Path) -> Recipe:
         """Parse a POML file and extract recipe metadata."""
-        with open(poml_file, 'r', encoding='utf-8') as f:
+        with open(poml_file, "r", encoding="utf-8") as f:
             content = f.read()
 
         # Extract metadata from POML <let> blocks
@@ -40,44 +40,48 @@ class RecipeManager:
         tools = []
         if tools_match:
             tools_str = tools_match.group(1)
-            tools = [tool.strip().strip('"') for tool in tools_str.split(',') if tool.strip()]
+            tools = [
+                tool.strip().strip('"') for tool in tools_str.split(",") if tool.strip()
+            ]
 
         # Parse providers
-        providers_match = re.search(r'<let name="providers">\s*\{(.*?)\}', content, re.DOTALL)
+        providers_match = re.search(
+            r'<let name="providers">\s*\{(.*?)\}', content, re.DOTALL
+        )
         providers = {}
         if providers_match:
             # Simple parsing - in production you'd want proper JSON parsing
             providers_str = providers_match.group(1)
-            if 'openai' in providers_str:
-                providers['openai'] = {"model": "gpt-5", "temperature": 0.2}
-            if 'gemini' in providers_str:
-                providers['gemini'] = {"model": "gemini-2.5-pro", "temperature": 0.2}
-            if 'qwen' in providers_str:
-                providers['qwen'] = {"model": "Qwen2.5-Coder", "temperature": 0.1}
+            if "openai" in providers_str:
+                providers["openai"] = {"model": "gpt-5", "temperature": 0.2}
+            if "gemini" in providers_str:
+                providers["gemini"] = {"model": "gemini-2.5-pro", "temperature": 0.2}
+            if "qwen" in providers_str:
+                providers["qwen"] = {"model": "Qwen2.5-Coder", "temperature": 0.1}
 
         # Parse topology
         topology_match = re.search(r'<let name="topology">(.*?)</let>', content)
         topology = topology_match.group(1).strip() if topology_match else "solo"
 
         # Extract description from role section
-        role_match = re.search(r'<role>(.*?)</role>', content, re.DOTALL)
+        role_match = re.search(r"<role>(.*?)</role>", content, re.DOTALL)
         description = "AI Agent Recipe"
         if role_match:
             role_text = role_match.group(1).strip()
             # Take first sentence as description
-            first_sentence = role_text.split('.')[0]
+            first_sentence = role_text.split(".")[0]
             if len(first_sentence) < 200:
                 description = first_sentence + "."
 
         return Recipe(
             id=recipe_id,
-            name=recipe_id.replace('-', ' ').title(),
+            name=recipe_id.replace("-", " ").title(),
             category=category,
             description=description,
             file_path=str(poml_file),
             tools=tools,
             providers=providers,
-            topology=topology
+            topology=topology,
         )
 
     def get_recipe(self, recipe_id: str) -> Optional[Recipe]:
@@ -86,7 +90,9 @@ class RecipeManager:
 
     def get_recipes_by_category(self, category: str) -> List[Recipe]:
         """Get all recipes in a specific category."""
-        return [recipe for recipe in self.recipes.values() if recipe.category == category]
+        return [
+            recipe for recipe in self.recipes.values() if recipe.category == category
+        ]
 
     def suggest_recipe(self, user_prompt: str, phase_id: str) -> Optional[Recipe]:
         """Suggest the best recipe based on user prompt and current phase."""
@@ -94,24 +100,33 @@ class RecipeManager:
 
         # Phase-specific recipe suggestions
         phase_recipes = {
-            'define': ['sprint-prioritizer', 'studio-producer'],
-            'decompose': ['studio-producer', 'sprint-prioritizer'],
-            'design': ['ai-engineer', 'studio-producer'],
-            'implement': ['ai-engineer'],
-            'test': ['ai-engineer'],
-            'review': ['studio-producer', 'ai-engineer']
+            "define": ["sprint-prioritizer", "studio-producer"],
+            "decompose": ["studio-producer", "sprint-prioritizer"],
+            "design": ["ai-engineer", "studio-producer"],
+            "implement": ["ai-engineer"],
+            "test": ["ai-engineer"],
+            "review": ["studio-producer", "ai-engineer"],
         }
 
         # Content-based suggestions
-        if any(keyword in prompt_lower for keyword in ['ai', 'ml', 'machine learning', 'algorithm']):
-            return self.get_recipe('ai-engineer')
-        elif any(keyword in prompt_lower for keyword in ['sprint', 'prioritize', 'backlog', 'feature']):
-            return self.get_recipe('sprint-prioritizer')
-        elif any(keyword in prompt_lower for keyword in ['team', 'coordinate', 'manage', 'workflow']):
-            return self.get_recipe('studio-producer')
+        if any(
+            keyword in prompt_lower
+            for keyword in ["ai", "ml", "machine learning", "algorithm"]
+        ):
+            return self.get_recipe("ai-engineer")
+        elif any(
+            keyword in prompt_lower
+            for keyword in ["sprint", "prioritize", "backlog", "feature"]
+        ):
+            return self.get_recipe("sprint-prioritizer")
+        elif any(
+            keyword in prompt_lower
+            for keyword in ["team", "coordinate", "manage", "workflow"]
+        ):
+            return self.get_recipe("studio-producer")
 
         # Default to phase-based suggestion
-        suggested_recipes = phase_recipes.get(phase_id, ['ai-engineer'])
+        suggested_recipes = phase_recipes.get(phase_id, ["ai-engineer"])
         for recipe_id in suggested_recipes:
             recipe = self.get_recipe(recipe_id)
             if recipe:
@@ -129,7 +144,7 @@ class RecipeManager:
         if not recipe:
             raise ValueError(f"Recipe '{recipe_id}' not found")
 
-        with open(recipe.file_path, 'r', encoding='utf-8') as f:
+        with open(recipe.file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
         # Inject context variables

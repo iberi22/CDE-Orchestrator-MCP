@@ -24,6 +24,7 @@ from uuid import uuid4
 # VALUE OBJECTS
 # ============================================================================
 
+
 @dataclass(frozen=True)
 class ProjectId:
     """
@@ -39,6 +40,7 @@ class ProjectId:
         >>> str(pid)  # "abc-123"
         >>> pid2 = ProjectId("ab")  # raises ValueError
     """
+
     value: str
 
     def __post_init__(self):
@@ -59,6 +61,7 @@ class ProjectId:
 # ENUMERATIONS
 # ============================================================================
 
+
 class ProjectStatus(str, Enum):
     """
     All possible project states in CDE lifecycle.
@@ -74,12 +77,13 @@ class ProjectStatus(str, Enum):
         ARCHIVED:   No longer actively developed
         ERROR:      Unrecoverable error state
     """
+
     ONBOARDING = "onboarding"
     ACTIVE = "active"
     ARCHIVED = "archived"
     ERROR = "error"
 
-    def can_transition_to(self, target: 'ProjectStatus') -> bool:
+    def can_transition_to(self, target: "ProjectStatus") -> bool:
         """Check if transition to target status is valid."""
         transitions = {
             ProjectStatus.ONBOARDING: {ProjectStatus.ACTIVE, ProjectStatus.ERROR},
@@ -100,6 +104,7 @@ class FeatureStatus(str, Enum):
 
     Or can jump to FAILED from any state.
     """
+
     DEFINING = "defining"
     DECOMPOSING = "decomposing"
     DESIGNING = "designing"
@@ -110,7 +115,7 @@ class FeatureStatus(str, Enum):
     FAILED = "failed"
 
     @classmethod
-    def from_phase(cls, phase_id: str) -> 'FeatureStatus':
+    def from_phase(cls, phase_id: str) -> "FeatureStatus":
         """
         Map workflow phase ID to feature status.
 
@@ -139,6 +144,7 @@ class FeatureStatus(str, Enum):
 # ENTITIES
 # ============================================================================
 
+
 @dataclass
 class Feature:
     """
@@ -158,6 +164,7 @@ class Feature:
         fail() - Mark as failed with reason
         complete() - Mark as successfully completed
     """
+
     id: str
     project_id: ProjectId
     prompt: str  # Original user request
@@ -171,11 +178,8 @@ class Feature:
 
     @classmethod
     def create(
-        cls,
-        project_id: ProjectId,
-        prompt: str,
-        workflow_type: str = "default"
-    ) -> 'Feature':
+        cls, project_id: ProjectId, prompt: str, workflow_type: str = "default"
+    ) -> "Feature":
         """
         Factory method: Create new feature with enforced invariants.
 
@@ -211,7 +215,7 @@ class Feature:
             created_at=now,
             updated_at=now,
             artifacts={},
-            metadata={}
+            metadata={},
         )
 
     def advance_phase(self, next_phase: str, results: Dict[str, Any]) -> None:
@@ -302,6 +306,7 @@ class Project:
         - Path must exist (validated externally)
         - Features list never null
     """
+
     id: ProjectId
     name: str
     path: str  # Absolute filesystem path
@@ -313,11 +318,8 @@ class Project:
 
     @classmethod
     def create(
-        cls,
-        name: str,
-        path: str,
-        project_id: Optional[ProjectId] = None
-    ) -> 'Project':
+        cls, name: str, path: str, project_id: Optional[ProjectId] = None
+    ) -> "Project":
         """
         Factory method: Create new project.
 
@@ -345,7 +347,7 @@ class Project:
             created_at=now,
             updated_at=now,
             features=[],
-            metadata={}
+            metadata={},
         )
 
     def start_feature(self, prompt: str, workflow_type: str = "default") -> Feature:
@@ -374,9 +376,7 @@ class Project:
             )
 
         feature = Feature.create(
-            project_id=self.id,
-            prompt=prompt,
-            workflow_type=workflow_type
+            project_id=self.id, prompt=prompt, workflow_type=workflow_type
         )
 
         self.features.append(feature)
@@ -394,7 +394,8 @@ class Project:
     def get_active_features(self) -> List[Feature]:
         """Get all non-terminal features."""
         return [
-            f for f in self.features
+            f
+            for f in self.features
             if f.status not in (FeatureStatus.COMPLETED, FeatureStatus.FAILED)
         ]
 
@@ -409,9 +410,7 @@ class Project:
             ValueError: If transition not allowed
         """
         if not self.status.can_transition_to(target):
-            raise ValueError(
-                f"Invalid status transition: {self.status} → {target}"
-            )
+            raise ValueError(f"Invalid status transition: {self.status} → {target}")
 
         self.status = target
         self.updated_at = datetime.now(timezone.utc)
@@ -440,6 +439,7 @@ class WorkflowPhase:
         - Prompt template location
         - Expected inputs/outputs
     """
+
     id: str
     description: str
     prompt_recipe: str  # Path to POML file
@@ -464,6 +464,7 @@ class Workflow:
         - Phase IDs must be unique
         - Phases form a linear sequence
     """
+
     name: str
     version: str
     phases: List[WorkflowPhase]
@@ -516,8 +517,8 @@ class Workflow:
             "phase_number": current_index + 1,
             "total_phases": len(self.phases),
             "progress_percentage": ((current_index + 1) / len(self.phases)) * 100,
-            "remaining_phases": phase_ids[current_index + 1:],
-            "completed_phases": phase_ids[:current_index]
+            "remaining_phases": phase_ids[current_index + 1 :],
+            "completed_phases": phase_ids[:current_index],
         }
 
 
@@ -528,6 +529,7 @@ class CodeArtifact:
 
     Artifacts are immutable records of what was produced during a phase.
     """
+
     path: str  # Relative path within project
     content: str
     language: str
@@ -535,17 +537,12 @@ class CodeArtifact:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def create(
-        cls,
-        path: str,
-        content: str,
-        language: str
-    ) -> 'CodeArtifact':
+    def create(cls, path: str, content: str, language: str) -> "CodeArtifact":
         """Factory: Create artifact with timestamp."""
         return cls(
             path=path,
             content=content,
             language=language,
             generated_at=datetime.now(timezone.utc),
-            metadata={}
+            metadata={},
         )

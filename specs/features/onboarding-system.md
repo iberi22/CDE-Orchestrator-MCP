@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-Se ha implementado un sistema completo de onboarding automático que detecta cuando un proyecto necesita estructura compatible con [Spec-Kit](https://github.com/github/spec-kit) y la crea automáticamente.
+Se ha implementado un sistema completo de onboarding automático que detecta cuando un proyecto necesita estructura compatible con [Spec-Kit](https://github.com/github/spec-kit) y la crea automáticamente. **NUEVO**: Ahora incluye configuración automática de AI assistants siguiendo los estándares de la industria 2025.
 
 ## 🎯 Objetivos Cumplidos
 
@@ -11,6 +11,8 @@ Se ha implementado un sistema completo de onboarding automático que detecta cua
 ✅ **Integración MCP**: Nueva herramienta `cde_onboardingProject` detecta y configura
 ✅ **Workflow POML**: Receta robusta para generar toda la documentación necesaria
 ✅ **Compatibilidad Spec-Kit**: Estructura 100% compatible con Spec-Kit
+✅ **🆕 AI Assistant Configuration**: Generación automática de archivos de configuración para múltiples AI assistants
+✅ **🆕 Multi-Tool Support**: Soporte para GitHub Copilot, Gemini, Claude, Cursor, Windsurf, y más
 
 ## 🏗️ Arquitectura
 
@@ -56,7 +58,7 @@ cde_onboardingProject()
 
 Siguiendo [Spec-Kit](https://github.com/github/spec-kit):
 
-```
+```text
 project/
 ├── specs/                    # Spec-Kit compatible
 │   ├── README.md            # Documentación del directorio
@@ -67,8 +69,17 @@ project/
 │   └── PROJECT-OVERVIEW.md  # Vista general del proyecto
 ├── memory/
 │   └── constitution.md      # Principios y reglas
-└── .cde/
-    └── state.json          # Estado del onboarding
+├── .cde/
+│   └── state.json          # Estado del onboarding
+│
+├── 🆕 AI Assistant Configuration Files (2025 Standards):
+├── AGENTS.md                # OpenAI/general AI agents format
+├── GEMINI.md                # Google AI Studio optimizations
+├── .github/
+│   └── copilot-instructions.md  # GitHub Copilot config
+├── .claude/                 # Claude Code config (if detected)
+├── .cursor/                 # Cursor IDE config (if detected)
+└── .windsurf/               # Windsurf IDE config (if detected)
 ```
 
 ## 🔍 Análisis de Git
@@ -317,15 +328,221 @@ El onboarding es el primer paso hacia:
 3. **Estándares**: Sigue metodología probada (Spec-Kit)
 4. **Integración**: Compatible con todos los workflows CDE
 5. **Escalable**: Genera estructura desde día 1
+6. **🆕 AI-First**: Configuración automática para múltiples AI assistants
+
+## 🤖 AI Assistant Configuration (Nuevo)
+
+### Componente: `AIAssistantConfigurator`
+
+Clase responsable de detectar y configurar AI coding assistants automáticamente durante el onboarding.
+
+**Ubicación**: `src/cde_orchestrator/ai_assistant_configurator.py`
+
+### AI Assistants Soportados
+
+| Assistant | Config Folder | Files Generated | Auto-Detect |
+|-----------|--------------|-----------------|-------------|
+| **GitHub Copilot** | `.github/` | `copilot-instructions.md`, `AGENTS.md` | ✅ Folder check |
+| **Gemini CLI** | `.gemini/` | `GEMINI.md`, `AGENTS.md` | ✅ CLI check |
+| **Claude Code** | `.claude/` | `AGENTS.md` | ✅ CLI check |
+| **Cursor** | `.cursor/` | `AGENTS.md` | ✅ Folder check |
+| **Windsurf** | `.windsurf/` | `AGENTS.md` | ✅ Folder check |
+| **Amp** | `.agents/` | `AGENTS.md` | ✅ CLI check |
+
+### Archivos Generados
+
+#### 1. `AGENTS.md` (OpenAI Standard)
+
+Archivo de instrucciones universal para AI agents siguiendo el formato OpenAI (7.8k ⭐).
+
+**Contenido**:
+- Project overview (arquitectura, tech stack)
+- Quick navigation (directorios clave)
+- Architecture rules (patrones, dependencies)
+- Development workflow (paso a paso)
+- Documentation rules (metadata, placement)
+- Testing strategy (unit, integration, e2e)
+- Common pitfalls (DO's y DON'Ts)
+- Quick commands reference
+
+**Target**: Cursor, Windsurf, Aider, Bolt, Claude, y otros AI agents generales.
+
+#### 2. `GEMINI.md` (Google AI Studio Standard)
+
+Archivo de instrucciones optimizado para Gemini AI con sus capacidades únicas.
+
+**Contenido**:
+- Todo el contenido de AGENTS.md
+- **PLUS** Gemini-Specific Optimizations:
+  - Large Context Window (1M+ tokens): Cómo aprovechar el contexto masivo
+  - Multi-Modal Capabilities: Análisis de diagramas y código visual
+  - Function Calling: Outputs estructurados con JSON schema
+  - Parallel Processing: Usar Gemini CLI en background jobs
+
+**Pro Tip**: "Request FULL file contents instead of summaries"
+
+**Target**: Google AI Studio, Gemini CLI, IDX.
+
+#### 3. `.github/copilot-instructions.md` (GitHub Standard)
+
+Configuración específica para GitHub Copilot en VS Code.
+
+**Formato**:
+```yaml
+---
+description: GitHub Copilot custom instructions for [PROJECT]
+---
+
+# GitHub Copilot Instructions
+
+[Project-specific rules, patterns, and guidelines]
+```
+
+**Características**:
+- Token-optimized (Copilot tiene límite más bajo)
+- Enfoque en patterns y code standards
+- Referencia a AGENTS.md para detalles completos
+
+### Flujo de Configuración
+
+```python
+# Durante onboarding, automáticamente:
+
+1. AIAssistantConfigurator detecta AI tools instalados:
+   - CLI check: gemini --version, claude --version, etc.
+   - Folder check: .github/, .cursor/, .windsurf/ existentes
+
+2. Genera archivos de configuración:
+   - AGENTS.md (siempre, universal)
+   - GEMINI.md (si Gemini detectado o por defecto)
+   - .github/copilot-instructions.md (siempre, GitHub es común)
+   - Otros según detección
+
+3. Integra con SpecKitStructureGenerator:
+   - Se ejecuta automáticamente en create_structure()
+   - Resultados incluidos en results["ai_assistants"]
+
+4. Actualiza estado:
+   - state["onboarding"]["ai_assistants"] con detección y configuración
+```
+
+### API Pública
+
+```python
+from cde_orchestrator.ai_assistant_configurator import AIAssistantConfigurator
+
+# Inicializar
+configurator = AIAssistantConfigurator(project_root)
+
+# Detectar herramientas instaladas
+detected = configurator.detect_installed_agents()
+# Returns: ["copilot", "gemini", "cursor"]
+
+# Generar archivos de configuración
+results = configurator.generate_config_files(
+    agents=None,  # None = auto-detect + defaults
+    force=False   # False = skip existing files
+)
+# Returns: {
+#   "generated": ["AGENTS.md", "GEMINI.md", ...],
+#   "skipped": [...],
+#   "errors": [...]
+# }
+
+# Obtener resumen
+summary = configurator.get_configuration_summary()
+# Returns: {
+#   "total_agents": 6,
+#   "detected_agents": ["copilot", "gemini"],
+#   "configured_agents": ["copilot", "gemini"],
+#   "available_agents": ["copilot", "claude", "gemini", ...]
+# }
+```
+
+### Características Técnicas
+
+**Detección Inteligente**:
+- CLI tools: `subprocess.run([tool, "--version"])` con timeout
+- IDE tools: Check de carpetas `.github/`, `.cursor/`, etc.
+- Fallback: `where` (Windows) / `which` (Unix) commands
+
+**Templates Adaptativos**:
+- Placeholder `[PROJECT_NAME]` reemplazado con nombre real
+- Sections personalizables por tipo de proyecto
+- Links a documentación específica del proyecto
+
+**Gestión de Archivos**:
+- No sobrescribe archivos existentes (force=False por defecto)
+- Crea carpetas necesarias automáticamente
+- Logging detallado de operaciones
+
+**Inspiración**: Spec-Kit's `specify init --ai <agent>` approach
+
+### Integración con Onboarding
+
+El `cde_onboardingProject` tool ahora:
+
+1. Analiza estructura y Git (como antes)
+2. **NUEVO**: Detecta AI assistants instalados
+3. **NUEVO**: Genera archivos de configuración automáticamente
+4. Retorna prompt con contexto de AI assistants detectados
+5. Incluye recomendaciones específicas por herramienta
+
+**Contexto adicional en prompt**:
+```json
+{
+  "AI_ASSISTANTS": {
+    "detected": ["copilot", "gemini"],
+    "summary": { ... },
+    "recommendation": "Configure AI assistant instruction files..."
+  }
+}
+```
+
+### Best Practices Implementadas
+
+✅ **Multi-file approach**: AGENTS.md (universal), GEMINI.md (optimized), copilot-instructions.md (tool-specific)
+
+✅ **Industry standards**: OpenAI agents.md format, GitHub Copilot custom instructions, Google AI Studio
+
+✅ **No duplication**: GEMINI.md incluye todo de AGENTS.md + optimizaciones Gemini
+
+✅ **Root-level placement**: Máxima discoverabilidad para AI tools
+
+✅ **No YAML frontmatter**: Mantiene compatibilidad con formato nativo de cada tool
+
+✅ **Tool-specific optimizations**: Gemini's 1M+ context, Copilot's token limits
+
+### Tests
+
+Cobertura completa en `tests/unit/test_ai_assistant_configurator.py`:
+
+- ✅ Detección de CLI tools (mock subprocess)
+- ✅ Detección de carpetas IDE
+- ✅ Generación de templates
+- ✅ Skip de archivos existentes
+- ✅ Overwrite con force=True
+- ✅ Calidad de contenido generado
+- ✅ Integration test completo
+
+### Beneficios
+
+1. **Cero configuración manual**: Todo automático durante onboarding
+2. **Multi-tool support**: Un comando, múltiples herramientas
+3. **Standards compliance**: Sigue mejores prácticas 2025
+4. **Inteligente**: Detecta y configura solo lo necesario
+5. **Mantenible**: Templates centralizados, fácil agregar nuevas herramientas
+6. **Tested**: 20+ tests unitarios con 90%+ coverage
 
 ## 🎯 Conclusión
 
 El sistema de onboarding completa el ciclo CDE:
 
-```
+```text
 Onboarding → Define → Decompose → Design → Implement → Test → Review
      ↓
 Proyecto estructurado desde el inicio ✓
++ AI assistants configurados automáticamente ✓
 ```
 
 Ahora los usuarios pueden:

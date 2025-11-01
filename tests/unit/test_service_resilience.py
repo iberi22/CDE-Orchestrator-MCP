@@ -44,7 +44,9 @@ def _stub_requests(behavior):
     return module
 
 
-def _connector_with_stub(monkeypatch, behavior, failure_threshold: int = 2) -> GitHubConnector:
+def _connector_with_stub(
+    monkeypatch, behavior, failure_threshold: int = 2
+) -> GitHubConnector:
     """Helper to build a GitHubConnector with a stubbed requests module."""
     stub = _stub_requests(behavior)
     monkeypatch.setitem(sys.modules, "requests", stub)

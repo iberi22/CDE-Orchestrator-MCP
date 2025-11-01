@@ -20,7 +20,7 @@ class WorkflowManager:
 
     def _load_workflow(self) -> Workflow:
         """Loads and validates the workflow file using Pydantic models."""
-        with open(self.workflow_path, 'r') as f:
+        with open(self.workflow_path, "r") as f:
             data = yaml.safe_load(f)
         return Workflow(**data)
 
@@ -28,25 +28,52 @@ class WorkflowManager:
         """Initialize patterns for automatic workflow detection."""
         return {
             "web_application": [
-                r"web.*app", r"website", r"frontend", r"backend", r"api",
-                r"authentication", r"login", r"user.*management", r"dashboard"
+                r"web.*app",
+                r"website",
+                r"frontend",
+                r"backend",
+                r"api",
+                r"authentication",
+                r"login",
+                r"user.*management",
+                r"dashboard",
             ],
             "data_processing": [
-                r"data.*process", r"etl", r"pipeline", r"analytics",
-                r"machine.*learning", r"ml", r"ai", r"algorithm"
+                r"data.*process",
+                r"etl",
+                r"pipeline",
+                r"analytics",
+                r"machine.*learning",
+                r"ml",
+                r"ai",
+                r"algorithm",
             ],
             "mobile_app": [
-                r"mobile.*app", r"ios", r"android", r"react.*native",
-                r"flutter", r"mobile"
+                r"mobile.*app",
+                r"ios",
+                r"android",
+                r"react.*native",
+                r"flutter",
+                r"mobile",
             ],
             "infrastructure": [
-                r"deploy", r"docker", r"kubernetes", r"ci.*cd",
-                r"infrastructure", r"devops", r"monitoring"
+                r"deploy",
+                r"docker",
+                r"kubernetes",
+                r"ci.*cd",
+                r"infrastructure",
+                r"devops",
+                r"monitoring",
             ],
             "bug_fix": [
-                r"fix", r"bug", r"error", r"issue", r"problem",
-                r"broken", r"not.*working"
-            ]
+                r"fix",
+                r"bug",
+                r"error",
+                r"issue",
+                r"problem",
+                r"broken",
+                r"not.*working",
+            ],
         }
 
     def detect_workflow_type(self, user_prompt: str) -> str:
@@ -104,9 +131,8 @@ class WorkflowManager:
                 "phase_number": current_index + 1,
                 "total_phases": len(phase_ids),
                 "progress_percentage": ((current_index + 1) / len(phase_ids)) * 100,
-                "remaining_phases": phase_ids[current_index + 1:],
-                "completed_phases": phase_ids[:current_index]
+                "remaining_phases": phase_ids[current_index + 1 :],
+                "completed_phases": phase_ids[:current_index],
             }
         except ValueError:
             raise ValueError(f"Phase '{current_phase_id}' not found in workflow.")
-

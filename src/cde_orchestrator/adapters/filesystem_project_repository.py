@@ -174,8 +174,7 @@ class FileSystemProjectRepository(IProjectRepository):
         return []
 
     async def list_all_async(
-        self,
-        limit: Optional[int] = None
+        self, limit: Optional[int] = None
     ) -> AsyncIterator[Project]:
         """
         Stream all projects asynchronously.
@@ -261,8 +260,8 @@ class FileSystemProjectRepository(IProjectRepository):
         """
         # Without registry, we can't map ID to path
         raise ProjectNotFoundError(
-            f"Cannot delete by ID in stateless repository. "
-            f"Use get_by_path() to load project, then delete_by_path()."
+            "Cannot delete by ID in stateless repository. "
+            "Use get_by_path() to load project, then delete_by_path()."
         )
 
     def delete_by_path(self, path: str) -> None:
@@ -326,8 +325,7 @@ class FileSystemProjectRepository(IProjectRepository):
             "updated_at": project.updated_at.isoformat(),
             "metadata": project.metadata,
             "features": [
-                self._serialize_feature(feature)
-                for feature in project.features
+                self._serialize_feature(feature) for feature in project.features
             ],
         }
 

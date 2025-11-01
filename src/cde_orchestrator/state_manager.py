@@ -67,7 +67,9 @@ class StateManager:
         normalized["features"] = validated_features
         return normalized
 
-    def _coerce_feature_state(self, feature_id: str, feature_data: Dict[str, Any]) -> FeatureState:
+    def _coerce_feature_state(
+        self, feature_id: str, feature_data: Dict[str, Any]
+    ) -> FeatureState:
         """Coerce loose dict data into a validated FeatureState instance."""
         if not isinstance(feature_data, dict):
             logger.warning("Feature %s contains non-dict state; coercing", feature_id)
@@ -76,7 +78,9 @@ class StateManager:
         status = feature_data.get("status", FeatureStatus.DEFINING.value)
         current_phase = feature_data.get("current_phase") or PhaseStatus.DEFINE.value
 
-        created_at = feature_data.get("created_at") or datetime.now(timezone.utc).isoformat()
+        created_at = (
+            feature_data.get("created_at") or datetime.now(timezone.utc).isoformat()
+        )
         updated_at = feature_data.get("updated_at")
         previous_features = self._last_state_snapshot.get("features") or {}
         if feature_id in previous_features:
@@ -158,7 +162,11 @@ class StateManager:
         created, updated, removed = self._compare_features(old_features, new_features)
 
         for feature_id in created:
-            logger.info("Feature %s created with status %s", feature_id, new_features[feature_id]["status"])
+            logger.info(
+                "Feature %s created with status %s",
+                feature_id,
+                new_features[feature_id]["status"],
+            )
         for feature_id, changes in updated.items():
             change_str = ", ".join(f"{k}: {v[0]} -> {v[1]}" for k, v in changes.items())
             logger.info("Feature %s updated (%s)", feature_id, change_str)

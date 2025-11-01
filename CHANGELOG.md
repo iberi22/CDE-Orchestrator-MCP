@@ -1,5 +1,78 @@
 # Changelog
 
+## [0.3.0] - 2025-11-01
+
+### Added
+
+#### AI Assistant Configuration System
+- **NEW FEATURE**: Automatic detection and configuration of AI coding assistants
+- **Multi-Agent Support**: Supports 6 AI assistants out of the box
+  - GitHub Copilot (folder detection: `.github/copilot/`)
+  - Gemini CLI (CLI + folder detection)
+  - Claude Code (CLI detection)
+  - Cursor (folder detection: `.cursor/`)
+  - Windsurf (folder detection: `.windsurf/`)
+  - Amp (CLI detection)
+- **Auto-Generation**: Creates optimized instruction files during onboarding
+  - `AGENTS.md` (~400 lines): Universal instructions for all agents
+  - `GEMINI.md` (~550 lines): Gemini-specific optimized format
+  - `.github/copilot-instructions.md` (~200 lines): GitHub Copilot-specific
+- **Intelligent Detection**:
+  - CLI tool detection via `subprocess.run([tool, "--version"])`
+  - IDE tool detection via folder checks (`.cursor/`, `.windsurf/`, etc.)
+  - Timeout protection (2s per check), fallback to `which`/`where`
+  - Cross-platform support (Windows, macOS, Linux)
+- **Smart File Management**:
+  - Skips existing files by default (preserves user edits)
+  - Supports force overwrite mode with `force=True`
+  - Graceful error handling (continues on failures)
+- **Seamless Integration**:
+  - Integrated with `cde_onboardingProject()` MCP tool
+  - Transparent integration (zero breaking changes)
+  - Project-aware templates (includes project name, structure, tech stack)
+- **Testing**: 20+ tests with >90% coverage (unit + integration)
+- **Documentation**: Complete feature spec and API reference
+  - `specs/features/ai-assistant-config.md` (1000+ lines)
+  - `specs/api/mcp-tools.md` (complete API reference)
+  - `specs/design/ai-assistant-config-implementation.md` (executive summary)
+
+#### Inspiration
+- Adopted patterns from GitHub's [Spec-Kit](https://github.com/github/spec-kit) multi-agent support
+- `AGENT_CONFIG` dict as single source of truth
+- Template-based generation with adaptive content
+- CLI-first detection with folder fallback
+
+#### Performance
+- Detection completes in <3 seconds (typically ~2s)
+- Template generation <1 second per file
+- Zero impact on existing onboarding flow
+
+### Files Created
+- `src/cde_orchestrator/ai_assistant_configurator.py` (600+ lines)
+- `tests/unit/test_ai_assistant_configurator.py` (400+ lines, 20+ tests)
+- `specs/features/ai-assistant-config.md` (1000+ lines)
+- `specs/api/mcp-tools.md` (complete MCP tools API reference)
+- `specs/api/README.md` (API documentation structure)
+- `specs/reviews/README.md` (code review structure)
+
+### Files Modified
+- `src/cde_orchestrator/onboarding_analyzer.py`: Integrated AIAssistantConfigurator
+- `src/server.py`: Added AI detection to `cde_onboardingProject()` tool
+- `specs/features/onboarding-system.md`: Added AI assistant configuration section
+
+### Validation
+- Live demo on CDE Orchestrator project itself (2025-11-01)
+- Detected 4 AI assistants: Claude Code, Gemini CLI, Cursor, GitHub Copilot
+- Generated 3 config files: AGENTS.md (9.2 KB), GEMINI.md (16.3 KB), copilot-instructions.md (23.2 KB)
+- Zero errors, <2 second execution time
+
+### Future Enhancements
+- Phase 2: Add support for Aider, Bolt, Devin, Replit Agent, Amazon Q
+- Phase 3: Dynamic templates, CLI update command, analytics, localization
+- Phase 4: Parallel detection, cache detection, smart updates, diff preview
+
+---
+
 ## [0.2.0] - 2025-11-01
 
 ### Changed

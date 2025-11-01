@@ -21,7 +21,6 @@ import json
 
 from ..domain.entities import Project, ProjectId, ProjectStatus
 from ..domain.ports import IProjectRepository
-from ..domain.exceptions import RepositoryError
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +54,7 @@ class ProjectRegistry:
         self,
         root_path: str,
         max_depth: int = 10,
-        skip_patterns: Optional[List[str]] = None
+        skip_patterns: Optional[List[str]] = None,
     ) -> List[Project]:
         """
         Scan directory tree for Git repositories and register as projects.
@@ -113,7 +112,7 @@ class ProjectRegistry:
                 "dist",
                 "build",
                 ".tox",
-                ".eggs"
+                ".eggs",
             ]
 
         discovered = []
@@ -139,7 +138,9 @@ class ProjectRegistry:
                 project = self._create_project_from_git_repo(git_dir)
                 self.repo.save(project)
                 discovered.append(project)
-                logger.info(f"Registered new project: {project.name} ({project.id.value})")
+                logger.info(
+                    f"Registered new project: {project.name} ({project.id.value})"
+                )
             except Exception as e:
                 logger.error(f"Failed to register project at {project_path}: {e}")
                 continue
@@ -150,10 +151,7 @@ class ProjectRegistry:
         return discovered
 
     def _find_git_directories(
-        self,
-        root: Path,
-        max_depth: int,
-        skip_patterns: Set[str]
+        self, root: Path, max_depth: int, skip_patterns: Set[str]
     ) -> List[Path]:
         """
         Recursively find all .git directories.
@@ -175,7 +173,7 @@ class ProjectRegistry:
             try:
                 for item in path.iterdir():
                     # Skip hidden directories (except .git)
-                    if item.name.startswith('.') and item.name != '.git':
+                    if item.name.startswith(".") and item.name != ".git":
                         continue
 
                     # Skip patterns
@@ -183,7 +181,7 @@ class ProjectRegistry:
                         continue
 
                     if item.is_dir():
-                        if item.name == '.git':
+                        if item.name == ".git":
                             git_dirs.append(item)
                             # Don't recurse into .git contents
                         else:
@@ -216,19 +214,18 @@ class ProjectRegistry:
         tech_stack = self._detect_tech_stack(project_path)
 
         # Create project
-        project = Project.create(
-            name=project_name,
-            path=str(project_path)
-        )
+        project = Project.create(name=project_name, path=str(project_path))
 
         # Populate metadata
-        project.metadata.update({
-            "auto_discovered": True,
-            "git_remote": git_metadata.get("remote_url"),
-            "git_branch": git_metadata.get("current_branch"),
-            "tech_stack": tech_stack,
-            "discovery_timestamp": str(project.created_at)
-        })
+        project.metadata.update(
+            {
+                "auto_discovered": True,
+                "git_remote": git_metadata.get("remote_url"),
+                "git_branch": git_metadata.get("current_branch"),
+                "tech_stack": tech_stack,
+                "discovery_timestamp": str(project.created_at),
+            }
+        )
 
         return project
 
@@ -242,10 +239,7 @@ class ProjectRegistry:
         Returns:
             Dict with remote_url, current_branch, etc.
         """
-        metadata = {
-            "remote_url": None,
-            "current_branch": None
-        }
+        metadata = {"remote_url": None, "current_branch": None}
 
         project_path = git_dir.parent
 
@@ -256,7 +250,7 @@ class ProjectRegistry:
                 cwd=project_path,
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             if result.returncode == 0:
                 metadata["remote_url"] = result.stdout.strip()
@@ -270,7 +264,7 @@ class ProjectRegistry:
                 cwd=project_path,
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             if result.returncode == 0:
                 metadata["current_branch"] = result.stdout.strip()
@@ -289,11 +283,7 @@ class ProjectRegistry:
         Returns:
             Dict with detected technologies
         """
-        stack = {
-            "languages": [],
-            "frameworks": [],
-            "tools": []
-        }
+        stack = {"languages": [], "frameworks": [], "tools": []}
 
         # Python detection
         if (project_path / "pyproject.toml").exists():
@@ -317,7 +307,7 @@ class ProjectRegistry:
                     package_data = json.load(f)
                     deps = {
                         **package_data.get("dependencies", {}),
-                        **package_data.get("devDependencies", {})
+                        **package_data.get("devDependencies", {}),
                     }
 
                     if "react" in deps:
@@ -356,7 +346,7 @@ class ProjectRegistry:
         self._scan_cache[root_path] = {
             "count": len(projects),
             "project_ids": [p.id.value for p in projects],
-            "last_scan": str(projects[0].created_at) if projects else None
+            "last_scan": str(projects[0].created_at) if projects else None,
         }
 
     def get_project(self, project_id: str) -> Optional[Project]:
@@ -413,7 +403,9 @@ class ProjectRegistry:
         all_projects = self.repo.list_all()
 
         active = sum(1 for p in all_projects if p.status == ProjectStatus.ACTIVE)
-        onboarding = sum(1 for p in all_projects if p.status == ProjectStatus.ONBOARDING)
+        onboarding = sum(
+            1 for p in all_projects if p.status == ProjectStatus.ONBOARDING
+        )
         archived = sum(1 for p in all_projects if p.status == ProjectStatus.ARCHIVED)
 
         return {
@@ -421,5 +413,5 @@ class ProjectRegistry:
             "active": active,
             "onboarding": onboarding,
             "archived": archived,
-            "scan_cache": self._scan_cache
+            "scan_cache": self._scan_cache,
         }

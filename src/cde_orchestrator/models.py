@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, validator
 
 class FeatureStatus(str, Enum):
     """Valid feature status values."""
+
     DEFINING = "defining"
     DECOMPOSING = "decomposing"
     DESIGNING = "designing"
@@ -20,6 +21,7 @@ class FeatureStatus(str, Enum):
 
 class PhaseStatus(str, Enum):
     """Valid workflow phase identifiers."""
+
     DEFINE = "define"
     DECOMPOSE = "decompose"
     DESIGN = "design"
@@ -30,6 +32,7 @@ class PhaseStatus(str, Enum):
 
 class FeatureState(BaseModel):
     """Validated feature state model."""
+
     status: FeatureStatus
     current_phase: PhaseStatus
     workflow_type: str = "default"
@@ -90,6 +93,7 @@ class FeatureState(BaseModel):
         ):
             # Log warning but don't fail - allow migration
             import logging
+
             logging.warning(
                 "Phase %s may be inconsistent with status %s, expected %s",
                 current_phase,
@@ -114,12 +118,14 @@ class FeatureState(BaseModel):
 
 class WorkflowInput(BaseModel):
     """Defines an input artifact for a workflow phase."""
+
     type: str
     path: str
 
 
 class WorkflowOutput(BaseModel):
     """Defines an output artifact for a workflow phase."""
+
     type: str
     path: Optional[str] = None
     labels: Optional[List[str]] = None
@@ -127,6 +133,7 @@ class WorkflowOutput(BaseModel):
 
 class Phase(BaseModel):
     """Represents a single phase in the CDE workflow."""
+
     id: str
     description: str
     handler: str
@@ -137,6 +144,7 @@ class Phase(BaseModel):
 
 class Workflow(BaseModel):
     """Represents the entire CDE workflow defined in workflow.yml."""
+
     name: str
     version: str
     phases: List[Phase]
@@ -144,6 +152,7 @@ class Workflow(BaseModel):
 
 class Task(BaseModel):
     """Represents a single, actionable task for the AI agent."""
+
     id: str
     feature_id: str
     phase_id: str
@@ -154,6 +163,7 @@ class Task(BaseModel):
 
 class Recipe(BaseModel):
     """Represents a POML recipe for specialized agents."""
+
     id: str
     name: str
     category: str  # engineering, product, project-management, etc.
@@ -166,9 +176,10 @@ class Recipe(BaseModel):
 
 class WorkflowType(BaseModel):
     """Represents different types of workflows for different project types."""
+
     id: str
     name: str
     description: str
     patterns: List[str]  # regex patterns to match user prompts
-    phases: List[str]    # phase IDs in order
+    phases: List[str]  # phase IDs in order
     default_recipes: Dict[str, str]  # phase_id -> recipe_id mapping

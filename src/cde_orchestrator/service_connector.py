@@ -58,7 +58,7 @@ class MCPDetector:
             return {}
 
         try:
-            with open(config_path, 'r') as f:
+            with open(config_path, "r") as f:
                 config = json.load(f)
 
             return config.get("mcpServers", {})
@@ -144,7 +144,9 @@ class CircuitBreaker:
         return {
             "state": self.state,
             "failure_count": self.failure_count,
-            "last_failure": self.last_failure.isoformat() if self.last_failure else None,
+            "last_failure": (
+                self.last_failure.isoformat() if self.last_failure else None
+            ),
             "failure_threshold": self.failure_threshold,
             "recovery_timeout_seconds": int(self.recovery_timeout.total_seconds()),
         }
@@ -163,7 +165,9 @@ class GitHubConnector:
         retry_attempts: int = 3,
     ):
         self.mcp_available = MCPDetector.is_github_mcp_available()
-        self.mcp_config = MCPDetector.get_github_mcp_config() if self.mcp_available else None
+        self.mcp_config = (
+            MCPDetector.get_github_mcp_config() if self.mcp_available else None
+        )
         self.token = os.getenv("GITHUB_TOKEN")
         self.circuit_breaker = circuit_breaker or CircuitBreaker()
         self.default_timeout = default_timeout
@@ -186,7 +190,7 @@ class GitHubConnector:
         repo_name: str,
         title: str,
         body: str,
-        labels: Optional[List[str]] = None
+        labels: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Create a GitHub issue.
@@ -203,8 +207,12 @@ class GitHubConnector:
             try:
                 self.circuit_breaker.allow()
             except CircuitBreakerOpenError:
-                logger.warning("GitHub circuit breaker open; using local issue fallback")
-                return self._create_issue_local(title, body, labels, reason="circuit_open")
+                logger.warning(
+                    "GitHub circuit breaker open; using local issue fallback"
+                )
+                return self._create_issue_local(
+                    title, body, labels, reason="circuit_open"
+                )
 
         # Try MCP first
         if self.mcp_available:
@@ -227,10 +235,7 @@ class GitHubConnector:
         return self._create_issue_local(title, body, labels, reason="no_remote_service")
 
     def _create_issue_via_mcp(
-        self,
-        title: str,
-        body: str,
-        labels: Optional[List[str]] = None
+        self, title: str, body: str, labels: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """
         Create issue via external MCP GitHub server.
@@ -243,7 +248,7 @@ class GitHubConnector:
             "body": body,
             "labels": labels or [],
             "method": "mcp",
-            "message": "Issue created via external GitHub MCP server"
+            "message": "Issue created via external GitHub MCP server",
         }
         if self.circuit_breaker:
             self.circuit_breaker.record_success()
@@ -256,24 +261,25 @@ class GitHubConnector:
         title: str,
         body: str,
         labels: Optional[List[str]] = None,
-        timeout: int = 10
+        timeout: int = 10,
     ) -> Dict[str, Any]:
         """Create issue via GitHub API with timeout, retries, and fallback."""
         try:
             import requests
         except ImportError:
-            logger.warning("requests library not available; falling back to local issue storage")
-            return self._create_issue_local(title, body, labels, reason="requests_not_available")
+            logger.warning(
+                "requests library not available; falling back to local issue storage"
+            )
+            return self._create_issue_local(
+                title, body, labels, reason="requests_not_available"
+            )
 
         url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues"
         headers = {
             "Authorization": f"Bearer {self.token}",
-            "Accept": "application/vnd.github.v3+json"
+            "Accept": "application/vnd.github.v3+json",
         }
-        data = {
-            "title": title,
-            "body": body
-        }
+        data = {"title": title, "body": body}
 
         if labels:
             data["labels"] = labels
@@ -310,7 +316,9 @@ class GitHubConnector:
         except requests.exceptions.ConnectionError as exc:
             logger.error("GitHub API connection error: %s", exc)
             self._record_failure()
-            return self._create_issue_local(title, body, labels, reason="connection_error")
+            return self._create_issue_local(
+                title, body, labels, reason="connection_error"
+            )
         except requests.exceptions.HTTPError as exc:
             logger.error("GitHub API HTTP error: %s", exc)
             self._record_failure()
@@ -318,14 +326,16 @@ class GitHubConnector:
         except Exception as exc:
             logger.exception("Unexpected error creating GitHub issue: %s", exc)
             self._record_failure()
-            return self._create_issue_local(title, body, labels, reason="unexpected_error")
+            return self._create_issue_local(
+                title, body, labels, reason="unexpected_error"
+            )
 
     def _create_issue_local(
         self,
         title: str,
         body: str,
         labels: Optional[List[str]] = None,
-        reason: str = "fallback"
+        reason: str = "fallback",
     ) -> Dict[str, Any]:
         """
         Fallback: Create issue as local file.
@@ -350,7 +360,7 @@ class GitHubConnector:
             "labels": labels or [],
             "method": "local",
             "fallback_reason": reason,
-            "message": f"Issue stored locally at {issue_file}"
+            "message": f"Issue stored locally at {issue_file}",
         }
 
     def get_status(self) -> Dict[str, Any]:
@@ -375,7 +385,9 @@ class GitConnector:
     def __init__(self):
         self.repo_path = Path.cwd()
 
-    def create_branch(self, branch_name: str, base_branch: str = "main") -> Dict[str, Any]:
+    def create_branch(
+        self, branch_name: str, base_branch: str = "main"
+    ) -> Dict[str, Any]:
         """Create a new git branch."""
         try:
             # Fetch latest changes
@@ -383,7 +395,7 @@ class GitConnector:
                 ["git", "fetch", "origin", base_branch],
                 cwd=self.repo_path,
                 capture_output=True,
-                check=False
+                check=False,
             )
 
             # Create branch
@@ -392,32 +404,30 @@ class GitConnector:
                 cwd=self.repo_path,
                 capture_output=True,
                 text=True,
-                check=False
+                check=False,
             )
 
             if result.returncode == 0:
                 return {
                     "success": True,
                     "branch": branch_name,
-                    "message": f"Branch {branch_name} created successfully"
+                    "message": f"Branch {branch_name} created successfully",
                 }
             else:
                 return {
                     "success": False,
                     "error": result.stderr,
-                    "message": "Failed to create branch"
+                    "message": "Failed to create branch",
                 }
         except Exception as e:
             return {
                 "success": False,
                 "error": str(e),
-                "message": "Error creating branch"
+                "message": "Error creating branch",
             }
 
     def commit_changes(
-        self,
-        message: str,
-        files: Optional[List[str]] = None
+        self, message: str, files: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """Commit changes to git repository."""
         try:
@@ -427,14 +437,14 @@ class GitConnector:
                     ["git", "add"] + files,
                     cwd=self.repo_path,
                     capture_output=True,
-                    check=False
+                    check=False,
                 )
             else:
                 subprocess.run(
                     ["git", "add", "."],
                     cwd=self.repo_path,
                     capture_output=True,
-                    check=False
+                    check=False,
                 )
 
             # Commit
@@ -443,25 +453,22 @@ class GitConnector:
                 cwd=self.repo_path,
                 capture_output=True,
                 text=True,
-                check=False
+                check=False,
             )
 
             if result.returncode == 0:
-                return {
-                    "success": True,
-                    "message": "Changes committed successfully"
-                }
+                return {"success": True, "message": "Changes committed successfully"}
             else:
                 return {
                     "success": False,
                     "error": result.stderr,
-                    "message": "Failed to commit changes"
+                    "message": "Failed to commit changes",
                 }
         except Exception as e:
             return {
                 "success": False,
                 "error": str(e),
-                "message": "Error committing changes"
+                "message": "Error committing changes",
             }
 
     def push_branch(self, branch_name: str) -> Dict[str, Any]:
@@ -472,25 +479,25 @@ class GitConnector:
                 cwd=self.repo_path,
                 capture_output=True,
                 text=True,
-                check=False
+                check=False,
             )
 
             if result.returncode == 0:
                 return {
                     "success": True,
-                    "message": f"Branch {branch_name} pushed successfully"
+                    "message": f"Branch {branch_name} pushed successfully",
                 }
             else:
                 return {
                     "success": False,
                     "error": result.stderr,
-                    "message": "Failed to push branch"
+                    "message": "Failed to push branch",
                 }
         except Exception as e:
             return {
                 "success": False,
                 "error": str(e),
-                "message": "Error pushing branch"
+                "message": "Error pushing branch",
             }
 
 

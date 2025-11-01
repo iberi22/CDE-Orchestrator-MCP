@@ -14,7 +14,9 @@ def _state_manager(tmp_path: Path) -> StateManager:
     return StateManager(state_file)
 
 
-def _feature_state(status: FeatureStatus, phase: PhaseStatus, prompt: str = "prompt") -> dict:
+def _feature_state(
+    status: FeatureStatus, phase: PhaseStatus, prompt: str = "prompt"
+) -> dict:
     feature = FeatureState(
         status=status,
         current_phase=phase,
@@ -30,11 +32,17 @@ def test_save_state_creates_backup_and_updates_timestamp(tmp_path):
     manager = _state_manager(tmp_path)
     feature_id = "feature-1"
 
-    state = {"features": {feature_id: _feature_state(FeatureStatus.DEFINING, PhaseStatus.DEFINE)}}
+    state = {
+        "features": {
+            feature_id: _feature_state(FeatureStatus.DEFINING, PhaseStatus.DEFINE)
+        }
+    }
     manager.save_state(state)
 
     # Update status and phase to trigger new save + backup creation
-    state["features"][feature_id] = _feature_state(FeatureStatus.DESIGNING, PhaseStatus.DESIGN)
+    state["features"][feature_id] = _feature_state(
+        FeatureStatus.DESIGNING, PhaseStatus.DESIGN
+    )
     manager.save_state(state)
 
     backups_dir = tmp_path / "backups"

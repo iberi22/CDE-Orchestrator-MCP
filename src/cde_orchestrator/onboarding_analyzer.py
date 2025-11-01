@@ -11,6 +11,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from .ai_assistant_configurator import AIAssistantConfigurator
+
 logger = logging.getLogger(__name__)
 
 
@@ -39,7 +41,7 @@ class OnboardingAnalyzer:
             "missing_structure": [],
             "existing_structure": [],
             "recommendations": [],
-            "project_info": {}
+            "project_info": {},
         }
 
         # Check for Spec-Kit compatible structure
@@ -48,13 +50,10 @@ class OnboardingAnalyzer:
             "specs/features",
             "specs/api",
             "specs/design",
-            "specs/reviews"
+            "specs/reviews",
         ]
 
-        required_docs = [
-            "specs/README.md",
-            "memory/constitution.md"
-        ]
+        required_docs = ["specs/README.md", "memory/constitution.md"]
 
         for dir_path in required_specs_dirs:
             full_path = self.project_root / dir_path
@@ -94,7 +93,7 @@ class OnboardingAnalyzer:
             "branches": [],
             "recent_commits": [],
             "project_age_days": 0,
-            "active_features": []
+            "active_features": [],
         }
 
         if not git_info["is_git_repo"]:
@@ -111,27 +110,44 @@ class OnboardingAnalyzer:
             if result and result.returncode == 0:
                 branches = [b.strip() for b in result.stdout.splitlines() if b.strip()]
                 git_info["branches"] = branches
-                feature_branches = [b for b in branches if any(prefix in b for prefix in ("feature/", "feat/", "dev/"))]
+                feature_branches = [
+                    b
+                    for b in branches
+                    if any(prefix in b for prefix in ("feature/", "feat/", "dev/"))
+                ]
                 git_info["active_features"] = feature_branches
 
             # Recent commits (limit 10)
-            result = self._run_git(["git", "log", "--pretty=format:%H|%an|%ae|%ad|%s", "--date=short", "-n", "20"])
+            result = self._run_git(
+                [
+                    "git",
+                    "log",
+                    "--pretty=format:%H|%an|%ae|%ad|%s",
+                    "--date=short",
+                    "-n",
+                    "20",
+                ]
+            )
             if result and result.returncode == 0:
                 commits: List[Dict[str, Any]] = []
                 for line in result.stdout.splitlines():
-                    parts = line.split('|')
+                    parts = line.split("|")
                     if len(parts) >= 5:
-                        commits.append({
-                            "hash": parts[0][:8],
-                            "author": parts[1],
-                            "email": parts[2],
-                            "date": parts[3],
-                            "message": parts[4]
-                        })
+                        commits.append(
+                            {
+                                "hash": parts[0][:8],
+                                "author": parts[1],
+                                "email": parts[2],
+                                "date": parts[3],
+                                "message": parts[4],
+                            }
+                        )
                 git_info["recent_commits"] = commits[:10]
 
             # Project age (days)
-            result = self._run_git(["git", "log", "--reverse", "--pretty=%ad", "--date=iso"])
+            result = self._run_git(
+                ["git", "log", "--reverse", "--pretty=%ad", "--date=iso"]
+            )
             if result and result.returncode == 0:
                 lines = [line for line in result.stdout.splitlines() if line.strip()]
                 if lines:
@@ -140,7 +156,8 @@ class OnboardingAnalyzer:
                         if first_commit.tzinfo is None:
                             first_commit = first_commit.replace(tzinfo=timezone.utc)
                         git_info["project_age_days"] = (
-                            datetime.now(timezone.utc) - first_commit.astimezone(timezone.utc)
+                            datetime.now(timezone.utc)
+                            - first_commit.astimezone(timezone.utc)
                         ).days
                     except ValueError:
                         logger.debug("Unable to parse first commit date: %s", lines[0])
@@ -150,7 +167,9 @@ class OnboardingAnalyzer:
 
         return git_info
 
-    def _run_git(self, args: List[str], timeout: int = 10) -> Optional[subprocess.CompletedProcess]:
+    def _run_git(
+        self, args: List[str], timeout: int = 10
+    ) -> Optional[subprocess.CompletedProcess]:
         """Execute git command with timeout, returning result or None."""
         try:
             t0 = time.time()
@@ -165,7 +184,9 @@ class OnboardingAnalyzer:
             logger.debug("git command succeeded in %.3fs: %s", elapsed, " ".join(args))
             return result
         except subprocess.TimeoutExpired:
-            logger.warning("git command timed out after %ss: %s", timeout, " ".join(args))
+            logger.warning(
+                "git command timed out after %ss: %s", timeout, " ".join(args)
+            )
             return None
         except Exception as exc:
             logger.warning("git command failed: %s (%s)", " ".join(args), exc)
@@ -207,7 +228,7 @@ class OnboardingAnalyzer:
             "total_files": total_files,
             "total_directories": total_dirs,
             "top_directories": top_level_counter.most_common(6),
-            "top_extensions": language_counter.most_common(8)
+            "top_extensions": language_counter.most_common(8),
         }
         return summary
 
@@ -222,10 +243,9 @@ class OnboardingAnalyzer:
                 rel = test_file.relative_to(self.project_root)
             except ValueError:
                 rel = test_file
-            tests_to_move.append({
-                "path": str(rel),
-                "suggested_destination": f"tests/{rel.name}"
-            })
+            tests_to_move.append(
+                {"path": str(rel), "suggested_destination": f"tests/{rel.name}"}
+            )
 
         # Heuristic: tests referencing modules that do not exist anymore
         # For simplicity, mark tests under tests/ that import modules not present.
@@ -242,11 +262,15 @@ class OnboardingAnalyzer:
                 for line in content.splitlines():
                     line = line.strip()
                     if line.startswith("from ") or line.startswith("import "):
-                        module = line.replace("from ", "").replace("import ", "").split()[0]
+                        module = (
+                            line.replace("from ", "").replace("import ", "").split()[0]
+                        )
                         module_path = module.replace(".", "/")
                         candidate = self.project_root / f"{module_path}.py"
                         # Skip stdlib heuristically
-                        if module.startswith(("os", "sys", "typing", "pytest", "unittest", "pathlib")):
+                        if module.startswith(
+                            ("os", "sys", "typing", "pytest", "unittest", "pathlib")
+                        ):
                             continue
                         if not candidate.exists():
                             orphan_tests.append(str(rel))
@@ -261,7 +285,7 @@ class OnboardingAnalyzer:
         return {
             "tests_to_move": tests_to_move,
             "orphan_tests": orphan_tests[:20],
-            "obsolete_files": obsolete_files
+            "obsolete_files": obsolete_files,
         }
 
     def _identify_document_updates(self) -> List[Dict[str, str]]:
@@ -269,19 +293,23 @@ class OnboardingAnalyzer:
         updates: List[Dict[str, str]] = []
         specs_readme = self.specs_root / "README.md"
         if specs_readme.exists():
-            updates.append({
-                "path": "specs/README.md",
-                "action": "refresh",
-                "reason": "Ensure Spec-Kit README reflects current workflow and toolchain."
-            })
+            updates.append(
+                {
+                    "path": "specs/README.md",
+                    "action": "refresh",
+                    "reason": "Ensure Spec-Kit README reflects current workflow and toolchain.",
+                }
+            )
 
         root_readme = self.project_root / "README.md"
         if root_readme.exists():
-            updates.append({
-                "path": "README.md",
-                "action": "align",
-                "reason": "Align overview with Integrated Management System principles."
-            })
+            updates.append(
+                {
+                    "path": "README.md",
+                    "action": "align",
+                    "reason": "Align overview with Integrated Management System principles.",
+                }
+            )
 
         return updates
 
@@ -355,7 +383,7 @@ class OnboardingAnalyzer:
             "Java": ["pom.xml", "build.gradle"],
             "Docker": ["Dockerfile"],
             "TypeScript": ["tsconfig.json"],
-            "React": ["package.json"]
+            "React": ["package.json"],
         }
 
         for tech, files in checks.items():
@@ -390,21 +418,23 @@ class OnboardingAnalyzer:
             "docs_to_generate": [],
             "tasks": [],
             "cleanup_plan": {},
-            "context": {}
+            "context": {},
         }
 
         if not analysis["needs_onboarding"]:
-            plan["tasks"].append({
-                "priority": "low",
-                "action": "review",
-                "description": "Project already has Spec-Kit structure. Review existing docs."
-            })
+            plan["tasks"].append(
+                {
+                    "priority": "low",
+                    "action": "review",
+                    "description": "Project already has Spec-Kit structure. Review existing docs.",
+                }
+            )
             plan["context"] = {
                 "git": analysis["project_info"]["git"],
                 "existing_structure": analysis["existing_structure"],
                 "repository_synthesis": self._synthesize_repository(),
                 "cleanup_plan": self._detect_structure_anomalies(),
-                "recommendations": self._generate_recommendations(analysis)
+                "recommendations": self._generate_recommendations(analysis),
             }
             return plan
 
@@ -413,49 +443,61 @@ class OnboardingAnalyzer:
         # Priority 1: Create directory structure
         for missing_dir in analysis["missing_structure"]:
             if missing_dir.endswith("/") or "/" in missing_dir:
-                plan["structure_to_create"].append({
-                    "type": "directory",
-                    "path": missing_dir,
-                    "description": f"Create {missing_dir} directory"
-                })
+                plan["structure_to_create"].append(
+                    {
+                        "type": "directory",
+                        "path": missing_dir,
+                        "description": f"Create {missing_dir} directory",
+                    }
+                )
 
         # Priority 2: Generate essential documentation
-        plan["docs_to_generate"].append({
-            "file": "specs/README.md",
-            "description": "Spec-Kit compatible specs directory README",
-            "priority": "high"
-        })
+        plan["docs_to_generate"].append(
+            {
+                "file": "specs/README.md",
+                "description": "Spec-Kit compatible specs directory README",
+                "priority": "high",
+            }
+        )
 
-        plan["docs_to_generate"].append({
-            "file": "memory/constitution.md",
-            "description": "Project constitution defining principles and rules",
-            "priority": "high"
-        })
+        plan["docs_to_generate"].append(
+            {
+                "file": "memory/constitution.md",
+                "description": "Project constitution defining principles and rules",
+                "priority": "high",
+            }
+        )
 
         # Priority 3: Generate project documentation based on Git history
         if git_info["commit_count"] > 0:
-            plan["docs_to_generate"].append({
-                "file": "specs/PROJECT-OVERVIEW.md",
-                "description": "Project overview generated from Git history",
-                "priority": "medium",
-                "context": {
-                    "commit_count": git_info["commit_count"],
-                    "project_age": git_info["project_age_days"],
-                    "branches": git_info["branches"]
+            plan["docs_to_generate"].append(
+                {
+                    "file": "specs/PROJECT-OVERVIEW.md",
+                    "description": "Project overview generated from Git history",
+                    "priority": "medium",
+                    "context": {
+                        "commit_count": git_info["commit_count"],
+                        "project_age": git_info["project_age_days"],
+                        "branches": git_info["branches"],
+                    },
                 }
-            })
+            )
 
         # Priority 4: Create specifications for active features
         if git_info["active_features"]:
             for feature_branch in git_info["active_features"][:5]:  # Limit to 5
-                feature_name = feature_branch.replace("feature/", "").replace("feat/", "")
-                plan["tasks"].append({
-                    "priority": "medium",
-                    "action": "create_feature_spec",
-                    "branch": feature_branch,
-                    "spec_file": f"specs/features/{feature_name}.md",
-                    "description": f"Create specification for {feature_branch}"
-                })
+                feature_name = feature_branch.replace("feature/", "").replace(
+                    "feat/", ""
+                )
+                plan["tasks"].append(
+                    {
+                        "priority": "medium",
+                        "action": "create_feature_spec",
+                        "branch": feature_branch,
+                        "spec_file": f"specs/features/{feature_name}.md",
+                        "description": f"Create specification for {feature_branch}",
+                    }
+                )
 
         repo_synthesis = self._synthesize_repository()
         cleanup = self._detect_structure_anomalies()
@@ -465,32 +507,38 @@ class OnboardingAnalyzer:
             "tests_to_move": cleanup["tests_to_move"],
             "orphan_tests": cleanup["orphan_tests"],
             "obsolete_files": cleanup["obsolete_files"],
-            "documentation_updates": doc_updates
+            "documentation_updates": doc_updates,
         }
 
         if cleanup["tests_to_move"]:
-            plan["tasks"].append({
-                "priority": "medium",
-                "action": "relocate_tests",
-                "description": "Align all automated tests under tests/ for consistent discovery.",
-                "affected_files": cleanup["tests_to_move"]
-            })
+            plan["tasks"].append(
+                {
+                    "priority": "medium",
+                    "action": "relocate_tests",
+                    "description": "Align all automated tests under tests/ for consistent discovery.",
+                    "affected_files": cleanup["tests_to_move"],
+                }
+            )
 
         if cleanup["obsolete_files"]:
-            plan["tasks"].append({
-                "priority": "medium",
-                "action": "archive_or_remove",
-                "description": "Archive or remove planning artifacts superseded by Spec-as-Code.",
-                "files": cleanup["obsolete_files"]
-            })
+            plan["tasks"].append(
+                {
+                    "priority": "medium",
+                    "action": "archive_or_remove",
+                    "description": "Archive or remove planning artifacts superseded by Spec-as-Code.",
+                    "files": cleanup["obsolete_files"],
+                }
+            )
 
         if doc_updates:
-            plan["tasks"].append({
-                "priority": "medium",
-                "action": "refresh_documentation",
-                "description": "Refresh core documentation with the Integrated Management System framing.",
-                "targets": doc_updates
-            })
+            plan["tasks"].append(
+                {
+                    "priority": "medium",
+                    "action": "refresh_documentation",
+                    "description": "Refresh core documentation with the Integrated Management System framing.",
+                    "targets": doc_updates,
+                }
+            )
 
         # Set context for generation
         plan["context"] = {
@@ -500,7 +548,7 @@ class OnboardingAnalyzer:
             "tech_stack": self._detect_tech_stack(),
             "repository_synthesis": repo_synthesis,
             "cleanup_plan": plan["cleanup_plan"],
-            "recommendations": self._generate_recommendations(analysis)
+            "recommendations": self._generate_recommendations(analysis),
         }
 
         return plan
@@ -509,14 +557,17 @@ class OnboardingAnalyzer:
 class SpecKitStructureGenerator:
     """
     Generates Spec-Kit compatible directory structure and initial files.
+    Now includes AI assistant configuration following Spec-Kit best practices.
     """
 
     def __init__(self, project_root: Path):
         self.project_root = project_root
+        self.ai_configurator = AIAssistantConfigurator(project_root)
 
     def create_structure(self, plan: Dict[str, Any]) -> Dict[str, Any]:
         """
         Create the directory structure according to plan.
+        Now includes AI assistant configuration files.
 
         Args:
             plan: Onboarding plan from analyzer
@@ -527,9 +578,11 @@ class SpecKitStructureGenerator:
         results = {
             "created": [],
             "failed": [],
-            "skipped": []
+            "skipped": [],
+            "ai_assistants": {"generated": [], "skipped": [], "errors": []},
         }
 
+        # Create directory structure
         for structure_item in plan.get("structure_to_create", []):
             if structure_item["type"] == "directory":
                 path = self.project_root / structure_item["path"]
@@ -542,10 +595,32 @@ class SpecKitStructureGenerator:
                     path.mkdir(parents=True, exist_ok=True)
                     results["created"].append(str(path))
                 except Exception as e:
-                    results["failed"].append({
-                        "path": str(path),
-                        "error": str(e)
-                    })
+                    results["failed"].append({"path": str(path), "error": str(e)})
+
+        # Configure AI assistants (auto-detect + defaults)
+        try:
+            logger.info("Configuring AI assistants...")
+            ai_results = self.ai_configurator.generate_config_files(
+                agents=None,  # Auto-detect + defaults
+                force=False,  # Don't overwrite existing
+            )
+            results["ai_assistants"] = ai_results
+
+            # Log summary
+            if ai_results["generated"]:
+                logger.info(
+                    f"Generated {len(ai_results['generated'])} AI assistant configuration files"
+                )
+            if ai_results["skipped"]:
+                logger.debug(f"Skipped {len(ai_results['skipped'])} existing files")
+            if ai_results["errors"]:
+                logger.warning(
+                    f"Failed to generate {len(ai_results['errors'])} files: {ai_results['errors']}"
+                )
+
+        except Exception as e:
+            logger.error(f"Failed to configure AI assistants: {e}")
+            results["ai_assistants"]["errors"].append(f"Configuration failed: {str(e)}")
 
         return results
 
@@ -647,4 +722,3 @@ When making technical decisions:
 - [Workflows](.cde/)
 - [Project Overview](../README.md)
 """
-

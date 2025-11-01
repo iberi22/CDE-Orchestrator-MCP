@@ -15,6 +15,7 @@ from cde_orchestrator.state_manager import StateManager
 from cde_orchestrator.prompt_manager import PromptManager
 from cde_orchestrator.repo_ingest import RepoIngestor
 
+
 def test_onboarding():
     """Test the onboarding process."""
     project_root = Path.cwd()
@@ -78,7 +79,7 @@ def test_onboarding():
     prompt_path = project_root / ".cde" / "prompts" / "00_onboarding.poml"
     if prompt_path.exists():
         print(f"   ✅ Found: {prompt_path}")
-        with open(prompt_path, 'r', encoding='utf-8') as f:
+        with open(prompt_path, "r", encoding="utf-8") as f:
             content = f.read()
             print(f"   Template size: {len(content)} chars")
     else:
@@ -96,7 +97,9 @@ def test_onboarding():
         print(f"   Has onboarding data: {bool(onboarding_data)}")
 
         if onboarding_data:
-            print(f"   Awaiting approval: {onboarding_data.get('awaiting_approval', False)}")
+            print(
+                f"   Awaiting approval: {onboarding_data.get('awaiting_approval', False)}"
+            )
             print(f"   Has plan: {bool(onboarding_data.get('plan'))}")
     else:
         print(f"   ⚠️  No state file at {state_file}")
@@ -109,11 +112,11 @@ def test_onboarding():
     components_ready = {
         "OnboardingAnalyzer": True,
         "needs_onboarding detection": True,
-        "plan generation": len(plan.get('docs_to_generate', [])) > 0,
+        "plan generation": len(plan.get("docs_to_generate", [])) > 0,
         "cleanup detection": bool(cleanup_plan),
         "repository ingestion": True,
         "POML template": prompt_path.exists(),
-        "state management": state_file.exists()
+        "state management": state_file.exists(),
     }
 
     for component, status in components_ready.items():
@@ -135,11 +138,13 @@ def test_onboarding():
         print("\nFix the issues above before running onboarding.")
     print("=" * 80)
 
+
 if __name__ == "__main__":
     try:
         test_onboarding()
     except Exception as e:
         print(f"\n❌ ERROR: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

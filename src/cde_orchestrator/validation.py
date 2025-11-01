@@ -30,6 +30,7 @@ def validate_input(model: Type[BaseModel]) -> Callable:
     Returns:
         Decorator function that validates inputs
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
@@ -40,21 +41,28 @@ def validate_input(model: Type[BaseModel]) -> Callable:
                 return func(*args, **validated.dict())
             except ValidationError as e:
                 # Return structured error for AI agent
-                return json.dumps({
-                    "error": "validation_error",
-                    "message": "Invalid input parameters",
-                    "details": e.errors(),
-                    "tool": func.__name__
-                }, indent=2)
+                return json.dumps(
+                    {
+                        "error": "validation_error",
+                        "message": "Invalid input parameters",
+                        "details": e.errors(),
+                        "tool": func.__name__,
+                    },
+                    indent=2,
+                )
             except Exception as e:
                 # Catch any other validation-related errors
-                return json.dumps({
-                    "error": "validation_error",
-                    "message": str(e),
-                    "tool": func.__name__
-                }, indent=2)
+                return json.dumps(
+                    {
+                        "error": "validation_error",
+                        "message": str(e),
+                        "tool": func.__name__,
+                    },
+                    indent=2,
+                )
 
         return wrapper
+
     return decorator
 
 
@@ -76,7 +84,9 @@ def sanitize_string(value: str, max_length: int = 10000) -> str:
     sanitized = value[:max_length]
 
     # Remove null bytes and other control characters
-    sanitized = ''.join(char for char in sanitized if ord(char) >= 32 or char in '\n\r\t')
+    sanitized = "".join(
+        char for char in sanitized if ord(char) >= 32 or char in "\n\r\t"
+    )
 
     return sanitized
 
@@ -98,7 +108,7 @@ def validate_file_path(path: str, allowed_extensions: list = None) -> bool:
     from pathlib import Path
 
     # Check for path traversal attacks
-    if '..' in path or path.startswith('/'):
+    if ".." in path or path.startswith("/"):
         raise ValueError(f"Invalid path: {path}. Path traversal not allowed.")
 
     # Check extension if specified
@@ -113,6 +123,7 @@ def validate_file_path(path: str, allowed_extensions: list = None) -> bool:
 # Common validation models for CDE tools
 class StartFeatureInput(BaseModel):
     """Validation model for cde_startFeature."""
+
     user_prompt: str
 
     class Config:
@@ -122,6 +133,7 @@ class StartFeatureInput(BaseModel):
 
 class SubmitWorkInput(BaseModel):
     """Validation model for cde_submitWork."""
+
     feature_id: str
     phase_id: str
     results: dict
@@ -133,6 +145,7 @@ class SubmitWorkInput(BaseModel):
 
 class CreateBranchInput(BaseModel):
     """Validation model for cde_createGitBranch."""
+
     feature_id: str
     branch_name: str
     base_branch: str = "main"
@@ -144,6 +157,7 @@ class CreateBranchInput(BaseModel):
 
 class CreateIssueInput(BaseModel):
     """Validation model for cde_createGitHubIssue."""
+
     feature_id: str
     title: str
     description: str

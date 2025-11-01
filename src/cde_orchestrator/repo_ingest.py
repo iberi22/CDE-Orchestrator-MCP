@@ -3,6 +3,7 @@ Lightweight repository ingestion utilities inspired by gitingest.
 Provides a small digest (tree, top files, content snippets) suitable to include in
 LLM prompts. Non-invasive: does not write files or modify repo.
 """
+
 import json
 import logging
 import subprocess
@@ -39,7 +40,9 @@ class RepoIngestor:
 
         if gitignore_path.exists():
             try:
-                for line in gitignore_path.read_text(encoding="utf-8", errors="ignore").splitlines():
+                for line in gitignore_path.read_text(
+                    encoding="utf-8", errors="ignore"
+                ).splitlines():
                     stripped = line.strip()
                     if stripped and not stripped.startswith("#"):
                         patterns.append(stripped)
@@ -49,7 +52,9 @@ class RepoIngestor:
         info_exclude = self.project_root / ".git" / "info" / "exclude"
         if info_exclude.exists():
             try:
-                for line in info_exclude.read_text(encoding="utf-8", errors="ignore").splitlines():
+                for line in info_exclude.read_text(
+                    encoding="utf-8", errors="ignore"
+                ).splitlines():
                     stripped = line.strip()
                     if stripped and not stripped.startswith("#"):
                         patterns.append(stripped)
@@ -79,7 +84,9 @@ class RepoIngestor:
             files = [self.project_root / p for p in result.stdout.splitlines() if p]
             return files
         except Exception as exc:
-            logger.debug("git ls-files failed, falling back to filesystem scan: %s", exc)
+            logger.debug(
+                "git ls-files failed, falling back to filesystem scan: %s", exc
+            )
             # Fallback: walk filesystem
             files = [p for p in self.project_root.rglob("*") if p.is_file()]
             if not self.include_gitignored:
@@ -90,7 +97,9 @@ class RepoIngestor:
                         continue
                     if str(rel).endswith("~"):
                         continue
-                    if self._gitignore_spec and self._gitignore_spec.match_file(str(rel)):
+                    if self._gitignore_spec and self._gitignore_spec.match_file(
+                        str(rel)
+                    ):
                         continue
                     filtered.append(path)
                 files = filtered
@@ -113,7 +122,12 @@ class RepoIngestor:
         except Exception:
             return True
 
-    def ingest(self, max_files: int = 200, max_snippet_chars: int = 2000, force_refresh: bool = False) -> Dict[str, Any]:
+    def ingest(
+        self,
+        max_files: int = 200,
+        max_snippet_chars: int = 2000,
+        force_refresh: bool = False,
+    ) -> Dict[str, Any]:
         """Return a small digest of the repo for prompting.
 
         Returns:
@@ -139,37 +153,63 @@ class RepoIngestor:
                 if self._is_binary(f):
                     continue
                 # read text safely
-                text = f.read_text(encoding='utf-8', errors='ignore')
-                lines = text.count('\n') + 1
+                text = f.read_text(encoding="utf-8", errors="ignore")
+                lines = text.count("\n") + 1
                 tokens = estimate_tokens(text)
-                file_infos.append({'path': str(f.relative_to(self.project_root)), 'size': size, 'lines': lines, 'text': text, 'tokens': tokens})
+                file_infos.append(
+                    {
+                        "path": str(f.relative_to(self.project_root)),
+                        "size": size,
+                        "lines": lines,
+                        "text": text,
+                        "tokens": tokens,
+                    }
+                )
             except Exception:
                 continue
 
         # sort by size desc and pick top N
-        file_infos.sort(key=lambda x: x['size'], reverse=True)
-        top = file_infos[:min(len(file_infos), max_files)]
+        file_infos.sort(key=lambda x: x["size"], reverse=True)
+        top = file_infos[: min(len(file_infos), max_files)]
 
         top_files = []
         for fi in top[:20]:
-            snippet = fi['text'][:max_snippet_chars]
-            top_files.append({'path': fi['path'], 'size': fi['size'], 'lines': fi['lines'], 'tokens': fi.get('tokens', 0), 'snippet': snippet})
+            snippet = fi["text"][:max_snippet_chars]
+            top_files.append(
+                {
+                    "path": fi["path"],
+                    "size": fi["size"],
+                    "lines": fi["lines"],
+                    "tokens": fi.get("tokens", 0),
+                    "snippet": snippet,
+                }
+            )
 
         # create a compact tree summary
-        tree = [{'path': fi['path'], 'size': fi['size'], 'lines': fi['lines'], 'tokens': fi.get('tokens', 0)} for fi in top[:100]]
+        tree = [
+            {
+                "path": fi["path"],
+                "size": fi["size"],
+                "lines": fi["lines"],
+                "tokens": fi.get("tokens", 0),
+            }
+            for fi in top[:100]
+        ]
 
         # short summary
         summary_lines = [f"Files analyzed: {len(file_infos)}"]
         languages = set()
         for fi in file_infos:
-            suffix = Path(fi['path']).suffix.lower().lstrip('.')
+            suffix = Path(fi["path"]).suffix.lower().lstrip(".")
             if suffix:
                 languages.add(suffix)
         if languages:
-            summary_lines.append(f"Detected file extensions: {', '.join(sorted(list(languages))[:10])}")
+            summary_lines.append(
+                f"Detected file extensions: {', '.join(sorted(list(languages))[:10])}"
+            )
 
         # token totals
-        total_tokens = sum(fi.get('tokens', 0) for fi in file_infos)
+        total_tokens = sum(fi.get("tokens", 0) for fi in file_infos)
         summary_lines.append(f"Estimated tokens (repo): {total_tokens}")
 
         # timestamp
@@ -177,18 +217,25 @@ class RepoIngestor:
 
         summary = " | ".join(summary_lines)
 
-        digest = {'summary': summary, 'tree': tree, 'top_files': top_files, 'total_tokens': total_tokens}
+        digest = {
+            "summary": summary,
+            "tree": tree,
+            "top_files": top_files,
+            "total_tokens": total_tokens,
+        }
         self._cache = digest
         return digest
 
-    def export_digest(self, dest: Optional[str] = 'specs', filename: str = 'repo_digest.json') -> Path:
+    def export_digest(
+        self, dest: Optional[str] = "specs", filename: str = "repo_digest.json"
+    ) -> Path:
         """Export a JSON digest to either 'specs' or '.specs' directory under project root.
 
         Returns the path written.
         """
-        dest_dir = self.project_root / (dest or 'specs')
+        dest_dir = self.project_root / (dest or "specs")
         dest_dir.mkdir(parents=True, exist_ok=True)
         digest = self.ingest()
         out = dest_dir / filename
-        out.write_text(json.dumps(digest, indent=2), encoding='utf-8')
+        out.write_text(json.dumps(digest, indent=2), encoding="utf-8")
         return out

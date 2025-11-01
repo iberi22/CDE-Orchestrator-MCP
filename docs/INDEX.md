@@ -46,8 +46,24 @@ Welcome to the CDE Orchestrator MCP documentation. This index will help you navi
 
 | Document | Description | Status |
 |----------|-------------|--------|
-| [Onboarding System](../ONBOARDING_FEATURE.md) | Repository onboarding and analysis | ✅ Implemented |
-| [Onboarding Review](../ONBOARDING_REVIEW_REPORT.md) | Implementation review and recommendations | ✅ Complete |
+| [Onboarding System](../specs/features/onboarding-system.md) | Repository onboarding and analysis | ✅ Implemented |
+| [AI Assistant Configuration](../specs/features/ai-assistant-config.md) | Automatic AI assistant setup (v1.0.0) | ✅ Implemented |
+| [Integrated Management](../specs/features/integrated-management-system.md) | Multi-project management system | 🔄 In Progress |
+| [User Authentication](../specs/features/user-authentication.md) | Authentication feature spec | 📋 Planned |
+
+### API Documentation
+
+| Document | Description | Audience |
+|----------|-------------|----------|
+| [MCP Tools API](../specs/api/mcp-tools.md) | Complete MCP tools reference (17 tools) | Developers, Integrators |
+| [API Structure](../specs/api/README.md) | API documentation organization | Contributors |
+
+### Code Reviews
+
+| Document | Description | Date |
+|----------|-------------|------|
+| [AI Assistant Config Review](../specs/reviews/ai-assistant-config-review.md) | Code quality assessment (A+ grade) | 2025-11-01 |
+| [Review Process](../specs/reviews/README.md) | Code review guidelines | - |
 
 ---
 

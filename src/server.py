@@ -43,6 +43,7 @@ def _status_for_phase(phase_id: str) -> FeatureStatus:
     """Map workflow phase identifiers to canonical feature status."""
     return FEATURE_STATUS_BY_PHASE.get(phase_id, FeatureStatus.FAILED)
 
+
 # --- Logging ---
 logging.basicConfig(
     level=logging.INFO,
@@ -94,18 +95,16 @@ def tool_handler(func):
                 return result
         except TimeoutError as exc:
             logger.error("Tool %s timed out: %s", func.__name__, exc)
-            return json.dumps({
-                "error": "timeout",
-                "message": str(exc),
-                "tool": func.__name__
-            }, indent=2)
+            return json.dumps(
+                {"error": "timeout", "message": str(exc), "tool": func.__name__},
+                indent=2,
+            )
         except Exception as exc:
             logger.exception("Tool %s failed", func.__name__)
-            return json.dumps({
-                "error": "internal_error",
-                "message": str(exc),
-                "tool": func.__name__
-            }, indent=2)
+            return json.dumps(
+                {"error": "internal_error", "message": str(exc), "tool": func.__name__},
+                indent=2,
+            )
 
     return wrapper
 
@@ -127,16 +126,22 @@ def cde_startFeature(user_prompt: str) -> str:
 
     # Validate and sanitize input
     if not user_prompt or len(user_prompt.strip()) < 10:
-        return json.dumps({
-            "error": "validation_error",
-            "message": "user_prompt must be at least 10 characters"
-        }, indent=2)
+        return json.dumps(
+            {
+                "error": "validation_error",
+                "message": "user_prompt must be at least 10 characters",
+            },
+            indent=2,
+        )
 
     if len(user_prompt) > 5000:
-        return json.dumps({
-            "error": "validation_error",
-            "message": "user_prompt must not exceed 5000 characters"
-        }, indent=2)
+        return json.dumps(
+            {
+                "error": "validation_error",
+                "message": "user_prompt must not exceed 5000 characters",
+            },
+            indent=2,
+        )
 
     user_prompt = sanitize_string(user_prompt, max_length=5000)
 
@@ -148,14 +153,14 @@ def cde_startFeature(user_prompt: str) -> str:
 
     # 3. Get the initial phase from the workflow
     initial_phase = workflow_manager.get_initial_phase()
-    if initial_phase.id != 'define':
+    if initial_phase.id != "define":
         raise ValueError("The workflow must start with a 'define' phase.")
 
     # 4. Prepare the context for the prompt recipe
     context = {
         "USER_PROMPT": user_prompt,
         "FEATURE_ID": feature_id,
-        "WORKFLOW_TYPE": workflow_type
+        "WORKFLOW_TYPE": workflow_type,
     }
 
     poml_recipe_path = Path(initial_phase.prompt_recipe)
@@ -180,14 +185,17 @@ def cde_startFeature(user_prompt: str) -> str:
     state_manager.save_state(state)
 
     # 7. Return structured JSON for the AI to execute
-    return json.dumps({
-        "status": "ok",
-        "feature_id": feature_id,
-        "phase": initial_phase.id,
-        "workflow_type": workflow_type,
-        "prompt": final_prompt,
-        "progress": state['features'][feature_id]['progress']
-    }, indent=2)
+    return json.dumps(
+        {
+            "status": "ok",
+            "feature_id": feature_id,
+            "phase": initial_phase.id,
+            "workflow_type": workflow_type,
+            "prompt": final_prompt,
+            "progress": state["features"][feature_id]["progress"],
+        },
+        indent=2,
+    )
 
 
 @app.tool()
@@ -207,18 +215,23 @@ def cde_submitWork(feature_id: str, phase_id: str, results: Dict[str, Any]) -> s
     # 1. Load current state
     state = state_manager.load_state()
 
-    if 'features' not in state or feature_id not in state['features']:
-        return json.dumps({"error": "feature_not_found", "feature_id": feature_id}, indent=2)
+    if "features" not in state or feature_id not in state["features"]:
+        return json.dumps(
+            {"error": "feature_not_found", "feature_id": feature_id}, indent=2
+        )
 
-    feature_state = state['features'][feature_id]
+    feature_state = state["features"][feature_id]
 
     # 2. Validate current phase
-    if feature_state['current_phase'] != phase_id:
-        return json.dumps({
-            "error": "invalid_phase",
-            "expected": feature_state['current_phase'],
-            "got": phase_id
-        }, indent=2)
+    if feature_state["current_phase"] != phase_id:
+        return json.dumps(
+            {
+                "error": "invalid_phase",
+                "expected": feature_state["current_phase"],
+                "got": phase_id,
+            },
+            indent=2,
+        )
 
     # 3. Process the results based on phase type
     try:
@@ -231,36 +244,33 @@ def cde_submitWork(feature_id: str, phase_id: str, results: Dict[str, Any]) -> s
 
     if next_phase_id is None:
         # Workflow complete
-        feature_state['status'] = FeatureStatus.COMPLETED.value
-        feature_state['current_phase'] = PhaseStatus.REVIEW.value
-        feature_state['completed_at'] = datetime.now(timezone.utc).isoformat()
-        feature_state['progress'] = workflow_manager.get_workflow_progress(phase_id)
+        feature_state["status"] = FeatureStatus.COMPLETED.value
+        feature_state["current_phase"] = PhaseStatus.REVIEW.value
+        feature_state["completed_at"] = datetime.now(timezone.utc).isoformat()
+        feature_state["progress"] = workflow_manager.get_workflow_progress(phase_id)
         state_manager.save_state(state)
-        return json.dumps({
-            "status": "completed",
-            "feature_id": feature_id
-        }, indent=2)
+        return json.dumps({"status": "completed", "feature_id": feature_id}, indent=2)
 
     # 5. Transition to next phase
     next_phase = workflow_manager.get_phase(next_phase_id)
-    feature_state['current_phase'] = next_phase_id
-    feature_state['status'] = _status_for_phase(next_phase_id).value
-    feature_state['progress'] = workflow_manager.get_workflow_progress(next_phase_id)
+    feature_state["current_phase"] = next_phase_id
+    feature_state["status"] = _status_for_phase(next_phase_id).value
+    feature_state["progress"] = workflow_manager.get_workflow_progress(next_phase_id)
 
     # 6. Prepare context for next phase
     context = {
         "FEATURE_ID": feature_id,
         "PREVIOUS_PHASE": phase_id,
-        "WORKFLOW_TYPE": feature_state.get('workflow_type', 'default')
+        "WORKFLOW_TYPE": feature_state.get("workflow_type", "default"),
     }
 
     # Add phase-specific context
-    if next_phase_id == 'decompose':
+    if next_phase_id == "decompose":
         # Load the feature spec from previous phase
         spec_file = SPECS_DIR / "features" / f"{feature_id}.md"
         if spec_file.exists():
             context["FEATURE_SPEC"] = spec_file.read_text()
-    elif next_phase_id == 'design':
+    elif next_phase_id == "design":
         # Load both spec and task breakdown
         spec_file = SPECS_DIR / "features" / f"{feature_id}.md"
         tasks_file = SPECS_DIR / "tasks" / f"{feature_id}_tasks.md"
@@ -276,13 +286,16 @@ def cde_submitWork(feature_id: str, phase_id: str, results: Dict[str, Any]) -> s
     # 8. Save updated state
     state_manager.save_state(state)
 
-    return json.dumps({
-        "status": "ok",
-        "feature_id": feature_id,
-        "phase": next_phase_id,
-        "prompt": final_prompt,
-        "progress": feature_state['progress']
-    }, indent=2)
+    return json.dumps(
+        {
+            "status": "ok",
+            "feature_id": feature_id,
+            "phase": next_phase_id,
+            "prompt": final_prompt,
+            "progress": feature_state["progress"],
+        },
+        indent=2,
+    )
 
 
 @app.tool()
@@ -299,10 +312,12 @@ def cde_getFeatureStatus(feature_id: str) -> str:
     """
     state = state_manager.load_state()
 
-    if 'features' not in state or feature_id not in state['features']:
-        return json.dumps({"error": "feature_not_found", "feature_id": feature_id}, indent=2)
+    if "features" not in state or feature_id not in state["features"]:
+        return json.dumps(
+            {"error": "feature_not_found", "feature_id": feature_id}, indent=2
+        )
 
-    feature_state = state['features'][feature_id]
+    feature_state = state["features"][feature_id]
     return json.dumps(feature_state, indent=2)
 
 
@@ -319,11 +334,11 @@ def cde_listFeatures() -> str:
 
     state = state_manager.load_state()
 
-    if 'features' not in state:
+    if "features" not in state:
         return json.dumps({"features": {}}, indent=2)
 
     features_summary = {}
-    for feature_id, feature_data in state['features'].items():
+    for feature_id, feature_data in state["features"].items():
         try:
             # Validate state structure
             validated = FeatureState(**feature_data)
@@ -333,12 +348,18 @@ def cde_listFeatures() -> str:
                 "current_phase": validated.current_phase.value,
                 "workflow_type": validated.workflow_type,
                 "created_at": validated.created_at.isoformat(),
-                "updated_at": validated.updated_at.isoformat() if validated.updated_at else None,
+                "updated_at": (
+                    validated.updated_at.isoformat() if validated.updated_at else None
+                ),
                 "progress": validated.progress,
                 "branch": validated.branch,
                 "recipe_id": validated.recipe_id,
                 "recipe_name": validated.recipe_name,
-                "prompt_preview": validated.prompt[:200] + "..." if len(validated.prompt) > 200 else validated.prompt
+                "prompt_preview": (
+                    validated.prompt[:200] + "..."
+                    if len(validated.prompt) > 200
+                    else validated.prompt
+                ),
             }
         except ValidationError as e:
             logger.error(f"Invalid feature state for {feature_id}: {e}")
@@ -346,7 +367,7 @@ def cde_listFeatures() -> str:
             features_summary[feature_id] = {
                 "status": "CORRUPTED",
                 "error": str(e),
-                "raw_data": feature_data
+                "raw_data": feature_data,
             }
 
     return json.dumps(features_summary, indent=2)
@@ -367,7 +388,9 @@ def cde_listRecipes() -> str:
 
 @app.tool()
 @tool_handler
-def cde_useRecipe(recipe_id: str, user_prompt: str, context: Optional[Dict[str, str]] = None) -> str:
+def cde_useRecipe(
+    recipe_id: str, user_prompt: str, context: Optional[Dict[str, str]] = None
+) -> str:
     """
     Uses a specific POML recipe to generate a specialized prompt.
 
@@ -388,19 +411,24 @@ def cde_useRecipe(recipe_id: str, user_prompt: str, context: Optional[Dict[str, 
 
     try:
         recipe_prompt = recipe_manager.load_recipe_content(recipe_id, context)
-        return json.dumps({
-            "status": "ok",
-            "recipe_id": recipe_id,
-            "task_id": context["TASK_ID"],
-            "prompt": recipe_prompt
-        }, indent=2)
+        return json.dumps(
+            {
+                "status": "ok",
+                "recipe_id": recipe_id,
+                "task_id": context["TASK_ID"],
+                "prompt": recipe_prompt,
+            },
+            indent=2,
+        )
     except ValueError as e:
         return json.dumps({"error": "recipe_not_found", "message": str(e)}, indent=2)
 
 
 @app.tool()
 @tool_handler
-def cde_createGitBranch(feature_id: str, branch_name: str, base_branch: str = "main") -> str:
+def cde_createGitBranch(
+    feature_id: str, branch_name: str, base_branch: str = "main"
+) -> str:
     """
     Creates a new Git branch for a feature.
 
@@ -421,8 +449,8 @@ def cde_createGitBranch(feature_id: str, branch_name: str, base_branch: str = "m
 
     # Update state
     state = state_manager.load_state()
-    if 'features' in state and feature_id in state['features']:
-        state['features'][feature_id]['branch'] = full_branch_name
+    if "features" in state and feature_id in state["features"]:
+        state["features"][feature_id]["branch"] = full_branch_name
         state_manager.save_state(state)
 
     return json.dumps(result, indent=2)
@@ -431,10 +459,7 @@ def cde_createGitBranch(feature_id: str, branch_name: str, base_branch: str = "m
 @app.tool()
 @tool_handler
 def cde_createGitHubIssue(
-    feature_id: str,
-    title: str,
-    description: str,
-    labels: Optional[List[str]] = None
+    feature_id: str, title: str, description: str, labels: Optional[List[str]] = None
 ) -> str:
     """
     Creates a GitHub issue for a feature.
@@ -464,15 +489,15 @@ def cde_createGitHubIssue(
         repo_name=repo_name,
         title=title,
         body=description,
-        labels=labels
+        labels=labels,
     )
 
     # Update state
     state = state_manager.load_state()
-    if 'features' in state and feature_id in state['features']:
-        if 'issues' not in state['features'][feature_id]:
-            state['features'][feature_id]['issues'] = []
-        state['features'][feature_id]['issues'].append(result)
+    if "features" in state and feature_id in state["features"]:
+        if "issues" not in state["features"][feature_id]:
+            state["features"][feature_id]["issues"] = []
+        state["features"][feature_id]["issues"].append(result)
         state_manager.save_state(state)
 
     return json.dumps(result, indent=2)
@@ -480,7 +505,9 @@ def cde_createGitHubIssue(
 
 @app.tool()
 @tool_handler
-def cde_commitWork(feature_id: str, message: str, files: Optional[List[str]] = None) -> str:
+def cde_commitWork(
+    feature_id: str, message: str, files: Optional[List[str]] = None
+) -> str:
     """
     Commits work for a feature to Git.
 
@@ -498,14 +525,16 @@ def cde_commitWork(feature_id: str, message: str, files: Optional[List[str]] = N
 
     # Update state
     state = state_manager.load_state()
-    if 'features' in state and feature_id in state['features']:
-        if 'commits' not in state['features'][feature_id]:
-            state['features'][feature_id]['commits'] = []
-        state['features'][feature_id]['commits'].append({
-            "message": message,
-            "result": result,
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        })
+    if "features" in state and feature_id in state["features"]:
+        if "commits" not in state["features"][feature_id]:
+            state["features"][feature_id]["commits"] = []
+        state["features"][feature_id]["commits"].append(
+            {
+                "message": message,
+                "result": result,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+        )
         state_manager.save_state(state)
 
     return json.dumps(result, indent=2)
@@ -540,21 +569,26 @@ def cde_suggestRecipe(user_prompt: str, phase_id: str = "define") -> str:
     suggested_recipe = recipe_manager.suggest_recipe(user_prompt, phase_id)
 
     if suggested_recipe:
-        return json.dumps({
-            "recipe_id": suggested_recipe.id,
-            "name": suggested_recipe.name,
-            "category": suggested_recipe.category,
-            "description": suggested_recipe.description,
-            "tools": suggested_recipe.tools,
-            "topology": suggested_recipe.topology
-        }, indent=2)
+        return json.dumps(
+            {
+                "recipe_id": suggested_recipe.id,
+                "name": suggested_recipe.name,
+                "category": suggested_recipe.category,
+                "description": suggested_recipe.description,
+                "tools": suggested_recipe.tools,
+                "topology": suggested_recipe.topology,
+            },
+            indent=2,
+        )
     else:
         return json.dumps({"error": "no_recipe"}, indent=2)
 
 
 @app.tool()
 @tool_handler
-def cde_startFeatureWithRecipe(user_prompt: str, recipe_id: Optional[str] = None) -> str:
+def cde_startFeatureWithRecipe(
+    user_prompt: str, recipe_id: Optional[str] = None
+) -> str:
     """
     Starts a new feature using a specific recipe or auto-suggested recipe.
 
@@ -571,7 +605,9 @@ def cde_startFeatureWithRecipe(user_prompt: str, recipe_id: Optional[str] = None
     if recipe_id:
         selected_recipe = recipe_manager.get_recipe(recipe_id)
         if not selected_recipe:
-            return json.dumps({"error": "recipe_not_found", "recipe_id": recipe_id}, indent=2)
+            return json.dumps(
+                {"error": "recipe_not_found", "recipe_id": recipe_id}, indent=2
+            )
     else:
         selected_recipe = recipe_manager.suggest_recipe(user_prompt, "define")
         if not selected_recipe:
@@ -581,7 +617,7 @@ def cde_startFeatureWithRecipe(user_prompt: str, recipe_id: Optional[str] = None
         "USER_PROMPT": user_prompt,
         "FEATURE_ID": feature_id,
         "WORKFLOW_TYPE": workflow_type,
-        "PHASE": "define"
+        "PHASE": "define",
     }
 
     try:
@@ -606,16 +642,19 @@ def cde_startFeatureWithRecipe(user_prompt: str, recipe_id: Optional[str] = None
     state["features"][feature_id] = feature_state.serialize()
     state_manager.save_state(state)
 
-    return json.dumps({
-        "status": "ok",
-        "feature_id": feature_id,
-        "phase": "define",
-        "workflow_type": workflow_type,
-        "recipe_id": selected_recipe.id,
-        "recipe_name": selected_recipe.name,
-        "prompt": recipe_prompt,
-        "progress": state['features'][feature_id]['progress']
-    }, indent=2)
+    return json.dumps(
+        {
+            "status": "ok",
+            "feature_id": feature_id,
+            "phase": "define",
+            "workflow_type": workflow_type,
+            "recipe_id": selected_recipe.id,
+            "recipe_name": selected_recipe.name,
+            "prompt": recipe_prompt,
+            "progress": state["features"][feature_id]["progress"],
+        },
+        indent=2,
+    )
 
 
 def _process_phase_results(phase_id: str, results: Dict[str, Any], feature_id: str):
@@ -626,8 +665,8 @@ def _process_phase_results(phase_id: str, results: Dict[str, Any], feature_id: s
     (SPECS_DIR / "design").mkdir(exist_ok=True)
     (SPECS_DIR / "reviews").mkdir(exist_ok=True)
 
-    if phase_id == 'define':
-        spec = results.get('specification')
+    if phase_id == "define":
+        spec = results.get("specification")
         if spec:
             spec_file = SPECS_DIR / "features" / f"{feature_id}.md"
             spec_file.write_text(spec)
@@ -637,8 +676,7 @@ def _process_phase_results(phase_id: str, results: Dict[str, Any], feature_id: s
             try:
                 git_connector = service_factory.get_connector("git")
                 branch_result = git_connector.create_branch(
-                    f"feature-{feature_id[:8]}",
-                    "main"
+                    f"feature-{feature_id[:8]}", "main"
                 )
                 if branch_result.get("success"):
                     logger.info("Created Git branch for feature %s", feature_id)
@@ -647,32 +685,35 @@ def _process_phase_results(phase_id: str, results: Dict[str, Any], feature_id: s
             except Exception as exc:
                 logger.warning("Could not create Git branch: %s", exc)
 
-    elif phase_id == 'decompose':
-        breakdown = results.get('task_breakdown')
+    elif phase_id == "decompose":
+        breakdown = results.get("task_breakdown")
         if breakdown:
             tasks_file = SPECS_DIR / "tasks" / f"{feature_id}_tasks.md"
             tasks_file.write_text(breakdown)
             logger.debug("Wrote task breakdown: %s", tasks_file)
 
-    elif phase_id == 'design':
-        design_doc = results.get('design_document')
+    elif phase_id == "design":
+        design_doc = results.get("design_document")
         if design_doc:
             design_file = SPECS_DIR / "design" / f"{feature_id}_design.md"
             design_file.write_text(design_doc)
             logger.debug("Wrote design doc: %s", design_file)
 
-    elif phase_id == 'review':
-        review_doc = results.get('review_document')
+    elif phase_id == "review":
+        review_doc = results.get("review_document")
         if review_doc:
             review_file = SPECS_DIR / "reviews" / f"{feature_id}_review.md"
             review_file.write_text(review_doc)
             logger.debug("Wrote review doc: %s", review_file)
+
+
 @app.tool()
 @tool_handler
 def cde_onboardingProject() -> str:
     """
     Analyzes project structure and performs onboarding setup.
     Automatically detects if onboarding is needed and creates Spec-Kit compatible structure.
+    Now includes AI assistant configuration following 2025 industry best practices.
     This is typically called when first connecting the MCP server to a new or existing project.
 
     Returns:
@@ -686,14 +727,28 @@ def cde_onboardingProject() -> str:
     analysis = analyzer.needs_onboarding()
 
     if not analysis["needs_onboarding"]:
-        return json.dumps({
-            "status": "already_configured",
-            "message": "Project already has Spec-Kit compatible structure.",
-            "existing_structure": analysis["existing_structure"]
-        }, indent=2)
+        return json.dumps(
+            {
+                "status": "already_configured",
+                "message": "Project already has Spec-Kit compatible structure.",
+                "existing_structure": analysis["existing_structure"],
+            },
+            indent=2,
+        )
 
     # Generate onboarding plan
     plan = analyzer.generate_onboarding_plan()
+
+    # Detect AI assistants available on the system
+    from .cde_orchestrator.ai_assistant_configurator import AIAssistantConfigurator
+
+    ai_configurator = AIAssistantConfigurator(project_root)
+    detected_agents = ai_configurator.detect_installed_agents()
+    ai_summary = ai_configurator.get_configuration_summary()
+
+    logger.info(
+        f"Detected AI assistants: {', '.join(detected_agents) if detected_agents else 'none'}"
+    )
 
     # Prepare context for POML prompt
     # Add a lightweight repo digest (inspired by gitingest) so the LLM has concrete file snippets
@@ -702,7 +757,11 @@ def cde_onboardingProject() -> str:
         repo_digest = ingestor.ingest(max_files=200)
     except Exception as exc:
         logger.warning("Repo ingestion failed: %s", exc)
-        repo_digest = {"summary": f"Error generating digest: {exc}", "tree": [], "top_files": []}
+        repo_digest = {
+            "summary": f"Error generating digest: {exc}",
+            "tree": [],
+            "top_files": [],
+        }
 
     plan_context = plan.get("context", {})
     context = {
@@ -710,25 +769,46 @@ def cde_onboardingProject() -> str:
         "GIT_INSIGHTS": json.dumps(analysis["project_info"]["git"], indent=2),
         "MISSING_STRUCTURE": json.dumps(analysis["missing_structure"], indent=2),
         "TECH_STACK": json.dumps(analyzer._detect_tech_stack(), indent=2),
-        "REPO_DIGEST": json.dumps({
-            "summary": repo_digest.get("summary"),
-            "top_files": [{"path": f['path'], "snippet": f['snippet'][:1000]} for f in repo_digest.get('top_files', [])[:10]]
-        }, indent=2),
-        "REPO_SYNTHESIS": json.dumps(plan_context.get("repository_synthesis", {}), indent=2),
+        "REPO_DIGEST": json.dumps(
+            {
+                "summary": repo_digest.get("summary"),
+                "top_files": [
+                    {"path": f["path"], "snippet": f["snippet"][:1000]}
+                    for f in repo_digest.get("top_files", [])[:10]
+                ],
+            },
+            indent=2,
+        ),
+        "REPO_SYNTHESIS": json.dumps(
+            plan_context.get("repository_synthesis", {}), indent=2
+        ),
         "CLEANUP_RECOMMENDATIONS": json.dumps(plan.get("cleanup_plan", {}), indent=2),
+        "AI_ASSISTANTS": json.dumps(
+            {
+                "detected": detected_agents,
+                "summary": ai_summary,
+                "recommendation": "Configure AI assistant instruction files (AGENTS.md, GEMINI.md, .github/copilot-instructions.md) following 2025 industry standards.",
+            },
+            indent=2,
+        ),
         "MANAGEMENT_PRINCIPLES": (
             "Specification-as-Code, Single Source of Truth (Git + Issues), Progressive Scalability, "
-            "Automation-friendly structure for AI assistants."
-        )
+            "Automation-friendly structure for AI assistants. "
+            "AI-First Documentation: AGENTS.md (OpenAI standard), GEMINI.md (Google AI Studio), "
+            ".github/copilot-instructions.md (GitHub Copilot)."
+        ),
     }
 
     # Load and prepare onboarding prompt
     onboarding_prompt_path = PROMPT_RECIPES_DIR / "00_onboarding.poml"
     if not onboarding_prompt_path.exists():
-        return json.dumps({
-            "error": "Onboarding prompt not found",
-            "expected_path": str(onboarding_prompt_path)
-        }, indent=2)
+        return json.dumps(
+            {
+                "error": "Onboarding prompt not found",
+                "expected_path": str(onboarding_prompt_path),
+            },
+            indent=2,
+        )
 
     try:
         final_prompt = prompt_manager.load_and_prepare(onboarding_prompt_path, context)
@@ -740,7 +820,13 @@ def cde_onboardingProject() -> str:
         state["onboarding"]["plan"] = plan
         state["onboarding"]["analysis"] = analysis
         state["onboarding"]["cleanup_plan"] = plan.get("cleanup_plan", {})
-        state["onboarding"]["repository_synthesis"] = plan_context.get("repository_synthesis", {})
+        state["onboarding"]["repository_synthesis"] = plan_context.get(
+            "repository_synthesis", {}
+        )
+        state["onboarding"]["ai_assistants"] = {
+            "detected": detected_agents,
+            "summary": ai_summary,
+        }
         # store the generated prompt as a draft (not yet applied)
         state["onboarding"]["draft_prompt"] = final_prompt
         state["onboarding"]["repo_digest"] = repo_digest
@@ -750,17 +836,19 @@ def cde_onboardingProject() -> str:
         # Return the prompt to the client so it can generate draft documents with an LLM.
         # The user must call the `cde_publishOnboarding` tool with the generated documents
         # to persist them into the repository (this enforces human validation).
-        return json.dumps({
-            "status": "draft_ready",
-            "message": "Onboarding draft prompt prepared. Use an LLM to generate documents, then call cde_publishOnboarding to apply after human approval.",
-            "draft_preview": final_prompt[:2000]
-        }, indent=2)
+        return json.dumps(
+            {
+                "status": "draft_ready",
+                "message": "Onboarding draft prompt prepared. Use an LLM to generate documents, then call cde_publishOnboarding to apply after human approval.",
+                "draft_preview": final_prompt[:2000],
+            },
+            indent=2,
+        )
     except Exception as exc:
         logger.exception("Error generating onboarding prompt")
-        return json.dumps({
-            "error": "onboarding_prompt_failed",
-            "message": str(exc)
-        }, indent=2)
+        return json.dumps(
+            {"error": "onboarding_prompt_failed", "message": str(exc)}, indent=2
+        )
 
 
 @app.tool()
@@ -780,20 +868,23 @@ def cde_publishOnboarding(documents: Dict[str, str], approve: bool = True) -> st
     onboarding = state.get("onboarding", {})
 
     if not onboarding.get("awaiting_approval"):
-        return json.dumps({
-            "error": "no_onboarding_pending",
-            "message": "Run cde_onboardingProject first."
-        }, indent=2)
+        return json.dumps(
+            {
+                "error": "no_onboarding_pending",
+                "message": "Run cde_onboardingProject first.",
+            },
+            indent=2,
+        )
 
     if not approve:
         # mark as declined
         onboarding["awaiting_approval"] = False
         onboarding["approved"] = False
         state_manager.save_state(state)
-        return json.dumps({
-            "status": "declined",
-            "message": "Onboarding draft declined by user."
-        }, indent=2)
+        return json.dumps(
+            {"status": "declined", "message": "Onboarding draft declined by user."},
+            indent=2,
+        )
 
     # Apply documents: write files under project_root, but do not commit (user workflow can commit)
     created = []
@@ -802,7 +893,7 @@ def cde_publishOnboarding(documents: Dict[str, str], approve: bool = True) -> st
         try:
             dest = project_root / path
             dest.parent.mkdir(parents=True, exist_ok=True)
-            dest.write_text(content, encoding='utf-8')
+            dest.write_text(content, encoding="utf-8")
             created.append(str(dest.relative_to(project_root)))
         except Exception as e:
             failed.append({"path": path, "error": str(e)})
@@ -813,10 +904,11 @@ def cde_publishOnboarding(documents: Dict[str, str], approve: bool = True) -> st
     onboarding["failed_writes"] = failed
     state_manager.save_state(state)
 
-    return json.dumps({"status": "applied", "created": created, "failed": failed}, indent=2)
+    return json.dumps(
+        {"status": "applied", "created": created, "failed": failed}, indent=2
+    )
 
 
 if __name__ == "__main__":
     # This allows running the server directly for testing
     app.run()
-

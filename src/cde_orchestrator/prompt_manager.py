@@ -66,7 +66,9 @@ class PromptManager:
         sanitized_content = content
         for key in placeholders:
             sanitized_value = self._sanitize_value(context[key])
-            sanitized_content = sanitized_content.replace(f"{{{{{key}}}}}", sanitized_value)
+            sanitized_content = sanitized_content.replace(
+                f"{{{{{key}}}}}", sanitized_value
+            )
 
         unresolved = set(self.PLACEHOLDER_PATTERN.findall(sanitized_content))
         if unresolved:

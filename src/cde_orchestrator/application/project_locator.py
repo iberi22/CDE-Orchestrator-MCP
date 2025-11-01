@@ -136,7 +136,7 @@ class ProjectLocator:
         self,
         project_path: Optional[str] = None,
         project_name: Optional[str] = None,
-        fallback_to_cwd: bool = True
+        fallback_to_cwd: bool = True,
     ) -> Optional[str]:
         """
         Resolve project location from various inputs.
@@ -208,6 +208,7 @@ def get_project_locator() -> ProjectLocator:
     global _default_locator
     if _default_locator is None:
         import os
+
         scan_roots_env = os.getenv("CDE_SCAN_ROOTS")
         scan_roots = scan_roots_env.split(";") if scan_roots_env else []
         _default_locator = ProjectLocator(scan_roots)
