@@ -39,6 +39,9 @@ ALLOWED_ROOT_FILES = {
     "CONTRIBUTING.md",
     "CODE_OF_CONDUCT.md",
     "LICENSE",
+    "AGENTS.md",      # OpenAI/general AI agents format
+    "GEMINI.md",      # Google AI Studio format
+    "CLAUDE.md",      # Anthropic Claude format (if needed)
 }
 
 ALLOWED_DIRECTORIES = {
@@ -210,32 +213,46 @@ def validate_script_location(file_path: str) -> tuple[bool, str]:
     return True, "File location OK"
 
 
+def _iter_input_files(argv: list[str]) -> list[str]:
+    """Collect files either from CLI args (preferred) or stdin (fallback)."""
+    files: list[str] = []
+    # Prefer explicit filenames from pre-commit
+    if argv:
+        files = [f for f in argv if f]
+        if files:
+            return files
+    # Fallback: read from stdin (one per line)
+    for line in sys.stdin:
+        file_path = line.strip()
+        if file_path:
+            files.append(file_path)
+    return files
+
+
 def main():
     """
     Entry point for pre-commit hook.
 
-    Reads file paths from stdin (pre-commit format).
+    Accepts file paths as CLI arguments (preferred by pre-commit) or via stdin.
     Exit code: 0 = all files pass, 1 = governance violation found
     """
     violations = []
 
-    # Read files from stdin (one per line)
-    for line in sys.stdin:
-        file_path = line.strip()
-        if not file_path:
-            continue
+    input_files = _iter_input_files(sys.argv[1:])
+    if not input_files:
+        print("No input files provided to governance checker. Skipping.")
+        return 0
 
+    for file_path in input_files:
         # Check documentation governance
         is_doc_compliant, doc_reason = is_governance_compliant(file_path)
-
         if not is_doc_compliant:
             violations.append((file_path, doc_reason))
         else:
             print(f"[OK] {file_path}: {doc_reason}")
 
-        # Check script organization
+        # Check script organization (handles tests and scripts)
         is_script_compliant, script_reason = validate_script_location(file_path)
-
         if not is_script_compliant:
             violations.append((file_path, script_reason))
 

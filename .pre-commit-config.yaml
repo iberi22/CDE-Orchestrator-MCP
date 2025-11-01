@@ -6,28 +6,29 @@ repos:
   # DOCUMENTATION GOVERNANCE
   - repo: local
     hooks:
-      # Prevent .md files outside designated directories
+      # Prevent .md files outside designated directories (Python-based for Windows compatibility)
       - id: check-doc-governance
         name: Check Documentation Governance Rules
-        entry: bash scripts/validation/check-governance.sh
-        language: system
-        files: '\.md$'
+        entry: scripts/validation/enforce-doc-governance.py
+        language: python
+        files: '\\.md$'
         pass_filenames: true
 
-      # Validate document metadata (YAML frontmatter)
+      # Validate document metadata (YAML frontmatter) - blocks commit if missing
       - id: validate-metadata
         name: Validate Document Metadata
-        entry: python scripts/validation/validate-metadata.py --staged
-        language: system
-        files: '\.md$'
+        entry: scripts/validation/validate-metadata.py
+        language: python
+        files: '\\.md$'
         pass_filenames: false
+        args: ['--staged']
+        additional_dependencies: ['pyyaml']
 
-      # Validate test structure
+      # Validate test structure (organization only)
       - id: validate-test-structure
         name: Validate Test Structure
-        entry: python scripts/validation/validate-test-structure.py --staged
-        language: system
-        files: 'test_.*\.py$'
+        entry: scripts/validation/validate-test-structure.py
+        language: python
         pass_filenames: false
 
   # MARKDOWN LINTING

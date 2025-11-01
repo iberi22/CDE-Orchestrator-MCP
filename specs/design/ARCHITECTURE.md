@@ -1,3 +1,22 @@
+---
+title: "CDE Orchestrator MCP - Hexagonal Architecture"
+description: "Complete architecture guide for hexagonal/clean architecture pattern in CDE Orchestrator"
+type: "design"
+status: "active"
+created: "2025-10-15"
+updated: "2025-11-01"
+author: "CDE Orchestrator Team"
+tags:
+  - "architecture"
+  - "hexagonal"
+  - "ports-and-adapters"
+  - "clean-architecture"
+llm_summary: |
+  Comprehensive architecture documentation for CDE Orchestrator MCP using hexagonal/clean architecture.
+  Covers domain entities, ports, adapters, dependency injection, and multi-project design.
+  Reference when designing new features or understanding system structure.
+---
+
 # CDE Orchestrator MCP - Hexagonal Architecture
 
 > **Target Audience**: Large Language Models, AI Coding Agents

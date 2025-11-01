@@ -1,4 +1,22 @@
-# Agent Guide: CDE Orchestrator MCP
+---
+title: "Agent Guide - CDE Orchestrator MCP"
+description: "Quick reference for AI agents working with CDE Orchestrator MCP tools and workflows"
+type: "guide"
+status: "active"
+created: "2025-10-31"
+updated: "2025-11-01"
+author: "CDE Orchestrator Team"
+tags:
+  - "ai-agents"
+  - "mcp-tools"
+  - "workflow"
+  - "contracts"
+llm_summary: |
+  Reference guide for AI agents using CDE Orchestrator MCP. Covers tool contracts, workflow rules,
+  and core principles. Use when working with MCP tools or understanding project structure.
+---
+
+# CDE Orchestrator MCP - Agent Guide
 
 This repository is designed for AI agents. Keep human-facing docs minimal and machine contracts explicit. Follow these rules when interacting with the MCP tools and repository.
 

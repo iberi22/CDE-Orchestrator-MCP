@@ -1,103 +1,50 @@
 # GitHub Copilot Instructions for CDE Orchestrator MCP
 
-> **Target Audience**: GitHub Copilot, AI Coding Agents sonnnet4.5 generatd
-> **Last Updated**: 2025-10-31
+> **Target Audience**: GitHub Copilot, AI Coding Agents
+> **Last Updated**: 2025-11-01
 > **Architecture**: Hexagonal (Ports & Adapters)
-> **Scale**: Multi-project orchestration (1000+ repositories)
+> **Token-Optimized**: Links to detailed specs when needed
 
 ---
 
-## 🎯 Project Mission
+## 🎯 Quick Context
 
-CDE Orchestrator is an **MCP (Model Context Protocol) server** that implements **Context-Driven Engineering** for AI-powered software development. It manages multiple projects simultaneously, orchestrates workflows, and can invoke GitHub Copilot CLI headless for automated code generation.
+**What**: MCP server implementing Context-Driven Engineering for AI-powered development
+**How**: Manages 1000+ projects, orchestrates workflows, invokes Copilot CLI headless
+**New**: Dynamic Skill Management System (DSMS) - self-improving AI knowledge layer
 
-**NEW (2025-11-01):** The system now includes a **Dynamic Skill Management System (DSMS)** - a self-improving knowledge layer that automatically generates, updates, and manages AI skills based on task requirements and web research.
+📖 **Deep Dive**: See `specs/design/ARCHITECTURE.md` for complete architecture
 
-## 🏗️ Architecture Overview
+## 🏗️ Architecture (Hexagonal/Clean)
 
-### Hexagonal Architecture (Clean Architecture)
+**Layers**: External Agents → MCP Server → Application Core (Domain/UseCases/Ports) → Adapters
 
-```
-┌─────────────────────────────────────────────┐
-│           EXTERNAL AGENTS (LLMs)            │
-└──────────────────┬──────────────────────────┘
-                   │
-        ┌──────────┴─────────┐
-        │   MCP SERVER       │  ← PRIMARY ADAPTER (IN)
-        │   (FastMCP)        │
-        └──────────┬─────────┘
-                   │
-   ┌───────────────┴───────────────┐
-   │      APPLICATION CORE          │
-   │  ┌──────────────────────────┐ │
-   │  │    DOMAIN ENTITIES       │ │
-   │  │  - Project, Feature      │ │
-   │  │  - Workflow, Phase       │ │
-   │  └──────────────────────────┘ │
-   │  ┌──────────────────────────┐ │
-   │  │     USE CASES            │ │
-   │  │  - StartFeature          │ │
-   │  │  - SubmitWork            │ │
-   │  │  - ExecuteCode           │ │
-   │  │  - ManageProjects        │ │
-   │  └──────────────────────────┘ │
-   │  ┌──────────────────────────┐ │
-   │  │    PORTS (Interfaces)    │ │
-   │  │  - IProjectRepository    │ │
-   │  │  - IWorkflowEngine       │ │
-   │  │  - ICodeExecutor         │ │
-   │  └──────────────────────────┘ │
-   └────────────┬──────────────────┘
-                │
-      ┌─────────┴────────┐
-      │  ADAPTERS (OUT)  │  ← SECONDARY ADAPTERS
-      └─────────┬────────┘
-                │
-    ┌───────────┼────────────┐
-    │           │            │
-┌───┴───┐  ┌───┴────┐  ┌───┴─────┐
-│FS Repo│  │Copilot │  │ GitHub  │
-│       │  │  CLI   │  │   MCP   │
-└───────┘  └────────┘  └─────────┘
-```
-
-### Dependency Rule
-
-**Critical**: Dependencies point INWARD ONLY
-- ✅ Application → Domain
+**Critical Rule**: Dependencies point INWARD only
 - ✅ Adapters → Application → Domain
-- ❌ Domain → Adapters (NEVER!)
-- ❌ Domain → Infrastructure (NEVER!)
+- ❌ Domain NEVER imports Adapters or Infrastructure
 
-## 📁 Project Structure
+📖 **Full Diagram**: `specs/design/ARCHITECTURE.md`
+
+## 📁 Key Directories
 
 ```
-CDE Orchestrator MCP/
-├── .cde/                           # Workflow definitions
-│   ├── workflow.yml               # Phase definitions
-│   ├── prompts/                   # POML templates
-│   │   ├── 01_define.poml
-│   │   ├── 02_decompose.poml
-│   │   └── ...
-│   ├── recipes/                   # Specialized agents
-│   └── state.json                 # Global state
-├── .vscode/
-│   └── mcp.json                   # MCP server config
-├── specs/                         # Spec-Kit methodology
-│   ├── features/                  # Feature specifications
-│   ├── tasks/                     # Task roadmaps
-│   │   └── improvement-roadmap.md # 63 prioritized tasks
-│   ├── design/                    # Technical designs
-│   └── reviews/                   # Code reviews
-├── memory/
-│   └── constitution.md            # Project principles
-├── src/
-│   ├── server.py                  # MCP entry point (FastMCP)
-│   └── cde_orchestrator/
-│       ├── domain/                # 🔷 HEXAGON CORE
-│       │   ├── entities.py        # Business logic (Project, Feature)
-│       │   ├── ports.py           # Interface contracts
-│       │   └── exceptions.py      # Domain errors
+src/cde_orchestrator/
+├── domain/          # 🔷 Core business logic (NO external deps)
+├── application/     # Use cases (orchestration)
+├── adapters/        # Infrastructure implementations
+└── infrastructure/  # DI, config
+
+specs/               # 📚 All documentation (Spec-Kit)
+├── features/        # Feature specs
+├── design/          # Architecture decisions
+├── tasks/           # Roadmaps (see improvement-roadmap.md)
+├── governance/      # Process rules
+└── templates/       # Document patterns
+
+.cde/                # Workflow engine
+├── workflow.yml     # Phase definitions
+├── prompts/         # POML templates
+└── recipes/         # Specialized agents
 │       ├── application/           # Use cases (orchestration)
 │       ├── adapters/              # Implementations
 │       │   ├── filesystem_project_repository.py
@@ -150,109 +97,44 @@ The agent (LLM) already knows which project the user is referring to. CDE's job 
 2. **Resolve** project names to paths (optional convenience)
 3. **Execute** workflows in that path
 
-**No registries. No caching. No complex state.**
+## 🎓 Core Concepts
 
-#### Configuration
+### 1. Context-Driven Engineering (CDE)
 
-```json
-// .vscode/mcp.json
-{
-  "servers": {
-    "CDE_Orchestrator": {
-      "command": "python",
-      "args": [
-        "src/server.py",
-        "--scan-paths",
-        "E:\\scripts-python",
-        "C:\\work\\projects"
-      ]
-    }
-  }
-}
+Development as **state transitions** defined in `workflow.yml`:
+
+```yaml
+phases:
+  - id: define          # Write specification
+  - id: decompose       # Break into tasks
+  - id: design          # Technical design
+  - id: implement       # Write code
+  - id: test            # Create tests
+  - id: review          # QA validation
 ```
 
-Scan paths provide **search roots** for name resolution only. No scanning happens unless the agent explicitly asks to resolve a name.
+Each phase takes **context** from previous phases, produces **artifacts** for next phases.
 
-#### Usage Pattern
+### 2. Multi-Project Management
 
+**Philosophy**: Stateless & Simple. The agent knows context, CDE validates and executes.
+
+**Usage**: All MCP tools accept `project_path` or `project_name`:
 ```python
-from cde_orchestrator.application.project_locator import ProjectLocator
-
-locator = ProjectLocator(scan_roots=["E:\\scripts-python"])
-
-# Agent provides path directly (preferred)
-info = locator.validate_project_path("E:\\scripts-python\\CDE")
-# Returns: ProjectInfo(path=..., exists=True, has_git=True)
-
-# OR agent provides name, we resolve it
-resolved = locator.resolve_project_path(project_name="CDE")
-# Returns: "E:\\scripts-python\\CDE"
-
-# Each operation is independent - no state persists
+cde_startFeature(project_name="CDE", user_prompt="Add auth")
+# OR
+cde_startFeature(project_path="E:\\scripts-python\\CDE", user_prompt="Add auth")
 ```
 
-#### Project Operations
-
-All MCP tools accept optional `project_path` or `project_name`:
-
-```python
-# Agent specifies project explicitly
-cde_startFeature(
-    project_name="CDE",  # Resolves to E:\scripts-python\CDE
-    user_prompt="Add authentication"
-)
-
-# OR uses path directly
-cde_startFeature(
-    project_path="E:\\scripts-python\\CDE",
-    user_prompt="Add authentication"
-)
-
-# State is managed per-project in .cde/state.json
-# No cross-project registries needed
-```
+State managed per-project in `.cde/state.json`. No registries needed.
 
 ### 3. Copilot CLI Integration
 
-The `ICodeExecutor` port allows headless Copilot execution:
-
-```python
-# Use case: Agent needs to generate code
-executor = CopilotCLIAdapter(yolo_mode=True)
-
-result = await executor.execute_prompt(
-    project_path="E:\\scripts-python\\my-project",
-    prompt="Create FastAPI user authentication with JWT",
-    context={"yolo": True}  # Auto-apply changes
-)
-
-# Result includes:
-# - modified_files: ["src/auth.py", "src/models.py"]
-# - diff: "..."
-# - success: True/False
-```
+`ICodeExecutor` port allows headless Copilot execution for code generation.
 
 ### 4. Workflow as Code
 
-Everything is versioned in `.cde/workflow.yml`:
-
-```yaml
-name: "Standard Web Application Workflow"
-phases:
-  - id: define
-    prompt_recipe: ".cde/prompts/01_define.poml"
-    outputs:
-      - type: "file"
-        path: "specs/features/{feature_name}.md"
-
-  - id: decompose
-    inputs:
-      - type: "file"
-        path: "specs/features/{feature_name}.md"
-    outputs:
-      - type: "github_issues"
-        labels: ["cde-task"]
-```
+Versioned in `.cde/workflow.yml` - defines phases, inputs, outputs, and POML templates.
 
 ### 5. Dynamic Skill Management System (DSMS) 🆕
 
@@ -290,67 +172,13 @@ Every workflow execution follows the smart reuse loop:
   - **NEW**: Archived after 6 months inactivity (never deleted, preserved)
   - Learnings distilled to base skill
 
-**Smart Reuse Logic:**
-
-```python
-# Fingerprint skill's dependencies
-context_hash = SHA256({
-    "domain": "database",
-    "tools": ["redis", "fastapi", "python"],
-    "tool_versions": {"redis": "7.2.4", "redis-py": "5.0.1", ...}
-})
-
-# When preparing skill for task:
-if cached_skill.context_hash == current_context_hash:
-    # Dependencies unchanged - REUSE (saves time)
-    cached_skill.metadata.last_used = now()
-    cached_skill.metadata.generation_count += 1
-    return cached_skill
-else:
-    # Context changed - regenerate with updated context
-    new_skill = await generate_ephemeral_skill(...)
-    new_skill.metadata.previous_version_id = cached_skill.skill_id
-    return new_skill
-```
-
-**Example Workflow:**
-
-```
-Task 1: "Implement Redis caching" (Day 1)
-  → SRD: HIGH complexity, database domain, gaps=[redis, caching]
-  → Generator: Create new ephemeral skill (2.5s)
-  → Store with context_hash=a1b2c3d4...
-  ↓
-Task 2: "Add Redis to FastAPI" (Day 15)
-  → SRD: HIGH complexity, database domain, gaps=[redis, caching]
-  → Manager: Found cached skill! Check staleness
-  → Hash match: a1b2c3d4... == a1b2c3d4... (YES)
-  → REUSE (0.1s lookup, no generation) ✅
-  → Increment generation_count: 1
-  ↓
-Task 3: "Cache with Redis 8.0" (Day 45)
-  → Manager: Found cached skill, but...
-  → Hash mismatch: redis 8.0 ≠ redis 7.2 in stored hash
-  → Breaking changes detected in redis 8.0
-  → REGENERATE (2.5s, mark old as stale)
-  → Link: new_skill.previous_version_id = old_skill.skill_id
-```
-
-**Background Job (Daily):**
-
-```python
-# Archive inactive skills (6-month threshold)
-for skill in ephemeral_skills:
-    if (now - skill.metadata.last_used).days > 180:
-        skill.metadata.status = "archived"
-        skill.metadata.archived_at = now()
-        # Move to .copilot/skills/archived/
-        # Preserve for audit, never delete
-```
-
 **See Full Design:**
 - `specs/design/EPHEMERAL_SMART_REUSE.md` - Complete smart reuse strategy (NEW)
 - `specs/design/SMART_REUSE_INTEGRATION.md` - Integration with SkillManager (NEW)
+- `specs/design/EXECUTIVE_SUMMARY_V2.md` - Executive overview, v2.0 (NEW)
+- `specs/design/QUICK_REFERENCE_V2.md` - Quick reference guide (NEW)
+- `specs/design/dynamic-skill-system.md` - Original architecture (44 pages)
+- `specs/design/dynamic-skill-system-implementation.md` - Code implementation guide
 - `specs/design/EXECUTIVE_SUMMARY_V2.md` - Executive overview, v2.0 (NEW)
 - `specs/design/QUICK_REFERENCE_V2.md` - Quick reference guide (NEW)
 - `specs/design/dynamic-skill-system.md` - Original architecture (44 pages)
@@ -540,7 +368,7 @@ async def test_execute_code_use_case():
   - [x] Domain entities (Project, Feature, Workflow)
   - [x] Port interfaces (IProjectRepository, ICodeExecutor, etc.)
   - [x] Domain exceptions
-  - [x] ARCHITECTURE.md documentation
+  - [x] specs/design/ARCHITECTURE.md documentation
 
 ### 🔄 In Progress (Phase 2)
 
@@ -779,7 +607,7 @@ class Project:
         return Feature.create(self.id, prompt)
 ```
 
-## �️ Documentation Governance (Section 6)
+## 📖 Documentation Governance (Section 6)
 
 **Core Principle**: All documentation lives in designated directories. Single source of truth prevents sprawl.
 
@@ -805,66 +633,63 @@ Only these .md files are allowed in the repository root:
 - `CODE_OF_CONDUCT.md` - Community standards
 - `LICENSE` - Legal
 
+### Metadata Requirement (Mandatory)
+
+**All markdown files MUST begin with YAML frontmatter**:
+
+```yaml
+---
+title: "Document Title"
+description: "One-sentence summary (50-150 chars)"
+type: "feature|design|task|guide|governance|session|execution|feedback|research"
+status: "draft|active|deprecated|archived"
+created: "YYYY-MM-DD"
+updated: "YYYY-MM-DD"
+author: "Name or Agent ID"
+llm_summary: |
+  Brief summary optimized for LLM context (2-3 sentences).
+  Answers: What is this? Why does it exist? When to use it?
+---
+```
+
+**Enforcement**:
+- Commits are **BLOCKED** if `.md` file lacks valid frontmatter
+- Use `scripts/metadata/add-metadata.py --path <file>` to auto-add
+- Run `scripts/validation/validate-metadata.py --all` to audit
+
 ### AI Agent Governance Checklist
 
 When asked to create or modify documentation:
 
 **✅ DO:**
-- Identify the document's purpose FIRST (feature? design? task? guide? **agent output?**)
+- Identify the document's purpose FIRST (feature? design? task? guide? agent output?)
 - Place in the correct directory based on purpose
-- **NEW**: Place agent-generated outputs in `/agent-docs/` subdirectories:
+- Place agent-generated outputs in `/agent-docs/` subdirectories:
   - Session summaries → `agent-docs/sessions/`
   - Execution reports → `agent-docs/execution/`
   - Feedback/analysis → `agent-docs/feedback/`
   - Web research → `agent-docs/research/`
-- Use templates from `specs/templates/` (session-summary.md, execution-report.md, feedback-report.md)
-- Include metadata block with date, agent name, duration, status
+- Use templates from `specs/templates/`
+- Include YAML frontmatter with all required fields
 - Check if a similar document already exists (avoid duplication)
-- Link from existing indexes (e.g., `specs/README.md`, `docs/INDEX.md`, `agent-docs/README.md`)
+- Link from existing indexes
 - Follow naming conventions (lowercase, hyphens for spaces, ISO dates)
-- Add document metadata (date, author/agent, status)
 
-**✅ DO - Agent Output Examples:**
-```markdown
-# Session summary after onboarding work
-agent-docs/sessions/session-onboarding-review-2025-01-15.md
-
-# Execution report for workflow run
-agent-docs/execution/execution-onboarding-2025-01.md
-
-# Feedback document with recommendations
-agent-docs/feedback/feedback-governance-improvements-2025-01.md
-
-# Web research summary (auto-archived after 90 days)
-agent-docs/research/research-best-practices-2025-01-10.md
-```
-
-**❌ DON'T - Agent Output Anti-Patterns:**
+**❌ DON'T:**
 - Create .md files in the project root (unless in exceptions list)
-- Create documents in subdirectories with inconsistent naming
+- Create documents without YAML frontmatter
 - Duplicate content across multiple .md files (link instead)
 - Leave new documents orphaned (must link from index/parent)
-- Ignore `.markdownlintrc` rules (120-char lines, consistent formatting)
+- Ignore `.markdownlintrc` rules
 - Create documents without clear purpose/ownership
 
 ### Enforcement Mechanisms
 
-**Pre-Commit Hook** (Automatic):
-- Runs before every commit
+**Pre-Commit Hooks** (Automatic):
 - Validates file paths against governance rules
-- Rejects commits with root .md files outside exceptions
+- Validates YAML frontmatter in all .md files
+- Blocks commits with violations
 - Command: `pre-commit run --all-files`
-
-**Markdown Linting** (Automatic):
-- Enforces formatting consistency (120-char lines, proper headings, etc)
-- Configured in `.markdownlintrc`
-- Integrated into pre-commit pipeline
-- Command: `markdownlint-cli --config .markdownlintrc *.md`
-
-**CI/CD Integration** (GitHub Actions):
-- Runs governance checks on every PR
-- Blocks merge if violations detected
-- Reports specific violations and remediation steps
 
 ### Document Lifecycle
 
@@ -879,16 +704,6 @@ Every new documentation follows this path:
 ### For More Details
 
 See full governance framework: `specs/governance/DOCUMENTATION_GOVERNANCE.md`
-
----
-
-## �🎓 Learning Resources
-
-- **Hexagonal Architecture**: https://netflixtechblog.com/ready-for-changes-with-hexagonal-architecture-b315ec967749
-- **Domain-Driven Design**: Eric Evans book
-- **Clean Architecture**: Robert C. Martin book
-- **FastMCP**: https://github.com/jlowin/fastmcp
-- **Spec-Kit**: https://github.com/github/spec-kit
 
 ---
 

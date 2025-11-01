@@ -294,6 +294,12 @@ def main():
 
         # Skip certain files
         relative_path = file_path.relative_to(repo_root)
+
+        # Skip .github/copilot-instructions.md (uses GitHub-specific frontmatter format)
+        if str(relative_path) == ".github/copilot-instructions.md":
+            print(f"SKIP: {relative_path} (GitHub-specific format)")
+            continue
+
         if any(
             part.startswith(".")
             for part in relative_path.parts

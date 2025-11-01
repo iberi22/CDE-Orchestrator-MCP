@@ -1,3 +1,22 @@
+---
+title: "CDE Orchestrator MCP - Improvement Roadmap"
+description: "Prioritized roadmap with 63 tasks organized by phases for CDE Orchestrator development"
+type: "task"
+status: "active"
+created: "2025-10-25"
+updated: "2025-11-01"
+author: "CDE Orchestrator Team"
+tags:
+  - "roadmap"
+  - "planning"
+  - "tasks"
+  - "phases"
+llm_summary: |
+  Comprehensive improvement roadmap with 63 prioritized tasks across 4 phases. Phase 1 (critical fixes)
+  completed. Covers hexagonal architecture migration, testing, documentation, and advanced features.
+  Reference when planning sprints or understanding project progress.
+---
+
 # CDE Orchestrator MCP - Improvement Roadmap
 
 **Versión:** 2.0

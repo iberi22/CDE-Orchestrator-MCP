@@ -1,8 +1,27 @@
+---
+title: "Documentation Governance Framework"
+description: "Rules and patterns for systematic documentation organization in CDE Orchestrator MCP"
+type: "governance"
+status: "active"
+created: "2025-01-10"
+updated: "2025-11-01"
+author: "CDE Orchestrator Team"
+tags:
+  - "governance"
+  - "documentation"
+  - "standards"
+  - "metadata"
+llm_summary: |
+  Complete governance framework for documentation in CDE Orchestrator. Defines directory structure,
+  metadata requirements, enforcement mechanisms, and rules for AI agents. Reference when creating
+  or organizing documentation.
+---
+
 # Documentation Governance Framework
 
 > **Purpose**: Establish rules and patterns for systematic documentation organization
 > **Status**: Active
-> **Last Updated**: 2025-01-11
+> **Last Updated**: 2025-11-01
 > **Owner**: CDE Orchestrator Team
 
 ---
@@ -217,7 +236,15 @@ related_tasks: [TASK-001, TASK-042]
    - `CODE_OF_CONDUCT.md` - Community values
    - `LICENSE` / `LICENSE.md` - Legal
 
-2. **Never in root** (Always moved):
+2. **AI Assistant Instructions** (Industry standards):
+   - `AGENTS.md` - OpenAI/general AI agents format (comprehensive, all agents)
+   - `GEMINI.md` - Google AI Studio format (Gemini-specific optimizations)
+   - `.github/copilot-instructions.md` - GitHub Copilot configuration (uses GitHub-specific frontmatter: `description`, `applyTo` only)
+
+3. **GitHub-Specific Directories** (Tool-specific formats):
+   - `.github/workflows/*.yml` - GitHub Actions workflows
+
+4. **Never in root** (Always moved):
    - Summary documents from design sessions → `specs/design/`
    - Task breakdowns → `specs/tasks/`
    - Feature ideas → `specs/features/`
@@ -264,6 +291,34 @@ When agents (including GitHub Copilot) create documentation:
 [ ] Linked to related documents
 [ ] Pre-commit hook would approve this location
 ```
+
+---
+
+## 🧾 Metadata Requirement (Mandatory)
+
+All markdown documents must begin with a YAML frontmatter block that follows the standard in `specs/templates/document-metadata.md`.
+
+Minimum required fields:
+
+```yaml
+---
+title: "Human-readable title"
+description: "One-sentence summary (50–150 chars)"
+type: "feature|design|task|guide|governance|session|execution|feedback|research"
+status: "draft|active|deprecated|archived"
+created: "YYYY-MM-DD"
+updated: "YYYY-MM-DD"
+author: "Name or Agent ID"
+---
+```
+
+**Exceptions**: Files with tool-specific frontmatter formats (e.g., `.github/copilot-instructions.md`) are exempt from this requirement.
+
+Validation and enforcement:
+- Commits are blocked if a `.md` file is missing frontmatter or has invalid metadata
+- Use `scripts/metadata/add-metadata.py` to auto-add missing frontmatter
+- Use `scripts/validation/validate-metadata.py --all` to audit repository-wide
+- Metadata validation skips `.github/` directory (tool-specific formats)
 
 ---
 
