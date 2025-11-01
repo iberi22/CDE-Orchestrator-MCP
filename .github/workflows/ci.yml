@@ -46,7 +46,7 @@ jobs:
       run: isort --check-only --diff src/ tests/
 
     - name: Type check with mypy
-      run: mypy src/ || true
+      run: timeout 300 mypy src/ || true
 
     - name: Run tests
       run: pytest tests/ --cov=src/ --cov-report=xml
@@ -58,6 +58,7 @@ jobs:
         flags: unittests
         name: codecov-umbrella
         fail_ci_if_error: false
+      timeout-minutes: 2
 
   build:
     runs-on: ubuntu-latest
