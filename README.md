@@ -1,3 +1,23 @@
+---
+title: CDE Orchestrator MCP
+description: '[![CI](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/workflows/ci.yml/badge.svg)](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/wo'
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- api
+- architecture
+- documentation
+- mcp
+- migration
+- orchestration
+llm_summary: "User guide for CDE Orchestrator MCP.\n  [![CI](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/workflows/ci.yml/badge.svg)](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/workflows/ci.yml)\
+  \ [![codecov](https://codecov.io/gh/iberi22/CDE-Orchestrator-MCP/branch/main/graph/badge.svg)](https://codecov.io/gh/iberi22/CDE-Orchest\n\
+  \  Reference when working with guide documentation."
+---
+
 # CDE Orchestrator MCP
 
 [![CI](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/workflows/ci.yml/badge.svg)](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/workflows/ci.yml)

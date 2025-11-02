@@ -1,3 +1,25 @@
+---
+author: Auto-Generated
+created: '2025-11-02'
+description: '**Búsqueda realizada**: ```powershell rg "get_event_loop|new_event_loop|set_event_loop"
+  src/ --type py'
+llm_summary: "User guide for Reporte de Auditoría de Código - Migración Python 3.14.\n\
+  \  > **Fecha**: 2025-11-01 > **Agente**: KERNEL (GPT-5) > **Proyecto**: CDE Orchestrator\
+  \ MCP > **Objetivo**: Identificar breaking changes de Python 3.14 **Búsqueda realizada**:\
+  \ **Resultado**: ✅ **NO ENCONTRADO**\n  Reference when working with guide documentation."
+status: draft
+tags:
+- '11'
+- '2025'
+- '314'
+- api
+- audit
+- code
+title: Reporte de Auditoría de Código - Migración Python 3.14
+type: execution
+updated: '2025-11-02'
+---
+
 # Reporte de Auditoría de Código - Migración Python 3.14
 
 > **Fecha**: 2025-11-01

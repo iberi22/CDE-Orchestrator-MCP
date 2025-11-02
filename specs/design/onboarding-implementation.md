@@ -1,3 +1,24 @@
+---
+author: Auto-Generated
+created: '2025-11-02'
+description: '``` ┌─────────────────────────────────────────────────────────────┐'
+llm_summary: "User guide for Onboarding System: Technical Implementation Guide.\n\
+  \  > **Status**: Implementation Ready > **Design Doc**: `specs/design/onboarding-system-redesign.md`\
+  \ > **Target**: Sprint 1-4 (8 weeks) > **Priority**: \U0001F534 CRITICAL | Operation\
+  \ | Target | Current | Status |\n  Reference when working with guide documentation."
+status: draft
+tags:
+- architecture
+- documentation
+- implementation
+- mcp
+- migration
+- onboarding
+title: 'Onboarding System: Technical Implementation Guide'
+type: design
+updated: '2025-11-02'
+---
+
 # Onboarding System: Technical Implementation Guide
 
 > **Status**: Implementation Ready

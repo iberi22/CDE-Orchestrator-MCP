@@ -1,3 +1,25 @@
+---
+title: 'TASK.md: CDE Orchestrator MCP Implementation'
+description: '| ID | Task | Priority | Status | |---|---|---|---|'
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- analysis
+- detailed
+- documentation
+- mcp
+- python
+- testing
+llm_summary: "User guide for TASK.md: CDE Orchestrator MCP Implementation.\n  | ID\
+  \ | Task | Priority | Status | |---|---|---|---| | SETUP-01 | Create the project\
+  \ directory structure as defined in `README.md`. | HIGH | ✅ Complete | | SETUP-02\
+  \ | Initialize a Python virtual environment and create `requirements.txt`. | HIGH\
+  \ | ✅ Complete |\n  Reference when working with guide documentation."
+---
+
 # TASK.md: CDE Orchestrator MCP Implementation
 
 ## Phase 1: Project Setup & Core Models

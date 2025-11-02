@@ -1,21 +1,26 @@
 ---
-title: "Session: Documentation Reorganization & Governance Implementation"
-description: "Complete documentation reorganization with metadata enforcement and pre-commit hooks"
-type: "session"
-status: "completed"
-created: "2025-11-01"
-updated: "2025-11-01"
-author: "GitHub Copilot"
-tags:
-  - "documentation"
-  - "governance"
-  - "metadata"
-  - "pre-commit"
-  - "reorganization"
-llm_summary: |
-  Complete session report on documentation reorganization project. Moved 11 .md files to proper directories,
+author: GitHub Copilot
+created: '2025-11-01'
+description: Complete documentation reorganization with metadata enforcement and pre-commit
+  hooks
+llm_summary: 'Complete session report on documentation reorganization project. Moved
+  11 .md files to proper directories,
+
   implemented metadata validation, configured pre-commit hooks, and condensed copilot-instructions.md.
+
   Reference for understanding project governance improvements.
+
+  '
+status: active
+tags:
+- documentation
+- governance
+- metadata
+- pre-commit
+- reorganization
+title: 'Session: Documentation Reorganization & Governance Implementation'
+type: session
+updated: '2025-11-01'
 ---
 
 # Session: Documentation Reorganization & Governance Implementation

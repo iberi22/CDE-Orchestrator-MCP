@@ -6,6 +6,6 @@ This module contains adapters for analyzing Git repositories,
 reading file contents, and generating repository digests.
 """
 
-from .repository_adapter import RepoIngestor, estimate_tokens
+from .repository_adapter import GitAdapter
 
-__all__ = ["RepoIngestor", "estimate_tokens"]
+__all__ = ["GitAdapter"]

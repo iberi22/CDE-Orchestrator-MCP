@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 from cde_orchestrator.application.onboarding import OnboardingUseCase
 from cde_orchestrator.adapters.state import StateAdapter
 from cde_orchestrator.adapters.prompt import PromptAdapter
-from cde_orchestrator.adapters.repository import RepoIngestor
+
 
 
 def test_onboarding():
@@ -64,15 +64,7 @@ def test_onboarding():
             for file in obsolete:
                 print(f"   - {file}")
 
-    # Step 4: Test repository synthesis
-    print("\n4. REPOSITORY SYNTHESIS...")
-    try:
-        ingestor = RepoIngestor(project_root)
-        repo_digest = ingestor.ingest(max_files=50)
-        print(f"   Total files analyzed: {len(repo_digest.get('top_files', []))}")
-        print(f"   Summary length: {len(str(repo_digest.get('summary', '')))} chars")
-    except Exception as e:
-        print(f"   ⚠️  Ingestion warning: {e}")
+
 
     # Step 5: Check if prompt template exists
     print("\n5. VALIDATING PROMPT TEMPLATE...")

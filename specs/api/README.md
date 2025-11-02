@@ -1,3 +1,24 @@
+---
+author: Auto-Generated
+created: '2025-11-02'
+description: This directory contains API specifications and contracts for CDE Orchestrator
+  MCP.
+llm_summary: "User guide for API Specifications.\n  This directory contains API specifications\
+  \ and contracts for CDE Orchestrator MCP. All API documentation should be stored\
+  \ here, following OpenAPI/Swagger standards when applicable. CDE Orchestrator exposes\
+  \ several MCP tools:\n  Reference when working with guide documentation."
+status: draft
+tags:
+- api
+- documentation
+- mcp
+- readme
+- workflow
+title: API Specifications
+type: design
+updated: '2025-11-02'
+---
+
 # API Specifications
 
 This directory contains API specifications and contracts for CDE Orchestrator MCP.

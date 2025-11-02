@@ -1,3 +1,23 @@
+---
+author: Auto-Generated
+created: '2025-11-02'
+description: '```python from datetime import datetime, timedelta'
+llm_summary: "User guide for Smart Reuse Integration in SkillManager.\n  > **File**:\
+  \ Implementation of `prepare_ephemeral_skill()` logic > **Status**: Ready for Phase\
+  \ 2 > **Impact**: Replaces 24h cleanup with smart context-based reuse **Status**:\
+  \ Ready for Phase 2 Implementation\n  Reference when working with guide documentation."
+status: draft
+tags:
+- api
+- database
+- python
+- smart_reuse_integration
+- workflow
+title: Smart Reuse Integration in SkillManager
+type: design
+updated: '2025-11-02'
+---
+
 # Smart Reuse Integration in SkillManager
 
 > **File**: Implementation of `prepare_ephemeral_skill()` logic

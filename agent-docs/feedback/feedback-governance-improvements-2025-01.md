@@ -1,3 +1,27 @@
+---
+author: Auto-Generated
+created: '2025-11-02'
+description: '```text /reports/                            # 🆕 Nuevos documentos de
+  agentes'
+llm_summary: "User guide for Análisis de Gobernanza de Documentación Generada por\
+  \ Agentes IA.\n  > **Fecha**: 2025-11-01 > **Agente**: KERNEL (GPT-5 Low → High)\
+  \ > **Estado**: Propuesta para revisión humana 1. **Separación Clara**: Features\
+  \ (código futuro) vs Reports (trabajo pasado) 2. **Ciclo de Vida**: Reports son\
+  \ **transitorios** (archivables), specs son **permanentes**\n  Reference when working\
+  \ with guide documentation."
+status: draft
+tags:
+- '01'
+- '2025'
+- deployment
+- documentation
+- feedback
+- governance
+title: Análisis de Gobernanza de Documentación Generada por Agentes IA
+type: feedback
+updated: '2025-11-02'
+---
+
 # Análisis de Gobernanza de Documentación Generada por Agentes IA
 
 > **Fecha**: 2025-11-01

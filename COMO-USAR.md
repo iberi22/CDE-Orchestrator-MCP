@@ -1,3 +1,24 @@
+---
+title: 🚀 Cómo Usar CDE Orchestrator MCP
+description: '```bash python test_with_real_project.py ``` Esto probará:'
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- api
+- architecture
+- authentication
+- como
+- documentation
+- mcp
+llm_summary: "User guide for \U0001F680 Cómo Usar CDE Orchestrator MCP.\n  Esto probará:\
+  \ - ✅ Selección de workflows (5 prompts diferentes) - ✅ Descarga de skills (awesome-claude-skills)\
+  \ - ✅ Web research para actualizar skills **Resultado Esperado**: Todos los tests\
+  \ en verde ✅\n  Reference when working with guide documentation."
+---
+
 # 🚀 Cómo Usar CDE Orchestrator MCP
 
 ## Quick Start - En 3 Pasos

@@ -1,3 +1,24 @@
+---
+title: Resumen Ejecutivo - Migración Python 3.14
+description: '| Documento | Ubicación | Contenido | |-----------|-----------|-----------|'
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- mcp
+- migration
+- performance
+- python
+- python_314_migration_summary
+- testing
+llm_summary: "User guide for Resumen Ejecutivo - Migración Python 3.14.\n  > **Estado**:\
+  \ ✅ 80% COMPLETADO - Listo para Testing > **Fecha**: 2025-11-01 > **Versión del\
+  \ Proyecto**: 0.2.0 > **Agente**: KERNEL (GPT-5) | Documento | Ubicación | Contenido\
+  \ | |-----------|-----------|-----------|\n  Reference when working with guide documentation."
+---
+
 # Resumen Ejecutivo - Migración Python 3.14
 
 > **Estado**: ✅ 80% COMPLETADO - Listo para Testing

@@ -1,3 +1,25 @@
+---
+title: Documentation Governance Quick Reference
+description: '**Last Updated**: 2025-11-01 **Status**: ✅ Active - Automated Enforcement
+  Enabled'
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- architecture
+- authentication
+- documentation
+- governance_quick_reference
+- python
+- workflow
+llm_summary: "User guide for Documentation Governance Quick Reference.\n  **Last Updated**:\
+  \ 2025-11-01 **Status**: ✅ Active - Automated Enforcement Enabled **Step 1: Identify\
+  \ Purpose** Is this document for: - Describing a feature? → `specs/features/` -\
+  \ Technical design? → `specs/design/`\n  Reference when working with guide documentation."
+---
+
 # Documentation Governance Quick Reference
 
 **Last Updated**: 2025-11-01

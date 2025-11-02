@@ -1,3 +1,25 @@
+---
+title: GitHub Copilot Instructions for CDE Orchestrator MCP
+description: 'title: "Document Title" description: "One-sentence summary (50-150 chars)"'
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- api
+- architecture
+- authentication
+- copilot
+- database
+- documentation
+llm_summary: "User guide for GitHub Copilot Instructions for CDE Orchestrator MCP.\n\
+  \  > **Target Audience**: GitHub Copilot, AI Coding Agents > **Last Updated**: 2025-11-01\
+  \ > **Architecture**: Hexagonal (Ports & Adapters) > **Token-Optimized**: Links\
+  \ to detailed specs when needed title: \"Document Title\"\n  Reference when working\
+  \ with guide documentation."
+---
+
 # GitHub Copilot Instructions for CDE Orchestrator MCP
 
 > **Target Audience**: GitHub Copilot, AI Coding Agents

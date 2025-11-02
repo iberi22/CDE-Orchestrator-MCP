@@ -1,3 +1,26 @@
+---
+title: Contributing to CDE Orchestrator MCP
+description: Thank you for contributing! This document provides guidelines for contributing
+  code and documentation to the CDE Orchestrator MCP project.
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- api
+- architecture
+- authentication
+- contributing
+- documentation
+- mcp
+llm_summary: "User guide for Contributing to CDE Orchestrator MCP.\n  Thank you for\
+  \ contributing! This document provides guidelines for contributing code and documentation\
+  \ to the CDE Orchestrator MCP project. We follow a **single source of truth** principle\
+  \ for all documentation. This prevents sprawl and maintains clarity.\n  Reference\
+  \ when working with guide documentation."
+---
+
 # Contributing to CDE Orchestrator MCP
 
 Thank you for contributing! This document provides guidelines for contributing code and documentation to the CDE Orchestrator MCP project.

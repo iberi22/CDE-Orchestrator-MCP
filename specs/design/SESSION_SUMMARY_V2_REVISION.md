@@ -1,3 +1,25 @@
+---
+author: Auto-Generated
+created: '2025-11-02'
+description: '**Purpose**: Integration patterns with SkillManager'
+llm_summary: "User guide for Session Summary: Smart Reuse Strategy Revision.\n  >\
+  \ **Date**: 2025-11-01 > **Status**: ✅ COMPLETE > **Outcome**: 4 new comprehensive\
+  \ documents defining smart reuse strategy (NO auto-delete) **Purpose**: Integration\
+  \ patterns with SkillManager **Key Code Patterns**:\n  Reference when working with\
+  \ guide documentation."
+status: draft
+tags:
+- api
+- architecture
+- database
+- documentation
+- migration
+- performance
+title: 'Session Summary: Smart Reuse Strategy Revision'
+type: design
+updated: '2025-11-02'
+---
+
 # Session Summary: Smart Reuse Strategy Revision
 
 > **Date**: 2025-11-01

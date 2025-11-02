@@ -1,3 +1,25 @@
+---
+author: Auto-Generated
+created: '2025-11-02'
+description: 1. **Actualizar el entorno de desarrollo** a Python 3.14
+llm_summary: "User guide for Plan de Migración a Python 3.14 - CDE Orchestrator MCP.\n\
+  \  > **Estado**: En ejecución > **Fecha de Inicio**: 2025-11-01 > **Responsable**:\
+  \ KERNEL (GPT-5) > **Versión**: 1.0 > **Tipo**: Plan de Migración 1. **Actualizar\
+  \ el entorno de desarrollo** a Python 3.14\n  Reference when working with guide\
+  \ documentation."
+status: draft
+tags:
+- '314'
+- architecture
+- documentation
+- mcp
+- migration
+- performance
+title: Plan de Migración a Python 3.14 - CDE Orchestrator MCP
+type: design
+updated: '2025-11-02'
+---
+
 # Plan de Migración a Python 3.14 - CDE Orchestrator MCP
 
 > **Estado**: En ejecución

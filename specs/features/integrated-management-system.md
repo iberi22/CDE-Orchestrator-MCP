@@ -1,3 +1,26 @@
+---
+author: Auto-Generated
+created: '2025-11-02'
+description: 'Software development teams need a structured, scalable, and automation-friendly
+  system for managing requirements, planning, and development workflows '
+llm_summary: "User guide for Feature Spec: Integrated Management System.\n  Software\
+  \ development teams need a structured, scalable, and automation-friendly system\
+  \ for managing requirements, planning, and development workflows that evolves with\
+  \ project complexity while maintaining traceability and collaboration.\n  Reference\
+  \ when working with guide documentation."
+status: draft
+tags:
+- api
+- authentication
+- documentation
+- integrated
+- management
+- mcp
+title: 'Feature Spec: Integrated Management System'
+type: feature
+updated: '2025-11-02'
+---
+
 # Feature Spec: Integrated Management System
 
 ## 1. Problem Statement

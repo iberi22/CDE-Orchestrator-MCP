@@ -1,3 +1,25 @@
+---
+author: Auto-Generated
+created: '2025-11-02'
+description: '``` ┌────────────────────────────────────────────────────────────┐'
+llm_summary: "User guide for Executive Summary: Dynamic Skill System - Revised (v2.0).\n\
+  \  > **Date**: 2025-11-01 > **Version**: 2.0 (Smart Reuse) > **Previous Version**:\
+  \ 1.0 (24h Auto-Delete) > **Status**: Approved > **Revision Reason**: User requirement:\
+  \ \"solo quiero que se actualicen los skills cuando sea necesario\"\n  Reference\
+  \ when working with guide documentation."
+status: draft
+tags:
+- api
+- architecture
+- database
+- deployment
+- documentation
+- executive_summary_v2
+title: 'Executive Summary: Dynamic Skill System - Revised (v2.0)'
+type: design
+updated: '2025-11-02'
+---
+
 # Executive Summary: Dynamic Skill System - Revised (v2.0)
 
 > **Date**: 2025-11-01

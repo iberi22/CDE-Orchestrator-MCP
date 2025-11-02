@@ -1,3 +1,26 @@
+---
+title: CDE Orchestrator MCP - Gemini AI Studio Instructions
+description: '**Name**: CDE Orchestrator MCP **Purpose**: Model Context Protocol server
+  for Context-Driven Engineering'
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- api
+- architecture
+- authentication
+- database
+- deployment
+- documentation
+llm_summary: "User guide for CDE Orchestrator MCP - Gemini AI Studio Instructions.\n\
+  \  > **Format**: GEMINI.md (Google AI Studio Standard) > **Target**: Google Gemini\
+  \ AI (AI Studio, Gemini CLI, IDX) > **Last Updated**: 2025-11-02 > **Priority**:\
+  \ MCP-First Workflow Orchestration for Gemini\n  Reference when working with guide\
+  \ documentation."
+---
+
 # CDE Orchestrator MCP - Gemini AI Studio Instructions
 
 > **Format**: GEMINI.md (Google AI Studio Standard)

@@ -1,3 +1,26 @@
+---
+title: CDE Orchestrator MCP - Resumen Ejecutivo
+description: '**Fecha:** 31 de octubre de 2025 **Versión:** 2.0 **Estado:** Revisión
+  Profesional Completada'
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- api
+- architecture
+- authentication
+- deployment
+- documentation
+- executive_summary
+llm_summary: "User guide for CDE Orchestrator MCP - Resumen Ejecutivo.\n  **Fecha:**\
+  \ 31 de octubre de 2025 **Versión:** 2.0 **Estado:** Revisión Profesional Completada\
+  \ **Impacto:** Alto - Decisiones incorrecas de IA basadas en estado corrupto **Problema:**\
+  \ **Causas:** - StateManager no valida estructura al guardar\n  Reference when working\
+  \ with guide documentation."
+---
+
 # CDE Orchestrator MCP - Resumen Ejecutivo
 
 **Fecha:** 31 de octubre de 2025

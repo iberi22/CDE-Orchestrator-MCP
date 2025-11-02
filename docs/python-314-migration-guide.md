@@ -1,3 +1,25 @@
+---
+title: 🚀 Instrucciones para Completar la Migración a Python 3.14
+description: 'Necesitas completar 5 pasos simples que toman ~37 minutos en total:'
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- '314'
+- guide
+- mcp
+- migration
+- performance
+- python
+llm_summary: "User guide for \U0001F680 Instrucciones para Completar la Migración\
+  \ a Python 3.14.\n  > **Estado Actual**: Configuración completa, listo para testing\
+  \ > **Tiempo Estimado**: 37 minutos > **Última Actualización**: 2025-11-01 Necesitas\
+  \ completar 5 pasos simples que toman ~37 minutos en total:\n  Reference when working\
+  \ with guide documentation."
+---
+
 # 🚀 Instrucciones para Completar la Migración a Python 3.14
 
 > **Estado Actual**: Configuración completa, listo para testing

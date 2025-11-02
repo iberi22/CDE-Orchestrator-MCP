@@ -1,3 +1,25 @@
+---
+title: 'Smart Reuse Strategy: Quick Reference'
+description: '| Aspect | v1.0 (TTL) | v2.0 (Smart) | |--------|-----------|-------------|'
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- api
+- database
+- migration
+- performance
+- python
+- quick_reference_v2
+llm_summary: "User guide for Smart Reuse Strategy: Quick Reference.\n  > **Version**:\
+  \ 2.0 (Revised) > **Date**: 2025-11-01 > **Key Change**: NO auto-delete, context-based\
+  \ reuse instead | Aspect | v1.0 (TTL) | v2.0 (Smart) | |--------|-----------|-------------|\
+  \ | **Expiration** | 24h fixed | Context-based |\n  Reference when working with\
+  \ guide documentation."
+---
+
 # Smart Reuse Strategy: Quick Reference
 
 > **Version**: 2.0 (Revised)

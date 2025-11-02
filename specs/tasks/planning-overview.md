@@ -1,3 +1,25 @@
+---
+author: Auto-Generated
+created: '2025-11-02'
+description: To create a robust, open-source MCP that serves as the reference implementation
+  for the Context-Driven Engineering (CDE) methodology. This tool will e
+llm_summary: "User guide for CDE Orchestrator MCP - Planning Document.\n  > **\U0001F4CB\
+  \ Note:** This document contains the original project vision and architecture. For\
+  \ current status and detailed improvement plans, see: > - [Executive Summary](EXECUTIVE_SUMMARY.md)\
+  \ - Current status and roadmap\n  Reference when working with guide documentation."
+status: draft
+tags:
+- api
+- architecture
+- mcp
+- migration
+- overview
+- performance
+title: CDE Orchestrator MCP - Planning Document
+type: task
+updated: '2025-11-02'
+---
+
 # CDE Orchestrator MCP - Planning Document
 
 > **📋 Note:** This document contains the original project vision and architecture. For current status and detailed improvement plans, see:

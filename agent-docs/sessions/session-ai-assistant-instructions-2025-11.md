@@ -1,20 +1,24 @@
 ---
-title: "Session: AI Assistant Instructions Implementation"
-description: "Creation of AGENTS.md and GEMINI.md following 2025 industry standards"
-type: "session"
-status: "completed"
-created: "2025-11-01"
-updated: "2025-11-01"
-author: "GitHub Copilot"
+author: GitHub Copilot
+created: '2025-11-01'
+description: Creation of AGENTS.md and GEMINI.md following 2025 industry standards
+llm_summary: 'Session report on implementing AI assistant instruction files (AGENTS.md,
+  GEMINI.md) following
+
+  2025 industry best practices. Includes research findings, design decisions, and
+  governance updates.
+
+  '
+status: active
 tags:
-  - "ai-assistants"
-  - "documentation"
-  - "standards"
-  - "agents-md"
-  - "gemini-md"
-llm_summary: |
-  Session report on implementing AI assistant instruction files (AGENTS.md, GEMINI.md) following
-  2025 industry best practices. Includes research findings, design decisions, and governance updates.
+- ai-assistants
+- documentation
+- standards
+- agents-md
+- gemini-md
+title: 'Session: AI Assistant Instructions Implementation'
+type: session
+updated: '2025-11-01'
 ---
 
 # Session: AI Assistant Instructions Implementation

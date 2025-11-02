@@ -18,13 +18,32 @@ import re
 
 class WorkflowComplexity(Enum):
     """Task complexity levels."""
-    TRIVIAL = "trivial"  # < 5 min (typo fix, doc update)
-    SIMPLE = "simple"  # 15-30 min (single file change)
-    MODERATE = "moderate"  # 1-2 hours (multiple files, tests)
-    COMPLEX = "complex"  # Half day (new feature, refactor)
-    EPIC = "epic"  # Multi-day (major feature, architecture)
+    TRIVIAL = 1  # < 5 min (typo fix, doc update)
+    SIMPLE = 2  # 15-30 min (single file change)
+    MODERATE = 3  # 1-2 hours (multiple files, tests)
+    COMPLEX = 4  # Half day (new feature, refactor)
+    EPIC = 5  # Multi-day (major feature, architecture)
 
+    def __ge__(self, other: "WorkflowComplexity") -> bool:
+        """Support >= comparison."""
+        return self.value >= other.value
 
+    def __gt__(self, other: "WorkflowComplexity") -> bool:
+        """Support > comparison."""
+        return self.value > other.value
+
+    def __le__(self, other: "WorkflowComplexity") -> bool:
+        """Support <= comparison."""
+        return self.value <= other.value
+
+    def __lt__(self, other: "WorkflowComplexity") -> bool:
+        """Support < comparison."""
+        return self.value < other.value
+
+    def to_string(self) -> str:
+        """Convert to string representation for API."""
+        names = {1: "trivial", 2: "simple", 3: "moderate", 4: "complex", 5: "epic"}
+        return names.get(self.value, "unknown")
 class WorkflowType(Enum):
     """Available workflow types."""
     STANDARD = "standard"  # Full 6-phase workflow
@@ -248,7 +267,7 @@ class WorkflowSelectorUseCase:
             "status": "success",
             "recommendation": {
                 "workflow_type": workflow_type.value,
-                "complexity": complexity.value,
+                "complexity": complexity.to_string(),
                 "recipe_id": recipe_id,
                 "estimated_duration": estimated_duration,
                 "required_skills": required_skills,

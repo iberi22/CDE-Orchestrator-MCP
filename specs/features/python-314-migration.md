@@ -1,3 +1,25 @@
+---
+author: Auto-Generated
+created: '2025-11-02'
+description: 1. ✅ Actualizar configuración del proyecto a Python 3.14
+llm_summary: "User guide for Migración a Python 3.14 - Especificación Técnica.\n \
+  \ > **Tipo**: Feature / Technical Upgrade > **Estado**: In Progress (80% Complete)\
+  \ > **Prioridad**: HIGH > **Versión Target**: 0.2.0 > **Fecha**: 2025-11-01 1. ✅\
+  \ Actualizar configuración del proyecto a Python 3.14\n  Reference when working\
+  \ with guide documentation."
+status: draft
+tags:
+- '314'
+- mcp
+- migration
+- performance
+- python
+- testing
+title: Migración a Python 3.14 - Especificación Técnica
+type: feature
+updated: '2025-11-02'
+---
+
 # Migración a Python 3.14 - Especificación Técnica
 
 > **Tipo**: Feature / Technical Upgrade

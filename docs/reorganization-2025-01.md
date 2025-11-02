@@ -1,3 +1,25 @@
+---
+title: Documentation Reorganization Summary
+description: '**Date:** October 31, 2025 **Action:** Professional review and documentation
+  restructuring'
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- '01'
+- '2025'
+- api
+- architecture
+- authentication
+- documentation
+llm_summary: "User guide for Documentation Reorganization Summary.\n  **Date:** October\
+  \ 31, 2025 **Action:** Professional review and documentation restructuring | File\
+  \ | Purpose | Status | |------|---------|--------| | [README.md](README.md) | Main\
+  \ project documentation | ✅ Updated |\n  Reference when working with guide documentation."
+---
+
 # Documentation Reorganization Summary
 
 **Date:** October 31, 2025

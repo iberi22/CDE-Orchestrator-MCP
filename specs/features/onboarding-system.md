@@ -1,3 +1,27 @@
+---
+author: Auto-Generated
+created: '2025-11-02'
+description: Se ha implementado un sistema completo de onboarding automático que detecta
+  cuando un proyecto necesita estructura compatible con [Spec-Kit](https://g
+llm_summary: "User guide for Onboarding Feature - CDE Orchestrator.\n  Se ha implementado\
+  \ un sistema completo de onboarding automático que detecta cuando un proyecto necesita\
+  \ estructura compatible con [Spec-Kit](https://github.com/github/spec-kit) y la\
+  \ crea automáticamente. **NUEVO**: Ahora incluye configuración automática de AI\
+  \ assistants siguiendo los estándares de l\n  Reference when working with guide\
+  \ documentation."
+status: draft
+tags:
+- api
+- architecture
+- authentication
+- documentation
+- mcp
+- onboarding
+title: Onboarding Feature - CDE Orchestrator
+type: feature
+updated: '2025-11-02'
+---
+
 # Onboarding Feature - CDE Orchestrator
 
 ## 📋 Overview

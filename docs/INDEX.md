@@ -1,3 +1,26 @@
+---
+title: CDE Orchestrator MCP - Documentation Index
+description: Welcome to the CDE Orchestrator MCP documentation. This index will help
+  you navigate all project documentation.
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- api
+- architecture
+- authentication
+- deployment
+- documentation
+- index
+llm_summary: "User guide for CDE Orchestrator MCP - Documentation Index.\n  Welcome\
+  \ to the CDE Orchestrator MCP documentation. This index will help you navigate all\
+  \ project documentation. | Document | Description | Audience | |----------|-------------|----------|\
+  \ | [Executive Summary](../EXECUTIVE_SUMMARY.md) | High-level project status, metrics,\
+  \ and roadmap | Stakeholders,\n  Reference when working with guide documentation."
+---
+
 # CDE Orchestrator MCP - Documentation Index
 
 Welcome to the CDE Orchestrator MCP documentation. This index will help you navigate all project documentation.

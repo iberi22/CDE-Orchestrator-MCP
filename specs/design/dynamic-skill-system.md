@@ -1,3 +1,24 @@
+---
+author: Auto-Generated
+created: '2025-11-02'
+description: '``` ┌─────────────────────────────────────────────────────────┐'
+llm_summary: "User guide for Dynamic Skill Management System (DSMS).\n  > **Architecture\
+  \ Type**: Core Pillar - Auto-evolving Knowledge System > **Creation Date**: 2025-11-01\
+  \ > **Status**: Design Specification > **Priority**: \U0001F534 CRITICAL - Foundation\
+  \ for AI-Driven Evolution\n  Reference when working with guide documentation."
+status: draft
+tags:
+- api
+- architecture
+- database
+- documentation
+- dynamic
+- mcp
+title: Dynamic Skill Management System (DSMS)
+type: design
+updated: '2025-11-02'
+---
+
 # Dynamic Skill Management System (DSMS)
 
 > **Architecture Type**: Core Pillar - Auto-evolving Knowledge System

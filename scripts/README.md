@@ -1,3 +1,25 @@
+---
+title: Scripts Directory
+description: 'This directory contains all project utility scripts organized by function.
+  Each subdirectory serves a specific purpose:'
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- documentation
+- mcp
+- python
+- readme
+- testing
+llm_summary: "User guide for Scripts Directory.\n  > **Purpose**: Organized collection\
+  \ of utility and validation scripts for CDE Orchestrator MCP > **Last Updated**:\
+  \ 2025-11-01 This directory contains all project utility scripts organized by function.\
+  \ Each subdirectory serves a specific purpose:\n  Reference when working with guide\
+  \ documentation."
+---
+
 # Scripts Directory
 
 > **Purpose**: Organized collection of utility and validation scripts for CDE Orchestrator MCP

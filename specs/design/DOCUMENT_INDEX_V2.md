@@ -1,3 +1,24 @@
+---
+author: Auto-Generated
+created: '2025-11-02'
+description: '**→ QUICK_REFERENCE_V2.md** (300 lines) **Bookmark These Sections**:'
+llm_summary: "User guide for Smart Reuse v2.0: Document Index & Navigation.\n  > **Status**:\
+  \ Complete revision of DSMS strategy (2025-11-01) > **Total Documents**: 6 new/updated\
+  \ files > **Total Pages**: 5,000+ pages of comprehensive documentation > **Implementation\
+  \ Ready**: YES ✅\n  Reference when working with guide documentation."
+status: draft
+tags:
+- api
+- architecture
+- document_index_v2
+- documentation
+- performance
+- python
+title: 'Smart Reuse v2.0: Document Index & Navigation'
+type: design
+updated: '2025-11-02'
+---
+
 # Smart Reuse v2.0: Document Index & Navigation
 
 > **Status**: Complete revision of DSMS strategy (2025-11-01)

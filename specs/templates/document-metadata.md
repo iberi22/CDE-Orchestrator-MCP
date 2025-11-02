@@ -1,3 +1,25 @@
+---
+title: Document Metadata Pattern
+description: 'title: "Document Title (Human-Readable)" description: "One-sentence
+  summary (50-150 chars)"'
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- api
+- architecture
+- authentication
+- deployment
+- document
+- mcp
+llm_summary: "User guide for Document Metadata Pattern.\n  > **Purpose**: Standard\
+  \ YAML frontmatter pattern for all markdown documents > **Status**: Active Standard\
+  \ > **Last Updated**: 2025-11-01 > **Owner**: CDE Orchestrator Team title: \"Document\
+  \ Title (Human-Readable)\"\n  Reference when working with guide documentation."
+---
+
 # Document Metadata Pattern
 
 > **Purpose**: Standard YAML frontmatter pattern for all markdown documents

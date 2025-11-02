@@ -1,3 +1,25 @@
+---
+author: Auto-Generated
+created: '2025-11-02'
+description: This directory contains code review documentation and validation reports
+  for CDE Orchestrator MCP.
+llm_summary: "User guide for Code Reviews.\n  This directory contains code review\
+  \ documentation and validation reports for CDE Orchestrator MCP. All code reviews,\
+  \ quality assessments, and validation reports should be stored here. - Pull request\
+  \ reviews\n  Reference when working with guide documentation."
+status: draft
+tags:
+- architecture
+- documentation
+- mcp
+- performance
+- readme
+- security
+title: Code Reviews
+type: feedback
+updated: '2025-11-02'
+---
+
 # Code Reviews
 
 This directory contains code review documentation and validation reports for CDE Orchestrator MCP.

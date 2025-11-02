@@ -1,3 +1,25 @@
+---
+author: Auto-Generated
+created: '2025-11-02'
+description: '**Documento Creado**: `specs/design/python-314-migration-plan.md`'
+llm_summary: "User guide for Informe de Migración a Python 3.14 - CDE Orchestrator\
+  \ MCP.\n  > **Estado**: ✅ COMPLETADO (Configuración y Auditoría) > **Fecha**: 2025-11-01\
+  \ > **Agente**: KERNEL (GPT-5) > **Versión del Proyecto**: 0.2.0 **Documento Creado**:\
+  \ `specs/design/python-314-migration-plan.md`\n  Reference when working with guide\
+  \ documentation."
+status: draft
+tags:
+- '314'
+- mcp
+- migration
+- performance
+- python
+- report
+title: Informe de Migración a Python 3.14 - CDE Orchestrator MCP
+type: execution
+updated: '2025-11-02'
+---
+
 # Informe de Migración a Python 3.14 - CDE Orchestrator MCP
 
 > **Estado**: ✅ COMPLETADO (Configuración y Auditoría)

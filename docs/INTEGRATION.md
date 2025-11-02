@@ -1,3 +1,26 @@
+---
+title: CDE Orchestrator - External Service Integration
+description: The CDE Orchestrator now supports external service integration through
+  a flexible, detection-based approach. The orchestrator automatically detects an
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- api
+- authentication
+- integration
+- mcp
+- python
+- workflow
+llm_summary: "User guide for CDE Orchestrator - External Service Integration.\n  The\
+  \ CDE Orchestrator now supports external service integration through a flexible,\
+  \ detection-based approach. The orchestrator automatically detects and uses external\
+  \ MCP servers (like GitHub MCP) when they are configured by the user, falling back\
+  \ to local implementations when needed.\n  Reference when working with guide documentation."
+---
+
 # CDE Orchestrator - External Service Integration
 
 ## Overview

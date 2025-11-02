@@ -1,3 +1,24 @@
+---
+title: Changelog
+description: Changelog - Documentation for CDE Orchestrator MCP
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- api
+- architecture
+- changelog
+- documentation
+- mcp
+- migration
+llm_summary: "User guide for Changelog.\n  - **NEW FEATURE**: Automatic detection\
+  \ and configuration of AI coding assistants - **Multi-Agent Support**: Supports\
+  \ 6 AI assistants out of the box - GitHub Copilot (folder detection: `.github/copilot/`)\n\
+  \  Reference when working with guide documentation."
+---
+
 # Changelog
 
 ## [0.3.0] - 2025-11-01

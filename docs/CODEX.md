@@ -1,3 +1,26 @@
+---
+title: 'Codex CLI + MCP: CDE Orchestrator'
+description: This guide shows how to use the CDE Orchestrator MCP with Codex CLI and
+  how to connect additional MCP tools (e.g., GitHub MCP) for a fully agentic wor
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- api
+- authentication
+- codex
+- mcp
+- python
+- workflow
+llm_summary: "User guide for Codex CLI + MCP: CDE Orchestrator.\n  This guide shows\
+  \ how to use the CDE Orchestrator MCP with Codex CLI and how to connect additional\
+  \ MCP tools (e.g., GitHub MCP) for a fully agentic workflow. - Prerequisites: -\
+  \ Python 3.11+ - `pip install -r requirements.txt`\n  Reference when working with\
+  \ guide documentation."
+---
+
 # Codex CLI + MCP: CDE Orchestrator
 
 This guide shows how to use the CDE Orchestrator MCP with Codex CLI and how to connect additional MCP tools (e.g., GitHub MCP) for a fully agentic workflow.

@@ -1,3 +1,25 @@
+---
+author: Auto-Generated
+created: '2025-11-02'
+description: '``` src/cde_orchestrator/skills/ ├── __init__.py ├── models.py              #
+  Pydantic models'
+llm_summary: "User guide for Dynamic Skill Management System - Implementation Guide.\n\
+  \  > **Type**: Technical Implementation > **Status**: Ready for Development > **Estimated\
+  \ Effort**: 8 weeks > **Dependencies**: `gemini-cli`, `beautifulsoup4`, `aiohttp`,\
+  \ `tiktoken` skill_type: ephemeral\n  Reference when working with guide documentation."
+status: draft
+tags:
+- api
+- authentication
+- database
+- deployment
+- dynamic
+- implementation
+title: Dynamic Skill Management System - Implementation Guide
+type: design
+updated: '2025-11-02'
+---
+
 # Dynamic Skill Management System - Implementation Guide
 
 > **Type**: Technical Implementation

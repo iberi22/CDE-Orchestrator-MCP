@@ -1,3 +1,25 @@
+---
+title: 'Quick Start: AI Research Automation'
+description: '```powershell $dir = "research-$(Get-Date -Format ''yyyy-MM-dd-HHmmss'')"'
+type: guide
+status: draft
+created: '2025-11-02'
+updated: '2025-11-02'
+author: Auto-Generated
+tags:
+- ai
+- api
+- architecture
+- authentication
+- documentation
+- performance
+llm_summary: "User guide for Quick Start: AI Research Automation.\n  > **For**: CDE\
+  \ Orchestrator Team > **Purpose**: Execute parallel research while continuing development\
+  \ > **Last Updated**: 2025-10-31 Add these to your PowerShell profile (`$PROFILE`):\
+  \ **Skill Location**: `.copilot/skills/parallel-ai-research.md`\n  Reference when\
+  \ working with guide documentation."
+---
+
 # Quick Start: AI Research Automation
 
 > **For**: CDE Orchestrator Team
