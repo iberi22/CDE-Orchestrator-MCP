@@ -2,8 +2,23 @@
 
 > **Format**: GEMINI.md (Google AI Studio Standard)
 > **Target**: Google Gemini AI (AI Studio, Gemini CLI, IDX)
-> **Last Updated**: 2025-11-01
-> **Priority**: Gemini-specific optimizations & best practices
+> **Last Updated**: 2025-11-02
+> **Priority**: MCP-First Workflow Orchestration for Gemini
+
+---
+
+## 🎯 Core Philosophy: MCP-First Development
+
+**CRITICAL**: You are a Gemini AI agent working with the **CDE Orchestrator MCP server**. Instead of making direct file changes, you **converse with the MCP** to:
+
+1. **Analyze user requests** → MCP selects optimal workflow + recipe + skills
+2. **Execute workflows** → MCP orchestrates phases (define → decompose → design → implement → test → review)
+3. **Source knowledge** → MCP downloads skills from external repos + performs web research
+4. **Manage documentation** → MCP enforces Spec-Kit governance (metadata, structure, linking)
+
+**Your Role**: Interpret user intent, invoke MCP tools, execute recommended workflows, report results.
+
+**MCP's Role**: Intelligent orchestration, skill management, workflow routing, documentation governance.
 
 ---
 
@@ -12,41 +27,419 @@
 **Name**: CDE Orchestrator MCP
 **Purpose**: Model Context Protocol server for Context-Driven Engineering
 **Architecture**: Hexagonal (Ports & Adapters)
-**Language**: Python 3.12+, FastMCP framework
+**Language**: Python 3.14, FastMCP framework
 **Scale**: Manages 1000+ projects, orchestrates AI-powered development workflows
+
+**🆕 NEW**: This MCP server now acts as your **intelligent orchestrator** - you interact with it via MCP tools, and it:
+1. Analyzes your requests and selects optimal workflows automatically
+2. Downloads and updates skills from external repositories
+3. Performs web research to keep knowledge current
+4. Manages documentation following Spec-Kit governance
 
 ---
 
-## 🚀 Quick Start for Gemini
+## 🚀 Quick Start for Gemini: Your First Request
 
 ### First-Time Setup
 1. **Read architecture**: `specs/design/ARCHITECTURE.md` (1400 lines - comprehensive system design)
 2. **Check roadmap**: `specs/tasks/improvement-roadmap.md` (63 prioritized tasks)
 3. **Review governance**: `specs/governance/DOCUMENTATION_GOVERNANCE.md` (file placement rules)
 
-### Project Structure
+### Example User Request (MCP-First Workflow)
+
+```plaintext
+User: "Add Redis caching to the authentication module"
 ```
-CDE Orchestrator MCP/
-├── src/cde_orchestrator/       # Main source code
-│   ├── domain/                 # Business logic (pure Python, NO external deps)
-│   ├── application/            # Use cases (orchestration layer)
-│   ├── adapters/               # Infrastructure (filesystem, APIs, CLI)
-│   └── infrastructure/         # DI container, configuration
-├── specs/                      # All documentation (Spec-Kit compliant)
-│   ├── features/               # Feature specifications
-│   ├── design/                 # Architecture & technical decisions
-│   ├── tasks/                  # Roadmaps & planning
-│   └── governance/             # Process & documentation rules
-├── .cde/                       # Workflow engine
-│   ├── workflow.yml            # Phase definitions
-│   ├── prompts/                # POML templates
-│   └── recipes/                # Specialized AI agent prompts
-└── tests/                      # Unit & integration tests
-    ├── unit/                   # Fast, isolated (domain logic)
-    └── integration/            # With I/O (adapters, repositories)
+
+### Your Workflow with Gemini
+
+```python
+# Step 1: Ask MCP to analyze and route
+cde_selectWorkflow(user_prompt="Add Redis caching to authentication")
+
+# MCP returns optimal workflow, complexity, recipe, required skills:
+{
+  "workflow_type": "standard",
+  "complexity": "moderate",
+  "recipe_id": "ai-engineer",
+  "estimated_duration": "1-2 hours",
+  "required_skills": ["redis-caching", "auth-best-practices", "python-async"],
+  "phases_to_skip": [],
+  "reasoning": "Moderate complexity, requires database + security knowledge",
+  "confidence": 0.85
+}
+
+# Step 2: Source missing skills (if needed)
+cde_sourceSkill(
+    skill_query="redis caching patterns",
+    destination="ephemeral"  # Temporary for this task
+)
+
+# MCP downloads from awesome-claude-skills, adapts to CDE format
+
+# Step 3: Start workflow with context
+cde_startFeature(
+    user_prompt="Add Redis caching to authentication",
+    workflow_type="standard",
+    recipe_id="ai-engineer"
+)
+
+# MCP enters "define" phase, returns POML prompt with:
+# - User request context
+# - Required skills injected
+# - Project-specific context
+# - Spec-Kit template
+
+# Step 4: Execute each phase
+# (define → decompose → design → implement → test → review)
+# Submit work after each phase using cde_submitWork()
+```
+
+**Key Difference from Traditional Approach**:
+
+| Traditional Gemini | Gemini + CDE MCP |
+|--------------------|------------------|
+| Read files directly | Ask MCP to scan documentation |
+| Create files immediately | MCP enforces Spec-Kit governance |
+| Guess workflow phases | MCP selects optimal workflow |
+| Search web manually | MCP performs research & updates skills |
+| No institutional memory | Skills accumulate, reuse, improve |
+
+---
+
+## 🛠️ MCP Tools Reference (Gemini-Specific)
+
+### 1. `cde_selectWorkflow` - Intelligent Workflow Routing
+
+**Purpose**: Analyze user prompt and recommend optimal workflow + recipe + skills
+
+**When to use**:
+- ✅ Every new user request (before any work)
+- ✅ When task complexity is unclear
+- ✅ To validate your workflow assumptions
+
+**Gemini Integration**:
+```python
+# From Gemini AI Studio or Gemini CLI
+result = mcp.call_tool("cde_selectWorkflow", {
+    "user_prompt": "User's request in natural language"
+})
+
+# Returns JSON with recommendation
+{
+  "workflow_type": "standard | quick-fix | research | documentation | refactor | hotfix",
+  "complexity": "trivial | simple | moderate | complex | epic",
+  "recipe_id": "ai-engineer | deep-research | documentation-writer",
+  "estimated_duration": "< 5 minutes | 15-30 min | 1-2 hours | 4-8 hours | 2-5 days",
+  "required_skills": ["skill1", "skill2"],
+  "phases_to_skip": ["define", "decompose"],  # For quick fixes
+  "reasoning": "Explanation of recommendation",
+  "confidence": 0.85  # 0.0-1.0
+}
+```
+
+**Gemini-Specific Tips**:
+- Use Gemini's context window to include project background
+- Leverage Gemini 2.0's multimodal capabilities for codebase screenshots
+- Combine with Gemini's "thinking mode" for complex routing decisions
+
+### 2. `cde_sourceSkill` - External Skill Downloads
+
+**Purpose**: Download and adapt skills from awesome-claude-skills repository
+
+**When to use**:
+- ✅ When `cde_selectWorkflow` recommends missing skills
+- ✅ Starting work in unfamiliar domain (AI, DevOps, DB, etc.)
+- ✅ Want latest patterns/best practices
+
+**Gemini Integration**:
+```python
+result = mcp.call_tool("cde_sourceSkill", {
+    "skill_query": "redis caching patterns",
+    "source": "awesome-claude-skills",  # Default
+    "destination": "base"  # "base" = persistent, "ephemeral" = temporary
+})
+
+# Returns skills found and downloaded
+{
+  "skills_found": 3,
+  "skills_downloaded": [
+    {
+      "name": "redis-caching-patterns",
+      "path": ".copilot/skills/base/redis-caching-patterns.md",
+      "adaptations": ["Added CDE frontmatter", "Preserved examples"],
+      "metadata": {"source": "awesome-claude-skills", "rating": 0.9}
+    }
+  ],
+  "destination_path": ".copilot/skills/base/"
+}
+```
+
+**Gemini-Specific Tips**:
+- Use `destination="ephemeral"` for one-off tasks
+- Use `destination="base"` to build permanent knowledge base
+- Gemini Flash Lite is ideal for quick skill searches
+
+### 3. `cde_updateSkill` - Web Research for Skills
+
+**Purpose**: Research and update skill with latest information
+
+**When to use**:
+- ✅ Before major implementation (ensure current knowledge)
+- ✅ Skill references old library versions
+- ✅ Monthly maintenance (background task)
+
+**Gemini Integration**:
+```python
+result = mcp.call_tool("cde_updateSkill", {
+    "skill_name": "redis-caching",
+    "topics": [
+        "redis 7.x breaking changes",
+        "redis connection pooling best practices"
+    ],
+    "max_sources": 10  # Optional, default 10
+})
+
+# Returns research insights
+{
+  "insights": [
+    {
+      "category": "breaking_change",
+      "summary": "Redis 7.0 removed SYNC command",
+      "details": "Use PSYNC instead for replication...",
+      "sources": ["https://redis.io/docs/7.0/"],
+      "confidence": 0.95
+    },
+    {
+      "category": "best_practice",
+      "summary": "Connection pooling now recommended for all production deployments",
+      "details": "redis-py 5.0+ includes built-in connection pool...",
+      "sources": ["https://redis.io/docs/connect/clients/python/"],
+      "confidence": 0.90
+    }
+  ],
+  "update_note": "## Update 2025-11-02\n\n🔴 **Breaking Changes**:\n...",
+  "sources": 10,
+  "version_info": {"redis": "7.2.4", "redis-py": "5.0.1"}
+}
+```
+
+**Gemini-Specific Tips**:
+- Use Gemini 2.0 Flash's speed for rapid research
+- Use Gemini Pro for deeper analysis of conflicting sources
+- Combine with Gemini's multimodal to analyze official docs screenshots
+
+### 4. `cde_startFeature` - Start Workflow Execution
+
+**Purpose**: Start workflow with selected workflow + recipe
+
+**Gemini Integration**:
+```python
+result = mcp.call_tool("cde_startFeature", {
+    "user_prompt": "Feature description",
+    "workflow_type": "standard",  # From cde_selectWorkflow
+    "recipe_id": "ai-engineer"    # From cde_selectWorkflow
+})
+
+# Returns POML prompt for first phase
+{
+  "status": "success",
+  "feature_id": "uuid-1234",
+  "phase": "define",
+  "prompt": "You are a senior engineer... [full POML prompt]"
+}
+```
+
+### 5. `cde_submitWork` - Advance Workflow Phase
+
+**Purpose**: Submit phase results and advance to next phase
+
+**Gemini Integration**:
+```python
+result = mcp.call_tool("cde_submitWork", {
+    "feature_id": "uuid-1234",
+    "phase_id": "define",
+    "results": {
+        "specification": "# Feature Spec...",
+        "files_created": ["specs/features/redis-caching.md"]
+    }
+})
+
+# Returns next phase prompt OR completion
+{
+  "status": "ok",
+  "phase": "decompose",  # Next phase
+  "prompt": "Break down the feature... [full POML prompt]"
+}
+# OR if workflow complete:
+{
+  "status": "completed",
+  "feature_id": "uuid-1234"
+}
 ```
 
 ---
+
+## 🎯 Gemini-Optimized Workflow Patterns
+
+### Pattern 1: Standard Feature Development (Gemini Pro)
+
+```python
+# 1. Analyze with Gemini's context understanding
+recommendation = cde_selectWorkflow("Add user profile editing")
+# Gemini analyzes: "editing" = CRUD, "user profile" = authentication domain
+
+# 2. Source skills (if needed)
+if "user-management" not in existing_skills:
+    cde_sourceSkill("user CRUD patterns", destination="ephemeral")
+
+# 3. Start workflow (Gemini executes each phase)
+response = cde_startFeature(
+    user_prompt="Add user profile editing",
+    workflow_type="standard",
+    recipe_id="ai-engineer"
+)
+
+# 4. Execute define phase (Gemini writes spec)
+spec = """
+# Feature Spec: User Profile Editing
+## Problem
+Users cannot edit their profile information...
+"""
+
+# 5. Submit and advance
+cde_submitWork(
+    feature_id=response["feature_id"],
+    phase_id="define",
+    results={"specification": spec}
+)
+
+# 6-9. Repeat for decompose, design, implement, test, review
+```
+
+### Pattern 2: Quick Fix (Gemini Flash)
+
+```python
+# 1. Analyze (Gemini Flash identifies trivial complexity)
+recommendation = cde_selectWorkflow("Fix typo in README")
+# Returns: workflow_type="quick-fix", phases_to_skip=["define", "decompose", "design"]
+
+# 2. Start workflow (jumps to implement)
+response = cde_startFeature(
+    user_prompt="Fix typo in README",
+    workflow_type="quick-fix"
+)
+# Returns: Implement phase prompt (define/decompose/design skipped)
+
+# 3. Make fix (Gemini Flash fast execution)
+# (edit README.md)
+
+# 4. Submit
+cde_submitWork(
+    feature_id=response["feature_id"],
+    phase_id="implement",
+    results={"files_modified": ["README.md"]}
+)
+```
+
+### Pattern 3: Research-Heavy Task (Gemini 2.0 Pro + Thinking Mode)
+
+```python
+# 1. Analyze (Gemini identifies research need)
+recommendation = cde_selectWorkflow(
+    "Research best practices for microservices communication in 2025"
+)
+# Returns: workflow_type="research", recipe_id="deep-research"
+
+# 2. Source skills
+cde_sourceSkill("microservices patterns", destination="base")
+
+# 3. Update skills with latest info (Gemini 2.0 web research)
+cde_updateSkill(
+    skill_name="microservices-patterns",
+    topics=[
+        "grpc vs rest performance 2025",
+        "event-driven architecture patterns",
+        "api gateway best practices"
+    ]
+)
+
+# 4. Start workflow (Gemini Pro deep analysis)
+response = cde_startFeature(
+    user_prompt="Research microservices communication",
+    workflow_type="research",
+    recipe_id="deep-research"
+)
+# Gemini uses "thinking mode" for comprehensive analysis
+```
+
+---
+
+## 🎨 Gemini-Specific Integration Patterns
+
+### Using Gemini CLI with CDE MCP
+
+```bash
+# Install Gemini CLI (if not already)
+pip install google-generativeai
+
+# Set API key
+export GOOGLE_API_KEY="your-api-key"
+
+# Run with MCP server
+gemini-cli --mcp-server "python src/server.py" \
+  --model gemini-2.0-flash-exp \
+  --prompt "Add Redis caching to authentication using CDE workflow"
+```
+
+### Using Gemini AI Studio with CDE MCP
+
+1. **Connect MCP Server**:
+   - In AI Studio, go to Settings → MCP Servers
+   - Add server: `python E:\scripts-python\CDE Orchestrator MCP\src\server.py`
+   - Verify connection (should show 12+ tools available)
+
+2. **Invoke Tools from Chat**:
+   ```
+   @cde_selectWorkflow("Add Redis caching to auth")
+   ```
+
+3. **Multi-Turn Workflow**:
+   ```
+   User: "I need to add Redis caching to authentication"
+
+   Gemini: Let me analyze this with CDE MCP...
+   [calls cde_selectWorkflow]
+
+   Gemini: MCP recommends "standard" workflow with "ai-engineer" recipe.
+   I'll source the Redis caching skill first...
+   [calls cde_sourceSkill]
+
+   Gemini: Now starting the workflow...
+   [calls cde_startFeature]
+
+   Gemini: Here's the define phase prompt. Let me write the specification...
+   ```
+
+### Using Gemini in IDX with CDE MCP
+
+```javascript
+// In IDX workspace settings.json
+{
+  "gemini.mcp.servers": [
+    {
+      "name": "cde-orchestrator",
+      "command": "python",
+      "args": ["E:\\scripts-python\\CDE Orchestrator MCP\\src\\server.py"],
+      "env": {}
+    }
+  ]
+}
+```
+
+---
+
+## 🏗️ Architecture (Hexagonal Pattern)
 
 ## 🏗️ Architecture (Hexagonal Pattern)
 

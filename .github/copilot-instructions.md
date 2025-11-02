@@ -136,53 +136,85 @@ State managed per-project in `.cde/state.json`. No registries needed.
 
 Versioned in `.cde/workflow.yml` - defines phases, inputs, outputs, and POML templates.
 
-### 5. Dynamic Skill Management System (DSMS) 🆕
+### 5. Intelligent Workflow Orchestration 🆕
 
-**Core Pillar**: Self-improving knowledge layer with smart reuse (NO auto-delete).
+**Core Pillar**: MCP-first development where agents converse with MCP instead of direct file operations.
 
-**Revised Strategy (v2.0, 2025-11-01)**:
-Every workflow execution follows the smart reuse loop:
+**Philosophy (v2.0, 2025-11-02)**:
+Every user request follows the intelligent orchestration loop:
 
 ```
-1. Detect task complexity & knowledge gaps
-2. Search cache for existing ephemeral skills (same domain/gaps)
-3. Check staleness: Is context hash unchanged?
-   - YES → REUSE (save 2-3s generation time)
+1. USER REQUEST → Agent receives natural language prompt
+2. ANALYZE → Agent calls cde_selectWorkflow (MCP analyzes complexity, domain, selects workflow+recipe)
+3. SOURCE SKILLS → If needed, agent calls cde_sourceSkill (downloads from awesome-claude-skills)
+4. UPDATE SKILLS → If outdated, agent calls cde_updateSkill (web research for latest info)
+5. EXECUTE WORKFLOW → Agent calls cde_startFeature (MCP returns phase prompt with context)
+6. ITERATE PHASES → Agent executes each phase, submits via cde_submitWork
+7. COMPLETE → MCP signals workflow completion
    - NO  → REGENERATE (version/deps changed)
 4. Execute task with skill context (reused or new)
 5. Distill learnings back to persistent base skill
 6. [Daily background job] Archive skills inactive > 6 months
 ```
 
-**Two-Tier Skill System:**
+**Key MCP Tools for Orchestration:**
 
-- **Base Skills** (`.copilot/skills/base/`): Persistent, accumulative knowledge
-  - Generic patterns and best practices
-  - Updated via web research (monthly)
-  - Version history with update notes
-  - Never deleted, only grows
+#### `cde_selectWorkflow` - Intelligent Routing
 
-- **Ephemeral Skills** (`.copilot/skills/ephemeral/`): Task-specific, reusable
-  - Generated on-demand for complex tasks
-  - Includes context-aware code examples, known issues
-  - **NEW**: Cached indefinitely with smart reuse
-  - **NEW**: Context hash tracks dependencies (redis 7.2.4, fastapi 0.104, etc.)
-  - **NEW**: Reused if context unchanged (generation_count increments)
-  - **NEW**: Regenerated only on breaking changes
-  - **NEW**: Archived after 6 months inactivity (never deleted, preserved)
-  - Learnings distilled to base skill
+Analyzes user prompts and recommends optimal workflow (standard, quick-fix, research, etc.) + recipe (ai-engineer, deep-research, documentation-writer) + required skills.
+
+**Usage in GitHub Copilot**:
+```python
+# Ask MCP to analyze complexity
+recommendation = cde_selectWorkflow("Add Redis caching to auth module")
+
+# Returns:
+{
+  "workflow_type": "standard",
+  "complexity": "moderate",
+  "recipe_id": "ai-engineer",
+  "estimated_duration": "1-2 hours",
+  "required_skills": ["redis-caching", "auth-best-practices"],
+  "phases_to_skip": [],
+  "reasoning": "Moderate complexity, requires database + security knowledge",
+  "confidence": 0.85
+}
+```
+
+#### `cde_sourceSkill` - External Knowledge
+
+Downloads skills from awesome-claude-skills repository, adapts to CDE format, saves to `.copilot/skills/`.
+
+**Usage in GitHub Copilot**:
+```python
+# Download skill from external repo
+result = cde_sourceSkill(
+    skill_query="redis caching patterns",
+    destination="ephemeral"  # or "base" for persistent
+)
+
+# MCP searches GitHub, ranks by relevance, downloads top 3, adapts format
+```
+
+#### `cde_updateSkill` - Web Research
+
+Performs web research to update skills with latest docs, breaking changes, best practices.
+
+**Usage in GitHub Copilot**:
+```python
+# Update skill with latest info
+result = cde_updateSkill(
+    skill_name="redis-caching",
+    topics=["redis 7.x breaking changes", "connection pooling 2025"]
+)
+
+# MCP scrapes official docs, GitHub, blogs; extracts insights; generates update note
+```
 
 **See Full Design:**
-- `specs/design/EPHEMERAL_SMART_REUSE.md` - Complete smart reuse strategy (NEW)
-- `specs/design/SMART_REUSE_INTEGRATION.md` - Integration with SkillManager (NEW)
-- `specs/design/EXECUTIVE_SUMMARY_V2.md` - Executive overview, v2.0 (NEW)
-- `specs/design/QUICK_REFERENCE_V2.md` - Quick reference guide (NEW)
+- `agent-docs/execution/intelligent-agent-system-implementation-2025-11.md` - Complete implementation report
 - `specs/design/dynamic-skill-system.md` - Original architecture (44 pages)
-- `specs/design/dynamic-skill-system-implementation.md` - Code implementation guide
-- `specs/design/EXECUTIVE_SUMMARY_V2.md` - Executive overview, v2.0 (NEW)
-- `specs/design/QUICK_REFERENCE_V2.md` - Quick reference guide (NEW)
-- `specs/design/dynamic-skill-system.md` - Original architecture (44 pages)
-- `specs/design/dynamic-skill-system-implementation.md` - Code implementation guide
+- `AGENTS.md` - MCP-first workflow examples
 
 ## 🔧 Development Guidelines
 
