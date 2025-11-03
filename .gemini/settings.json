@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "cde-orchestrator": {
+      "command": "python",
+      "args": ["-u", "src/server.py"],
+      "cwd": ".",
+      "env": {
+        "PYTHONUNBUFFERED": "1",
+        "CDE_LOG_LEVEL": "DEBUG"
+      },
+      "timeout": 60000,
+      "trust": true
+    }
+  }
+}
