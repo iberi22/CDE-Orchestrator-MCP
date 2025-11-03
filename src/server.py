@@ -7,6 +7,13 @@ from functools import wraps
 from pathlib import Path
 from typing import Dict, List
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not installed, use system env vars
+
 from fastmcp import FastMCP
 from mcp.server.fastmcp import Context
 from mcp.server.session import ServerSession
