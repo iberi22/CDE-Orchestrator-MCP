@@ -15,7 +15,7 @@ repos:
         pass_filenames: false
         stages: [commit]
         description: "Checks: file location, naming conventions, YAML frontmatter, metadata"
-        
+
       # Validate metadata (kept for compatibility)
       - id: validate-metadata
         name: Validate Document Metadata (YAML Frontmatter)

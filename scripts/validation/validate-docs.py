@@ -146,15 +146,15 @@ def validate_location(file_path: str) -> Optional[ValidationError]:
     path = Path(file_path)
     # Normalize to forward slashes for consistent comparison
     norm_path = file_path.replace("\\", "/")
-    
+
     # Check if in root
     if path.parent == Path("."):
         filename = path.name
-        
+
         # Check exceptions
         if filename in ROOT_EXCEPTIONS:
             return None  # OK
-        
+
         # Check disallowed patterns
         for pattern in DISALLOWED_ROOT_PATTERNS:
             if re.match(pattern, filename, re.IGNORECASE):
@@ -164,7 +164,7 @@ def validate_location(file_path: str) -> Optional[ValidationError]:
                     f"[ERR] '.md' files not allowed in root. Move to: agent-docs/execution/, agent-docs/sessions/, specs/design/, etc.",
                     "error"
                 )
-        
+
         # Generic root check
         return ValidationError(
             file_path,
@@ -172,12 +172,12 @@ def validate_location(file_path: str) -> Optional[ValidationError]:
             f"[ERR] '.md' files in root must be in ROOT_EXCEPTIONS list. Got: {filename}",
             "error"
         )
-    
+
     # Check if in valid directory (normalize backslashes to forward slashes)
     for allowed_dir in ALLOWED_DIRECTORIES.keys():
         if norm_path.startswith(allowed_dir):
             return None  # OK
-    
+
     return ValidationError(
         file_path,
         "LOCATION",
@@ -189,11 +189,11 @@ def validate_location(file_path: str) -> Optional[ValidationError]:
 def validate_naming(file_path: str) -> Optional[ValidationError]:
     """Validate filename follows conventions."""
     filename = Path(file_path).name
-    
+
     # Skip if in .github/ (special case)
     if ".github" in file_path:
         return None
-    
+
     # Check for uppercase letters (except in .md extension)
     name_part = filename.replace(".md", "")
     if name_part != name_part.lower():
@@ -203,7 +203,7 @@ def validate_naming(file_path: str) -> Optional[ValidationError]:
             f"[ERR] Filename must be lowercase. Use hyphens for spaces: '{filename.lower()}'",
             "warning"
         )
-    
+
     # Check for spaces
     if " " in filename:
         return ValidationError(
@@ -212,7 +212,7 @@ def validate_naming(file_path: str) -> Optional[ValidationError]:
             f"[ERR] Filename must not contain spaces. Use hyphens instead.",
             "warning"
         )
-    
+
     # Check for valid characters
     if not re.match(r"^[a-z0-9\-_.]+\.md$", filename):
         return ValidationError(
@@ -221,18 +221,18 @@ def validate_naming(file_path: str) -> Optional[ValidationError]:
             f"[ERR] Filename contains invalid characters. Use only: a-z, 0-9, hyphens, underscores, dots",
             "warning"
         )
-    
+
     return None
 
 
 def validate_frontmatter(file_path: str) -> List[ValidationError]:
     """Validate YAML frontmatter in markdown file."""
     errors = []
-    
+
     # Skip .github/ (special case - no frontmatter required)
     if ".github" in file_path:
         return errors
-    
+
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -244,7 +244,7 @@ def validate_frontmatter(file_path: str) -> List[ValidationError]:
             "error"
         ))
         return errors
-    
+
     # Check for frontmatter
     if not content.startswith("---"):
         errors.append(ValidationError(
@@ -254,7 +254,7 @@ def validate_frontmatter(file_path: str) -> List[ValidationError]:
             "error"
         ))
         return errors
-    
+
     # Extract frontmatter
     try:
         end_marker = content.find("---", 3)
@@ -266,10 +266,10 @@ def validate_frontmatter(file_path: str) -> List[ValidationError]:
                 "error"
             ))
             return errors
-        
+
         frontmatter_text = content[3:end_marker].strip()
         frontmatter = yaml.safe_load(frontmatter_text)
-        
+
         if not isinstance(frontmatter, dict):
             errors.append(ValidationError(
                 file_path,
@@ -286,7 +286,7 @@ def validate_frontmatter(file_path: str) -> List[ValidationError]:
             "error"
         ))
         return errors
-    
+
     # Validate required fields
     missing_fields = REQUIRED_FRONTMATTER_FIELDS - set(frontmatter.keys())
     if missing_fields:
@@ -296,7 +296,7 @@ def validate_frontmatter(file_path: str) -> List[ValidationError]:
             f"[ERR] Missing required frontmatter fields: {', '.join(sorted(missing_fields))}",
             "error"
         ))
-    
+
     # Validate type field
     doc_type = frontmatter.get("type", "").lower()
     if doc_type and doc_type not in VALID_TYPES:
@@ -306,7 +306,7 @@ def validate_frontmatter(file_path: str) -> List[ValidationError]:
             f"[ERR] Invalid type '{doc_type}'. Must be one of: {', '.join(sorted(VALID_TYPES))}",
             "error"
         ))
-    
+
     # Validate status field
     status = frontmatter.get("status", "").lower()
     if status and status not in VALID_STATUSES:
@@ -316,7 +316,7 @@ def validate_frontmatter(file_path: str) -> List[ValidationError]:
             f"[ERR] Invalid status '{status}'. Must be one of: {', '.join(sorted(VALID_STATUSES))}",
             "error"
         ))
-    
+
     # Validate date fields
     for date_field in ["created", "updated"]:
         date_str = frontmatter.get(date_field)
@@ -330,7 +330,7 @@ def validate_frontmatter(file_path: str) -> List[ValidationError]:
                     f"[ERR] Invalid {date_field} date format '{date_str}'. Use YYYY-MM-DD",
                     "error"
                 ))
-    
+
     return errors
 
 
@@ -338,10 +338,10 @@ def validate_agent_docs_structure(file_path: str) -> Optional[ValidationError]:
     """Validate agent-docs/ subdirectory structure."""
     # Normalize to forward slashes for consistent comparison
     norm_path = file_path.replace("\\", "/")
-    
+
     if not norm_path.startswith("agent-docs/"):
         return None
-    
+
     parts = Path(file_path).parts
     if len(parts) < 2:
         return ValidationError(
@@ -350,7 +350,7 @@ def validate_agent_docs_structure(file_path: str) -> Optional[ValidationError]:
             "[ERR] agent-docs files must be in subdirectories (execution/, sessions/, feedback/, research/)",
             "error"
         )
-    
+
     subdir = parts[1]
     if subdir not in {"execution", "sessions", "feedback", "research", "prompts"}:
         return ValidationError(
@@ -359,7 +359,7 @@ def validate_agent_docs_structure(file_path: str) -> Optional[ValidationError]:
             f"[ERR] agent-docs subdirectory '{subdir}' not recognized. Use: execution/, sessions/, feedback/, research/",
             "error"
         )
-    
+
     # Validate filename pattern for agent-docs
     filename = Path(file_path).name
     if subdir in {"execution", "sessions", "feedback", "research"}:
@@ -371,34 +371,34 @@ def validate_agent_docs_structure(file_path: str) -> Optional[ValidationError]:
                 f"[WRN] agent-docs/{subdir}/ files should include date: YYYY-MM or YYYY-MM-DD",
                 "warning"
             )
-    
+
     return None
 
 
 def validate_file(file_path: str) -> List[ValidationError]:
     """Validate a single markdown file."""
     errors = []
-    
+
     # Validate location
     loc_error = validate_location(file_path)
     if loc_error:
         errors.append(loc_error)
-    
+
     # Validate naming
     naming_error = validate_naming(file_path)
     if naming_error:
         errors.append(naming_error)
-    
+
     # Validate agent-docs structure
     agent_error = validate_agent_docs_structure(file_path)
     if agent_error:
         errors.append(agent_error)
-    
+
     # Validate frontmatter (only if other location checks pass or warning)
     if not loc_error or loc_error.severity == "warning":
         frontmatter_errors = validate_frontmatter(file_path)
         errors.extend(frontmatter_errors)
-    
+
     return errors
 
 
@@ -406,14 +406,14 @@ def find_all_md_files(root_dir: str = ".") -> List[str]:
     """Find all markdown files in the repository."""
     md_files = []
     root = Path(root_dir)
-    
+
     for md_file in root.rglob("*.md"):
         # Skip paths in SKIP_PATHS
         if any(part in SKIP_PATHS for part in md_file.parts):
             continue
-        
+
         md_files.append(str(md_file))
-    
+
     return sorted(md_files)
 
 
@@ -422,43 +422,43 @@ def print_report(errors: List[ValidationError], verbose: bool = False):
     if not errors:
         print(f"\n{Colors.GREEN}[PASS] All documentation is compliant with DOCUMENTATION_GOVERNANCE.md{Colors.ENDC}\n")
         return False
-    
+
     # Group by severity
     by_severity = {"error": [], "warning": [], "info": []}
     for error in errors:
         by_severity[error.severity].append(error)
-    
+
     # Print header
     total = len(errors)
     print(f"\n{Colors.RED}{Colors.BOLD}[AUDIT] DOCUMENTATION GOVERNANCE AUDIT{Colors.ENDC}\n")
     print(f"{Colors.RED}[FAIL] Found {total} violation(s){Colors.ENDC}\n")
-    
+
     # Print errors
     if by_severity["error"]:
         print(f"{Colors.RED}{Colors.BOLD}[ERROR] ({len(by_severity['error'])}) - MUST FIX:{Colors.ENDC}")
         for error in by_severity["error"]:
             print(f"  {error}")
         print()
-    
+
     # Print warnings
     if by_severity["warning"]:
         print(f"{Colors.YELLOW}{Colors.BOLD}[WARN] ({len(by_severity['warning'])}) - Should fix:{Colors.ENDC}")
         for error in by_severity["warning"]:
             print(f"  {error}")
         print()
-    
+
     # Print summary
     error_count = len(by_severity["error"])
     warning_count = len(by_severity["warning"])
-    
+
     print(f"{Colors.BOLD}Summary:{Colors.ENDC}")
     print(f"  Errors:   {error_count} (blocks commits)")
     print(f"  Warnings: {warning_count} (should be fixed)")
     print()
-    
+
     print(f"{Colors.BLUE}Reference: specs/governance/DOCUMENTATION_GOVERNANCE.md{Colors.ENDC}")
     print(f"{Colors.BLUE}Rules: .github/copilot-instructions.md (AI Agent Governance Checklist){Colors.ENDC}\n")
-    
+
     return error_count > 0
 
 
@@ -477,9 +477,9 @@ Examples:
     parser.add_argument("--staged", action="store_true", help="Validate only staged files (git)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     parser.add_argument("files", nargs="*", help="Specific files to validate")
-    
+
     args = parser.parse_args()
-    
+
     # Determine which files to validate
     if args.all:
         files_to_check = find_all_md_files()
@@ -490,20 +490,20 @@ Examples:
     else:
         parser.print_help()
         return 1
-    
+
     if not files_to_check:
         print("ℹ️  No files to validate.")
         return 0
-    
+
     # Validate files
     all_errors = []
     for file_path in files_to_check:
         errors = validate_file(file_path)
         all_errors.extend(errors)
-    
+
     # Print report
     has_errors = print_report(all_errors, args.verbose)
-    
+
     return 1 if has_errors else 0
 
 
