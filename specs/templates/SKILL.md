@@ -20,9 +20,9 @@ llm_summary: |
 
 ## [SKILL_NAME] Skill Template
 
-> **Status**: {{status}}  
-> **Type**: {{skill_type}} skill ({{domain}})  
-> **Complexity**: {{complexity}}  
+> **Status**: {{status}}
+> **Type**: {{skill_type}} skill ({{domain}})
+> **Complexity**: {{complexity}}
 > **Last Updated**: {{updated}}
 
 ---
@@ -36,7 +36,7 @@ Clear, concise explanation of the skill's purpose. What problem does it solve?
 **Example:**
 
 ```text
-This skill teaches Redis caching patterns for high-performance 
+This skill teaches Redis caching patterns for high-performance
 Python web applications. You'll learn:
 - Connection pooling with connection limits
 - Cache invalidation strategies (TTL, event-driven, manual)
@@ -178,10 +178,10 @@ def update_user(user_id, data):
 def get_user(user_id):
     cache_key = f"user:{user_id}"
     cached = cache.get(cache_key)
-    
+
     if cached:
         return json.loads(cached)
-    
+
     # Not in cache, fetch from DB
     user = db.get(user_id)
     if user:
@@ -217,7 +217,7 @@ def probabilistic_early_expiration(cache_key, ttl, hot_threshold=0.8):
     ttl_remaining = cache.ttl(cache_key)
     if ttl_remaining == -1:  # Key expired
         return True
-    
+
     # Check if in hot zone (last 20% of TTL)
     if ttl_remaining < ttl * (1 - hot_threshold):
         # Probabilistically refresh
@@ -230,12 +230,12 @@ def cached_with_stampede_prevention(ttl=3600):
         @wraps(func)
         def wrapper(*args, **kwargs):
             cache_key = f"{func.__name__}:{args}:{kwargs}"
-            
+
             # Try to get from cache
             value = cache.get(cache_key)
             if value and not probabilistic_early_expiration(cache_key, ttl):
                 return json.loads(value)
-            
+
             # Use lock to ensure only one process regenerates
             lock_key = f"{cache_key}:lock"
             with cache.lock(lock_key, timeout=5):
@@ -243,12 +243,12 @@ def cached_with_stampede_prevention(ttl=3600):
                 value = cache.get(cache_key)
                 if value:
                     return json.loads(value)
-                
+
                 # Regenerate
                 result = func(*args, **kwargs)
                 cache.setex(cache_key, ttl, json.dumps(result))
                 return result
-        
+
         return wrapper
     return decorator
 
@@ -276,26 +276,26 @@ class CacheLayer:
             decode_responses=True,
             socket_keepalive=True,
         )
-    
+
     def get(self, key, default=None):
         """Retrieve from cache."""
         value = self.client.get(key)
         return value or default
-    
+
     def set(self, key, value, ttl=3600):
         """Store in cache with TTL."""
         self.client.setex(key, ttl, value)
-    
+
     def delete(self, key):
         """Remove from cache."""
         self.client.delete(key)
-    
+
     def get_or_compute(self, key, compute_fn, ttl=3600):
         """Cache-aside pattern: get or compute."""
         cached = self.get(key)
         if cached:
             return cached
-        
+
         value = compute_fn()
         self.set(key, value, ttl)
         return value
@@ -325,34 +325,34 @@ import json
 class AsyncCacheLayer:
     def __init__(self):
         self.redis = None
-    
+
     async def init(self, url='redis://localhost'):
         """Initialize Redis connection."""
         self.redis = await aioredis.create_redis_pool(url)
-    
+
     async def get(self, key):
         """Async get from cache."""
         value = await self.redis.get(key)
         return json.loads(value) if value else None
-    
+
     async def set(self, key, value, ttl=3600):
         """Async set in cache."""
         await self.redis.setex(key, ttl, json.dumps(value))
-    
+
     async def delete(self, key):
         """Async delete from cache."""
         await self.redis.delete(key)
-    
+
     async def get_or_compute(self, key, compute_fn, ttl=3600):
         """Async cache-aside pattern."""
         cached = await self.get(key)
         if cached:
             return cached
-        
+
         value = await compute_fn()
         await self.set(key, value, ttl)
         return value
-    
+
     async def close(self):
         """Close Redis connection."""
         self.redis.close()
@@ -387,7 +387,7 @@ async def warm_cache():
     """Proactively populate frequently-accessed data."""
     cache = AsyncCacheLayer()
     await cache.init()
-    
+
     # Pre-populate top users
     top_users = await db.get_top_users(limit=100)
     for user in top_users:
@@ -396,7 +396,7 @@ async def warm_cache():
             user,
             ttl=86400  # 24 hours
         )
-    
+
     print(f"✓ Warmed cache with {len(top_users)} users")
     await cache.close()
 
@@ -434,12 +434,12 @@ def logout(session_id):
 ```python
 def get_user_by_email(email):
     cache_key = f"user:email:{email}"
-    
+
     # Try cache first
     cached = cache.get(cache_key)
     if cached:
         return json.loads(cached)
-    
+
     # Cache miss: query database
     user = db.query("SELECT * FROM users WHERE email = %s", email)
     if user:
@@ -461,10 +461,10 @@ def is_rate_limited(user_id, limit=100, window=3600):
     """Check if user has exceeded rate limit."""
     key = f"ratelimit:{user_id}"
     current = cache.incr(key)
-    
+
     if current == 1:
         cache.expire(key, window)
-    
+
     return current > limit
 
 @app.post("/api/action")
@@ -560,12 +560,12 @@ def cache():
 def test_get_or_compute_cache_hit(cache):
     """Test cache-aside pattern with cache hit."""
     cache.get.return_value = json.dumps({"id": 1})
-    
+
     result = cache_layer.get_or_compute(
         "user:1",
         lambda: {"id": 1, "name": "John"}
     )
-    
+
     assert result == {"id": 1}
     cache.get.assert_called_once()
     cache.set.assert_not_called()
@@ -573,13 +573,13 @@ def test_get_or_compute_cache_hit(cache):
 def test_get_or_compute_cache_miss(cache):
     """Test cache-aside pattern with cache miss."""
     cache.get.return_value = None
-    
+
     result = cache_layer.get_or_compute(
         "user:1",
         lambda: {"id": 1, "name": "John"},
         ttl=3600
     )
-    
+
     assert result == {"id": 1, "name": "John"}
     cache.set.assert_called_once()
 ```
@@ -655,6 +655,6 @@ Reference this skill for battle-tested patterns. Start with the Basic Caching La
 
 ---
 
-**Last Reviewed**: {{updated}}  
-**Confidence Score**: 95% (tested in production, 50+ projects)  
+**Last Reviewed**: {{updated}}
+**Confidence Score**: 95% (tested in production, 50+ projects)
 **Maintenance**: Review every 30 days for new Redis features
