@@ -1,4 +1,4 @@
----
+------
 title: CDE Orchestrator MCP - AI Agent Instructions# CDE Orchestrator MCP - Agent
   Instructions
 description: '**CRITICAL**: You are an AI agent working with the **CDE Orchestrator
@@ -20,7 +20,7 @@ llm_summary: "User guide for CDE Orchestrator MCP - AI Agent Instructions# CDE O
   \ AGENTS.md (OpenAI Standard) > **Target**: AI Coding Agents (Cursor, Windsurf,\
   \ Aider, Claude Desktop, Gemini, etc.)  > **Target**: AI Coding Agents (Cursor,\
   \ Windsurf, Aider, Bolt, etc.)\n  Reference when working with guide documentation."
----
+------
 
 # CDE Orchestrator MCP - AI Agent Instructions# CDE Orchestrator MCP - Agent Instructions
 
@@ -166,9 +166,9 @@ class StartFeatureUseCase:
 
 | No institutional memory | Skills accumulate, reuse, improve |
 
----
+------
 
----
+------
 
 ## 🛠️ Development Workflow
 
@@ -278,7 +278,7 @@ cde_startFeature(- `README.md` - Project overview
 
 **Returns**: POML prompt for "define" phase (or first non-skipped phase)```yaml
 
----
+------
 
 #### `cde_submitWork`title: "Document Title"
 
@@ -392,304 +392,110 @@ def test_filesystem_repository_save_and_load():
 
 - ✅ Want latest patterns/best practices
 
-### Multi-Project Support
+### AI Agent Tools
 
-#### `cde_updateSkill`All tools accept `project_path` or `project_name`
+#### `cde_selectAgent`
 
-```python
-
-**Purpose**: Research and update skill with latest information# Direct path (preferred)
-
-cde_startFeature(
-
-**Usage**:    project_path="E:\\scripts-python\\CDE",
-
-    user_prompt="Add authentication"
-
-```python)
-
-cde_updateSkill(
-
-    skill_name="redis-caching",# Or resolved name (convenience)
-
-    topics=["redis 7.x breaking changes", "redis connection pooling best practices"]cde_startFeature(
-
-)    project_name="CDE",
-
-```    user_prompt="Add authentication"
-
-)
-
-**Returns**: Update note with breaking changes, deprecations, new features, best practices```
-
-
-
-**When to Use**:State managed per-project in `.cde/state.json`.
-
-
-
-- ✅ Skill references old library versions---
-
-- ✅ Before major implementation (ensure current knowledge)
-
-- ✅ Monthly maintenance (background task)## ⚠️ Common Pitfalls
-
-
-
-### Documentation Management### ❌ DON'T
-
-1. Create `.md` files in root (except approved list)
-
-#### `cde_scanDocumentation`2. Import adapters in domain layer
-
-3. Put business logic in use cases (belongs in domain)
-
-**Purpose**: Audit documentation structure and compliance4. Skip metadata in new documentation
-
-5. Make breaking changes without updating specs
+**Purpose**: Automatically select the best AI agent for your task based on intelligent analysis
 
 **Usage**:
 
-### ✅ DO
+```python
+cde_selectAgent(task_description="Add Redis caching to user authentication")
+```
 
-```python1. Follow hexagonal architecture strictly
+**Returns**: JSON with selected agent, complexity analysis, capabilities, and reasoning
 
-cde_scanDocumentation(project_path=".")2. Write specs before code
+**When to Use**:
 
-```3. Add tests for all new functionality
+- ✅ Before delegating any coding task to AI agents
+- ✅ When unsure which agent is best for a specific task
+- ✅ To get detailed analysis of task requirements
 
-4. Use semantic commit messages: `feat:`, `fix:`, `docs:`, `refactor:`
+#### `cde_executeWithBestAgent`
 
-**Returns**: Total docs, missing metadata, orphaned files, large files, recommendations5. Link documents from indexes (`docs/INDEX.md`)
+**Purpose**: Execute task with automatically selected best available agent using MultiAgentOrchestrator
 
-
-
-**When to Use**:---
-
-
-
-- ✅ New project onboarding## 🎓 Key Concepts
-
-- ✅ Before major documentation work
-
-- ✅ Periodic quality audits### Context-Driven Engineering (CDE)
-
-Development as **state transitions** through phases:
-
-#### `cde_analyzeDocumentation`- `define` → Write specification
-
-- `decompose` → Break into tasks
-
-**Purpose**: Deep quality analysis with scoring- `design` → Technical design
-
-- `implement` → Write code
-
-**Usage**:- `test` → Create tests
-
-- `review` → QA validation
+**Usage**:
 
 ```python
+cde_executeWithBestAgent(
+    task_description="Refactor authentication to use OAuth2",
+    require_plan_approval=True,
+    timeout=3600
+)
+```
 
-cde_analyzeDocumentation(project_path=".")### Dynamic Skill Management System (DSMS)
+**Returns**: JSON with execution results, selected agent, and performance metrics
 
-```Self-improving knowledge layer with smart reuse:
+**When to Use**:
 
-- **Base skills**: `.copilot/skills/base/` - Persistent knowledge
+- ✅ For end-to-end task execution with intelligent agent selection
+- ✅ When you want seamless orchestration without manual agent management
+- ✅ For complex tasks requiring plan approval or long execution times
 
-**Returns**: Quality score (0-100), broken links, metadata analysis, issues, suggestions- **Ephemeral skills**: `.copilot/skills/ephemeral/` - Task-specific, reusable
+#### `cde_delegateToJules`
 
-- **Smart reuse**: Regenerate only on breaking changes
+**Purpose**: Delegate complex coding tasks to Jules AI agent with full repository context
 
----
-
-See: `specs/design/dynamic-skill-system.md` (44 pages)
-
-## 🏗️ Architecture Patterns (Python 3.14)
-
----
-
-### Hexagonal Architecture (CRITICAL)
-
-## 🔍 Finding Information
-
-**Rule**: Dependencies point INWARD: `Adapters → Application → Domain`
-
-### Semantic Search
-
-**Domain Layer** (`src/cde_orchestrator/domain/`)Use grep or semantic search for:
-
-- Function/class implementations
-
-- Pure business logic- Similar patterns
-
-- NO external dependencies (no adapters, no infrastructure)- Configuration examples
-
-- Rich entities with behavior
-
-### Key Documents
-
-```python- **Architecture**: `specs/design/ARCHITECTURE.md` (1400 lines)
-
-# ✅ CORRECT: Domain entity with business rules- **Roadmap**: `specs/tasks/improvement-roadmap.md` (63 tasks)
-
-class Project:- **Governance**: `specs/governance/DOCUMENTATION_GOVERNANCE.md`
-
-    def start_feature(self, prompt: str) -> Feature:- **DSMS Design**: `specs/design/dynamic-skill-system.md`
-
-        if self.status != ProjectStatus.ACTIVE:
-
-            raise InvalidStateTransitionError("Project must be active")---
-
-        return Feature.create(self.id, prompt)
-
-```## 📊 Current Status (Phase 2)
-
-
-
-**Application Layer** (`src/cde_orchestrator/application/`)### ✅ Completed (Phase 1)
-
-- Core validation with Pydantic
-
-- Use cases (orchestration)- Error handling (circuit breaker, retry logic)
-
-- Calls domain entities and ports- State backups and migration
-
-- Returns structured results- Hexagonal architecture foundation
-
-- Documentation governance
+**Usage**:
 
 ```python
-
-# ✅ CORRECT: Use case orchestrates domain + adapters### 🔄 In Progress (Phase 2)
-
-class StartFeatureUseCase:- Use cases implementation
-
-    def execute(self, project_path: str, prompt: str):- Copilot CLI adapter
-
-        project = self.repo.get_or_create(project_path)- Multi-project auto-discovery
-
-        feature = project.start_feature(prompt)- Unit test coverage (target: 80%)
-
-        self.repo.save(project)
-
-        return {"feature_id": feature.id}### 📋 Next (Phase 3+)
-
-```See `specs/tasks/improvement-roadmap.md` for detailed breakdown.
-
-
-
-**Adapters Layer** (`src/cde_orchestrator/adapters/`)---
-
-
-
-- Implements port interfaces## 🆘 When Stuck
-
-- Infrastructure details (filesystem, APIs, CLI)
-
-1. **Check specs**: `specs/features/` or `specs/design/`
-
-```python2. **Search code**: `grep -r "pattern" src/`
-
-# ✅ CORRECT: Adapter implements domain port3. **Read architecture**: `specs/design/ARCHITECTURE.md`
-
-class FileSystemProjectRepository(IProjectRepository):4. **Review roadmap**: `specs/tasks/improvement-roadmap.md`
-
-    def get_or_create(self, path: str) -> Project:5. **Check governance**: If documentation-related
-
-        # File I/O here
-
-        pass---
-
+cde_delegateToJules(
+    user_prompt="Add comprehensive error handling to API endpoints",
+    require_plan_approval=True,
+    timeout=3600
+)
 ```
 
-## 📞 Quick Commands Reference
+**Returns**: JSON with Jules session results, modified files, and execution status
 
-**❌ WRONG Examples**:
+**When to Use**:
 
-```bash
+- ✅ Complex feature development (4-8 hours)
+- ✅ Large-scale refactoring
+- ✅ Tasks requiring full codebase context
+- ✅ When plan approval is needed
 
-```python# Activate environment
+#### `cde_listAvailableAgents`
 
-# ❌ Domain importing adapters.\.venv\Scripts\activate  # Windows
+**Purpose**: Check which AI coding agents are currently available and configured
 
-from ..adapters.filesystem import FileSystem  # NEVER IN DOMAIN!source .venv/bin/activate  # Linux/Mac
+**Usage**:
 
-
-
-# ❌ Anemic domain models (just data, no behavior)# Run tests
-
-class Project:pytest tests/ -v --cov=src
-
-    status: str  # NO METHODS = BAD
-
-# Check types
-
-# ❌ Use cases with business rulesmypy src/
-
-class StartFeatureUseCase:
-
-    def execute(self, data):# Format code
-
-        if data["prompt"] == "":  # This belongs in domain!black src/ tests/
-
-            raise ValueError()ruff check src/ --fix
-
+```python
+cde_listAvailableAgents()
 ```
 
-# Validate docs
+**Returns**: JSON with available agents, their capabilities, and setup requirements
 
-### Python 3.14 Best Practicespython scripts/validation/validate-metadata.py --all
+**When to Use**:
 
-- Use `match/case` for complex conditionals# Add metadata to docs
+- ✅ Before using agent tools to verify availability
+- ✅ To troubleshoot agent configuration issues
+- ✅ To see which agents are ready for use
 
-- Use `type` keyword for type aliasespython scripts/metadata/add-metadata.py --path docs/my-doc.md
+### Multi-Project Support
 
-- Use `@dataclass(slots=True, frozen=True)` for value objects
+All tools accept `project_path` or `project_name`
 
-- Use `async/await` for I/O-bound operations# Pre-commit validation
+```python
+# Direct path (preferred)
+cde_startFeature(
+    project_path="E:\\scripts-python\\CDE",
+    user_prompt="Add authentication"
+)
 
-- Use `pathlib.Path` for file operationspre-commit run --all-files
-
-- Use PEP 695 type parameter syntax```
-
-```python---
-
-# ✅ Python 3.14 patterns
-
-from typing import TypeAlias## 🎯 Success Criteria
-
-from dataclasses import dataclass
-
-Before submitting work:
-
-type ProjectID = str  # PEP 695- ✅ All tests pass (`pytest tests/`)
-
-- ✅ Type checking passes (`mypy src/`)
-
-@dataclass(slots=True, frozen=True)- ✅ Linting passes (`ruff check`, `black --check`)
-
-class FeatureId:- ✅ Documentation updated (specs + metadata)
-
-    value: str- ✅ Pre-commit hooks pass
-
-- ✅ No domain layer importing adapters
-
-async def execute_workflow(prompt: str) -> Result:
-
-    match complexity:---
-
-        case WorkflowComplexity.TRIVIAL:
-
-            return await quick_fix(prompt)**For detailed GitHub Copilot instructions**: See `.github/copilot-instructions.md`
-
-        case WorkflowComplexity.EPIC:**For Google AI Studio (Gemini) instructions**: See `GEMINI.md`
-
-            return await full_workflow(prompt)
-        case _:
-            return await standard_workflow(prompt)
+# Or resolved name (convenience)
+cde_startFeature(
+    project_name="CDE",
+    user_prompt="Add authentication"
+)
 ```
 
----
+State managed per-project in `.cde/state.json`.
+
+------
 
 ## 📁 Documentation Governance (Mandatory)
 
@@ -709,7 +515,7 @@ async def execute_workflow(prompt: str) -> Result:
 **Every .md file** must start with:
 
 ```yaml
----
+------
 title: "Document Title"
 description: "One-sentence summary"
 type: "feature|design|task|session|execution|research"
@@ -719,7 +525,7 @@ updated: "2025-11-02"
 author: "Agent Name"
 llm_summary: |
   2-3 sentence summary optimized for LLM context.
----
+------
 ```
 
 **Enforcement**: Pre-commit hooks block commits without metadata.
@@ -736,7 +542,7 @@ llm_summary: |
 
 **All other .md files** must be in `specs/` or `agent-docs/`.
 
----
+------
 
 ## 🎓 Workflow Patterns
 
@@ -828,7 +634,7 @@ response = cde_startFeature(
 # Workflow emphasizes research, light on implementation
 ```
 
----
+------
 
 ## 🧪 Testing Strategy
 
@@ -872,7 +678,7 @@ async def test_complete_workflow():
     assert "feature_id" in feature
 ```
 
----
+------
 
 ## 🔧 Common Tasks
 
@@ -932,7 +738,7 @@ cde_selectWorkflow("Clean up documentation structure")
 # 4. Execute workflow phases
 ```
 
----
+------
 
 ## 📚 Key Documents
 
@@ -954,7 +760,7 @@ cde_selectWorkflow("Clean up documentation structure")
 - **`.cde/prompts/01_define.poml`** - Define phase template
 - **`agent-docs/sessions/`** - Past session examples
 
----
+------
 
 ## 🚀 Build & Test Commands
 
@@ -984,7 +790,7 @@ pre-commit run --all-files
 python src/server.py
 ```
 
----
+------
 
 ## ⚠️ Common Mistakes
 
@@ -1040,7 +846,7 @@ Path("specs/design/new-feature-design.md").write_text(design)
 # AND add YAML frontmatter!
 ```
 
----
+------
 
 ## 🎯 Success Checklist
 
@@ -1057,7 +863,7 @@ Before claiming task complete:
 - [ ] Documentation updated
 - [ ] Pre-commit hooks passing
 
----
+------
 
 **Remember**: You are an **orchestrator** working with an **intelligent MCP server**. Let the MCP handle routing, skill management, and governance. You focus on executing workflows and producing quality results.
 

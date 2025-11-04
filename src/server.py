@@ -41,6 +41,8 @@ from mcp_tools import (
     # Agents
     cde_delegateToJules,
     cde_listAvailableAgents,
+    cde_selectAgent,
+    cde_executeWithBestAgent,
 )
 
 # --- Configuration ---
@@ -72,6 +74,8 @@ app.tool()(cde_updateSkill)
 # --- AI Agent Tools ---
 app.tool()(cde_delegateToJules)
 app.tool()(cde_listAvailableAgents)
+app.tool()(cde_selectAgent)
+app.tool()(cde_executeWithBestAgent)
 
 # ============================================================================
 # SERVER ENTRY POINT
@@ -80,7 +84,7 @@ app.tool()(cde_listAvailableAgents)
 if __name__ == "__main__":
     """Run MCP server in development mode."""
     logger.info("🚀 Starting CDE Orchestrator MCP Server")
-    logger.info(f"📦 Registered {9} tools")
+    logger.info(f"📦 Registered {11} tools")
     logger.info("✅ Server ready for connections")
 
     app.run()

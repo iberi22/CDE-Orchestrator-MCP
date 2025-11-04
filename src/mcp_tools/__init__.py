@@ -7,7 +7,7 @@ Exports all CDE Orchestrator MCP tools for registration in server.py.
 from .onboarding import cde_onboardingProject, cde_publishOnboarding
 from .documentation import cde_scanDocumentation, cde_analyzeDocumentation
 from .orchestration import cde_selectWorkflow, cde_sourceSkill, cde_updateSkill
-from .agents import cde_delegateToJules, cde_listAvailableAgents
+from .agents import cde_delegateToJules, cde_listAvailableAgents, cde_selectAgent, cde_executeWithBestAgent
 
 __all__ = [
     # Onboarding
@@ -23,4 +23,6 @@ __all__ = [
     # Agents
     "cde_delegateToJules",
     "cde_listAvailableAgents",
+    "cde_selectAgent",
+    "cde_executeWithBestAgent",
 ]

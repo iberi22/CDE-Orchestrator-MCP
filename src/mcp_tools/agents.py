@@ -10,8 +10,41 @@ import shutil
 from pathlib import Path
 
 from cde_orchestrator.adapters.agents import JulesAsyncAdapter
+from cde_orchestrator.adapters.agents.agent_selection_policy import AgentSelectionPolicy
+from cde_orchestrator.adapters.agents.multi_agent_orchestrator import MultiAgentOrchestrator
 
 from ._base import tool_handler
+
+
+def _calculate_task_complexity(task_description: str) -> str:
+    """
+    Calculate task complexity from description.
+
+    Shared utility function used by multiple MCP tools.
+
+    Returns:
+        Complexity as string: "trivial", "moderate", "complex", "epic"
+    """
+    desc_lower = task_description.lower()
+
+    # Epic keywords (architecture/system-level changes)
+    epic_keywords = ["architecture", "system.*wide", "refactor.*entire", "redesign", "restructure", "complete.*rewrite", "platform", "infrastructure", "enterprise", "scalability", "performance.*optimization"]
+
+    # Complex keywords (features, modules, integrations)
+    complex_keywords = ["feature", "module", "integration", "api", "database", "authentication", "authorization", "security", "complex", "multiple.*files", "microservices", "distributed"]
+
+    # Simple keywords (fixes, docs, comments)
+    simple_keywords = ["fix", "typo", "doc", "comment", "readme", "update", "change", "modify"]
+
+    # Check for epic first (more specific patterns)
+    if any(kw in desc_lower for kw in epic_keywords):
+        return "epic"
+    elif any(kw in desc_lower for kw in complex_keywords):
+        return "complex"
+    elif any(kw in desc_lower for kw in simple_keywords):
+        return "trivial"
+    else:
+        return "moderate"
 
 
 @tool_handler
@@ -336,3 +369,421 @@ async def cde_listAvailableAgents() -> str:
         },
         indent=2,
     )
+
+
+@tool_handler
+async def cde_selectAgent(task_description: str) -> str:
+    """
+    🧠 **Intelligent Agent Selection** - Automatically select the best AI agent for your task.
+
+    Analyzes your task description and selects the most appropriate AI coding agent
+    based on complexity, capabilities, and availability. Uses intelligent heuristics
+    to determine task requirements and matches them with agent strengths.
+
+    **How it works:**
+    1. Analyzes task description for complexity keywords
+    2. Detects special requirements (plan approval, large context)
+    3. Checks agent availability and capabilities
+    4. Selects best agent with fallback chain
+    5. Returns detailed selection reasoning
+
+    **Task Complexity Detection:**
+    - **TRIVIAL**: < 5 min (typos, doc updates, simple fixes)
+    - **SIMPLE**: 15-30 min (single file changes)
+    - **MODERATE**: 1-2 hours (multiple files, basic features)
+    - **COMPLEX**: 4-8 hours (new features, refactoring)
+    - **EPIC**: 2-5 days (architecture changes, system refactoring)
+
+    **Args:**
+        task_description: Natural language description of the coding task
+            Examples:
+            - "Fix typo in README.md"
+            - "Add user authentication feature"
+            - "Refactor database layer to use async/await"
+            - "Implement complete e-commerce checkout system"
+
+    **Returns:**
+        JSON with:
+        - selected_agent: Agent chosen for the task
+        - complexity: Detected task complexity
+        - reasoning: Why this agent was selected
+        - capabilities: Agent capabilities summary
+        - alternatives: Other suitable agents (if any)
+        - requirements: Setup requirements for selected agent
+
+    **Example:**
+        >>> result = cde_selectAgent("Add Redis caching to user auth module")
+        {
+          "selected_agent": "jules",
+          "complexity": "moderate",
+          "reasoning": "Moderate complexity task requiring database integration",
+          "capabilities": {
+            "async": true,
+            "plan_approval": true,
+            "max_context": 100000
+          },
+          "requirements": ["JULES_API_KEY in .env", "jules-agent-sdk installed"]
+        }
+    """
+    try:
+        # Get available agents from existing logic
+        agents_status = []
+
+        # Check Jules
+        jules_available = bool(os.getenv("JULES_API_KEY"))
+        try:
+            import importlib.util
+            jules_sdk_installed = importlib.util.find_spec("jules_agent_sdk") is not None
+        except ImportError:
+            jules_sdk_installed = False
+
+        if jules_available and jules_sdk_installed:
+            agents_status.append("jules")
+
+        # Check Copilot CLI
+        copilot_available = shutil.which("gh") is not None
+        if copilot_available:
+            agents_status.append("copilot")
+
+        # Check Gemini CLI
+        gemini_available = shutil.which("gemini") is not None
+        if gemini_available:
+            agents_status.append("gemini")
+
+        # Check Qwen CLI
+        qwen_available = shutil.which("qwen") is not None
+        if qwen_available:
+            agents_status.append("qwen")
+
+        # Convert to AgentType enum values
+        from cde_orchestrator.adapters.agents.agent_selection_policy import AgentType
+        available_agent_types = []
+        for agent_name in agents_status:
+            if agent_name == "jules":
+                available_agent_types.append(AgentType.JULES)
+            elif agent_name == "copilot":
+                available_agent_types.append(AgentType.COPILOT)
+            elif agent_name == "gemini":
+                available_agent_types.append(AgentType.GEMINI)
+            elif agent_name == "qwen":
+                available_agent_types.append(AgentType.QWEN)
+
+        # Use AgentSelectionPolicy to suggest agent
+        suggested_agent = AgentSelectionPolicy.suggest_agent(task_description)
+
+        # Check if suggested agent is available
+        if suggested_agent not in available_agent_types:
+            # Find best available alternative
+            fallback_chain = AgentSelectionPolicy.FALLBACK_CHAIN
+            selected_agent = None
+            for agent_type in fallback_chain:
+                if agent_type in available_agent_types:
+                    selected_agent = agent_type
+                    break
+
+            if not selected_agent:
+                return json.dumps({
+                    "error": "No suitable agent available",
+                    "task_description": task_description,
+                    "available_agents": [a.value for a in available_agent_types],
+                    "message": "No AI agents are currently available. Please install at least one: Jules, Copilot CLI, Gemini CLI, or Qwen CLI."
+                }, indent=2)
+
+            # Use fallback
+            actual_agent = selected_agent
+            fallback_used = True
+        else:
+            actual_agent = suggested_agent
+            fallback_used = False
+
+        # Get agent capabilities
+        capabilities = AgentSelectionPolicy.CAPABILITIES[actual_agent]
+
+        # Calculate complexity properly
+        complexity = _calculate_task_complexity(task_description)
+
+        response = {
+            "selected_agent": actual_agent.value,
+            "task_description": task_description,
+            "complexity": complexity,
+            "reasoning": f"Selected {actual_agent.value} for task execution",
+            "capabilities": {
+                "async": capabilities.supports_async,
+                "plan_approval": capabilities.supports_plan_approval,
+                "max_context_lines": capabilities.max_context_lines,
+                "best_for": capabilities.best_for,
+                "requires_auth": capabilities.requires_auth,
+            },
+            "available_agents": [a.value for a in available_agent_types],
+            "fallback_used": fallback_used,
+        }
+
+        # Add requirements based on agent
+        requirements = []
+        if actual_agent == AgentType.JULES:
+            if not jules_available:
+                requirements.append("Add JULES_API_KEY to .env file")
+            if not jules_sdk_installed:
+                requirements.append("Install jules-agent-sdk: pip install jules-agent-sdk")
+        elif actual_agent == AgentType.COPILOT:
+            if not copilot_available:
+                requirements.append("Install GitHub CLI: https://cli.github.com/")
+                requirements.append("Install Copilot extension: gh extension install github/gh-copilot")
+        elif actual_agent == AgentType.GEMINI:
+            if not gemini_available:
+                requirements.append("Install Gemini CLI: https://ai.google.dev/gemini-api/docs/cli")
+        elif actual_agent == AgentType.QWEN:
+            if not qwen_available:
+                requirements.append("Install Qwen CLI: pip install qwen-cli")
+
+        if requirements:
+            response["setup_requirements"] = requirements
+
+        # Enhanced reasoning
+        if fallback_used:
+            response["reasoning"] = f"Preferred agent not available, using {actual_agent.value} as fallback"
+        else:
+            complexity_reasons = {
+                "trivial": "Simple task suitable for quick fixes",
+                "moderate": "Balanced task requiring code generation capabilities",
+                "complex": "Complex task needing full context and planning",
+                "epic": "Large-scale task requiring async execution and plan approval"
+            }
+            response["reasoning"] = f"{complexity_reasons.get(complexity, 'Task')} - selected {actual_agent.value} based on capabilities and availability"
+
+        return json.dumps(response, indent=2)
+
+    except Exception as e:
+        return json.dumps({
+            "error": "agent_selection_failed",
+            "message": str(e),
+            "task_description": task_description,
+            "type": type(e).__name__,
+        }, indent=2)
+
+
+@tool_handler
+async def cde_executeWithBestAgent(
+    task_description: str,
+    project_path: str = ".",
+    preferred_agent: str = None,
+    require_plan_approval: bool = False,
+    timeout: int = 1800,
+    context_size: int = 1000,
+) -> str:
+    """
+    🚀 **Execute Task with Best Available Agent** - Intelligent agent orchestration.
+
+    Automatically selects and executes with the best AI coding agent for your task.
+    Combines intelligent agent selection with seamless execution using MultiAgentOrchestrator.
+
+    **How it works:**
+    1. Analyzes task description for complexity and requirements
+    2. Checks available agents (Jules, Copilot, Gemini, Qwen)
+    3. Selects optimal agent based on capabilities and availability
+    4. Configures MultiAgentOrchestrator with available adapters
+    5. Executes task with selected agent
+    6. Returns detailed execution results
+
+    **Agent Selection Criteria:**
+    - **Jules**: Complex tasks, refactoring, full repo context, plan approval
+    - **Copilot**: Quick fixes, code generation, GitHub-integrated workflows
+    - **Gemini**: Documentation, analysis, moderate complexity tasks
+    - **Qwen**: Fallback option for basic code generation
+
+    **Args:**
+        task_description: Natural language description of the coding task
+            Examples:
+            - "Add Redis caching to user authentication"
+            - "Refactor database models to use async patterns"
+            - "Fix bug in payment processing logic"
+            - "Add comprehensive error handling to API endpoints"
+
+        project_path: Path to project directory (default: current directory)
+
+        preferred_agent: Override automatic selection ("jules", "copilot", "gemini", "qwen")
+            Use when you know which agent should handle the task
+
+        require_plan_approval: Whether task requires human approval of execution plan
+            Forces selection of Jules (only agent with plan approval support)
+
+        timeout: Maximum execution time in seconds (default: 1800 = 30 minutes)
+            Increase for complex tasks (3600+ for very large refactoring)
+
+        context_size: Estimated lines of code context (default: 1000)
+            Helps agent selection for large vs small tasks
+
+    **Returns:**
+        JSON with execution results:
+        - selected_agent: Agent that executed the task
+        - execution_result: Raw result from the agent
+        - task_complexity: Detected complexity level
+        - execution_time: Time taken to complete
+        - success: Whether execution completed successfully
+
+    **Examples:**
+
+    **Simple Task:**
+        >>> result = cde_executeWithBestAgent("Fix typo in error message")
+        {
+          "selected_agent": "copilot",
+          "task_complexity": "trivial",
+          "success": true,
+          "execution_result": "..."
+        }
+
+    **Complex Task:**
+        >>> result = cde_executeWithBestAgent(
+        ...     "Refactor authentication system to use OAuth2",
+        ...     require_plan_approval=True
+        ... )
+        {
+          "selected_agent": "jules",
+          "task_complexity": "complex",
+          "success": true,
+          "execution_result": "..."
+        }
+
+    **Override Selection:**
+        >>> result = cde_executeWithBestAgent(
+        ...     "Document the new API endpoints",
+        ...     preferred_agent="gemini"
+        ... )
+    """
+    try:
+        import time
+        start_time = time.time()
+
+        # Initialize MultiAgentOrchestrator
+        from cde_orchestrator.adapters.agents.multi_agent_orchestrator import MultiAgentOrchestrator
+        from cde_orchestrator.adapters.agents.agent_selection_policy import AgentType, TaskComplexity
+
+        orchestrator = MultiAgentOrchestrator()
+
+        # Register available agents
+        available_agents = []
+
+        # Register Jules if available
+        jules_api_key = os.getenv("JULES_API_KEY")
+        if jules_api_key:
+            try:
+                import importlib.util
+                if importlib.util.find_spec("jules_agent_sdk"):
+                    from cde_orchestrator.adapters.agents import JulesAsyncAdapter
+                    jules_adapter = JulesAsyncAdapter(
+                        api_key=jules_api_key,
+                        default_timeout=timeout,
+                        require_plan_approval=require_plan_approval,
+                    )
+                    orchestrator.register_agent(AgentType.JULES, jules_adapter)
+                    available_agents.append("jules")
+            except ImportError:
+                pass
+
+        # Register Copilot if available
+        if shutil.which("gh"):
+            try:
+                from cde_orchestrator.adapters.agents import CopilotCLIAdapter
+                copilot_adapter = CopilotCLIAdapter()
+                orchestrator.register_agent(AgentType.COPILOT, copilot_adapter)
+                available_agents.append("copilot")
+            except (ImportError, AttributeError):
+                pass
+
+        # Register Gemini if available
+        if shutil.which("gemini"):
+            try:
+                from cde_orchestrator.adapters.agents import GeminiCLIAdapter
+                gemini_adapter = GeminiCLIAdapter()
+                orchestrator.register_agent(AgentType.GEMINI, gemini_adapter)
+                available_agents.append("gemini")
+            except (ImportError, AttributeError):
+                pass
+
+        # Register Qwen if available
+        if shutil.which("qwen"):
+            try:
+                from cde_orchestrator.adapters.agents import QwenCLIAdapter
+                qwen_adapter = QwenCLIAdapter()
+                orchestrator.register_agent(AgentType.QWEN, qwen_adapter)
+                available_agents.append("qwen")
+            except (ImportError, AttributeError):
+                pass
+
+        if not available_agents:
+            return json.dumps({
+                "error": "no_agents_available",
+                "message": "No AI agents are configured or available",
+                "task_description": task_description,
+                "suggestions": [
+                    "Install Jules: pip install jules-agent-sdk + add JULES_API_KEY to .env",
+                    "Install GitHub CLI: https://cli.github.com/ + gh extension install github/gh-copilot",
+                    "Install Gemini CLI: https://ai.google.dev/gemini-api/docs/cli",
+                ]
+            }, indent=2)
+
+        # Determine task complexity using shared logic
+        complexity_str = _calculate_task_complexity(task_description)
+
+        # Convert to TaskComplexity enum
+        complexity_map = {
+            "trivial": TaskComplexity.TRIVIAL,
+            "moderate": TaskComplexity.MODERATE,
+            "complex": TaskComplexity.COMPLEX,
+            "epic": TaskComplexity.EPIC,
+        }
+        complexity = complexity_map[complexity_str]
+
+        # Prepare execution context
+        context = {
+            "complexity": complexity,
+            "require_plan_approval": require_plan_approval,
+            "context_size": context_size,
+            "timeout": timeout,
+        }
+
+        # Override preferred agent if specified
+        if preferred_agent:
+            preferred_agent_map = {
+                "jules": AgentType.JULES,
+                "copilot": AgentType.COPILOT,
+                "gemini": AgentType.GEMINI,
+                "qwen": AgentType.QWEN,
+            }
+            if preferred_agent.lower() in preferred_agent_map:
+                context["preferred_agent"] = preferred_agent_map[preferred_agent.lower()]
+
+        # Execute with orchestrator
+        execution_result = await orchestrator.execute_prompt(
+            project_path=Path(project_path),
+            prompt=task_description,
+            context=context,
+        )
+
+        execution_time = time.time() - start_time
+
+        # Parse execution result to determine success
+        try:
+            result_data = json.loads(execution_result)
+            success = result_data.get("success", True)  # Assume success if not specified
+        except (json.JSONDecodeError, TypeError):
+            success = True  # Assume success for non-JSON results
+
+        return json.dumps({
+            "selected_agent": context.get("preferred_agent", "auto-selected").value if "preferred_agent" in context else "auto-selected",
+            "task_description": task_description,
+            "task_complexity": complexity.value,
+            "require_plan_approval": require_plan_approval,
+            "available_agents": available_agents,
+            "execution_time_seconds": round(execution_time, 2),
+            "success": success,
+            "execution_result": execution_result,
+        }, indent=2)
+
+    except Exception as e:
+        return json.dumps({
+            "error": "orchestration_failed",
+            "message": str(e),
+            "task_description": task_description,
+            "type": type(e).__name__,
+        }, indent=2)

@@ -56,7 +56,7 @@ llm_summary: |
 src/server.py
 ├── Lines 1-50: Imports, config, constants
 ├── Lines 51-88: Error handlers (_serialize_error, tool_handler)
-├── Lines 90-282: cde_onboardingProject (192 LOC) 
+├── Lines 90-282: cde_onboardingProject (192 LOC)
 ├── Lines 283-345: cde_publishOnboarding (63 LOC)
 ├── Lines 346-398: cde_scanDocumentation (53 LOC)
 ├── Lines 399-468: cde_analyzeDocumentation (70 LOC)
@@ -123,10 +123,10 @@ import json
 def _serialize_error(error: Exception) -> dict:
     """
     Serialize error for JSON response.
-    
+
     Args:
         error: Exception to serialize
-        
+
     Returns:
         Dict with error details
     """
@@ -140,12 +140,12 @@ def _serialize_error(error: Exception) -> dict:
 def tool_handler(func: Callable) -> Callable:
     """
     Wrap MCP tool function with error handling.
-    
+
     Ensures all tools return JSON strings and handle exceptions gracefully.
-    
+
     Args:
         func: Async function to wrap
-        
+
     Returns:
         Wrapped function with error handling
     """
@@ -176,16 +176,16 @@ __all__ = [
     # Onboarding
     "cde_onboardingProject",
     "cde_publishOnboarding",
-    
+
     # Documentation
     "cde_scanDocumentation",
     "cde_analyzeDocumentation",
-    
+
     # Orchestration
     "cde_selectWorkflow",
     "cde_sourceSkill",
     "cde_updateSkill",
-    
+
     # Agents
     "cde_delegateToJules",
     "cde_listAvailableAgents",
@@ -299,16 +299,16 @@ from mcp_tools import (
     # Onboarding
     cde_onboardingProject,
     cde_publishOnboarding,
-    
+
     # Documentation
     cde_scanDocumentation,
     cde_analyzeDocumentation,
-    
+
     # Orchestration
     cde_selectWorkflow,
     cde_sourceSkill,
     cde_updateSkill,
-    
+
     # Agents
     cde_delegateToJules,
     cde_listAvailableAgents,
