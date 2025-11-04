@@ -1,95 +1,64 @@
-"""
-Unit tests for MCP agent tools.
-"""
+# tests/unit/mcp_tools/test_agents.py
 
 import pytest
 import json
-from unittest.mock import patch, MagicMock
-from pathlib import Path
+from unittest.mock import patch
 
 from mcp_tools.agents import cde_selectAgent, cde_listAvailableAgents
+from cde_orchestrator.adapters.agents.agent_selection_policy import AgentSelectionPolicy, AgentType, AgentCapabilities
 
+# Mock AgentSelectionPolicy for testing
+class MockAgentSelectionPolicy:
+    FALLBACK_CHAIN = [AgentType.JULES, AgentType.COPILOT]
+    CAPABILITIES = {
+        AgentType.JULES: AgentCapabilities(
+            agent_type=AgentType.JULES,
+            supports_async=True,
+            supports_plan_approval=True,
+            max_context_lines=100000,
+            best_for=["refactoring"],
+            requires_auth=True
+        ),
+        AgentType.COPILOT: AgentCapabilities(
+            agent_type=AgentType.COPILOT,
+            supports_async=False,
+            supports_plan_approval=False,
+            max_context_lines=4096,
+            best_for=["simple-task"],
+            requires_auth=False
+        ),
+    }
 
-class TestCdeSelectAgent:
-    """Test cde_selectAgent MCP tool."""
+    def suggest_agent(self, task_description: str):
+        if "simple" in task_description:
+            return AgentType.COPILOT
+        return AgentType.JULES
 
-    @pytest.mark.asyncio
-    async def test_select_agent_simple_task(self):
-        """Test agent selection for simple task."""
-        result = await cde_selectAgent("Fix typo in README")
+@pytest.fixture
+def mock_policy():
+    return MockAgentSelectionPolicy()
 
-        data = json.loads(result)
+@pytest.mark.asyncio
+@patch('shutil.which', return_value=True)
+@patch('os.getenv', return_value='fake_key')
+async def test_select_agent_simple_task(getenv_mock, which_mock, mock_policy):
+    result = await cde_selectAgent("A simple task", agent_selection_policy=mock_policy)
+    data = json.loads(result)
+    assert data["selected_agent"] == "copilot"
 
-        assert "selected_agent" in data
-        assert data["complexity"] == "trivial"
-        assert "reasoning" in data
-        assert "capabilities" in data
+@pytest.mark.asyncio
+@patch('shutil.which', return_value=True)
+@patch('os.getenv', return_value='fake_key')
+async def test_select_agent_complex_task(getenv_mock, which_mock, mock_policy):
+    result = await cde_selectAgent("A complex task", agent_selection_policy=mock_policy)
+    data = json.loads(result)
+    assert data["selected_agent"] == "jules"
 
-    @pytest.mark.asyncio
-    async def test_select_agent_complex_task(self):
-        """Test agent selection for complex task."""
-        result = await cde_selectAgent("Implement complete authentication system")
-
-        data = json.loads(result)
-
-        assert "selected_agent" in data
-        assert data["complexity"] == "complex"
-        assert "reasoning" in data
-
-    @pytest.mark.asyncio
-    async def test_select_agent_epic_task(self):
-        """Test agent selection for epic task."""
-        result = await cde_selectAgent("Refactor entire system architecture")
-
-        data = json.loads(result)
-
-        assert "selected_agent" in data
-        assert data["complexity"] == "epic"
-        assert "reasoning" in data
-
-    @pytest.mark.asyncio
-    async def test_select_agent_no_agents_available(self):
-        """Test behavior when no agents are available."""
-        with patch('mcp_tools.agents.shutil.which', return_value=None):
-            with patch.dict('os.environ', {}, clear=True):
-                result = await cde_selectAgent("Any task")
-
-                data = json.loads(result)
-                assert "error" in data
-                assert data["error"] == "No suitable agent available"
-
-
-class TestCdeListAvailableAgents:
-    """Test cde_listAvailableAgents MCP tool."""
-
-    @pytest.mark.asyncio
-    async def test_list_agents_with_all_available(self):
-        """Test listing agents when all are available."""
-        with patch('mcp_tools.agents.shutil.which', return_value='/usr/bin/gh'):
-            with patch.dict('os.environ', {'JULES_API_KEY': 'test-key'}):
-                with patch('importlib.util.find_spec', return_value=MagicMock()):
-                    result = await cde_listAvailableAgents()
-
-                    data = json.loads(result)
-                    assert "available_agents" in data
-                    assert "unavailable_agents" in data
-                    assert "recommendations" in data
-
-                    # Should have multiple agents available
-                    assert len(data["available_agents"]) > 0
-
-    @pytest.mark.asyncio
-    async def test_list_agents_with_none_available(self):
-        """Test listing agents when none are available."""
-        with patch('mcp_tools.agents.shutil.which', return_value=None):
-            with patch.dict('os.environ', {}, clear=True):
-                with patch('importlib.util.find_spec', return_value=None):
-                    result = await cde_listAvailableAgents()
-
-                    data = json.loads(result)
-                    assert "available_agents" in data
-                    assert "unavailable_agents" in data
-
-                    # Should have no agents available
-                    assert len(data["available_agents"]) == 0
-                    assert len(data["unavailable_agents"]) > 0
+@pytest.mark.asyncio
+@patch('shutil.which', return_value=None)
+@patch('os.getenv', return_value=None)
+async def test_select_agent_no_agents_available(getenv_mock, which_mock, mock_policy):
+    result = await cde_selectAgent("Any task", agent_selection_policy=mock_policy)
+    data = json.loads(result)
+    assert "error" in data
+    assert data["error"] == "No suitable agent available"

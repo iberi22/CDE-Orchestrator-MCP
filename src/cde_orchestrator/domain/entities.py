@@ -164,6 +164,25 @@ class FeatureStatus(str, Enum):
 # ============================================================================
 
 
+class Recipe(BaseModel):
+    """Represents a POML recipe for specialized agents."""
+
+    id: str
+    name: str
+    category: str  # engineering, product, project-management, etc.
+    description: str
+    file_path: str
+    tools: List[str]
+    providers: Dict[str, Dict[str, Any]]
+    topology: str = "solo"
+
+
+class RecipeSuggestion(BaseModel):
+    """Represents a recipe suggestion."""
+    recipe: Recipe
+    confidence: float
+
+
 class FeatureState(BaseModel):
     """Validated feature state model for JSON serialization."""
 
