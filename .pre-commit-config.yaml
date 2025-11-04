@@ -3,33 +3,28 @@
 # Run manually: pre-commit run --all-files
 
 repos:
-  # DOCUMENTATION GOVERNANCE
+  # DOCUMENTATION GOVERNANCE (Enhanced with DOCUMENTATION_GOVERNANCE.md compliance)
   - repo: local
     hooks:
-      # Prevent .md files outside designated directories (Python-based for Windows compatibility)
-      - id: check-doc-governance
-        name: Check Documentation Governance Rules
-        entry: scripts/validation/enforce-doc-governance.py
-        language: python
+      # Main documentation governance validator (replaces enforce-doc-governance.py)
+      - id: validate-docs-governance
+        name: Validate Documentation Governance Compliance
+        entry: python scripts/validation/validate-docs.py --staged
+        language: system
         files: '\\.md$'
-        pass_filenames: true
-
-      # Validate document metadata (YAML frontmatter) - blocks commit if missing
+        pass_filenames: false
+        stages: [commit]
+        description: "Checks: file location, naming conventions, YAML frontmatter, metadata"
+        
+      # Validate metadata (kept for compatibility)
       - id: validate-metadata
-        name: Validate Document Metadata
-        entry: scripts/validation/validate-metadata.py
-        language: python
+        name: Validate Document Metadata (YAML Frontmatter)
+        entry: python scripts/validation/validate-docs.py --staged
+        language: system
         files: '\\.md$'
         pass_filenames: false
-        args: ['--staged']
         additional_dependencies: ['pyyaml']
-
-      # Validate test structure (organization only)
-      - id: validate-test-structure
-        name: Validate Test Structure
-        entry: scripts/validation/validate-test-structure.py
-        language: python
-        pass_filenames: false
+        stages: [commit]
 
   # MARKDOWN LINTING
   - repo: https://github.com/igorshubovych/markdownlint-cli

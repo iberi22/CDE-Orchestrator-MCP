@@ -665,19 +665,41 @@ class Project:
 
 **Core Principle**: All documentation lives in designated directories. Single source of truth prevents sprawl.
 
+### 🚨 CRITICAL RULE - NO RANDOM .md FILES IN ROOT
+
+**NEVER CREATE THESE IN ROOT** (Pre-commit will BLOCK them):
+```
+❌ PHASE3C_*.md              ❌ SESSION_*.md              ❌ SUMMARY_*.md
+❌ REPORT_*.md              ❌ REVIEW_*.md              ❌ NOTES_*.md
+❌ ANALYSIS_*.md            ❌ EXECUTION_*.md           ❌ FEEDBACK_*.md
+```
+
+**ALWAYS CREATE IN CORRECT LOCATIONS**:
+- Agent execution reports → `agent-docs/execution/execution-<topic>-<YYYY-MM-DD>.md`
+- Session summaries → `agent-docs/sessions/session-<topic>-<YYYY-MM-DD>.md`
+- Design decisions → `specs/design/<topic>.md`
+- Features → `specs/features/<feature>.md`
+- Tasks → `specs/tasks/<topic>.md`
+
+**WHY**: Root-level documents violate DOCUMENTATION_GOVERNANCE.md and bypass automated governance checks. Pre-commit hooks will prevent commits with root-level violations.
+
 ### Directory Structure
 
-| Directory | Purpose | Examples |
-|-----------|---------|----------|
-| `specs/features/` | User-facing feature specifications | `authentication.md`, `multi-project-support.md` |
-| `specs/design/` | Technical architecture & decisions | `dynamic-skill-system.md`, `hexagonal-architecture.md` |
-| `specs/tasks/` | Roadmap & project tracking | `improvement-roadmap.md` |
-| `specs/governance/` | Process & rules | `DOCUMENTATION_GOVERNANCE.md` |
-| `docs/` | User-facing guides | `INDEX.md`, `QUICK_START.md` |
-| `.cde/` | Workflows & prompts | `workflow.yml`, `prompts/`, `recipes/` |
-| `memory/` | Constitution & principles | `constitution.md` |
+| Directory | Purpose | Pattern | Examples |
+|-----------|---------|---------|----------|
+| `specs/features/` | User-facing feature specifications | `<feature>.md` | `authentication.md`, `multi-project-support.md` |
+| `specs/design/` | Technical architecture & decisions | `<topic>.md` | `dynamic-skill-system.md`, `hexagonal-architecture.md` |
+| `specs/tasks/` | Roadmap & project tracking | `<topic>-roadmap.md` | `improvement-roadmap.md` |
+| `specs/governance/` | Process & rules | `<process>-governance.md` | `DOCUMENTATION_GOVERNANCE.md` |
+| `agent-docs/execution/` | Workflow execution reports | `execution-<topic>-<YYYY-MM-DD>.md` | `execution-phase3c-deployment-2025-11-04.md` |
+| `agent-docs/sessions/` | Session summaries | `session-<topic>-<YYYY-MM-DD>.md` | `session-phase3c-complete-2025-11-04.md` |
+| `agent-docs/feedback/` | Analysis & recommendations | `feedback-<topic>-<YYYY-MM>.md` | `feedback-governance-improvements-2025-11.md` |
+| `agent-docs/research/` | Web research (90-day archive) | `research-<topic>-<YYYY-MM-DD>.md` | `research-async-patterns-2025-11-04.md` |
+| `docs/` | User-facing guides | `<section>/<doc>.md` | `user-guide/quickstart.md` |
+| `.cde/` | Workflows & automation | YAML/JSON files | `workflow.yml`, `prompts/`, `recipes/` |
+| `memory/` | Constitution & principles | `constitution.md` | `constitution.md` |
 
-### Root-Level Exceptions
+### Root-Level Exceptions (Only These Allowed)
 
 Only these .md files are allowed in the repository root:
 
@@ -686,6 +708,11 @@ Only these .md files are allowed in the repository root:
 - `CONTRIBUTING.md` - Developer guidelines
 - `CODE_OF_CONDUCT.md` - Community standards
 - `LICENSE` - Legal
+
+**SPECIAL AI AGENT INSTRUCTIONS**:
+- `AGENTS.md` - OpenAI standard format (industry convention)
+- `GEMINI.md` - Google AI Studio format (tool-specific)
+- `.github/copilot-instructions.md` - GitHub Copilot config (tool-specific)
 
 ### Metadata Requirement (Mandatory)
 
@@ -713,37 +740,79 @@ llm_summary: |
 
 ### AI Agent Governance Checklist
 
+**BEFORE CREATING ANY DOCUMENTATION**, answer these questions:
+
+1. **🎯 Purpose**: Is this a feature spec? Design decision? Execution report? Session summary?
+2. **📍 Location**: What is the correct directory for this type?
+3. **📋 Format**: Does it need YAML frontmatter? Which fields are required?
+4. **🔗 Linking**: Will I link this from an index or parent document?
+5. **⏰ Naming**: Does it follow the naming convention (lowercase-hyphens-YYYY-MM-DD)?
+
+**✅ DO (Professional Pattern)**:
+```markdown
+<!-- CORRECT EXAMPLE -->
+1. Purpose identified: "Execution report for Phase 3C deployment"
+2. Location: agent-docs/execution/
+3. Filename: execution-phase3c-deployment-2025-11-04.md
+4. Frontmatter: YAML with title, description, type: "execution", etc.
+5. Content: Professional report with clear structure
+6. Linked: From agent-docs/README.md or related spec documents
+```
+
+**❌ DON'T (Anti-patterns - Pre-commit will BLOCK)**:
+```markdown
+<!-- VIOLATES GOVERNANCE -->
+- PHASE3C_DEPLOYMENT_SUMMARY.md (in root!)
+- SESSION_COMPLETE.md (in root!)
+- SUMMARY_OF_WORK.md (vague, in root!)
+- RandomReport.md (no date, no frontmatter)
+```
+
+**AI Agent Governance Checklist**:
+
 When asked to create or modify documentation:
 
 **✅ DO:**
-- Identify the document's purpose FIRST (feature? design? task? guide? agent output?)
-- Place in the correct directory based on purpose
-- Place agent-generated outputs in `/agent-docs/` subdirectories:
-  - Session summaries → `agent-docs/sessions/`
-  - Execution reports → `agent-docs/execution/`
-  - Feedback/analysis → `agent-docs/feedback/`
-  - Web research → `agent-docs/research/`
-- Use templates from `specs/templates/`
-- Include YAML frontmatter with all required fields
-- Check if a similar document already exists (avoid duplication)
-- Link from existing indexes
-- Follow naming conventions (lowercase, hyphens for spaces, ISO dates)
+- [ ] Identify the document's purpose FIRST (feature? design? task? execution? feedback? session?)
+- [ ] Place in the CORRECT directory (check table above)
+- [ ] For agent-generated outputs, use `/agent-docs/` subdirectories:
+  - [ ] Execution reports → `agent-docs/execution/execution-<topic>-<YYYY-MM-DD>.md`
+  - [ ] Session summaries → `agent-docs/sessions/session-<topic>-<YYYY-MM-DD>.md`
+  - [ ] Feedback/analysis → `agent-docs/feedback/feedback-<topic>-<YYYY-MM>.md`
+  - [ ] Web research → `agent-docs/research/research-<topic>-<YYYY-MM-DD>.md`
+- [ ] Use templates from `specs/templates/`
+- [ ] Include YAML frontmatter with ALL required fields:
+  - `title`, `description`, `type`, `status`, `created`, `updated`, `author`
+- [ ] Check if similar document exists (avoid duplication)
+- [ ] Link from existing indexes or parent documents
+- [ ] Follow naming: `lowercase-with-hyphens-YYYY-MM-DD.md` (not SCREAMING_CASE!)
+- [ ] Verify pre-commit hook passes: `git diff --cached --name-only | grep .md`
 
 **❌ DON'T:**
-- Create .md files in the project root (unless in exceptions list)
-- Create documents without YAML frontmatter
-- Duplicate content across multiple .md files (link instead)
-- Leave new documents orphaned (must link from index/parent)
-- Ignore `.markdownlintrc` rules
-- Create documents without clear purpose/ownership
+- [ ] Create .md files in project root (pre-commit will BLOCK)
+- [ ] Create documents without YAML frontmatter (pre-commit will REJECT)
+- [ ] Use names like `REPORT_*.md`, `SUMMARY_*.md`, `NOTES_*.md` (pattern-matched blocklist)
+- [ ] Duplicate content across files (link instead)
+- [ ] Leave documents orphaned (always link from index/parent)
+- [ ] Ignore `.markdownlintrc` lint rules
+- [ ] Forget ownership/date fields in metadata
+- [ ] Use UPPERCASE in filenames (use lowercase-hyphens only)
 
 ### Enforcement Mechanisms
 
-**Pre-Commit Hooks** (Automatic):
-- Validates file paths against governance rules
-- Validates YAML frontmatter in all .md files
-- Blocks commits with violations
-- Command: `pre-commit run --all-files`
+**Pre-Commit Hooks** (Automatic validation on every commit):
+- ✅ Validates file paths against governance rules
+- ✅ Blocks .md files in disallowed root locations
+- ✅ Validates YAML frontmatter in all .md files (except .github/)
+- ✅ Validates naming conventions (lowercase, hyphens, no spaces)
+- ✅ Validates agent-docs/ subdirectory structure
+- ✅ Provides helpful error messages with fix suggestions
+- Command to test: `git diff --cached --name-only | xargs python scripts/validation/validate-docs.py`
+
+**Validation Script** (For proactive checking):
+- Run before pushing: `python scripts/validation/validate-docs.py --all`
+- Generates professional report showing all governance violations
+- Exit code: 0 (compliant) or 1 (violations found)
 
 ### Document Lifecycle
 

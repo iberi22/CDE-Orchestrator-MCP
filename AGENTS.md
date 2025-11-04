@@ -846,6 +846,110 @@ Path("specs/design/new-feature-design.md").write_text(design)
 # AND add YAML frontmatter!
 ```
 
+### ❌ DON'T: Violate Documentation Governance
+
+```python
+# WRONG: Create execution reports in root
+Path("PHASE3C_DEPLOYMENT_SUMMARY.md").write_text(report)
+
+# WRONG: Create session files in root
+Path("SESSION_COMPLETE.md").write_text(summary)
+```
+
+```python
+# CORRECT: Use proper directories with timestamps
+Path("agent-docs/execution/execution-phase3c-deployment-2025-11-04.md").write_text(report)
+Path("agent-docs/sessions/session-phase3c-complete-2025-11-04.md").write_text(summary)
+
+# AND include YAML frontmatter with required fields
+```
+
+------
+
+## 📋 Documentation Governance (CRITICAL)
+
+**Single Source of Truth**: `specs/governance/DOCUMENTATION_GOVERNANCE.md`
+
+### File Placement Rules (Mandatory)
+
+| Document Type | Location | Pattern | Examples |
+|---------------|----------|---------|----------|
+| Feature specs | `specs/features/` | `<feature>.md` | `authentication.md`, `multi-project-support.md` |
+| Technical design | `specs/design/` | `<topic>.md` | `dynamic-skill-system.md`, `hexagonal-architecture.md` |
+| Roadmaps/tasks | `specs/tasks/` | `<topic>.md` | `improvement-roadmap.md` |
+| Execution reports | `agent-docs/execution/` | `execution-<topic>-<YYYY-MM-DD>.md` | `execution-phase3c-deployment-2025-11-04.md` |
+| Session summaries | `agent-docs/sessions/` | `session-<topic>-<YYYY-MM-DD>.md` | `session-phase3c-complete-2025-11-04.md` |
+| Feedback/analysis | `agent-docs/feedback/` | `feedback-<topic>-<YYYY-MM>.md` | `feedback-governance-improvements-2025-11.md` |
+| Web research | `agent-docs/research/` | `research-<topic>-<YYYY-MM-DD>.md` | `research-async-patterns-2025-11-04.md` |
+
+### Root-Level Exceptions (ONLY These Allowed)
+
+- `README.md` - Project overview
+- `CHANGELOG.md` - Version history
+- `CONTRIBUTING.md` - Developer guidelines
+- `CODE_OF_CONDUCT.md` - Community standards
+- `LICENSE` - Legal
+- `AGENTS.md` - Agent instructions (this file)
+- `GEMINI.md` - Gemini AI Studio instructions
+- `.github/copilot-instructions.md` - GitHub Copilot configuration
+
+### NOT Allowed in Root
+
+- `PHASE3C_*.md`
+- `SESSION_*.md`
+- `SUMMARY_*.md`
+- `REPORT_*.md`
+- `RESUMEN_*.md`
+- Any other execution/session/feedback files
+
+### YAML Frontmatter (Required for ALL .md files except root exceptions)
+
+Every documentation file must start with:
+
+```yaml
+---
+title: "Document Title"
+description: "One-sentence summary (50-150 chars)"
+type: "feature|design|task|guide|governance|session|execution|feedback|research"
+status: "draft|active|deprecated|archived"
+created: "YYYY-MM-DD"
+updated: "YYYY-MM-DD"
+author: "Your Name or Agent ID"
+---
+```
+
+### Validation
+
+- **Pre-commit Hook**: Automatically validates all files before commit
+- **Script**: `python scripts/validation/validate-docs.py --all`
+- **Exit Codes**: 0 = compliant, 1 = violations found
+
+### AI Agent Governance Checklist
+
+**BEFORE creating ANY documentation**:
+
+**DO:**
+
+- [ ] Identify the document's **purpose** FIRST (feature? design? task? execution? feedback? session?)
+- [ ] Place in the **CORRECT directory** per table above
+- [ ] Use **lowercase-with-hyphens** filename pattern: `execution-phase3c-deployment-2025-11-04.md`
+- [ ] **Include YAML frontmatter** with ALL 7 required fields
+- [ ] Set `type` to correct value (feature, design, task, guide, governance, session, execution, feedback, research)
+- [ ] Set `status` to correct value (draft, active, deprecated, archived)
+- [ ] Use dates in `YYYY-MM-DD` format
+- [ ] Link from existing indexes or parent documents
+
+**DON'T:**
+
+- [ ] Create .md files in project root (pre-commit will BLOCK)
+- [ ] Create documents without YAML frontmatter (pre-commit will REJECT)
+- [ ] Use UPPERCASE filenames or spaces (use lowercase-hyphens only)
+- [ ] Create `PHASE3C_*.md`, `SESSION_*.md`, `SUMMARY_*.md`, `REPORT_*.md` files
+- [ ] Mix document types in wrong directories
+- [ ] Leave documents orphaned without indexing
+- [ ] Forget ownership/date fields in metadata
+- [ ] Ignore pre-commit validation failures
+
 ------
 
 ## 🎯 Success Checklist
@@ -858,9 +962,9 @@ Before claiming task complete:
 - [ ] Executed all non-skipped phases
 - [ ] Submitted work via `cde_submitWork` for each phase
 - [ ] All files have YAML frontmatter
-- [ ] Files placed in correct `specs/` or `agent-docs/` directories
+- [ ] Files placed in correct `specs/` or `agent-docs/` directories with proper naming
 - [ ] Tests written and passing
-- [ ] Documentation updated
+- [ ] Documentation follows governance rules
 - [ ] Pre-commit hooks passing
 
 ------

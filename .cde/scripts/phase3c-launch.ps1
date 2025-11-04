@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# 
+#
 # PHASE 3C - QUICK LAUNCH SCRIPT FOR JULES
 # This script verifies system readiness before Jules begins Phase 3C execution
 #
