@@ -1,56 +1,36 @@
-# src/cde_orchestrator/state_manager.py
-import json
+# src/cde_orchestrator/application/use_cases/manage_state.py
 import logging
-import shutil
-from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any, Dict, List, Tuple
-
 from pydantic import ValidationError
 
-from cde_orchestrator.adapters.serialization import FeatureState, FeatureStatus, PhaseStatus
+from ...domain.entities import Feature, FeatureState, FeatureStatus, PhaseStatus
+from ...domain.ports import IStateStore
 
 logger = logging.getLogger(__name__)
 
 
-class StateManager:
-    """Manages the project's state by reading/writing to a JSON file."""
+class ManageStateUseCase:
+    """
+    Orchestrates the loading, validation, and saving of application state.
+    """
 
-    def __init__(self, state_file_path: Path):
-        self.state_file_path = state_file_path
-        self.backup_dir = self.state_file_path.parent / "backups"
+    def __init__(self, state_store: IStateStore):
+        self._state_store = state_store
         self._last_state_snapshot: Dict[str, Any] = {}
 
-    def load_state(self) -> Dict[str, Any]:
-        """Loads the current state from the JSON file."""
-        if not self.state_file_path.exists():
-            self._last_state_snapshot = {}
-            return {}
-
-        with open(self.state_file_path, "r", encoding="utf-8") as f:
-            raw_state = json.load(f)
-
+    def load_and_validate_state(self) -> Dict[str, Any]:
+        """Loads, migrates, and validates the state."""
+        raw_state = self._state_store.load_state()
         migrated_state = self._migrate_state(raw_state)
-        # Keep snapshot for change detection
-        self._last_state_snapshot = json.loads(json.dumps(migrated_state))
+        self._last_state_snapshot = migrated_state
         return migrated_state
 
     def save_state(self, state: Dict[str, Any]):
-        """Saves the given state to the JSON file."""
+        """Validates and saves the application state."""
         validated_state = self._validate_state(state)
-
-        if self.state_file_path.exists():
-            self._create_backup()
-
-        self.state_file_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.state_file_path, "w", encoding="utf-8") as f:
-            json.dump(validated_state, f, indent=4)
-
+        self._state_store.save_state(validated_state)
         self._log_state_changes(validated_state)
-        # Update snapshot after successful write
-        self._last_state_snapshot = json.loads(json.dumps(validated_state))
-
-    # --- Internal helpers -------------------------------------------------
+        self._last_state_snapshot = validated_state
 
     def _validate_state(self, state: Dict[str, Any]) -> Dict[str, Any]:
         """Validate and normalize state before persisting."""
@@ -129,34 +109,16 @@ class StateManager:
         new_features = {}
         for feature_id, feature_data in features.items():
             try:
-                feature_state = self._coerce_feature_state(feature_id, feature_data)
+                feature_state = self._coerce_feature_state(feature_id, feature__data)
                 new_features[feature_id] = feature_state.serialize()
             except ValidationError as exc:
                 logger.error("Feature %s could not be migrated: %s", feature_id, exc)
         migrated["features"] = new_features
         return migrated
 
-    def _create_backup(self) -> Path:
-        """Create a timestamped backup of the current state file."""
-        timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-        self.backup_dir.mkdir(parents=True, exist_ok=True)
-        backup_path = self.backup_dir / f"state_{timestamp}.json"
-        shutil.copy2(self.state_file_path, backup_path)
-        self._rotate_backups(max_files=10)
-        return backup_path
-
-    def _rotate_backups(self, max_files: int = 10):
-        """Keep only the latest N backups."""
-        backups = sorted(self.backup_dir.glob("state_*.json"), reverse=True)
-        for stale_backup in backups[max_files:]:
-            try:
-                stale_backup.unlink()
-            except OSError as exc:
-                logger.warning("Failed to remove old backup %s: %s", stale_backup, exc)
-
     def _log_state_changes(self, new_state: Dict[str, Any]):
         """Log high-level state changes for observability."""
-        old_features = (self._last_state_snapshot or {}).get("features", {})
+        old_features = self._last_state_snapshot.get("features", {})
         new_features = new_state.get("features", {})
 
         created, updated, removed = self._compare_features(old_features, new_features)
@@ -165,7 +127,7 @@ class StateManager:
             logger.info(
                 "Feature %s created with status %s",
                 feature_id,
-                new_features[feature_id]["status"],
+                new_features[feature_id].get("status", "N/A"),
             )
         for feature_id, changes in updated.items():
             change_str = ", ".join(f"{k}: {v[0]} -> {v[1]}" for k, v in changes.items())

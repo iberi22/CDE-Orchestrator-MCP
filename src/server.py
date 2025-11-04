@@ -2,43 +2,28 @@
 CDE Orchestrator MCP Server.
 
 FastMCP server providing Context-Driven Engineering tools for AI agents.
-All tools are organized in mcp_tools/ package for modularity and maintainability.
-
-Usage:
-    python src/server.py
-
-Architecture:
-    - MCP tools are modularized in src/mcp_tools/
-    - Each module contains thematically related tools
-    - server.py only handles registration and initialization
+This server is the entry point for the CDE Orchestrator application. It uses a
+Dependency Injection container to wire together the application's components
+and registers the MCP tools.
 """
 
 import logging
 import os
+from pathlib import Path
+from functools import partial
 
-# Load environment variables
-try:
-    from dotenv import load_dotenv
-
-    load_dotenv()
-except ImportError:
-    pass  # dotenv not installed, use system env vars
-
+from dotenv import load_dotenv
 from fastmcp import FastMCP
 
-# Import all MCP tools from modular package
+from cde_orchestrator.infrastructure.di_container import DIContainer
 from mcp_tools import (
-    # Onboarding
     cde_onboardingProject,
     cde_publishOnboarding,
-    # Documentation
     cde_scanDocumentation,
     cde_analyzeDocumentation,
-    # Orchestration
     cde_selectWorkflow,
     cde_sourceSkill,
     cde_updateSkill,
-    # Agents
     cde_delegateToJules,
     cde_listAvailableAgents,
     cde_selectAgent,
@@ -46,45 +31,33 @@ from mcp_tools import (
 )
 
 # --- Configuration ---
-logger = logging.getLogger("cde_orchestrator.server")
+load_dotenv()
 logging.basicConfig(level=os.environ.get("CDE_LOG_LEVEL", "INFO"))
+logger = logging.getLogger(__name__)
+
+# --- Dependency Injection ---
+CDE_ROOT = Path(".cde")
+di_container = DIContainer(cde_root=CDE_ROOT)
 
 # --- FastMCP App Initialization ---
 app = FastMCP("CDE Orchestrator MCP")
 
-# ============================================================================
-# TOOL REGISTRATION
-# ============================================================================
-# All tools are registered with FastMCP using @app.tool() decorator.
-# Error handling is managed by @tool_handler decorator in each module.
-
-# --- Onboarding Tools ---
-app.tool()(cde_onboardingProject)
-app.tool()(cde_publishOnboarding)
-
-# --- Documentation Tools ---
+# --- Tool Registration ---
+app.tool()(partial(cde_onboardingProject, manage_state_use_case=di_container.get_manage_state_use_case()))
+app.tool()(partial(cde_publishOnboarding, manage_state_use_case=di_container.get_manage_state_use_case()))
 app.tool()(cde_scanDocumentation)
 app.tool()(cde_analyzeDocumentation)
-
-# --- Orchestration Tools ---
-app.tool()(cde_selectWorkflow)
+app.tool()(partial(cde_selectWorkflow, select_workflow_use_case=di_container.get_select_workflow_use_case()))
 app.tool()(cde_sourceSkill)
 app.tool()(cde_updateSkill)
-
-# --- AI Agent Tools ---
 app.tool()(cde_delegateToJules)
 app.tool()(cde_listAvailableAgents)
 app.tool()(cde_selectAgent)
 app.tool()(cde_executeWithBestAgent)
 
-# ============================================================================
-# SERVER ENTRY POINT
-# ============================================================================
-
+# --- Server Entry Point ---
 if __name__ == "__main__":
-    """Run MCP server in development mode."""
     logger.info("🚀 Starting CDE Orchestrator MCP Server")
-    logger.info(f"📦 Registered {11} tools")
+    logger.info(f"📦 Registered {len(app.tools)} tools")
     logger.info("✅ Server ready for connections")
-
     app.run()

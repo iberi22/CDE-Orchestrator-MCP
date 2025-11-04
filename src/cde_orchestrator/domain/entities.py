@@ -19,6 +19,14 @@ from enum import Enum
 from typing import List, Optional, Dict, Any
 from uuid import uuid4
 
+from .exceptions import (
+    InvalidStateTransitionError,
+    WorkflowValidationError,
+    PhaseNotFoundError,
+)
+from pydantic import BaseModel, Field, field_validator
+
+
 
 # ============================================================================
 # VALUE OBJECTS
@@ -94,6 +102,17 @@ class ProjectStatus(str, Enum):
         return target in transitions.get(self, set())
 
 
+class PhaseStatus(str, Enum):
+    """Valid workflow phase identifiers."""
+
+    DEFINE = "define"
+    DECOMPOSE = "decompose"
+    DESIGN = "design"
+    IMPLEMENT = "implement"
+    TEST = "test"
+    REVIEW = "review"
+
+
 class FeatureStatus(str, Enum):
     """
     Feature lifecycle states matching CDE workflow phases.
@@ -143,6 +162,322 @@ class FeatureStatus(str, Enum):
 # ============================================================================
 # ENTITIES
 # ============================================================================
+
+
+class FeatureState(BaseModel):
+    """Validated feature state model for JSON serialization."""
+
+    status: FeatureStatus
+    current_phase: PhaseStatus
+    workflow_type: str = "default"
+    prompt: str
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    branch: Optional[str] = None
+    recipe_id: Optional[str] = None
+    recipe_name: Optional[str] = None
+    issues: List[Dict[str, Any]] = Field(default_factory=list)
+    progress: Dict[str, Any] = Field(default_factory=dict)
+    commits: List[Dict[str, Any]] = Field(default_factory=list)
+    completed_at: Optional[datetime] = None
+
+    @field_validator("created_at", "updated_at", mode="before")
+    @classmethod
+    def ensure_datetime(cls, value):
+        """Parse datetime strings into datetime objects."""
+        if value in (None, "", 0):
+            return None
+        if isinstance(value, datetime):
+            return value
+        try:
+            return datetime.fromisoformat(str(value))
+        except (ValueError, TypeError):
+            raise ValueError("Timestamps must be ISO formatted strings")
+
+    @field_validator("prompt")
+    @classmethod
+    def ensure_prompt_not_empty(cls, value: str) -> str:
+        """Ensure prompts are non-empty strings."""
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("Prompt must be a non-empty string")
+        return value
+
+    @field_validator("current_phase", mode="after")
+    @classmethod
+    def validate_phase_matches_status(cls, current_phase, info):
+        """Ensure phase is consistent with status."""
+        values = info.data
+        if "status" not in values:
+            return current_phase
+
+        status = values["status"]
+        phase_mapping = {
+            FeatureStatus.DEFINING: PhaseStatus.DEFINE,
+            FeatureStatus.DECOMPOSING: PhaseStatus.DECOMPOSE,
+            FeatureStatus.DESIGNING: PhaseStatus.DESIGN,
+            FeatureStatus.IMPLEMENTING: PhaseStatus.IMPLEMENT,
+            FeatureStatus.TESTING: PhaseStatus.TEST,
+            FeatureStatus.REVIEWING: PhaseStatus.REVIEW,
+            FeatureStatus.COMPLETED: PhaseStatus.REVIEW,
+            FeatureStatus.FAILED: current_phase,  # Allow any phase for failed
+        }
+
+        expected = phase_mapping.get(status)
+        if (
+            expected
+            and isinstance(expected, PhaseStatus)
+            and current_phase != expected
+            and status != FeatureStatus.FAILED
+        ):
+            # Log warning but don't fail - allow migration
+            import logging
+
+            logging.warning(
+                "Phase %s may be inconsistent with status %s, expected %s",
+                current_phase,
+                status,
+                expected,
+            )
+
+        return current_phase
+
+    def serialize(self) -> Dict[str, Any]:
+        """Serialize state to JSON-safe dict."""
+        data = self.model_dump()
+        data["status"] = self.status.value
+        data["current_phase"] = self.current_phase.value
+        data["created_at"] = self.created_at.isoformat()
+        if data.get("updated_at"):
+            data["updated_at"] = self.updated_at.isoformat()  # type: ignore[attr-defined]
+        if data.get("completed_at"):
+            data["completed_at"] = self.completed_at.isoformat()  # type: ignore[attr-defined]
+        return data
+
+
+# ============================================================================
+# VALUE OBJECTS
+# ============================================================================
+
+
+@dataclass(frozen=True)
+class ProjectId:
+    """
+    Value object for project identification.
+
+    Invariants:
+        - Must be non-empty string
+        - Minimum length 3 characters
+        - Immutable once created
+
+    Examples:
+        >>> pid = ProjectId("abc-123")
+        >>> str(pid)  # "abc-123"
+        >>> pid2 = ProjectId("ab")  # raises ValueError
+    """
+
+    value: str
+
+    def __post_init__(self):
+        if not isinstance(self.value, str) or len(self.value) < 3:
+            raise ValueError(
+                f"Invalid project ID: '{self.value}'. "
+                f"Must be string with at least 3 characters."
+            )
+
+    def __str__(self) -> str:
+        return self.value
+
+    def __repr__(self) -> str:
+        return f"ProjectId('{self.value}')"
+
+
+# ============================================================================
+# ENUMERATIONS
+# ============================================================================
+
+
+class ProjectStatus(str, Enum):
+    """
+    All possible project states in CDE lifecycle.
+
+    State Machine:
+        ONBOARDING → ACTIVE → ARCHIVED
+                  ↓
+                ERROR (terminal)
+
+    Descriptions:
+        ONBOARDING: Project being analyzed and configured
+        ACTIVE:     Ready for feature development
+        ARCHIVED:   No longer actively developed
+        ERROR:      Unrecoverable error state
+    """
+
+    ONBOARDING = "onboarding"
+    ACTIVE = "active"
+    ARCHIVED = "archived"
+    ERROR = "error"
+
+    def can_transition_to(self, target: "ProjectStatus") -> bool:
+        """Check if transition to target status is valid."""
+        transitions = {
+            ProjectStatus.ONBOARDING: {ProjectStatus.ACTIVE, ProjectStatus.ERROR},
+            ProjectStatus.ACTIVE: {ProjectStatus.ARCHIVED, ProjectStatus.ERROR},
+            ProjectStatus.ARCHIVED: {ProjectStatus.ACTIVE},  # Can reactivate
+            ProjectStatus.ERROR: set(),  # Terminal state
+        }
+        return target in transitions.get(self, set())
+
+
+class PhaseStatus(str, Enum):
+    """Valid workflow phase identifiers."""
+
+    DEFINE = "define"
+    DECOMPOSE = "decompose"
+    DESIGN = "design"
+    IMPLEMENT = "implement"
+    TEST = "test"
+    REVIEW = "review"
+
+
+class FeatureStatus(str, Enum):
+    """
+    Feature lifecycle states matching CDE workflow phases.
+
+    Linear progression:
+        DEFINING → DECOMPOSING → DESIGNING →
+        IMPLEMENTING → TESTING → REVIEWING → COMPLETED
+
+    Or can jump to FAILED from any state.
+    """
+
+    DEFINING = "defining"
+    DECOMPOSING = "decomposing"
+    DESIGNING = "designing"
+    IMPLEMENTING = "implementing"
+    TESTING = "testing"
+    REVIEWING = "reviewing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+    @classmethod
+    def from_phase(cls, phase_id: str) -> "FeatureStatus":
+        """
+        Map workflow phase ID to feature status.
+
+        Args:
+            phase_id: Phase identifier (e.g., "define", "decompose")
+
+        Returns:
+            Corresponding FeatureStatus
+
+        Examples:
+            >>> FeatureStatus.from_phase("define")
+            FeatureStatus.DEFINING
+        """
+        mapping = {
+            "define": cls.DEFINING,
+            "decompose": cls.DECOMPOSING,
+            "design": cls.DESIGNING,
+            "implement": cls.IMPLEMENTING,
+            "test": cls.TESTING,
+            "review": cls.REVIEWING,
+        }
+        return mapping.get(phase_id, cls.FAILED)
+
+
+# ============================================================================
+# ENTITIES
+# ============================================================================
+
+
+class FeatureState(BaseModel):
+    """Validated feature state model for JSON serialization."""
+
+    status: FeatureStatus
+    current_phase: PhaseStatus
+    workflow_type: str = "default"
+    prompt: str
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    branch: Optional[str] = None
+    recipe_id: Optional[str] = None
+    recipe_name: Optional[str] = None
+    issues: List[Dict[str, Any]] = Field(default_factory=list)
+    progress: Dict[str, Any] = Field(default_factory=dict)
+    commits: List[Dict[str, Any]] = Field(default_factory=list)
+    completed_at: Optional[datetime] = None
+
+    @field_validator("created_at", "updated_at", mode="before")
+    @classmethod
+    def ensure_datetime(cls, value):
+        """Parse datetime strings into datetime objects."""
+        if value in (None, "", 0):
+            return None
+        if isinstance(value, datetime):
+            return value
+        try:
+            return datetime.fromisoformat(str(value))
+        except (ValueError, TypeError):
+            raise ValueError("Timestamps must be ISO formatted strings")
+
+    @field_validator("prompt")
+    @classmethod
+    def ensure_prompt_not_empty(cls, value: str) -> str:
+        """Ensure prompts are non-empty strings."""
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("Prompt must be a non-empty string")
+        return value
+
+    @field_validator("current_phase", mode="after")
+    @classmethod
+    def validate_phase_matches_status(cls, current_phase, info):
+        """Ensure phase is consistent with status."""
+        values = info.data
+        if "status" not in values:
+            return current_phase
+
+        status = values["status"]
+        phase_mapping = {
+            FeatureStatus.DEFINING: PhaseStatus.DEFINE,
+            FeatureStatus.DECOMPOSING: PhaseStatus.DECOMPOSE,
+            FeatureStatus.DESIGNING: PhaseStatus.DESIGN,
+            FeatureStatus.IMPLEMENTING: PhaseStatus.IMPLEMENT,
+            FeatureStatus.TESTING: PhaseStatus.TEST,
+            FeatureStatus.REVIEWING: PhaseStatus.REVIEW,
+            FeatureStatus.COMPLETED: PhaseStatus.REVIEW,
+            FeatureStatus.FAILED: current_phase,  # Allow any phase for failed
+        }
+
+        expected = phase_mapping.get(status)
+        if (
+            expected
+            and isinstance(expected, PhaseStatus)
+            and current_phase != expected
+            and status != FeatureStatus.FAILED
+        ):
+            # Log warning but don't fail - allow migration
+            import logging
+
+            logging.warning(
+                "Phase %s may be inconsistent with status %s, expected %s",
+                current_phase,
+                status,
+                expected,
+            )
+
+        return current_phase
+
+    def serialize(self) -> Dict[str, Any]:
+        """Serialize state to JSON-safe dict."""
+        data = self.model_dump()
+        data["status"] = self.status.value
+        data["current_phase"] = self.current_phase.value
+        data["created_at"] = self.created_at.isoformat()
+        if data.get("updated_at"):
+            data["updated_at"] = self.updated_at.isoformat()  # type: ignore[attr-defined]
+        if data.get("completed_at"):
+            data["completed_at"] = self.completed_at.isoformat()  # type: ignore[attr-defined]
+        return data
 
 
 @dataclass
@@ -407,10 +742,10 @@ class Project:
             target: Desired status
 
         Raises:
-            ValueError: If transition not allowed
+            InvalidStateTransitionError: If transition not allowed
         """
         if not self.status.can_transition_to(target):
-            raise ValueError(f"Invalid status transition: {self.status} → {target}")
+            raise InvalidStateTransitionError("Project", self.status.value, target.value)
 
         self.status = target
         self.updated_at = datetime.now(timezone.utc)
@@ -479,7 +814,7 @@ class Workflow:
     def get_initial_phase(self) -> WorkflowPhase:
         """Get the first phase in workflow."""
         if not self.phases:
-            raise ValueError("Workflow has no phases defined")
+            raise WorkflowValidationError("Workflow has no phases defined", self.name)
         return self.phases[0]
 
     def get_next_phase(self, current_phase_id: str) -> Optional[WorkflowPhase]:
@@ -490,14 +825,14 @@ class Workflow:
             Next WorkflowPhase or None if current is last phase
 
         Raises:
-            ValueError: If current_phase_id not found
+            PhaseNotFoundError: If current_phase_id not found
         """
         phase_ids = [p.id for p in self.phases]
 
         try:
             current_index = phase_ids.index(current_phase_id)
         except ValueError:
-            raise ValueError(f"Phase '{current_phase_id}' not found in workflow")
+            raise PhaseNotFoundError(current_phase_id, self.name)
 
         if current_index + 1 < len(self.phases):
             return self.phases[current_index + 1]
@@ -510,7 +845,7 @@ class Workflow:
         try:
             current_index = phase_ids.index(current_phase_id)
         except ValueError:
-            raise ValueError(f"Phase '{current_phase_id}' not found in workflow")
+            raise PhaseNotFoundError(current_phase_id, self.name)
 
         return {
             "current_phase": current_phase_id,

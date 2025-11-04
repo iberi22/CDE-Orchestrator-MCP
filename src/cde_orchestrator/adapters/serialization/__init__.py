@@ -7,9 +7,7 @@ of domain entities. These are infrastructure concerns, not domain logic.
 """
 
 from .models import (
-    FeatureState,
     Phase,
-    PhaseStatus,
     Recipe,
     Task,
     Workflow,
@@ -19,10 +17,9 @@ from .models import (
 )
 
 # Re-export domain enums for convenience
-from ...domain.entities import FeatureStatus
+from ...domain.entities import FeatureStatus, PhaseStatus
 
 __all__ = [
-    "FeatureState",
     "FeatureStatus",
     "Phase",
     "PhaseStatus",
