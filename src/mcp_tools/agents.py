@@ -749,65 +749,35 @@ async def cde_executeWithBestAgent(
             except ImportError:
                 pass
 
-        # Register Copilot if available
-        if shutil.which("gh"):
-            try:
-                from cde_orchestrator.adapters.agents import CopilotCLIAdapter
-                copilot_adapter = CopilotCLIAdapter()
-                orchestrator.register_agent(AgentType.COPILOT, copilot_adapter)
-                available_agents.append("copilot")
-            except (ImportError, AttributeError):
-                pass
+        # Register all CLI adapters
+        try:
+            from cde_orchestrator.adapters.agents.code_cli_adapters import (
+                CopilotCLIAdapter,
+                GeminiCLIAdapter,
+                QwenCLIAdapter,
+                DeepAgentsAdapter,
+                CodexAdapter,
+                RovoDevAdapter,
+            )
 
-        # Register Gemini if available
-        if shutil.which("gemini"):
-            try:
-                from cde_orchestrator.adapters.agents import GeminiCLIAdapter
-                gemini_adapter = GeminiCLIAdapter()
-                orchestrator.register_agent(AgentType.GEMINI, gemini_adapter)
-                available_agents.append("gemini")
-            except (ImportError, AttributeError):
-                pass
+            cli_adapters = {
+                AgentType.COPILOT: CopilotCLIAdapter,
+                AgentType.GEMINI: GeminiCLIAdapter,
+                AgentType.QWEN: QwenCLIAdapter,
+                AgentType.DEEPAGENTS: DeepAgentsAdapter,
+                AgentType.CODEX: CodexAdapter,
+                AgentType.ROVODEV: RovoDevAdapter,
+            }
 
-        # Register Qwen if available
-        if shutil.which("qwen"):
-            try:
-                from cde_orchestrator.adapters.agents import QwenCLIAdapter
-                qwen_adapter = QwenCLIAdapter()
-                orchestrator.register_agent(AgentType.QWEN, qwen_adapter)
-                available_agents.append("qwen")
-            except (ImportError, AttributeError):
-                pass
+            for agent_type, adapter_class in cli_adapters.items():
+                adapter = adapter_class()
+                if adapter.is_available():
+                    orchestrator.register_agent(agent_type, adapter)
+                    available_agents.append(agent_type.value)
 
-        # Register DeepAgents if available
-        if shutil.which("deepagents"):
-            try:
-                from cde_orchestrator.adapters.agents.deep_agents_adapter import DeepAgentsAdapter
-                deepagents_adapter = DeepAgentsAdapter()
-                orchestrator.register_agent(AgentType.DEEPAGENTS, deepagents_adapter)
-                available_agents.append("deepagents")
-            except (ImportError, AttributeError):
-                pass
-
-        # Register Codex if available
-        if shutil.which("codex"):
-            try:
-                from cde_orchestrator.adapters.agents.codex_adapter import CodexAdapter
-                codex_adapter = CodexAdapter()
-                orchestrator.register_agent(AgentType.CODEX, codex_adapter)
-                available_agents.append("codex")
-            except (ImportError, AttributeError):
-                pass
-
-        # Register Rovo Dev if available
-        if shutil.which("rovo"):
-            try:
-                from cde_orchestrator.adapters.agents.rovo_dev_adapter import RovoDevAdapter
-                rovo_adapter = RovoDevAdapter()
-                orchestrator.register_agent(AgentType.ROVODEV, rovo_adapter)
-                available_agents.append("rovodev")
-            except (ImportError, AttributeError):
-                pass
+        except (ImportError, AttributeError):
+            # Log this error in a real application
+            pass
 
         if not available_agents:
             return json.dumps({

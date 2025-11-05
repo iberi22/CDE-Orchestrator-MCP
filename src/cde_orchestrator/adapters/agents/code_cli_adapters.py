@@ -426,3 +426,59 @@ class QwenCLIAdapter(CodeCLIAdapter, ICodeExecutor):
 
         # If no code blocks, return as-is
         return response.strip()
+
+
+class DeepAgentsAdapter(CodeCLIAdapter, ICodeExecutor):
+    """DeepAgents CLI adapter for research and prototyping."""
+
+    @property
+    def cli_command(self) -> str:
+        return "deepagents"
+
+    @property
+    def provider_name(self) -> str:
+        return "DeepAgents"
+
+    def _build_command(self, prompt: str, context: Dict[str, Any]) -> List[str]:
+        return [self.cli_command, "--non-interactive", prompt]
+
+    def get_install_instructions(self) -> str:
+        return "Install DeepAgents CLI: pip install deepagents-cli"
+
+
+class CodexAdapter(CodeCLIAdapter, ICodeExecutor):
+    """Codex CLI adapter for code analysis and review."""
+
+    @property
+    def cli_command(self) -> str:
+        return "codex"
+
+    @property
+    def provider_name(self) -> str:
+        return "OpenAI Codex"
+
+    def _build_command(self, prompt: str, context: Dict[str, Any]) -> List[str]:
+        # Assuming a similar non-interactive flag exists
+        return [self.cli_command, "exec", prompt]
+
+    def get_install_instructions(self) -> str:
+        return "Install Codex CLI: npm install -g @openai/codex"
+
+
+class RovoDevAdapter(CodeCLIAdapter, ICodeExecutor):
+    """Rovo Dev CLI adapter for Jira-integrated tasks."""
+
+    @property
+    def cli_command(self) -> str:
+        return "rovo"
+
+    @property
+    def provider_name(self) -> str:
+        return "Atlassian Rovo Dev"
+
+    def _build_command(self, prompt: str, context: Dict[str, Any]) -> List[str]:
+        # Correct command for non-interactive execution
+        return [self.cli_command, "dev", "run", prompt]
+
+    def get_install_instructions(self) -> str:
+        return "Install Rovo Dev CLI: Follow instructions at https://support.atlassian.com/rovo/docs/use-rovo-dev-cli/"

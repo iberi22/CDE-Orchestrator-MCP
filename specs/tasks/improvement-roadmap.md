@@ -528,6 +528,28 @@ Soporte para múltiples usuarios/proyectos en una instancia.
 
 ---
 
+### FEAT-04: Integración Multi-Agente
+**Prioridad:** 🟠 ALTA | **Esfuerzo:** 5 días | **Asignado:** Jules | **Estado:** 🟡 En Progreso (75%)
+
+**Descripción:**
+Integrar y orquestar múltiples agentes de IA (DeepAgents, Codex, Rovo Dev, Copilot, Gemini, Qwen) para aprovechar sus fortalezas específicas.
+
+**Tareas:**
+- [x] FEAT-04.1: Crear adaptadores de agente para los nuevos CLIs ✅
+- [x] FEAT-04.2: Implementar una política de selección de agentes para enrutar tareas ✅
+- [x] FEAT-04.3: Integrar los nuevos agentes en las herramientas MCP (`cde_listAvailableAgents`, `cde_executeWithBestAgent`) ✅
+- [ ] FEAT-04.4: Refinar las heurísticas de selección basadas en pruebas del mundo real
+- [x] FEAT-04.5: Documentar la nueva arquitectura de agentes ✅
+
+**Criterios de Aceptación:**
+- El orquestador puede delegar tareas a cualquiera de los 6 agentes.
+- La selección de agentes se basa en las fortalezas definidas.
+- Todos los agentes se pueden listar y su disponibilidad se puede comprobar.
+
+**Dependencias:** Ninguna
+
+---
+
 ## ⚡ Quick Wins - Implementación Inmediata
 
 ### QUICK-01: Fix Feature List Tool ✅
