@@ -267,12 +267,12 @@ class AgentSelectionPolicy:
             return AgentType.ROVODEV
         if any(kw in desc_lower for kw in ["investigate", "research", "prototype", "refactor"]):
             return AgentType.DEEPAGENTS
+        if any(kw in desc_lower for kw in ["typo", "fix syntax", "complete this line"]):
+            return AgentType.COPILOT
         if any(kw in desc_lower for kw in ["analyze", "review", "complexity", "style issues"]):
             return AgentType.CODEX
         if any(kw in desc_lower for kw in ["documentation", "generate docs", "csv", "read a file", "help me finish", "quick way to"]):
             return AgentType.GEMINI
-        if any(kw in desc_lower for kw in ["typo", "fix syntax", "complete this line"]):
-            return AgentType.COPILOT
 
         # Fallback to complexity-based selection
         complexity_score = cls._calculate_complexity_score(desc_lower)

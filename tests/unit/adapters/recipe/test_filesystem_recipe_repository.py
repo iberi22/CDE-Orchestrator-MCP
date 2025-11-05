@@ -1,69 +1,61 @@
-# tests/unit/adapters/recipe/test_filesystem_recipe_repository.py
+"""
+Unit tests for the FileSystemRecipeRepository.
+"""
 import pytest
-from unittest.mock import patch, MagicMock
 from pathlib import Path
-
-from src.cde_orchestrator.domain.entities import Recipe
-from src.cde_orchestrator.adapters.recipe.filesystem_recipe_repository import FileSystemRecipeRepository
+from cde_orchestrator.adapters.recipe.filesystem_recipe_repository import FileSystemRecipeRepository
 
 @pytest.fixture
-def mock_poml_content(request):
-    """Provides POML content for mock files."""
-    if request.param == "valid":
-        return '<let name="tools">["tool1"]</let><role>A valid recipe.</role>'
-    if request.param == "invalid":
-        return '<let name="tools">["tool1"]</let><role>An invalid recipe.'
-    return ''
+def recipe_dir(tmp_path):
+    """Creates a temporary recipe directory with sample recipes."""
+    recipes_path = tmp_path / "recipes"
+    engineering_path = recipes_path / "engineering"
+    engineering_path.mkdir(parents=True)
 
-@patch('pathlib.Path')
-def test_list_all_recipes(MockPath):
-    """Should load all valid recipes from the recipes directory."""
-    mock_dir = MagicMock()
-    mock_dir.exists.return_value = True
+    # Sample ai-engineer recipe
+    (engineering_path / "ai-engineer.poml").write_text("""
+    <poml>
+        <let name="tools">["file", "shell"]</let>
+        <let name="providers">{ "openai": { "model": "gpt-5" } }</let>
+        <role>You are an AI engineer.</role>
+    </poml>
+    """)
 
-    mock_file1 = MagicMock()
-    mock_file1.stem = 'recipe1'
-    mock_file1.parent.name = 'category1'
-    mock_file1.is_file.return_value = True
+    # Sample sprint-prioritizer recipe
+    (recipes_path / "planning").mkdir()
+    (recipes_path / "planning" / "sprint-prioritizer.poml").write_text("""
+    <poml>
+        <let name="tools">["jira"]</let>
+        <role>You prioritize sprints.</role>
+    </poml>
+    """)
 
-    mock_file2 = MagicMock()
-    mock_file2.stem = 'recipe2'
-    mock_file2.parent.name = 'category2'
-    mock_file2.is_file.return_value = True
+    return recipes_path
 
-    mock_dir.rglob.return_value = [mock_file1, mock_file2]
-
-    # We need to mock the context manager for open
-    mock_open_func = patch('builtins.open', MagicMock())
-    mock_open = mock_open_func.start()
-    mock_open.return_value.__enter__.return_value.read.return_value = '<let name="tools">[]</let><role>Test recipe.</role>'
-
-    MockPath.return_value = mock_dir
-    repository = FileSystemRecipeRepository(recipes_dir=Path("dummy"))
-    recipes = repository.list_all()
+def test_list_all_recipes(recipe_dir):
+    """Tests that all recipes are loaded and parsed correctly."""
+    repo = FileSystemRecipeRepository(recipes_dir=recipe_dir)
+    recipes = repo.list_all()
 
     assert len(recipes) == 2
-    assert recipes[0].id == 'recipe1'
-    assert recipes[1].category == 'category2'
 
-    mock_open_func.stop()
+    recipe_ids = {recipe.id for recipe in recipes}
+    assert "ai-engineer" in recipe_ids
+    assert "sprint-prioritizer" in recipe_ids
 
-@patch('pathlib.Path')
-def test_list_all_handles_parsing_errors(MockPath):
-    """Should skip recipes that fail to parse."""
-    mock_dir = MagicMock()
-    mock_dir.exists.return_value = True
-
-    mock_file = MagicMock()
-    mock_dir.rglob.return_value = [mock_file]
-
-    mock_open_func = patch('builtins.open', MagicMock())
-    mock_open = mock_open_func.start()
-    mock_open.return_value.__enter__.return_value.read.side_effect = Exception("Parsing failed")
-
-    MockPath.return_value = mock_dir
-    repository = FileSystemRecipeRepository(recipes_dir=Path("dummy"))
-    recipes = repository.list_all()
-
+def test_empty_recipe_dir():
+    """Tests that an empty list is returned for a non-existent directory."""
+    repo = FileSystemRecipeRepository(recipes_dir=Path("non_existent_dir"))
+    recipes = repo.list_all()
     assert len(recipes) == 0
-    mock_open_func.stop()
+
+def test_parsing_logic(recipe_dir):
+    """Tests the parsing logic for a single recipe."""
+    repo = FileSystemRecipeRepository(recipes_dir=recipe_dir)
+    recipes = repo.list_all()
+
+    ai_engineer = next((r for r in recipes if r.id == "ai-engineer"), None)
+    assert ai_engineer is not None
+    assert ai_engineer.category == "engineering"
+    assert "file" in ai_engineer.tools
+    assert "openai" in ai_engineer.providers

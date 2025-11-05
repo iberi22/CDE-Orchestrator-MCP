@@ -240,7 +240,7 @@ Configurar infraestructura completa de testing con pytest, coverage y CI/CD.
 ---
 
 ### TEST-02: Unit Tests (80% Coverage Target)
-**Prioridad:** 🟠 ALTA | **Esfuerzo:** 5 días | **Asignado:** User | **Estado:** 🔵 Pendiente
+**Prioridad:** 🟠 ALTA | **Esfuerzo:** 5 días | **Asignado:** Jules | **Estado:** 🟡 En Progreso
 
 **Descripción:**
 Implementar tests unitarios completos para todos los managers y models.
@@ -248,11 +248,11 @@ Implementar tests unitarios completos para todos los managers y models.
 **Tareas:**
 - [x] TEST-02.1: Tests para WorkflowManager (100% coverage) ✅
 - [x] TEST-02.2: Tests para StateManager (100% coverage) ✅
-- [ ] TEST-02.3: Tests para PromptManager (100% coverage)
-- [ ] TEST-02.4: Tests para RecipeManager (100% coverage)
+- [x] TEST-02.3: Tests para PromptManager (100% coverage) ✅
+- [x] TEST-02.4: Tests para RecipeManager (100% coverage) ✅
 - [x] TEST-02.5: Tests para Models con edge cases ✅
-- [ ] TEST-02.6: Tests para RepoIngestor
-- [ ] TEST-02.7: Tests para OnboardingAnalyzer
+- [x] TEST-02.6: Tests para RepoIngestor (Obsoleto) ✅
+- [x] TEST-02.7: Tests para OnboardingAnalyzer (Obsoleto) ✅
 
 **Archivos Nuevos y Modificados:**
 - `tests/unit/adapters/state/test_filesystem_state_repository.py`

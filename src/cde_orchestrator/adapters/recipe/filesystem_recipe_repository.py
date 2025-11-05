@@ -37,7 +37,7 @@ class FileSystemRecipeRepository(IRecipeRepository):
         recipe_id = poml_file.stem
         category = poml_file.parent.name
 
-        tools_match = re.search(r'<let name="tools">\\s*\\[(.*?)\\]', content, re.DOTALL)
+        tools_match = re.search(r'<let name="tools">\s*\[(.*?)\]', content, re.DOTALL)
         tools = []
         if tools_match:
             tools_str = tools_match.group(1)
@@ -46,7 +46,7 @@ class FileSystemRecipeRepository(IRecipeRepository):
             ]
 
         providers_match = re.search(
-            r'<let name="providers">\\s*\\{(.*?)\\}', content, re.DOTALL
+            r'<let name="providers">\s*\{(.*?)\}', content, re.DOTALL
         )
         providers = {}
         if providers_match:
