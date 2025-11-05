@@ -56,12 +56,12 @@ class ScanDocumentationUseCase:
             # Fallback to Python implementation
             return self._scan_with_python(project_path)
 
-    def _scan_with_rust(self, project_path: str) -> Dict[str, Any]:
+    def _scan_with_rust(self, project_path: str) -> List[Dict[str, Any]]:
         """Use high-performance Rust core for scanning."""
         try:
             import cde_rust_core
             # Call the fast Rust scanning function
-            result_json = cde_rust_core.documentation.scan_documentation_fast(project_path)
+            result_json = cde_rust_core.scan_documentation_py(project_path)
             return json.loads(result_json)
         except ImportError:
             # Rust module not available, raise error to trigger fallback
@@ -71,19 +71,57 @@ class ScanDocumentationUseCase:
             print(f"Warning: Rust scanning failed ({e}), falling back to Python implementation")
             raise ImportError("Rust scanning failed")
 
-    def _process_rust_result(self, rust_result: Dict[str, Any], project_path: str) -> Dict[str, Any]:
+    def _process_rust_result(self, rust_result: List[Dict[str, Any]], project_path: str) -> Dict[str, Any]:
         """Process and enhance Rust scan results with Python logic."""
         project = Path(project_path)
 
-        # Start with Rust results
-        results = rust_result.copy()
-        results["scanned_at"] = datetime.now().isoformat()
-        results["project_path"] = project_path
+        results = {
+            "total_docs": len(rust_result),
+            "scanned_at": datetime.now().isoformat(),
+            "project_path": str(project),
+            "by_location": {},
+            "missing_metadata": [],
+            "orphaned_docs": [],
+            "large_files": [],
+            "recommendations": [],
+        }
 
-        # Add Python-specific enhancements
-        results["by_location"] = self._enhance_location_categorization(results.get("by_location", {}), project)
+        standard_dirs = {
+            "specs/features": [], "specs/design": [], "specs/tasks": [],
+            "specs/governance": [], "docs": [], "agent-docs/sessions": [],
+            "agent-docs/execution": [], "agent-docs/feedback": [],
+            "agent-docs/research": [], "root": [], "other": [],
+        }
 
-        # Generate recommendations using Python logic
+        for doc_data in rust_result:
+            md_file = project / doc_data['path']
+            relative = md_file.relative_to(project)
+
+            # Re-use Python logic for analysis
+            file_info = {
+                "path": str(relative),
+                "size": len(doc_data['content']), # Approximation
+                "lines": doc_data['content'].count('\n') + 1,
+            }
+
+            has_metadata = self._has_yaml_frontmatter(md_file)
+            file_info["has_metadata"] = has_metadata
+            if not has_metadata:
+                results["missing_metadata"].append(str(relative))
+
+            location = self._categorize_file(relative)
+            standard_dirs[location].append(file_info)
+
+            if file_info["lines"] > 1000:
+                results["large_files"].append({"path": str(relative), "lines": file_info["lines"]})
+
+            if relative.parent == Path(".") and relative.name not in {
+                "README.md", "CHANGELOG.md", "CONTRIBUTING.md",
+                "CODE_OF_CONDUCT.md", "LICENSE.md", "AGENTS.md", "GEMINI.md"
+            }:
+                results["orphaned_docs"].append(str(relative))
+
+        results["by_location"] = {loc: files for loc, files in standard_dirs.items() if files}
         results["recommendations"] = self._generate_recommendations(results)
 
         return results
