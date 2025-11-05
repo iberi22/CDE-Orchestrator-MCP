@@ -9,8 +9,65 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from src.cde_orchestrator.application.onboarding.project_analysis_use_case import ProjectAnalysisUseCase
 from src.cde_orchestrator.application.onboarding.publishing_use_case import PublishingUseCase
+from src.cde_orchestrator.application.onboarding.project_setup_use_case import ProjectSetupUseCase
+from unittest.mock import MagicMock
 
 class TestOnboardingUseCases(unittest.TestCase):
+    def test_project_setup_use_case(self):
+        """
+        Verify that ProjectSetupUseCase orchestrates analysis and publishing.
+        """
+        # Mocks for dependencies
+        mock_analysis_uc = MagicMock(spec=ProjectAnalysisUseCase)
+        mock_publishing_uc = MagicMock(spec=PublishingUseCase)
+
+        # Mock return values
+        mock_analysis_uc.execute.return_value = {
+            "language_stats": {".py": 10},
+            "dependency_files": ["requirements.txt"],
+            "summary": "A Python project."
+        }
+        mock_publishing_uc.execute.return_value = {
+            "status": "success",
+            "files_written": [".gitignore", "AGENTS.md"]
+        }
+
+        # Instantiate the use case with mocks
+        setup_use_case = ProjectSetupUseCase(mock_analysis_uc, mock_publishing_uc)
+
+        result = setup_use_case.execute("/fake/project")
+
+        # Verify that dependencies were called
+        mock_analysis_uc.execute.assert_called_once_with("/fake/project")
+
+        # Verify that the correct files were generated and passed to the publisher
+        expected_docs = {
+            ".gitignore": "# Generic ignores\n.env\n.venv/\nvenv/\n__pycache__/\n*.pyc\n\n# Python specific\n.pytest_cache/\n",
+            "AGENTS.md": """# AI Agent Guidelines (AGENTS.md)
+
+This document provides instructions for AI agents working on this repository.
+
+## Project Structure
+- The main source code is located in the `src/` directory.
+- Tests are located in the `tests/` directory.
+- This project uses a Hexagonal Architecture. Keep domain, application, and infrastructure layers separate.
+
+## Coding Conventions
+- Follow PEP 8 for Python code.
+- Use the pre-commit hooks configured in `.pre-commit-config.yaml`.
+
+## Your Role
+- **Analyze Before You Act:** Use tools like `cde_scanDocumentation` to understand the project state.
+- **Follow the Workflow:** Do not commit directly to `main`. Follow the feature workflow.
+- **Communicate Clearly:** Provide clear commit messages and pull request descriptions.
+"""
+        }
+        mock_publishing_uc.execute.assert_called_once_with("/fake/project", expected_docs)
+
+        # Verify the final report
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(result["files_written"], [".gitignore", "AGENTS.md"])
+
 
     def test_project_analysis_use_case(self):
         """

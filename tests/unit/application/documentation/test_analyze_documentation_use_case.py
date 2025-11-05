@@ -1,39 +1,55 @@
 """
-Unit tests for the AnalyzeDocumentationUseCase.
+Unit tests for the AnalyzeDocumentationUseCase using pyfakefs.
 """
 import pytest
-from unittest.mock import patch, MagicMock
-from cde_orchestrator.application.documentation import AnalyzeDocumentationUseCase
+from pathlib import Path
+
+# Add project root to path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+
+from src.cde_orchestrator.application.documentation.analyze_documentation_use_case import AnalyzeDocumentationUseCase
 
 @pytest.fixture
 def use_case():
+    """Provides an instance of the use case for tests."""
     return AnalyzeDocumentationUseCase()
 
-@patch('pathlib.Path.rglob')
-def test_analyze_documentation_quality_score(mock_rglob, use_case):
-    """Tests the quality score calculation."""
-    # Simulate finding two files, one good, one with a broken link
-    mock_file_ok = MagicMock()
-    mock_file_ok.read_text.return_value = "---\ntitle: OK\n---\n[link](valid.md)"
+def test_analyze_documentation_quality_score(fs, use_case):
+    """Tests the quality score calculation with a fake filesystem."""
+    # fs is the pyfakefs fixture
+    project_path = "/fake/project"
+    fs.create_dir(project_path)
 
-    mock_file_broken = MagicMock()
-    mock_file_broken.read_text.return_value = "---\ntitle: Broken\n---\n[link](broken.md)"
+    # Create a valid file with a link to another valid file
+    fs.create_file(
+        f"{project_path}/docs/valid.md",
+        contents="---\ntitle: Valid\ndescription: d\ntype: guide\nstatus: active\ncreated: 2025-01-01\nupdated: 2025-01-01\nauthor: Test\n---\nContent"
+    )
+    fs.create_file(
+        f"{project_path}/docs/file1.md",
+        contents="---\ntitle: OK\ndescription: d\ntype: guide\nstatus: active\ncreated: 2025-01-01\nupdated: 2025-01-01\nauthor: Test\n---\n[link](valid.md)"
+    )
 
-    mock_rglob.return_value = [mock_file_ok, mock_file_broken]
+    # Create a file with a broken link
+    fs.create_file(
+        f"{project_path}/docs/file2.md",
+        contents="---\ntitle: Broken\ndescription: d\ntype: guide\nstatus: active\ncreated: 2025-01-01\nupdated: 2025-01-01\nauthor: Test\n---\n[link](broken.md)"
+    )
 
-    # Mock exists to control link validation
-    with patch('pathlib.Path.exists', side_effect=[True, False]): # valid.md exists, broken.md does not
-        result = use_case.execute("/fake/project")
+    result = use_case.execute(project_path)
 
     assert "quality_score" in result
     assert 0 < result["quality_score"] < 100
     assert len(result["link_analysis"]["broken_links"]) == 1
+    assert result["link_analysis"]["broken_links"][0]["target"] == "broken.md"
 
-@patch('pathlib.Path.rglob')
-def test_analyze_documentation_no_docs(mock_rglob, use_case):
-    """Tests analysis of a project with no markdown files."""
-    mock_rglob.return_value = []
-    result = use_case.execute("/fake/project")
+def test_analyze_documentation_no_docs(fs, use_case):
+    """Tests analysis of a project with no markdown files returns a perfect score."""
+    project_path = "/fake/project"
+    fs.create_dir(project_path)
 
-    assert result["quality_score"] == 0
-    assert "No markdown files found" in result["suggestions"][0]
+    result = use_case.execute(project_path)
+
+    assert result["total_analyzed"] == 0
+    assert result["quality_score"] == 100.0

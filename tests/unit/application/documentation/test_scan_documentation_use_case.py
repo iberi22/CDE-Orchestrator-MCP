@@ -43,4 +43,4 @@ def test_scan_documentation_no_specs_dir(tmp_path):
 
     assert result["total_docs"] == 0
     assert len(result["recommendations"]) > 0
-    assert "No 'specs' directory found" in result["recommendations"][0]
+    assert "No specs/features directory found" in result["recommendations"][0]

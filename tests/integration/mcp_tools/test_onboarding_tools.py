@@ -60,5 +60,42 @@ class TestOnboardingTools(unittest.TestCase):
         self.assertEqual(data["files_written"], ["doc1.md"])
         mock_use_case.save.assert_called_once()
 
+    def test_cde_setupProject_runs_successfully(self):
+        """
+        Verify that cde_setupProject analyzes and creates config files.
+        """
+        from src.mcp_tools.onboarding import cde_setupProject
+        import tempfile
+        import asyncio
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_path = Path(temp_dir)
+
+            # Create a dummy python file to be detected by the analysis
+            (project_path / "main.py").touch()
+
+            mock_ctx = MagicMock(spec=Context)
+
+            result_json = asyncio.run(cde_setupProject(
+                ctx=mock_ctx,
+                project_path=str(project_path),
+                force=True
+            ))
+
+            data = json.loads(result_json)
+
+            self.assertEqual(data["status"], "success")
+            self.assertIn(".gitignore", data["files_written"])
+            self.assertIn("AGENTS.md", data["files_written"])
+
+            # Verify that the files were actually created
+            self.assertTrue((project_path / ".gitignore").exists())
+            self.assertTrue((project_path / "AGENTS.md").exists())
+
+            # Verify content of .gitignore
+            gitignore_content = (project_path / ".gitignore").read_text()
+            self.assertIn(".venv/", gitignore_content)
+            self.assertIn(".pytest_cache/", gitignore_content)
+
 if __name__ == "__main__":
     unittest.main()

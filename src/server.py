@@ -8,6 +8,7 @@ from cde_orchestrator.infrastructure.dependency_injection import container
 from mcp_tools import (
     cde_onboardingProject,
     cde_publishOnboarding,
+    cde_setupProject,
     cde_scanDocumentation,
     cde_analyzeDocumentation,
     cde_selectWorkflow,
@@ -29,6 +30,7 @@ app = FastMCP("CDE Orchestrator MCP")
 # Tool Registration with Dependency Injection
 app.tool()(partial(cde_onboardingProject, manage_state_use_case=container.manage_state_use_case))
 app.tool()(partial(cde_publishOnboarding, manage_state_use_case=container.manage_state_use_case))
+app.tool()(cde_setupProject)
 app.tool()(cde_scanDocumentation)
 app.tool()(cde_analyzeDocumentation)
 app.tool()(partial(cde_selectWorkflow, select_workflow_use_case=container.select_workflow_use_case))

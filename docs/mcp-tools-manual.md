@@ -12,7 +12,29 @@ author: "Jules"
 
 Este documento proporciona una referencia completa para todas las herramientas expuestas por el CDE Orchestrator a través del protocolo MCP.
 
-## Herramientas de Onboarding
+## Herramientas de Configuración y Onboarding
+
+### `cde_setupProject` (En Diseño)
+
+Orquesta el proceso completo de configuración de un proyecto. Analiza el repositorio y genera los archivos de configuración esenciales para los agentes de IA, como `AGENTS.md`, `GEMINI.md`, y `.gitignore`.
+
+**Parámetros:**
+- `project_path` (string, opcional): La ruta al proyecto a configurar.
+- `force` (bool, opcional): Si es `true`, sobrescribirá los archivos de configuración existentes. Por defecto, `false`.
+
+**Devuelve:**
+Un objeto JSON que resume las acciones realizadas y los archivos creados o modificados.
+
+**Ejemplo de Uso:**
+```json
+{
+  "tool": "cde_setupProject",
+  "params": {
+    "project_path": "/path/to/my/project",
+    "force": true
+  }
+}
+```
 
 ### `cde_onboardingProject`
 

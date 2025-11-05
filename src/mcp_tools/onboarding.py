@@ -31,6 +31,28 @@ async def cde_onboardingProject(ctx: Context, manage_state_use_case: ManageState
     return json.dumps(analysis_result, indent=2)
 
 from cde_orchestrator.application.onboarding.publishing_use_case import PublishingUseCase
+from cde_orchestrator.application.onboarding.project_setup_use_case import ProjectSetupUseCase
+
+@tool_handler
+async def cde_setupProject(ctx: Context, project_path: str = ".", force: bool = False) -> str:
+    """
+    Analyzes a project and generates key configuration files (e.g., .gitignore, AGENTS.md).
+
+    Args:
+        project_path: The path to the project to set up.
+        force: If true, overwrites existing configuration files.
+    """
+    # Note: In a real DI system, these would be injected.
+    analysis_use_case = ProjectAnalysisUseCase()
+    publishing_use_case = PublishingUseCase()
+    setup_use_case = ProjectSetupUseCase(analysis_use_case, publishing_use_case)
+
+    if project_path == ".":
+        project_path = os.getcwd()
+
+    result = setup_use_case.execute(project_path, force)
+    return json.dumps(result, indent=2)
+
 
 @tool_handler
 def cde_publishOnboarding(
