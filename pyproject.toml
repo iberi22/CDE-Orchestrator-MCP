@@ -9,7 +9,7 @@ description = "CDE Orchestrator MCP Server for Context-Driven Engineering"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "fastmcp==2.12.3",
+    "fastmcp==2.13.0",
     "pyyaml",
     "pydantic",
     "python-dotenv",
