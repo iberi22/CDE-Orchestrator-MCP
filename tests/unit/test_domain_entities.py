@@ -6,12 +6,6 @@ Tests business logic, invariants, and state transitions WITHOUT infrastructure.
 All tests should be fast (<5ms) and require no I/O.
 """
 
-import sys
-from pathlib import Path
-
-# Add project root to path (same pattern as other tests)
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
 import pytest
 from datetime import datetime, timezone
 from uuid import UUID
@@ -29,6 +23,8 @@ from src.cde_orchestrator.domain.exceptions import (
     InvalidStateTransitionError,
     ProjectNotFoundError,
     FeatureNotFoundError,
+    WorkflowValidationError,
+    PhaseNotFoundError,
 )
 
 
@@ -163,12 +159,10 @@ class TestProject:
     def test_activate_from_invalid_status_raises_error(self):
         """Test that activating from archived status fails."""
         project = Project.create(name="Test", path="/tmp/test")
-        project.activate()
-        project.archive()
+        project.status = ProjectStatus.ARCHIVED # Manually set for test
 
-        # Cannot activate directly from archived
-        # Must use different method or logic
-        assert project.status == ProjectStatus.ARCHIVED
+        with pytest.raises(InvalidStateTransitionError):
+            project.activate()
 
     def test_archive_active_project(self):
         """Test archiving active project."""
@@ -183,8 +177,7 @@ class TestProject:
         """Onboarding projects cannot be archived (invalid transition)."""
         project = Project.create(name="Test", path="/tmp/test")
 
-        # Domain raises ValueError for invalid transitions
-        with pytest.raises(ValueError, match="Invalid status transition"):
+        with pytest.raises(InvalidStateTransitionError, match="Cannot transition Project from 'onboarding' to 'archived'"):
             project.archive()
 
     def test_start_feature_when_active(self):
@@ -406,7 +399,7 @@ class TestWorkflow:
     def test_empty_workflow_raises_error(self):
         """Workflow with no phases is invalid (get_initial_phase)."""
         workflow = Workflow(name="Test", version="1.0", phases=[])
-        with pytest.raises(ValueError, match="Workflow has no phases defined"):
+        with pytest.raises(WorkflowValidationError, match="Workflow has no phases defined"):
             workflow.get_initial_phase()
 
 

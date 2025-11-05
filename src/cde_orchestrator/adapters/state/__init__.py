@@ -6,6 +6,6 @@ This module contains adapters for loading and saving project state
 to external storage like JSON files.
 """
 
-from .state_adapter import StateAdapter
+from .filesystem_state_repository import FileSystemStateRepository
 
-__all__ = ["StateAdapter"]
+__all__ = ["FileSystemStateRepository"]

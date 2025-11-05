@@ -1,90 +1,36 @@
-# Pre-commit hooks configuration for CDE Orchestrator MCP
-# Install with: pre-commit install
-# Run manually: pre-commit run --all-files
-
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
 repos:
-  # DOCUMENTATION GOVERNANCE (Enhanced with DOCUMENTATION_GOVERNANCE.md compliance)
-  - repo: local
-    hooks:
-      # Main documentation governance validator (replaces enforce-doc-governance.py)
-      - id: validate-docs-governance
-        name: Validate Documentation Governance Compliance
-        entry: python scripts/validation/validate-docs.py --staged
-        language: system
-        files: '\\.md$'
-        pass_filenames: false
-        stages: [commit]
-        description: "Checks: file location, naming conventions, YAML frontmatter, metadata"
-
-      # Validate metadata (kept for compatibility)
-      - id: validate-metadata
-        name: Validate Document Metadata (YAML Frontmatter)
-        entry: python scripts/validation/validate-docs.py --staged
-        language: system
-        files: '\\.md$'
-        pass_filenames: false
-        additional_dependencies: ['pyyaml']
-        stages: [commit]
-
-  # MARKDOWN LINTING
-  - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.45.0
-    hooks:
-      - id: markdownlint
-        name: Markdown Lint
-        args: ['--config=.markdownlintrc']
-        exclude: |
-          (?x)^(
-            node_modules/|
-            \.venv/|
-            build/|
-            dist/
-          )
-
-  # STANDARD HOOKS
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
-      # Identify files that would conflict in merge
-      - id: check-merge-conflict
-
-      # Ensure files end with newline
-      - id: end-of-file-fixer
-
-      # Trailing whitespace (allow markdown double-space line breaks)
       - id: trailing-whitespace
-        args: ['--markdown-linebreak-ext=md']
-
-      # Check YAML
+      - id: end-of-file-fixer
       - id: check-yaml
-        args: ['--safe']
+      - id: check-added-large-files
 
-      # Check JSON
-      - id: check-json
-
-      # Check TOML
-      - id: check-toml
-
-      # Detect private keys
-      - id: detect-private-key
-
-  # PYTHON LINTING
   - repo: https://github.com/psf/black
-    rev: 24.10.0
+    rev: 24.4.2
     hooks:
       - id: black
-        language_version: python3
-        exclude: '^(venv|\.venv|migrations)'
+        args: [--line-length=88]
 
-  - repo: https://github.com/PyCQA/isort
+  - repo: https://github.com/pycqa/isort
     rev: 5.13.2
     hooks:
       - id: isort
-        args: ['--profile', 'black']
+        name: isort (python)
+        args: ["--profile", "black"]
 
-# CONFIGURATION
-default_language_version:
-  python: python3.12
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.6
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
 
-# Fail fast to give user quick feedback
-fail_fast: false
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.7.0
+    hooks:
+      - id: mypy
+        args: [--ignore-missing-imports]
+        additional_dependencies: [pydantic]

@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import AsyncGenerator, List, Optional, AsyncIterator, Dict, Any
 
 from cde_orchestrator.domain.git import Commit, Modification
-from cde_orchestrator.domain.entities import Project, ProjectId, WorkflowPhase
+from cde_orchestrator.domain.entities import Project, ProjectId, WorkflowPhase, Workflow, Recipe
 
 class IGitAdapter(ABC):
     """
@@ -113,4 +113,20 @@ class IStateStore(ABC):
 
     @abstractmethod
     def save_state(self, state: Dict[str, Any]):
+        pass
+
+class IWorkflowRepository(ABC):
+    """
+    Port for loading workflow definitions.
+    """
+    @abstractmethod
+    def load_workflow(self) -> Workflow:
+        pass
+
+class IRecipeRepository(ABC):
+    """
+    Port for loading recipe definitions.
+    """
+    @abstractmethod
+    def list_all(self) -> List[Recipe]:
         pass
