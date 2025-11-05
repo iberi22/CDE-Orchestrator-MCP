@@ -1,0 +1,13 @@
+{
+  "project_path": "E:\\scripts-python\\CDE Orchestrator MCP\\tests\\performance\\..\\..",
+  "iterations": 3,
+  "avg_time": 0.3572448094685872,
+  "min_time": 0.32300233840942383,
+  "max_time": 0.4233591556549072,
+  "times": [
+    0.4233591556549072,
+    0.32537293434143066,
+    0.32300233840942383
+  ],
+  "rust_accelerated": true
+}

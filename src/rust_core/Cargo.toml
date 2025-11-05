@@ -1,0 +1,28 @@
+[package]
+name = "cde-rust-core"
+version = "0.1.0"
+edition = "2021"
+description = "High-performance Rust core for CDE Orchestrator MCP"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/iberi22/CDE-Orchestrator-MCP"
+homepage = "https://github.com/iberi22/CDE-Orchestrator-MCP"
+
+[lib]
+name = "cde_rust_core"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.21", features = ["experimental-declarative-modules"] }
+tokio = { version = "1.0", features = ["fs", "rt-multi-thread"] }
+rayon = "1.8"
+regex = "1.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+walkdir = "2.4"
+futures = "0.3"
+async-trait = "0.1"
+
+[dependencies.pyo3-async-runtimes]
+version = "0.21"
+features = ["tokio-runtime"]

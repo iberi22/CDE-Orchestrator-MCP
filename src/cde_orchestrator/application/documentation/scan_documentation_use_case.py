@@ -1,12 +1,13 @@
 """
-Scan Documentation Use Case - MVP Version.
+Scan Documentation Use Case - Optimized Version.
 
 Analyzes project documentation structure and identifies issues.
-This is a simplified version that works immediately without full repository setup.
+Uses high-performance Rust core for I/O intensive operations.
 """
 
 import os
 import re
+import json
 from pathlib import Path
 from typing import Dict, Any, List
 from datetime import datetime
@@ -22,6 +23,8 @@ class ScanDocumentationUseCase:
     - Detecting missing metadata
     - Identifying orphaned documents
     - Suggesting organizational improvements
+
+    Uses Rust core for performance when available, falls back to Python.
     """
 
     def execute(self, project_path: str) -> Dict[str, Any]:
@@ -43,6 +46,57 @@ class ScanDocumentationUseCase:
 
         if not project.exists():
             raise ValueError(f"Project path does not exist: {project_path}")
+
+        # Try to use Rust core for performance
+        try:
+            import cde_rust_core
+            rust_result = self._scan_with_rust(project_path)
+            return self._process_rust_result(rust_result, project_path)
+        except ImportError:
+            # Fallback to Python implementation
+            return self._scan_with_python(project_path)
+
+    def _scan_with_rust(self, project_path: str) -> Dict[str, Any]:
+        """Use high-performance Rust core for scanning."""
+        try:
+            import cde_rust_core
+            # Call the fast Rust scanning function
+            result_json = cde_rust_core.documentation.scan_documentation_fast(project_path)
+            return json.loads(result_json)
+        except ImportError:
+            # Rust module not available, raise error to trigger fallback
+            raise ImportError("Rust core module not available")
+        except Exception as e:
+            # Rust module failed, log and fallback to Python
+            print(f"Warning: Rust scanning failed ({e}), falling back to Python implementation")
+            raise ImportError("Rust scanning failed")
+
+    def _process_rust_result(self, rust_result: Dict[str, Any], project_path: str) -> Dict[str, Any]:
+        """Process and enhance Rust scan results with Python logic."""
+        project = Path(project_path)
+
+        # Start with Rust results
+        results = rust_result.copy()
+        results["scanned_at"] = datetime.now().isoformat()
+        results["project_path"] = project_path
+
+        # Add Python-specific enhancements
+        results["by_location"] = self._enhance_location_categorization(results.get("by_location", {}), project)
+
+        # Generate recommendations using Python logic
+        results["recommendations"] = self._generate_recommendations(results)
+
+        return results
+
+    def _enhance_location_categorization(self, by_location: Dict[str, Any], project: Path) -> Dict[str, Any]:
+        """Enhance location categorization with additional Python logic."""
+        # The Rust version provides basic categorization
+        # Python can add more sophisticated analysis if needed
+        return by_location
+
+    def _scan_with_python(self, project_path: str) -> Dict[str, Any]:
+        """Fallback Python implementation."""
+        project = Path(project_path)
 
         # Find all markdown files
         md_files = list(project.rglob("*.md"))
