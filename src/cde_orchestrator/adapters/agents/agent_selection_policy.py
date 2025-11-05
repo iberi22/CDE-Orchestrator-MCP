@@ -34,6 +34,9 @@ class AgentType(Enum):
     COPILOT = "copilot"          # GitHub Copilot CLI
     GEMINI = "gemini"            # Google Gemini CLI
     QWEN = "qwen"                # Alibaba Qwen CLI
+    DEEPAGENTS = "deepagents"    # DeepAgents CLI for research
+    CODEX = "codex"              # Codex CLI for code analysis
+    ROVODEV = "rovodev"          # Rovo Dev CLI for task completion
 
 
 class AgentCapability(Enum):
@@ -132,12 +135,39 @@ class AgentSelectionPolicy:
             best_for=["fallback"],
             requires_auth=False
         ),
+        AgentType.DEEPAGENTS: AgentCapabilities(
+            agent_type=AgentType.DEEPAGENTS,
+            supports_async=True,
+            supports_plan_approval=False,
+            max_context_lines=20000,
+            best_for=["research", "prototyping", "refactoring"],
+            requires_auth=True
+        ),
+        AgentType.CODEX: AgentCapabilities(
+            agent_type=AgentType.CODEX,
+            supports_async=False,
+            supports_plan_approval=False,
+            max_context_lines=8000,
+            best_for=["code_review", "analysis"],
+            requires_auth=True
+        ),
+        AgentType.ROVODEV: AgentCapabilities(
+            agent_type=AgentType.ROVODEV,
+            supports_async=False,
+            supports_plan_approval=False,
+            max_context_lines=10000,
+            best_for=["task_completion", "jira_integration"],
+            requires_auth=True
+        ),
     }
 
     # Default fallback chain
     FALLBACK_CHAIN = [
         AgentType.JULES,
+        AgentType.DEEPAGENTS,
+        AgentType.ROVODEV,
         AgentType.COPILOT,
+        AgentType.CODEX,
         AgentType.GEMINI,
         AgentType.QWEN,
     ]

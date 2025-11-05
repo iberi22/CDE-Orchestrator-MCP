@@ -341,6 +341,54 @@ async def cde_listAvailableAgents() -> str:
         }
     )
 
+    # Check DeepAgents CLI
+    deepagents_available = shutil.which("deepagents") is not None
+    agents_status.append(
+        {
+            "name": "DeepAgents CLI",
+            "type": "sync_cli",
+            "status": "available" if deepagents_available else "unavailable",
+            "cli_installed": deepagents_available,
+            "capabilities": ["research", "prototyping", "refactoring"],
+            "best_for": ["research", "new_feature_prototyping"],
+            "setup_required": (
+                [] if deepagents_available else ["Install DeepAgents CLI: pip install deepagents-cli"]
+            ),
+        }
+    )
+
+    # Check Codex CLI
+    codex_available = shutil.which("codex") is not None
+    agents_status.append(
+        {
+            "name": "Codex CLI",
+            "type": "sync_cli",
+            "status": "available" if codex_available else "unavailable",
+            "cli_installed": codex_available,
+            "capabilities": ["code_review", "analysis"],
+            "best_for": ["code_analysis", "task_review"],
+            "setup_required": (
+                [] if codex_available else ["Install Codex CLI: npm install -g @openai/codex"]
+            ),
+        }
+    )
+
+    # Check Rovo Dev CLI
+    rovo_available = shutil.which("rovo") is not None
+    agents_status.append(
+        {
+            "name": "Rovo Dev CLI",
+            "type": "sync_cli",
+            "status": "available" if rovo_available else "unavailable",
+            "cli_installed": rovo_available,
+            "capabilities": ["task_completion", "jira_integration"],
+            "best_for": ["end_to_end_tasks", "jira_workflows"],
+            "setup_required": (
+                [] if rovo_available else ["Install Rovo Dev CLI: Follow Atlassian's instructions"]
+            ),
+        }
+    )
+
     available = [a for a in agents_status if a["status"] == "available"]
     unavailable = [a for a in agents_status if a["status"] == "unavailable"]
 
@@ -455,6 +503,21 @@ async def cde_selectAgent(task_description: str) -> str:
         if qwen_available:
             agents_status.append("qwen")
 
+        # Check DeepAgents CLI
+        deepagents_available = shutil.which("deepagents") is not None
+        if deepagents_available:
+            agents_status.append("deepagents")
+
+        # Check Codex CLI
+        codex_available = shutil.which("codex") is not None
+        if codex_available:
+            agents_status.append("codex")
+
+        # Check Rovo Dev CLI
+        rovo_available = shutil.which("rovo") is not None
+        if rovo_available:
+            agents_status.append("rovodev")
+
         # Convert to AgentType enum values
         from cde_orchestrator.adapters.agents.agent_selection_policy import AgentType
         available_agent_types = []
@@ -467,6 +530,12 @@ async def cde_selectAgent(task_description: str) -> str:
                 available_agent_types.append(AgentType.GEMINI)
             elif agent_name == "qwen":
                 available_agent_types.append(AgentType.QWEN)
+            elif agent_name == "deepagents":
+                available_agent_types.append(AgentType.DEEPAGENTS)
+            elif agent_name == "codex":
+                available_agent_types.append(AgentType.CODEX)
+            elif agent_name == "rovodev":
+                available_agent_types.append(AgentType.ROVODEV)
 
         # Use AgentSelectionPolicy to suggest agent
         suggested_agent = AgentSelectionPolicy.suggest_agent(task_description)
@@ -707,6 +776,36 @@ async def cde_executeWithBestAgent(
                 qwen_adapter = QwenCLIAdapter()
                 orchestrator.register_agent(AgentType.QWEN, qwen_adapter)
                 available_agents.append("qwen")
+            except (ImportError, AttributeError):
+                pass
+
+        # Register DeepAgents if available
+        if shutil.which("deepagents"):
+            try:
+                from cde_orchestrator.adapters.agents.deep_agents_adapter import DeepAgentsAdapter
+                deepagents_adapter = DeepAgentsAdapter()
+                orchestrator.register_agent(AgentType.DEEPAGENTS, deepagents_adapter)
+                available_agents.append("deepagents")
+            except (ImportError, AttributeError):
+                pass
+
+        # Register Codex if available
+        if shutil.which("codex"):
+            try:
+                from cde_orchestrator.adapters.agents.codex_adapter import CodexAdapter
+                codex_adapter = CodexAdapter()
+                orchestrator.register_agent(AgentType.CODEX, codex_adapter)
+                available_agents.append("codex")
+            except (ImportError, AttributeError):
+                pass
+
+        # Register Rovo Dev if available
+        if shutil.which("rovo"):
+            try:
+                from cde_orchestrator.adapters.agents.rovo_dev_adapter import RovoDevAdapter
+                rovo_adapter = RovoDevAdapter()
+                orchestrator.register_agent(AgentType.ROVODEV, rovo_adapter)
+                available_agents.append("rovodev")
             except (ImportError, AttributeError):
                 pass
 

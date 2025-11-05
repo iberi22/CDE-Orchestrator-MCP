@@ -9,6 +9,7 @@ import os
 
 from cde_orchestrator.application.documentation import (
     AnalyzeDocumentationUseCase,
+    CreateSpecificationUseCase,
     ScanDocumentationUseCase,
 )
 
@@ -64,6 +65,42 @@ def cde_scanDocumentation(project_path: str = ".") -> str:
         project_path = os.getcwd()
 
     result = use_case.execute(project_path)
+    return json.dumps(result, indent=2)
+
+
+@tool_handler
+def cde_createSpecification(
+    feature_name: str,
+    description: str,
+    author: str,
+    project_path: str = "."
+) -> str:
+    """
+    Creates a new feature specification document.
+
+    This tool generates a new specification file in `specs/features/`
+    with the correct filename and pre-populated YAML frontmatter.
+
+    Args:
+        feature_name: The name of the feature (e.g., "User Authentication").
+        description: A one-sentence description of the feature.
+        author: The name or ID of the authoring agent.
+        project_path: The path to the project root (default: current directory).
+
+    Returns:
+        JSON with the path to the newly created file or an error message.
+    """
+    use_case = CreateSpecificationUseCase()
+
+    if project_path == ".":
+        project_path = os.getcwd()
+
+    result = use_case.execute(
+        project_path=project_path,
+        feature_name=feature_name,
+        description=description,
+        author=author
+    )
     return json.dumps(result, indent=2)
 
 
