@@ -240,7 +240,7 @@ Configurar infraestructura completa de testing con pytest, coverage y CI/CD.
 ---
 
 ### TEST-02: Unit Tests (80% Coverage Target)
-**Prioridad:** 🟠 ALTA | **Esfuerzo:** 5 días | **Asignado:** Jules | **Estado:** 🟡 En Progreso
+**Prioridad:** 🟠 ALTA | **Esfuerzo:** 5 días | **Asignado:** User | **Estado:** 🔵 Pendiente
 
 **Descripción:**
 Implementar tests unitarios completos para todos los managers y models.
@@ -529,7 +529,7 @@ Soporte para múltiples usuarios/proyectos en una instancia.
 ---
 
 ### FEAT-04: Integración Multi-Agente
-**Prioridad:** 🟠 ALTA | **Esfuerzo:** 5 días | **Asignado:** Jules | **Estado:** 🟡 En Progreso (75%)
+**Prioridad:** 🟠 ALTA | **Esfuerzo:** 5 días | **Asignado:** Jules | **Estado:** ✅ Completado (100%)
 
 **Descripción:**
 Integrar y orquestar múltiples agentes de IA (DeepAgents, Codex, Rovo Dev, Copilot, Gemini, Qwen) para aprovechar sus fortalezas específicas.
@@ -538,7 +538,7 @@ Integrar y orquestar múltiples agentes de IA (DeepAgents, Codex, Rovo Dev, Copi
 - [x] FEAT-04.1: Crear adaptadores de agente para los nuevos CLIs ✅
 - [x] FEAT-04.2: Implementar una política de selección de agentes para enrutar tareas ✅
 - [x] FEAT-04.3: Integrar los nuevos agentes en las herramientas MCP (`cde_listAvailableAgents`, `cde_executeWithBestAgent`) ✅
-- [ ] FEAT-04.4: Refinar las heurísticas de selección basadas en pruebas del mundo real
+- [x] FEAT-04.4: Refinar las heurísticas de selección basadas en pruebas del mundo real ✅
 - [x] FEAT-04.5: Documentar la nueva arquitectura de agentes ✅
 
 **Criterios de Aceptación:**
