@@ -248,11 +248,11 @@ Implementar tests unitarios completos para todos los managers y models.
 **Tareas:**
 - [x] TEST-02.1: Tests para WorkflowManager (100% coverage) ✅
 - [x] TEST-02.2: Tests para StateManager (100% coverage) ✅
-- [ ] TEST-02.3: Tests para PromptManager (100% coverage)
-- [ ] TEST-02.4: Tests para RecipeManager (100% coverage)
+- [x] TEST-02.3: Tests para PromptManager (100% coverage) ✅
+- [x] TEST-02.4: Tests para RecipeManager (100% coverage) ✅
 - [x] TEST-02.5: Tests para Models con edge cases ✅
-- [ ] TEST-02.6: Tests para RepoIngestor
-- [ ] TEST-02.7: Tests para OnboardingAnalyzer
+- [x] TEST-02.6: Tests para RepoIngestor (Obsoleto) ✅
+- [x] TEST-02.7: Tests para OnboardingAnalyzer (Obsoleto) ✅
 
 **Archivos Nuevos y Modificados:**
 - `tests/unit/adapters/state/test_filesystem_state_repository.py`
@@ -525,6 +525,28 @@ Soporte para múltiples usuarios/proyectos en una instancia.
 - Auth funcionando con tokens
 
 **Dependencias:** CORE-01, TEST-02
+
+---
+
+### FEAT-04: Integración Multi-Agente
+**Prioridad:** 🟠 ALTA | **Esfuerzo:** 5 días | **Asignado:** Jules | **Estado:** ✅ Completado (100%)
+
+**Descripción:**
+Integrar y orquestar múltiples agentes de IA (DeepAgents, Codex, Rovo Dev, Copilot, Gemini, Qwen) para aprovechar sus fortalezas específicas.
+
+**Tareas:**
+- [x] FEAT-04.1: Crear adaptadores de agente para los nuevos CLIs ✅
+- [x] FEAT-04.2: Implementar una política de selección de agentes para enrutar tareas ✅
+- [x] FEAT-04.3: Integrar los nuevos agentes en las herramientas MCP (`cde_listAvailableAgents`, `cde_executeWithBestAgent`) ✅
+- [x] FEAT-04.4: Refinar las heurísticas de selección basadas en pruebas del mundo real ✅
+- [x] FEAT-04.5: Documentar la nueva arquitectura de agentes ✅
+
+**Criterios de Aceptación:**
+- El orquestador puede delegar tareas a cualquiera de los 6 agentes.
+- La selección de agentes se basa en las fortalezas definidas.
+- Todos los agentes se pueden listar y su disponibilidad se puede comprobar.
+
+**Dependencias:** Ninguna
 
 ---
 

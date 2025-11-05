@@ -34,6 +34,9 @@ class AgentType(Enum):
     COPILOT = "copilot"          # GitHub Copilot CLI
     GEMINI = "gemini"            # Google Gemini CLI
     QWEN = "qwen"                # Alibaba Qwen CLI
+    DEEPAGENTS = "deepagents"    # DeepAgents CLI for research
+    CODEX = "codex"              # Codex CLI for code analysis
+    ROVODEV = "rovodev"          # Rovo Dev CLI for task completion
 
 
 class AgentCapability(Enum):
@@ -132,12 +135,39 @@ class AgentSelectionPolicy:
             best_for=["fallback"],
             requires_auth=False
         ),
+        AgentType.DEEPAGENTS: AgentCapabilities(
+            agent_type=AgentType.DEEPAGENTS,
+            supports_async=True,
+            supports_plan_approval=False,
+            max_context_lines=20000,
+            best_for=["research", "prototyping", "refactoring"],
+            requires_auth=True
+        ),
+        AgentType.CODEX: AgentCapabilities(
+            agent_type=AgentType.CODEX,
+            supports_async=False,
+            supports_plan_approval=False,
+            max_context_lines=8000,
+            best_for=["code_review", "analysis"],
+            requires_auth=True
+        ),
+        AgentType.ROVODEV: AgentCapabilities(
+            agent_type=AgentType.ROVODEV,
+            supports_async=False,
+            supports_plan_approval=False,
+            max_context_lines=10000,
+            best_for=["task_completion", "jira_integration"],
+            requires_auth=True
+        ),
     }
 
     # Default fallback chain
     FALLBACK_CHAIN = [
         AgentType.JULES,
+        AgentType.DEEPAGENTS,
+        AgentType.ROVODEV,
         AgentType.COPILOT,
+        AgentType.CODEX,
         AgentType.GEMINI,
         AgentType.QWEN,
     ]
@@ -229,48 +259,30 @@ class AgentSelectionPolicy:
     def suggest_agent(cls, task_description: str) -> AgentType:
         """
         Suggest agent based on task description.
-
-        Uses advanced heuristics to estimate complexity and requirements:
-        - Keyword analysis with weights
-        - Task scope detection
-        - Technology stack consideration
-        - Context size estimation
-
-        Args:
-            task_description: Natural language task description
-
-        Returns:
-            Suggested AgentType
         """
         desc_lower = task_description.lower()
 
-        # Advanced complexity detection with weighted keywords
+        # Specific keywords for each agent
+        if any(kw in desc_lower for kw in ["jira", "ticket", "bug-tracker issue"]):
+            return AgentType.ROVODEV
+        if any(kw in desc_lower for kw in ["investigate", "research", "prototype", "refactor"]):
+            return AgentType.DEEPAGENTS
+        if any(kw in desc_lower for kw in ["typo", "fix syntax", "complete this line"]):
+            return AgentType.COPILOT
+        if any(kw in desc_lower for kw in ["analyze", "review", "complexity", "style issues"]):
+            return AgentType.CODEX
+        if any(kw in desc_lower for kw in ["documentation", "generate docs", "csv", "read a file", "help me finish", "quick way to"]):
+            return AgentType.GEMINI
+
+        # Fallback to complexity-based selection
         complexity_score = cls._calculate_complexity_score(desc_lower)
 
-        # Map score to complexity level
-        if complexity_score >= 8:
-            complexity = TaskComplexity.EPIC
-        elif complexity_score >= 6:
-            complexity = TaskComplexity.COMPLEX
+        if complexity_score >= 6:
+            return AgentType.JULES
         elif complexity_score >= 4:
-            complexity = TaskComplexity.MODERATE
-        elif complexity_score >= 2:
-            complexity = TaskComplexity.SIMPLE
+            return AgentType.DEEPAGENTS
         else:
-            complexity = TaskComplexity.TRIVIAL
-
-        # Detect plan approval need with better heuristics
-        require_approval = cls._requires_plan_approval(desc_lower)
-
-        # Estimate context size based on task description
-        context_size = cls._estimate_context_size(desc_lower)
-
-        return cls.select_agent(
-            complexity=complexity,
-            require_plan_approval=require_approval,
-            context_size=context_size,
-            available_agents=list(AgentType),
-        )
+            return AgentType.COPILOT
 
     @classmethod
     def _calculate_complexity_score(cls, desc_lower: str) -> float:

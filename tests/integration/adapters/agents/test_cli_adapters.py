@@ -14,6 +14,9 @@ from cde_orchestrator.adapters.agents.code_cli_adapters import (
     CopilotCLIAdapter,
     GeminiCLIAdapter,
     QwenCLIAdapter,
+    DeepAgentsAdapter,
+    CodexAdapter,
+    RovoDevAdapter,
     CodeCLINotFoundError,
     CodeCLIExecutionError,
 )
@@ -262,6 +265,9 @@ class TestCLIAdapterErrorHandling:
         CopilotCLIAdapter,
         GeminiCLIAdapter,
         QwenCLIAdapter,
+        DeepAgentsAdapter,
+        CodexAdapter,
+        RovoDevAdapter,
     ])
     @pytest.mark.asyncio
     async def test_subprocess_execution_error(self, adapter_class, tmp_path):
@@ -285,3 +291,72 @@ class TestCLIAdapterErrorHandling:
         assert isinstance(instructions, str)
         assert len(instructions) > 0
         assert "install" in instructions.lower() or "Install" in instructions
+
+
+class TestDeepAgentsAdapter:
+    """Test DeepAgents CLI adapter integration."""
+
+    @pytest.fixture
+    def adapter(self):
+        return DeepAgentsAdapter()
+
+    @pytest.mark.asyncio
+    async def test_execute_prompt_success(self, adapter, tmp_path):
+        """Test successful prompt execution."""
+        mock_response = "Research complete"
+
+        with patch.object(adapter, 'is_available', return_value=True):
+            with patch('asyncio.create_subprocess_exec') as mock_subprocess:
+                mock_process = AsyncMock()
+                mock_process.communicate.return_value = (mock_response.encode(), b'')
+                mock_process.returncode = 0
+                mock_subprocess.return_value = mock_process
+
+                result = await adapter.execute_prompt(tmp_path, "research topic", {})
+                assert "Research complete" in result
+
+
+class TestCodexAdapter:
+    """Test Codex CLI adapter integration."""
+
+    @pytest.fixture
+    def adapter(self):
+        return CodexAdapter()
+
+    @pytest.mark.asyncio
+    async def test_execute_prompt_success(self, adapter, tmp_path):
+        """Test successful prompt execution."""
+        mock_response = "Analysis complete"
+
+        with patch.object(adapter, 'is_available', return_value=True):
+            with patch('asyncio.create_subprocess_exec') as mock_subprocess:
+                mock_process = AsyncMock()
+                mock_process.communicate.return_value = (mock_response.encode(), b'')
+                mock_process.returncode = 0
+                mock_subprocess.return_value = mock_process
+
+                result = await adapter.execute_prompt(tmp_path, "analyze code", {})
+                assert "Analysis complete" in result
+
+
+class TestRovoDevAdapter:
+    """Test Rovo Dev CLI adapter integration."""
+
+    @pytest.fixture
+    def adapter(self):
+        return RovoDevAdapter()
+
+    @pytest.mark.asyncio
+    async def test_execute_prompt_success(self, adapter, tmp_path):
+        """Test successful prompt execution."""
+        mock_response = "Task JIRA-123 complete"
+
+        with patch.object(adapter, 'is_available', return_value=True):
+            with patch('asyncio.create_subprocess_exec') as mock_subprocess:
+                mock_process = AsyncMock()
+                mock_process.communicate.return_value = (mock_response.encode(), b'')
+                mock_process.returncode = 0
+                mock_subprocess.return_value = mock_process
+
+                result = await adapter.execute_prompt(tmp_path, "complete task JIRA-123", {})
+                assert "Task JIRA-123 complete" in result
