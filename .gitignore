@@ -65,6 +65,14 @@ Thumbs.db
 
 # Coverage
 .coverage
+.coverage.*
+coverage.json
+
+# Rust
+target/
+
+# Local CDE issues (temporary files)
+.cde/issues/
 
 # Wheels
 *.whl
