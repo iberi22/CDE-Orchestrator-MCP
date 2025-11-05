@@ -34,6 +34,7 @@ name = "cde_rust_core"
 version = "0.1.0"
 dependencies = [
  "glob",
+ "once_cell",
  "pyo3",
  "rayon",
  "regex",
