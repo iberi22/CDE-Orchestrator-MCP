@@ -45,26 +45,22 @@ This MCP doesn't just provide tools; it manages the project's state and guides t
 
 ## Features (MCP Tools)
 
-### Core Workflow Tools
-- `cde_onboardingProject()`: Synthesizes the repository, proposes cleanup/relocation actions, and performs Spec-Kit onboarding with automation-ready artifacts.
-- `cde_startFeature(prompt: str)`: Initiates a new feature development workflow.
-- `cde_submitWork(feature_id: str, phase_id: str, results: dict)`: Submits completed work and transitions to the next phase.
-- `cde_getFeatureStatus(feature_id: str)`: Gets the current status of a feature.
-- `cde_listFeatures()`: Lists all features and their status.
+The following tools are currently implemented and available for use. For a detailed guide, see [MCP Tools Manual](docs/mcp-tools-manual.md).
 
-### Recipe Management Tools
-- `cde_listRecipes()`: Lists all available POML recipes.
-- `cde_useRecipe(recipe_id: str, user_prompt: str, context: dict)`: Uses a specific recipe to generate a prompt.
-- `cde_suggestRecipe(user_prompt: str, phase_id: str)`: Suggests the best recipe for a task.
-- `cde_startFeatureWithRecipe(user_prompt: str, recipe_id: str)`: Starts a feature using a specific recipe.
+### Onboarding & Documentation Tools
+- `cde_onboardingProject(project_path: str)`: Analyzes a project's structure, languages, and dependencies.
+- `cde_publishOnboarding(documents: dict, project_path: str, approve: bool)`: Writes generated documents to the repository.
+- `cde_scanDocumentation(project_path: str)`: Performs a high-level scan of documentation structure and metadata.
+- `cde_analyzeDocumentation(project_path: str)`: Conducts a deep analysis of documentation quality, including link validation.
+- `cde_createSpecification(feature_name: str, description: str, author: str)`: Creates a new feature specification file.
 
-### Git & GitHub Integration Tools
-- `cde_createGitBranch(feature_id: str, branch_name: str, base_branch: str)`: Creates a Git branch for a feature.
-- `cde_createGitHubIssue(feature_id: str, title: str, description: str, labels: list)`: Creates GitHub issues (uses external MCP if configured).
-- `cde_commitWork(feature_id: str, message: str, files: list)`: Commits work to Git.
-- `cde_getServiceStatus()`: Gets status of configured integrations.
-
-> **Note:** Git/GitHub tools automatically detect and use external MCP servers when configured. See [INTEGRATION.md](INTEGRATION.md) for details.
+### Orchestration & Agent Tools
+- `cde_selectWorkflow(prompt: str)`: Suggests a workflow based on the user's prompt.
+- `cde_listAvailableAgents()`: Lists the agents configured in the system.
+- `cde_selectAgent(prompt: str)`: Recommends the best agent for a given task.
+- `cde_executeWithBestAgent(prompt: str)`: Selects and executes a task with the most appropriate agent.
+- `cde_sourceSkill(skill: str)`: Searches for a skill in the skill library.
+- `cde_updateSkill(skill: str, source: str)`: Updates a skill from a specified source.
 
 ## Requirements
 

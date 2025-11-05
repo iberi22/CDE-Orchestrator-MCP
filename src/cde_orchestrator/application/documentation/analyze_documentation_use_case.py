@@ -113,9 +113,8 @@ class AnalyzeDocumentationUseCase:
         return {
             "total_links": total_links,
             "valid_links": valid_links,
-            "broken_links": len(broken_links),
+            "broken_links": broken_links, # Return the list itself
             "external_links": external_links,
-            "broken_link_details": broken_links[:10],  # First 10
         }
 
     def _analyze_metadata(self, md_files: List[Path]) -> Dict[str, Any]:
@@ -225,8 +224,9 @@ class AnalyzeDocumentationUseCase:
 
         # Link integrity (30 points)
         links = results["link_analysis"]
+        num_broken_links = len(links["broken_links"])
         if links["total_links"] > 0:
-            link_health = links["valid_links"] / (links["valid_links"] + links["broken_links"])
+            link_health = links["valid_links"] / (links["valid_links"] + num_broken_links)
             score -= (1 - link_health) * 30
 
         # Content quality (20 points)
@@ -255,9 +255,10 @@ class AnalyzeDocumentationUseCase:
                 f"🔴 {meta['files_without_metadata']} files missing YAML frontmatter"
             )
 
-        if links["broken_links"] > 0:
+        num_broken_links = len(links["broken_links"])
+        if num_broken_links > 0:
             issues.append(
-                f"🔴 {links['broken_links']} broken internal links detected"
+                f"🔴 {num_broken_links} broken internal links detected"
             )
 
         if quality["very_short_files"] > 5:
@@ -308,7 +309,7 @@ class AnalyzeDocumentationUseCase:
             )
 
         links = results["link_analysis"]
-        if links["broken_links"] > 0:
+        if len(links["broken_links"]) > 0:
             suggestions.append(
                 "→ Fix broken links to improve navigation and discoverability"
             )

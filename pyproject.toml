@@ -29,6 +29,11 @@ dev = [
     "maturin>=1.0,<2.0",
 ]
 
+[tool.maturin]
+bindings = "pyo3"
+module-name = "cde_rust_core"
+manifest-path = "rust_core/Cargo.toml"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
