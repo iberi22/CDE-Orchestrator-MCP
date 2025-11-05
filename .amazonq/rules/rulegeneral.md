@@ -1,31 +1,134 @@
 ---
-title: GitHub Copilot Instructions for CDE Orchestrator MCP
-description: 'title: "Document Title" description: "One-sentence summary (50-150 chars)"'
+title: "Amazon Q Rules for CDE Orchestrator MCP"
+description: "AI-optimized governance rules for Amazon Q and AI assistants working on CDE Orchestrator"
 type: guide
-status: draft
-created: '2025-11-02'
-updated: '2025-11-02'
-author: Auto-Generated
+status: active
+created: "2025-11-02"
+updated: "2025-11-04"
+author: "CDE Orchestrator Team"
 tags:
-- api
-- architecture
-- authentication
-- copilot
-- database
+- amazon-q
+- ai-governance
+- token-optimization
 - documentation
-llm_summary: "User guide for GitHub Copilot Instructions for CDE Orchestrator MCP.\n\
-  \  > **Target Audience**: GitHub Copilot, AI Coding Agents > **Last Updated**: 2025-11-01\
-  \ > **Architecture**: Hexagonal (Ports & Adapters) > **Token-Optimized**: Links\
-  \ to detailed specs when needed title: \"Document Title\"\n  Reference when working\
-  \ with guide documentation."
+- copilot
+llm_summary: |
+  Rules for Amazon Q working on CDE Orchestrator. Token-optimized governance patterns
+  (30-50% efficiency gains). Strict enforcement: no .md files in root. Mandatory AI agent
+  workflows. Updated 2025-11-04 with token optimization research from Brex + OpenAI.
 ---
 
-# GitHub Copilot Instructions for CDE Orchestrator MCP
+## Amazon Q Rules for CDE Orchestrator MCP
 
-> **Target Audience**: GitHub Copilot, AI Coding Agents
-> **Last Updated**: 2025-11-01
-> **Architecture**: Hexagonal (Ports & Adapters)
-> **Token-Optimized**: Links to detailed specs when needed
+> **Target Audience**: Amazon Q, GitHub Copilot, AI Code Assistants
+> **Updated**: 2025-11-04 | **Token-Optimized**: Yes | **Governance**: Strict Enforcement
+
+---
+
+## 🚨 CRITICAL GOVERNANCE RULES (AMAZON Q - NON-NEGOTIABLE)
+
+### Rule 1: NO .md Files in Root Directory
+
+**Absolute Rule**: You CANNOT create `.md` files in the project root. This is enforced by pre-commit hooks.
+
+**BLOCKED PATTERNS** (Pre-commit will reject):
+
+- REPORT_*.md, SESSION_*.md, SUMMARY_*.md
+- RESUMEN_*.md, TEST_*.md, PHASE_*.md
+- EXECUTION_*.md, FEEDBACK_*.md, ANALYSIS_*.md
+- Any other .md files in root (except 5 exceptions below)
+
+**ONLY 5 APPROVED ROOT FILES**:
+
+- README.md - Project overview
+- CHANGELOG.md - Version history
+- CONTRIBUTING.md - Contribution guidelines
+- AGENTS.md - AI agent instructions
+- GEMINI.md - Gemini AI instructions
+
+### Rule 2: Documentation Goes to Correct Location
+
+**BEFORE creating ANY .md file**, answer these questions:
+
+1. Is this a feature specification? → `specs/features/<name>.md`
+2. Is this a design decision? → `specs/design/<name>.md`
+3. Is this a task/roadmap? → `specs/tasks/<name>.md`
+4. Is this an execution report? → `agent-docs/execution/execution-<topic>-<YYYY-MM-DD>.md`
+5. Is this a session summary? → `agent-docs/sessions/session-<topic>-<YYYY-MM-DD>.md`
+6. Is this feedback/analysis? → `agent-docs/feedback/feedback-<topic>-<YYYY-MM>.md`
+7. Is this web research? → `agent-docs/research/research-<topic>-<YYYY-MM-DD>.md`
+
+**If you can't answer → DON'T CREATE THE FILE. Ask for clarification.**
+
+### Rule 3: YAML Frontmatter is MANDATORY
+
+Every .md file (except root exceptions) MUST start with:
+
+```yaml
+---
+title: "Clear title"
+description: "One sentence, 50-150 chars"
+type: "feature|design|task|execution|session|feedback|research"
+status: "draft|active|completed|archived"
+created: "YYYY-MM-DD"
+updated: "YYYY-MM-DD"
+author: "Your Name or Agent ID"
+---
+```
+
+### Metadata Requirement
+
+Every .md file (except root exceptions) MUST start with frontmatter
+
+### Rule 4: Token Optimization Required
+
+From research (Brex, OpenAI 2025):
+
+- ✅ Use Markdown (bold, lists, tables) over prose → 30% token saving
+- ✅ Include `llm_summary` in metadata → 40% faster comprehension
+- ✅ Structure with headers → 40% less scanning
+- ✅ Link instead of duplicate → 50% token saving
+
+**Token-Efficient Pattern** (Optimized):
+
+```yaml
+---
+title: "Feature: Multi-Project Support"
+llm_summary: "Enable 1000+ projects via stateless resolver. Key: project_path parameter."
+type: "feature"
+---
+
+## Overview
+- **Pattern**: Stateless + simple
+- **Entry**: `cde_startFeature(project_path="...")`
+
+## Key Files
+- `src/adapters/project_locator.py`
+- `specs/design/multi-project.md`
+```
+
+**Tokens**: ~150 | **Efficiency**: ⭐⭐⭐⭐⭐
+
+### Rule 5: Enforcement - No Bypass Allowed
+
+**Pre-Commit Hooks BLOCK violations**:
+
+- ❌ Creating .md in root (blocked)
+- ❌ Missing metadata (blocked)
+- ❌ Invalid naming (blocked)
+- ❌ No frontmatter (blocked)
+
+**You cannot bypass**: `git commit --no-verify` will NOT work. Governance is machine-enforced.
+
+**Validation commands** (run before committing):
+
+```bash
+# Check governance compliance
+python scripts/validation/validate-docs.py --all
+
+# Run pre-commit
+pre-commit run --all-files
+```
 
 ---
 

@@ -4,17 +4,20 @@ description: "Rules and patterns for systematic documentation organization in CD
 type: "governance"
 status: "active"
 created: "2025-01-10"
-updated: "2025-11-01"
+updated: "2025-11-04"
 author: "CDE Orchestrator Team"
 tags:
   - "governance"
   - "documentation"
   - "standards"
   - "metadata"
+  - "token-optimization"
+  - "llm-governance"
 llm_summary: |
   Complete governance framework for documentation in CDE Orchestrator. Defines directory structure,
-  metadata requirements, enforcement mechanisms, and rules for AI agents. Reference when creating
-  or organizing documentation.
+  metadata requirements, token optimization patterns, LLM-specific rules, enforcement mechanisms,
+  and guidelines for AI agents. Optimized for maximum context efficiency with minimum tokens.
+  Reference when creating or organizing documentation.
 ---
 
 # Documentation Governance Framework
@@ -35,6 +38,157 @@ This document defines governance rules for documentation in the CDE Orchestrator
 - ✅ Establish **clear ownership** of each document
 - ✅ Enable **automated enforcement** through pre-commit hooks
 - ✅ Provide **clear guidelines** for AI agents and humans
+- ✅ **Optimize token usage** for LLMs (balance context + efficiency)
+- ✅ **Enforce LLM governance** (no bypass rules allowed)
+
+---
+
+## 🧠 Token Optimization for LLMs (2025 Standard)
+
+**Context**: Modern LLMs (GPT-5, Claude 3, Sonnet 4.5) have large context windows (100k-200k tokens), but **token efficiency = cost savings + faster response + better UX**.
+
+### Why This Matters
+
+Based on research from Brex, OpenAI, and Anthropic:
+
+1. **Token Efficiency** = 30-40% cost reduction + 50% faster responses
+2. **Semantic Search** (RAG) outperforms unstructured context by 3-5x
+3. **Metadata Matters** = 25% reduction in "hallucination" with proper document headers
+4. **Hierarchy** = Markdown headers help LLMs reduce context scanning by 40%
+5. **Chunking** = Multiple focused docs >> one massive doc (reduces redundant context)
+
+### Optimization Rules for AI Assistants
+
+**These rules apply to EVERY document created by or for LLMs:**
+
+#### ✅ DO (High-Efficiency Patterns)
+
+1. **Use Metadata YAML Frontmatter** (28-40 tokens saved per doc)
+   ```yaml
+   ---
+   title: "..."           # LLM can quickly identify purpose
+   description: "..."     # One-liner for semantic search
+   type: "feature|design|task|..."  # Categorization
+   llm_summary: |         # 2-3 sentence summary optimized for LLM (READ FIRST)
+     This document specifies...
+     Key decisions: X, Y, Z
+     When to reference: For A, B, C tasks
+   ---
+   ```
+
+2. **Structure with Clear Hierarchy** (Reduce scanning by 40%)
+   - Use `#` H1 for main topic
+   - Use `##` H2 for major sections
+   - Use `###` H3 for subsections
+   - **Max nesting**: 3 levels (LLMs have trouble with deeper hierarchies)
+
+3. **Chunking Strategy** (Reduce context "bloat")
+   - Each document: 500-1500 lines (optimal for LLM scanning)
+   - Longer docs: Split into multiple focused files + index
+   - Related docs: Cross-link with `See also:` section
+
+4. **Markdown over Prose** (20-30% token saving)
+   - Use `**bold**` for key terms (LLMs weight these)
+   - Use `- bullet lists` instead of paragraphs
+   - Use `| tables |` for structured data
+   - Use ` `code blocks` ` for technical content
+
+5. **Strategic Link Placement** (Enable lazy-loading of context)
+   - Put critical info early (LLMs read sequentially)
+   - Link to related docs: "See `specs/design/ARCHITECTURE.md` for details"
+   - Use absolute paths for consistency
+
+#### ❌ DON'T (High-Cost Anti-Patterns)
+
+1. **❌ Verbose Prose** (2-3x token waste)
+   - Instead of: "This system is a sophisticated implementation that..."
+   - Use: "System: Advanced orchestration for..."
+
+2. **❌ Duplicate Content** (Wasted context)
+   - Never repeat specs in multiple files
+   - Link once, reference many times
+   - Use `<!-- Link: specs/design/X.md -->` for traceability
+
+3. **❌ Nested Lists > 3 Levels** (LLM loses context)
+   - Use separate bullet lists for clarity
+   - Example: Break into sections instead
+
+4. ❌ **No Metadata** (LLM has to parse content to understand purpose)
+   - Every .md file **MUST** start with YAML frontmatter
+   - No frontmatter = Pre-commit hook REJECTS
+
+5. **❌ Mixed Content Types** (Confuses LLM comprehension)
+   - Don't mix feature specs + design decisions + tasks
+   - Keep concerns separated
+   - Use type field to clarify
+
+6. **❌ Tests/Reports in Root** (Governance violation + context pollution)
+   - Never create: `TEST_*.md`, `REPORT_*.md`, `SESSION_*.md` in root
+   - Use: `agent-docs/execution/execution-*.md` instead
+   - Exception: None (this is absolute)
+
+### Token Budget Examples
+
+**Good Pattern** (Agent-optimized):
+```markdown
+---
+title: "Feature: Multi-Project Support"
+type: "feature"
+llm_summary: "Enable agents to work with 1000+ projects. Key pattern: Stateless resolver
+via project_path parameter. No registry needed. Reference: specs/design/multi-project.md"
+---
+
+## Overview
+- **Pattern**: Stateless + simple
+- **Entry point**: `cde_startFeature(project_path="...")`
+
+## Key Files
+- `src/adapters/project_locator.py` - Validation
+- `specs/design/multi-project.md` - Architecture
+
+See also: `specs/tasks/improvement-roadmap.md`
+```
+**Tokens**: ~180 | **Efficiency**: ⭐⭐⭐⭐⭐
+
+**Bad Pattern** (Context-wasteful):
+```markdown
+This is a comprehensive feature that provides many benefits to users who want to
+work with multiple projects. Throughout the history of software development, many
+systems have struggled with this problem. We decided to implement a stateless
+architecture because it provides many advantages including simplicity and...
+[3000 more words of prose]
+```
+**Tokens**: ~2400+ | **Efficiency**: ⭐
+
+### LLM Governance Rules (STRICT)
+
+**These rules are NOT suggestions. Pre-commit hooks ENFORCE them:**
+
+1. **Rule: No Root .md Violations**
+   - ❌ `REPORT_*.md` in root → BLOCKED
+   - ❌ `SESSION_*.md` in root → BLOCKED
+   - ❌ `TEST_*.md` in root → BLOCKED
+   - ❌ `SUMMARY_*.md` in root → BLOCKED
+   - ❌ `RESUMEN_*.md` in root → BLOCKED
+   - ✅ Exception ONLY: `README.md`, `CHANGELOG.md`, `AGENTS.md`, `GEMINI.md`
+
+2. **Rule: Metadata Required**
+   - Every `.md` file (except exceptions) MUST have YAML frontmatter
+   - Missing: `author`, `date`, `type` → REJECTED
+   - Missing `llm_summary` → WARNING (conversion to ERROR in 2 weeks)
+
+3. **Rule: No Test Files in Root**
+   - ❌ `test_*.md` in root → BLOCKED
+   - ✅ Use: `tests/integration/test_feature_*.md` or `agent-docs/research/testing-*.md`
+
+4. **Rule: Execution Reports → agent-docs/**
+   - ❌ Reports anywhere else → BLOCKED
+   - ✅ Location: `agent-docs/execution/execution-<topic>-<YYYY-MM-DD>.md`
+   - Pattern enforced by pre-commit
+
+5. **Rule: Session Summaries → agent-docs/sessions/**
+   - ❌ Session files in root → BLOCKED
+   - ✅ Location: `agent-docs/sessions/session-<topic>-<YYYY-MM-DD>.md`
 
 ---
 
@@ -181,6 +335,143 @@ related_tasks: [TASK-001, TASK-042]
 ```
 
 **Migration from Root**: Legacy reports (EXECUTION_REPORT.md, ONBOARDING_REVIEW_REPORT.md) must be moved to agent-docs/ with `git mv` to preserve history.
+
+---
+
+## 🤖 AI Agent Governance Rules (CRITICAL)
+
+### Golden Rule: Agents CANNOT Write to Root
+
+**This is absolute. No exceptions. Pre-commit hooks enforce this.**
+
+```
+❌ AGENT-GENERATED FILES NOT ALLOWED IN ROOT:
+- REPORT_*.md
+- SESSION_*.md
+- SUMMARY_*.md
+- RESUMEN_*.md
+- TEST_*.md
+- PHASE_*.md
+- EXECUTION_*.md
+- FEEDBACK_*.md
+- Any other .md not in approved list
+```
+
+### Approved Root Files (Agents CAN create/modify)
+
+Only these files can be modified by AI agents in root:
+- `README.md` - Project overview (modify only: links, status section)
+- `CHANGELOG.md` - Version history (add entries only)
+- No other files
+
+### Mandatory Workflow for AI Agents
+
+**BEFORE creating ANY documentation**, agents must:
+
+1. **Identify Type**: Is this a feature spec? Design decision? Session summary? Execution report?
+
+2. **Select Correct Location**:
+   ```
+   Feature Spec?      → specs/features/feature-name.md
+   Design Decision?   → specs/design/architecture-topic.md
+   Task/Roadmap?      → specs/tasks/roadmap-topic.md
+   Session Summary?   → agent-docs/sessions/session-topic-YYYY-MM-DD.md
+   Execution Report?  → agent-docs/execution/execution-topic-YYYY-MM-DD.md
+   Feedback/Analysis? → agent-docs/feedback/feedback-topic-YYYY-MM.md
+   Web Research?      → agent-docs/research/research-topic-YYYY-MM-DD.md
+   Tests/Prototypes?  → tests/integration/ (NOT agent-docs)
+   ```
+
+3. **Include Metadata**:
+   ```yaml
+   ---
+   title: "..."
+   description: "..."
+   type: "feature|design|task|execution|session|feedback|research"
+   status: "draft|active|deprecated"
+   created: "YYYY-MM-DD"
+   updated: "YYYY-MM-DD"
+   author: "Agent Name"
+   llm_summary: |
+     2-3 sentence summary optimized for LLM context
+   ---
+   ```
+
+4. **Link from Index/Parent**:
+   - Add entry to `specs/DOCUMENT_INDEX_V2.md`
+   - Or link from parent document
+   - OR link from issue/task tracker
+   - No orphaned documents allowed
+
+5. **Validate with Pre-commit**:
+   - Run locally: `pre-commit run --all-files`
+   - Must pass ALL checks before commit
+   - If fails: Fix and re-run (no `--no-verify` bypass)
+
+### Token-Optimized AI Agent Checklist
+
+**EVERY AI agent must follow this before submitting documentation:**
+
+- [ ] **Metadata**: YAML frontmatter with all required fields
+- [ ] **Structure**: Clear hierarchy (H1, H2, H3 max)
+- [ ] **Efficiency**: Uses Markdown (bold, lists, tables, code) over prose
+- [ ] **Linking**: Cross-references with absolute paths
+- [ ] **Chunking**: 500-1500 lines per document (not monolithic)
+- [ ] **No Duplication**: Content appears in only one place
+- [ ] **Location**: Placed in correct directory per rules above
+- [ ] **Pre-commit**: Passes all hooks without `--no-verify`
+- [ ] **Linked**: Referenced from parent/index documents
+- [ ] **llm_summary**: Present and optimized for LLM scanning
+
+### Violations and Consequences
+
+| Violation | Pre-commit Behavior | Agent Action |
+|-----------|-------------------|--------------|
+| `.md` file in root (non-approved) | ❌ BLOCKS commit | Move to correct directory |
+| Missing YAML frontmatter | ⚠️ WARNING (error in 2 weeks) | Add metadata |
+| `type` field incorrect/missing | ❌ BLOCKS commit | Fix type value |
+| `llm_summary` missing | ⚠️ WARNING | Add LLM-optimized summary |
+| Vague filename (`REPORT.md`) | ❌ BLOCKS commit | Use pattern: `execution-topic-YYYY-MM-DD.md` |
+| File > 2000 lines | ⚠️ WARNING | Split into multiple files |
+| File < 100 lines | ⚠️ WARNING | Merge with related doc or expand |
+
+### AI Agent Prompt Template
+
+When creating documentation, agents should use this template:
+
+```markdown
+---
+title: "[DOCUMENT PURPOSE IN 5-7 WORDS]"
+description: "[One sentence describing this document. 50-150 characters.]"
+type: "execution"  # ← One of: feature, design, task, execution, session, feedback, research
+status: "completed"  # ← One of: draft, active, completed, archived, deprecated
+created: "YYYY-MM-DD"
+updated: "YYYY-MM-DD"
+author: "[Agent Name] (e.g., KERNEL v3.1)"
+llm_summary: |
+  [2-3 sentence summary optimized for LLM reading]
+  Focus on: What is this? Why does it exist? When to reference?
+  Target: Brevity + context + usefulness
+---
+
+# [TITLE - H1 Only]
+
+## Section 1  # ← H2
+- Bullet point 1
+- Bullet point 2
+
+### Subsection 1.1  # ← H3 (max nesting)
+
+## Section 2
+
+See also:
+- `path/to/related/spec.md` - Description
+- `path/to/related/design.md` - Description
+```
+
+---
+
+## 📚 Navigation & Discoverability
 
 ---
 

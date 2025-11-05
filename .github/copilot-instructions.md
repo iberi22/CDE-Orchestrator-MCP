@@ -1,31 +1,115 @@
 ---
 title: GitHub Copilot Instructions for CDE Orchestrator MCP
-description: 'title: "Document Title" description: "One-sentence summary (50-150 chars)"'
-type: guide
-status: draft
-created: '2025-11-02'
-updated: '2025-11-02'
-author: Auto-Generated
-tags:
-- api
-- architecture
-- authentication
-- copilot
-- database
-- documentation
-llm_summary: "User guide for GitHub Copilot Instructions for CDE Orchestrator MCP.\n\
-  \  > **Target Audience**: GitHub Copilot, AI Coding Agents > **Last Updated**: 2025-11-01\
-  \ > **Architecture**: Hexagonal (Ports & Adapters) > **Token-Optimized**: Links\
-  \ to detailed specs when needed title: \"Document Title\"\n  Reference when working\
-  \ with guide documentation."
+description: 'AI agent guidelines for CDE Orchestrator MCP with token optimization and governance enforcement. Token-optimized context + strict governance rules. NO .md files in root. All documentation must follow DOCUMENTATION_GOVERNANCE.md.'
 ---
 
 # GitHub Copilot Instructions for CDE Orchestrator MCP
 
 > **Target Audience**: GitHub Copilot, AI Coding Agents
-> **Last Updated**: 2025-11-01
+> **Last Updated**: 2025-11-04
 > **Architecture**: Hexagonal (Ports & Adapters)
 > **Token-Optimized**: Links to detailed specs when needed
+
+---
+
+## 🚨 CRITICAL GOVERNANCE RULES (NON-NEGOTIABLE)
+
+**These rules are ABSOLUTE. Pre-commit hooks ENFORCE them. No exceptions.**
+
+### Rule 1: NO .md FILES IN ROOT (Except 5 Approved)
+
+```
+❌ BLOCKED BY PRE-COMMIT:
+REPORT_*.md          SESSION_*.md         SUMMARY_*.md
+RESUMEN_*.md         TEST_*.md            PHASE_*.md
+EXECUTION_*.md       FEEDBACK_*.md        Any other .md
+```
+
+✅ **ONLY 5 APPROVED ROOT FILES**:
+- README.md (project overview)
+- CHANGELOG.md (version history)
+- CONTRIBUTING.md (contribution guidelines)
+- AGENTS.md (agent instructions - OpenAI standard)
+- GEMINI.md (Gemini instructions - Google standard)
+
+**Why**: Prevents documentation sprawl. Keeps root clean. Forces organized structure.
+
+### Rule 2: DOCUMENTATION GOES TO CORRECT LOCATION
+
+**BEFORE creating any .md file, answer:**
+1. Is this a feature specification? → `specs/features/`
+2. Is this a design decision? → `specs/design/`
+3. Is this a task/roadmap? → `specs/tasks/`
+4. Is this an execution report? → `agent-docs/execution/`
+5. Is this a session summary? → `agent-docs/sessions/`
+6. Is this feedback/analysis? → `agent-docs/feedback/`
+7. Is this web research? → `agent-docs/research/`
+
+**If you can't answer → DON'T CREATE THE FILE. Ask clarifying questions first.**
+
+### Rule 3: YAML FRONTMATTER IS MANDATORY
+
+Every .md file (except root exceptions) MUST start with:
+```yaml
+---
+title: "Clear title"
+description: "One sentence, 50-150 chars"
+type: "feature|design|task|execution|session|feedback|research"
+status: "draft|active|completed|archived"
+created: "YYYY-MM-DD"
+updated: "YYYY-MM-DD"
+author: "Your Name or Agent ID"
+---
+```
+
+**Missing any field → Pre-commit REJECTS commit**
+
+### Rule 4: NO VAGUE FILENAMES
+
+```
+❌ WRONG:
+- REPORT.md
+- SESSION.md
+- SUMMARY.md
+- NOTES.md
+- ANALYSIS.md
+
+✅ RIGHT:
+- execution-phase3c-deployment-2025-11-04.md
+- session-onboarding-complete-2025-11-04.md
+- feedback-governance-improvements-2025-11.md
+- research-async-patterns-2025-11-04.md
+```
+
+Pattern: `<type>-<topic>-<YYYY-MM-DD>.md`
+
+### Rule 5: TOKEN OPTIMIZATION OVER VERBOSITY
+
+**From research (Brex, OpenAI 2025):**
+- Use Markdown (bold, lists, tables) over prose → 30% token saving
+- Include `llm_summary` in metadata → 40% faster LLM comprehension
+- Structure with headers → 40% less context scanning
+- Link instead of duplicate → 50% token saving
+
+**Example - Token Efficient**:
+```markdown
+---
+title: "Feature: Multi-Project Support"
+llm_summary: "Enable 1000+ projects via stateless resolver. Key: project_path parameter."
+type: "feature"
+---
+
+## Overview
+- **Pattern**: Stateless + simple
+- **Entry**: `cde_startFeature(project_path="...")`
+
+## Key Files
+- `src/adapters/project_locator.py`
+- `specs/design/multi-project.md`
+
+See also: `specs/tasks/improvement-roadmap.md`
+```
+**Tokens**: ~150 | **Efficiency**: ⭐⭐⭐⭐⭐
 
 ---
 
@@ -830,7 +914,55 @@ See full governance framework: `specs/governance/DOCUMENTATION_GOVERNANCE.md`
 
 ---
 
-## 💡 Tips for Copilot
+## � Strict Governance Enforcement (2025 Standard)
+
+### What Gets Blocked by Pre-Commit
+
+These violations will **REJECT** your commit:
+
+| Violation | Blocker | Fix |
+|-----------|---------|-----|
+| `.md` in root (non-approved) | ❌ BLOCKS | Move to correct directory per rules |
+| Missing YAML frontmatter | ❌ BLOCKS | Add metadata block with required fields |
+| Invalid `type` field | ❌ BLOCKS | Use: feature\|design\|task\|execution\|session\|feedback\|research |
+| Vague filename pattern | ❌ BLOCKS | Use: `lowercase-hyphens-YYYY-MM-DD.md` |
+| `REPORT_*.md` pattern | ❌ BLOCKS | Move to `agent-docs/execution/` |
+| `SESSION_*.md` pattern | ❌ BLOCKS | Move to `agent-docs/sessions/` |
+| `TEST_*.md` pattern | ❌ BLOCKS | Move to `tests/` or `agent-docs/` |
+
+### Bypass Prevention
+
+**You CANNOT bypass governance enforcement:**
+
+```bash
+# ❌ This will NOT work:
+git commit --no-verify -m "..."
+
+# ✅ This is the only way:
+# Fix the violations and commit normally
+git commit -m "..."
+```
+
+**Why**: Governance rules protect the LLM context. Violations make it harder for agents to understand the project.
+
+### Validation Commands
+
+**Before committing, run:**
+
+```bash
+# Check ALL markdown files for governance violations
+python scripts/validation/validate-docs.py --all
+
+# Check metadata on specific file
+python scripts/validation/validate-metadata.py --path specs/features/my-feature.md
+
+# Run local pre-commit hook (what GitHub will run)
+pre-commit run --all-files
+```
+
+---
+
+## �💡 Tips for Copilot
 
 1. **Always check the layer** before suggesting code:
    - Domain? No external dependencies!
