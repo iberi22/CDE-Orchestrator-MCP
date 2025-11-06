@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HARCOS - Human-AI Research Community Open Source</title>
+    <meta name="description" content="Open tools for symbiotic intelligence. HARCOS develops community-driven AI orchestration tools for research and production.">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --deep-blue: #003DA5;
+            --warm-orange: #FF6B35;
+            --neutral-gray: #4A4A4A;
+            --light-gray: #F5F5F5;
+            --white: #FFFFFF;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #EF4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--neutral-gray);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background: var(--deep-blue);
+            color: var(--white);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        nav {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--white);
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: 14px;
+        }
+
+        nav a:hover {
+            color: var(--warm-orange);
+        }
+
+        .btn-primary {
+            background: var(--warm-orange);
+            color: var(--white);
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: #FF5517;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--warm-orange);
+            padding: 10px 20px;
+            border: 2px solid var(--warm-orange);
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn-secondary:hover {
+            background: var(--warm-orange);
+            color: var(--white);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--deep-blue) 0%, #0056D2 100%);
+            color: var(--white);
+            padding: 100px 40px;
+            text-align: center;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 24px;
+            margin-bottom: 40px;
+            opacity: 0.95;
+        }
+
+        .hero-tagline {
+            color: var(--warm-orange);
+            font-size: 18px;
+            margin-bottom: 50px;
+            font-style: italic;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Sections */
+        section {
+            padding: 80px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        section h2 {
+            font-size: 36px;
+            color: var(--deep-blue);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        section h3 {
+            font-size: 24px;
+            color: var(--deep-blue);
+            margin: 30px 0 15px 0;
+        }
+
+        /* Projects Grid */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .project-card {
+            background: var(--light-gray);
+            padding: 30px;
+            border-radius: 8px;
+            border-left: 4px solid var(--warm-orange);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        .project-card h3 {
+            color: var(--deep-blue);
+            margin-top: 0;
+        }
+
+        .project-card .status {
+            display: inline-block;
+            background: var(--warm-orange);
+            color: var(--white);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+
+        .project-card .status.coming {
+            background: var(--warning);
+        }
+
+        /* Benefits Section */
+        .benefits {
+            background: var(--light-gray);
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .benefit-item {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .benefit-item .icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .benefit-item h3 {
+            margin-top: 0;
+        }
+
+        /* Enterprise Section */
+        .enterprise {
+            background: var(--deep-blue);
+            color: var(--white);
+        }
+
+        .enterprise h2 {
+            color: var(--white);
+        }
+
+        .enterprise-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+            margin-top: 40px;
+        }
+
+        .enterprise ul {
+            list-style: none;
+        }
+
+        .enterprise li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .enterprise li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--warm-orange);
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        /* Support Section */
+        .support {
+            background: var(--light-gray);
+            text-align: center;
+        }
+
+        .support-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .support-card {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 8px;
+            border-top: 3px solid var(--warm-orange);
+        }
+
+        .support-card h3 {
+            margin-top: 0;
+            color: var(--deep-blue);
+        }
+
+        .support-card .amount {
+            font-size: 24px;
+            color: var(--warm-orange);
+            font-weight: 700;
+            margin: 15px 0;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--deep-blue);
+            color: var(--white);
+            padding: 40px;
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        footer a {
+            color: var(--warm-orange);
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .hero-buttons a {
+                width: 200px;
+                text-align: center;
+            }
+
+            section {
+                padding: 40px 20px;
+            }
+
+            .enterprise-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">◇ HARCOS</div>
+        <nav>
+            <a href="#projects">Projects</a>
+            <a href="#why">Why HARCOS</a>
+            <a href="#enterprise">Enterprise</a>
+            <a href="#support">Support</a>
+            <a href="https://github.com/HARCOS-AI" target="_blank">GitHub</a>
+            <a href="https://github.com/sponsors/HARCOS-AI" class="btn-primary">Sponsor</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>HARCOS</h1>
+        <p>Human-AI Research Community Open Source</p>
+        <p class="hero-tagline">"Open tools for symbiotic intelligence"</p>
+        <div class="hero-buttons">
+            <a href="https://github.com/HARCOS-AI/CDE-Orchestrator-MCP" class="btn-primary">Get Started</a>
+            <a href="#projects" class="btn-secondary">Explore Projects</a>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects">
+        <h2>Our Projects</h2>
+        <div class="projects-grid">
+            <div class="project-card">
+                <h3>🎼 CDE Orchestrator MCP</h3>
+                <p>Context-Driven Engineering for AI-powered development. Structure your development workflow with intelligent phase management and continuous research integration.</p>
+                <ul>
+                    <li>✅ Phase-based workflow orchestration</li>
+                    <li>✅ Multi-agent coordination</li>
+                    <li>✅ 309/312 tests passing (97% coverage)</li>
+                </ul>
+                <span class="status">Active</span>
+                <br><a href="https://github.com/HARCOS-AI/CDE-Orchestrator-MCP" style="color: var(--warm-orange); text-decoration: none;">View on GitHub →</a>
+            </div>
+
+            <div class="project-card">
+                <h3>🤖 Agent Framework</h3>
+                <p>Multi-agent orchestration framework for coordinating multiple AI agents with shared context and unified decision-making.</p>
+                <ul>
+                    <li>💡 Intelligent agent routing</li>
+                    <li>💡 Context sharing across agents</li>
+                    <li>💡 Fallback and retry strategies</li>
+                </ul>
+                <span class="status coming">Coming Soon</span>
+            </div>
+
+            <div class="project-card">
+                <h3>📊 LLM Eval Toolkit</h3>
+                <p>Comprehensive toolkit for evaluating LLM agent capabilities, benchmarking performance, and tracking improvements over time.</p>
+                <ul>
+                    <li>🧪 Automated testing frameworks</li>
+                    <li>🧪 Benchmark tracking</li>
+                    <li>🧪 Performance analytics</li>
+                </ul>
+                <span class="status coming">Coming Soon</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why HARCOS Section -->
+    <section id="why" class="benefits">
+        <h2>Why Choose HARCOS?</h2>
+        <div class="benefits-grid">
+            <div class="benefit-item">
+                <div class="icon">🔓</div>
+                <h3>100% Open Source</h3>
+                <p>All source code is freely available. No paywalls, no feature gating. Designed for researchers and developers.</p>
+            </div>
+
+            <div class="benefit-item">
+                <div class="icon">🤝</div>
+                <h3>Community-Driven</h3>
+                <p>Built by researchers, for researchers. Community contributions shape the roadmap.</p>
+            </div>
+
+            <div class="benefit-item">
+                <div class="icon">🚀</div>
+                <h3>Production-Ready</h3>
+                <p>Battle-tested in real-world deployments. Enterprise-grade reliability with community values.</p>
+            </div>
+
+            <div class="benefit-item">
+                <div class="icon">🔬</div>
+                <h3>Research-Focused</h3>
+                <p>Built for advancing AI research. Accessible to LLM models for training and improvement.</p>
+            </div>
+
+            <div class="benefit-item">
+                <div class="icon">💚</div>
+                <h3>Ethical Monetization</h3>
+                <p>Fair Source License with voluntary contributions. Support what you value, when you can.</p>
+            </div>
+
+            <div class="benefit-item">
+                <div class="icon">📚</div>
+                <h3>Comprehensive Docs</h3>
+                <p>Detailed documentation, examples, and best practices. Easy to get started and scale.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Enterprise Section -->
+    <section id="enterprise" class="enterprise">
+        <h2>Enterprise Solutions</h2>
+        <div class="enterprise-content">
+            <div>
+                <h3>Need more than open source?</h3>
+                <p>HARCOS Enterprise provides managed cloud hosting, 24×7 support, and dedicated infrastructure for organizations at scale.</p>
+                <ul>
+                    <li>Managed cloud deployment (AWS/GCP/Azure)</li>
+                    <li>24×7 premium support with SLA</li>
+                    <li>Dedicated infrastructure & RAG/embeddings services</li>
+                    <li>Custom integrations & consulting</li>
+                    <li>Team training & onboarding</li>
+                    <li>Security & compliance support</li>
+                </ul>
+            </div>
+            <div style="text-align: center;">
+                <p style="font-size: 24px; margin-bottom: 30px;">Starting at <strong>$2,000/month</strong></p>
+                <a href="mailto:enterprise@harcos.ai" class="btn-primary">Get a Quote</a>
+                <p style="margin-top: 30px; opacity: 0.8;">Contact us for custom enterprise pricing and SLA arrangements.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Support Section -->
+    <section id="support" class="support">
+        <h2>Support HARCOS</h2>
+        <p>If our tools help your organization, consider supporting our mission:</p>
+        <div class="support-grid">
+            <div class="support-card">
+                <h3>Supporter</h3>
+                <div class="amount">$5+/mo</div>
+                <ul style="text-align: left; list-style: none;">
+                    <li>✓ Badge on READMEs</li>
+                    <li>✓ Supporter recognition</li>
+                </ul>
+            </div>
+
+            <div class="support-card">
+                <h3>Contributor</h3>
+                <div class="amount">$25+/mo</div>
+                <ul style="text-align: left; list-style: none;">
+                    <li>✓ All Supporter benefits</li>
+                    <li>✓ Priority support</li>
+                    <li>✓ Early access to features</li>
+                </ul>
+            </div>
+
+            <div class="support-card">
+                <h3>Partner</h3>
+                <div class="amount">$50+/mo</div>
+                <ul style="text-align: left; list-style: none;">
+                    <li>✓ All Contributor benefits</li>
+                    <li>✓ Logo on website</li>
+                    <li>✓ Co-marketing opportunities</li>
+                </ul>
+            </div>
+
+            <div class="support-card">
+                <h3>Sponsor</h3>
+                <div class="amount">$100+/mo</div>
+                <ul style="text-align: left; list-style: none;">
+                    <li>✓ All Partner benefits</li>
+                    <li>✓ Dedicated support</li>
+                    <li>✓ Roadmap influence</li>
+                </ul>
+            </div>
+        </div>
+        <div style="margin-top: 50px;">
+            <h3>Support on</h3>
+            <div style="display: flex; gap: 20px; justify-content: center; margin-top: 20px;">
+                <a href="https://github.com/sponsors/HARCOS-AI" class="btn-primary">GitHub Sponsors</a>
+                <a href="https://opencollective.com/harcos-ai" class="btn-secondary">Open Collective</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p><strong>HARCOS — Human-AI Research Community Open Source</strong></p>
+        <p>"Open tools for symbiotic intelligence"</p>
+        <div style="margin: 30px 0;">
+            <a href="https://github.com/HARCOS-AI">GitHub</a>
+            <a href="https://github.com/sponsors/HARCOS-AI">Sponsor</a>
+            <a href="mailto:contact@harcos.ai">Contact</a>
+            <a href="https://github.com/HARCOS-AI/docs/blob/main/LICENSE">License</a>
+        </div>
+        <p style="opacity: 0.8; font-size: 12px;">© 2025 HARCOS Contributors. Licensed under Fair Source License 1.0.</p>
+    </footer>
+</body>
+</html>

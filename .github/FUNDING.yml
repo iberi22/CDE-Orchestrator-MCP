@@ -1,0 +1,12 @@
+# Configuration for funding buttons in GitHub
+
+# GitHub Sponsors
+github: [iberi22]
+
+# Open Collective
+open_collective: cde-orchestrator
+
+# Custom links
+custom:
+  - "https://opencollective.com/cde-orchestrator"
+  - "https://github.com/sponsors/iberi22"

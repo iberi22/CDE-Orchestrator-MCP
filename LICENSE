@@ -1,0 +1,197 @@
+# Fair Source License - CDE Orchestrator MCP
+
+**Version:** 1.0
+**Effective Date:** November 5, 2025
+**Licensor:** iberi22 (CDE Orchestrator MCP Project)
+
+---
+
+## 🎯 Summary
+
+This project is **free for personal, educational, and non-commercial use**. Commercial users are encouraged (but not required) to support the project with a **voluntary contribution starting at $5 USD**. All funds support AI research and accessibility.
+
+---
+
+## 1. Grant of License
+
+### 1.1 Free Use
+
+You are granted a **worldwide, royalty-free, non-exclusive license** to:
+
+- **Use** the software for any purpose (personal, educational, research, or commercial)
+- **Copy** and distribute the software
+- **Modify** the software and create derivative works
+- **Distribute** modified versions under the same license terms
+
+### 1.2 Commercial Use - Voluntary Contribution Model
+
+**Commercial use** means using this software in any business, organization, or for-profit activity including:
+- Developing paid products or services
+- Internal business operations generating revenue
+- Consulting services using this software
+- SaaS platforms built with this software
+
+**Voluntary Licensing:**
+- Commercial users are **encouraged** (but not required) to support the project
+- **Suggested contribution:** $5 USD minimum (pay-what-you-want)
+- **Honor system:** We trust you to support what you value
+- **100% optional:** No technical enforcement, legal obligations, or audits
+
+**How to contribute:**
+- GitHub Sponsors: [`https://github.com/sponsors/iberi22`](https://github.com/sponsors/iberi22)
+- Open Collective: [`https://opencollective.com/cde-orchestrator`](https://opencollective.com/cde-orchestrator)
+
+---
+
+## 2. Conditions
+
+### 2.1 Attribution
+
+All copies or derivatives **MUST** include:
+- This license file
+- Copyright notice: "© 2025 CDE Orchestrator MCP Project"
+- Prominent notice of modifications (if changed)
+
+### 2.2 Open Source Requirement
+
+Any software **built with or incorporating** this code must:
+- **Remain open source** under a compatible license (AGPL-3.0, GPL-3.0, MIT, Apache-2.0)
+- Be **freely accessible** to AI/LLM models for training and research
+- Include source code with all distributions
+
+**Prohibited:**
+- Closed-source derivatives
+- Proprietary forks without full source disclosure
+- License changes that restrict AI/LLM access
+
+### 2.3 Community Principles
+
+By using this software, you agree to:
+- **Transparency:** Share improvements with the community
+- **Accessibility:** Keep derivatives free and accessible
+- **Respect:** Credit original authors and contributors
+
+---
+
+## 3. Warranty Disclaimer
+
+```
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+---
+
+## 4. Funding & Support
+
+### 4.1 Where Your Contribution Goes
+
+All voluntary contributions support:
+- **AI Research:** Funding research into ethical AI development
+- **Accessibility:** Making AI tools free for everyone
+- **Open Source:** Supporting dependencies and community projects
+- **Education:** Creating learning materials and documentation
+- **Infrastructure:** Maintaining servers, CI/CD, and hosting
+
+### 4.2 Sponsorship Tiers (Voluntary)
+
+| Tier | Amount | Benefits |
+|------|--------|----------|
+| **Supporter** | $5+/month | ❤️ Supporter badge on README |
+| **Contributor** | $25+/month | 🌟 Priority support + badge |
+| **Partner** | $50+/month | 🚀 Logo on website + priority support |
+| **Sponsor** | $100+/month | 💎 Dedicated support + co-marketing |
+| **Custom** | Enterprise | 🏢 SLA, custom features, consulting |
+
+**All tiers are optional.** Use the software freely regardless of contribution.
+
+---
+
+## 5. FAQ
+
+### Can I use this commercially without paying?
+
+**Yes.** The license is voluntary. We operate on trust and community support.
+
+### What if my startup grows large?
+
+We hope you'll contribute more as you grow, but it's never required. Consider it "paying forward" to support future open-source AI tools.
+
+### Is this compatible with open-source dependencies?
+
+**Yes.** This license is compatible with MIT, Apache-2.0, GPL-3.0, and AGPL-3.0. All derivatives must remain open source.
+
+### Can I sell products built with this?
+
+**Absolutely.** You can sell products, services, or consulting. We just ask that you keep derivatives open source and accessible.
+
+### What happens if I don't contribute?
+
+**Nothing.** This is an honor system. No audits, no enforcement, no legal action. We trust you.
+
+### Why "voluntary"?
+
+We believe in ethical monetization. Forced licensing creates barriers to innovation. Voluntary support builds a stronger, more collaborative community.
+
+### Can I contribute as a company?
+
+**Yes!** Many companies budget for open-source dependencies. Corporate sponsorships are welcome and help sustain the project.
+
+---
+
+## 6. Legal Notes
+
+### 6.1 Compatibility
+
+This license is compatible with:
+- ✅ AGPL-3.0 (copyleft, strong open source)
+- ✅ GPL-3.0 (copyleft)
+- ✅ MIT License (permissive)
+- ✅ Apache License 2.0 (permissive)
+- ❌ Proprietary licenses (prohibited)
+
+### 6.2 Termination
+
+Your license automatically terminates if you:
+- Remove attribution or copyright notices
+- Create proprietary/closed-source derivatives
+- Block AI/LLM access to derivative works
+
+Upon termination, you must cease all use and distribution.
+
+### 6.3 Governing Law
+
+This license is governed by international copyright law and the laws of your jurisdiction.
+
+---
+
+## 7. Credits & Inspiration
+
+This license is inspired by:
+- [Fair Source License](https://fair.io/) - Balanced approach to open source
+- [Business Source License (BSL)](https://mariadb.com/bsl11/) - Time-delayed open source
+- [Ethical Source Movement](https://ethicalsource.dev/) - Human-centered licensing
+- [GitHub Sponsors](https://github.com/sponsors) - Sustainable open source funding
+- [Open Collective](https://opencollective.com/) - Transparent community funding
+
+---
+
+## 8. Contact & Support
+
+- **GitHub:** [`https://github.com/iberi22/CDE-Orchestrator-MCP`](https://github.com/iberi22/CDE-Orchestrator-MCP)
+- **Issues:** [`https://github.com/iberi22/CDE-Orchestrator-MCP/issues`](https://github.com/iberi22/CDE-Orchestrator-MCP/issues)
+- **Discussions:** [`https://github.com/iberi22/CDE-Orchestrator-MCP/discussions`](https://github.com/iberi22/CDE-Orchestrator-MCP/discussions)
+- **Email:** [project maintainer contact]
+
+---
+
+**Thank you for using CDE Orchestrator MCP. If this project helps you, consider supporting our mission to make AI research accessible to all.** ❤️
+
+---
+
+© 2025 CDE Orchestrator MCP Project. Licensed under Fair Source License 1.0.

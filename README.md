@@ -23,9 +23,66 @@ llm_summary: "User guide for CDE Orchestrator MCP.\n  [![CI](https://github.com/
 [![CI](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/workflows/ci.yml/badge.svg)](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/iberi22/CDE-Orchestrator-MCP/branch/main/graph/badge.svg)](https://codecov.io/gh/iberi22/CDE-Orchestrator-MCP)
 [![Python Versions](https://img.shields.io/badge/python-3.14+-blue)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![License](https://img.shields.io/badge/license-AGPL3-red)](LICENSE-DUAL.md)
 
-The CDE Orchestrator is the reference implementation of the **Context-Driven Engineering (CDE)** methodology. It is a smart MCP (Model Context Protocol) server designed to guide AI coding assistants through a structured, phase-based software development lifecycle.
+The CDE Orchestrator is the reference implementation of the **Context-Driven Engineering (CDE)** methodology for AI-assisted software development with continuous research and improvement. It is a smart MCP (Model Context Protocol) server designed to guide AI coding assistants through a structured, phase-based software development lifecycle with built-in research, dependency analysis, and project intelligence gathering.
+
+## ⚖️ License - Fair & Ethical
+
+**Licensed under Fair Source License 1.0** - Free for all, voluntary support for commercial use.
+
+- ✅ **100% Free:** Personal, educational, research, and commercial use
+- 💚 **Voluntary Support:** Commercial users encouraged to contribute $5+ (honor system)
+- 🌍 **Open Source:** All derivatives must remain open source
+- 🤖 **AI-Friendly:** Must remain accessible to LLM models for training
+- 📜 See [`LICENSE`](LICENSE) for complete terms
+
+### 💰 Support This Project
+
+If this project helps your business, **consider supporting** our mission:
+
+| Tier | Contribution | Benefits |
+|------|--------------|----------|
+| Supporter | $5+/month | ❤️ Badge on README |
+| Contributor | $25+/month | 🌟 Priority support + badge |
+| Partner | $50+/month | 🚀 Logo on website |
+| Sponsor | $100+/month | 💎 Dedicated support |
+
+**100% voluntary. No requirements. No audits. Honor system.**
+
+[![GitHub Sponsors](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-pink)](https://github.com/sponsors/iberi22)
+[![Open Collective](https://img.shields.io/badge/support-Open%20Collective-blue)](https://opencollective.com/cde-orchestrator)
+
+> **All funds support AI research, accessibility, and open-source sustainability.**
+
+---
+
+## 🏢 Enterprise Services
+
+Need managed cloud hosting, 24×7 support, or dedicated infrastructure for your organization?
+
+We offer **enterprise-grade services** while keeping the software 100% open source:
+
+| Service | Description | Pricing |
+|---------|-------------|---------|
+| **Managed Cloud** | Fully managed CDE deployment on AWS/GCP/Azure | Starting at **$500/mo** |
+| **Priority Support** | Business hours support with <4hr response SLA | Included in Pro tier |
+| **24×7 Premium Support** | Around-the-clock support with <1hr critical response | Starting at **$2000/mo** |
+| **RAG/Embeddings Setup** | Custom vector database configuration (Pinecone, Weaviate, Qdrant) | Included in Enterprise |
+| **Dedicated Infrastructure** | Isolated compute instances, custom SLAs, multi-region | Custom pricing |
+| **Consulting & Training** | Team onboarding, custom workflows, integration support | $150/hr |
+
+**Perfect for:**
+- 🏢 Enterprises with compliance requirements (SOC2, HIPAA, GDPR)
+- 🚀 Startups scaling AI development workflows
+- 🎓 Research institutions managing 100+ projects
+- 💼 Consulting firms needing white-label solutions
+
+📧 **Interested?** Contact us: [enterprise@cde-orchestrator.dev](mailto:enterprise@cde-orchestrator.dev)
+
+📄 **Learn more:** See [Enterprise Services Analysis](agent-docs/execution/enterprise-services-analysis-2025-11-05.md) for full details.
+
+---
 
 > **📋 Project Status:** Currently in active improvement phase. See [Executive Summary](EXECUTIVE_SUMMARY.md) for roadmap and [Improvement Roadmap](specs/tasks/improvement-roadmap.md) for detailed tasks.
 
