@@ -16,12 +16,14 @@ import json
 import logging
 import os
 import subprocess
+import asyncio
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import httpx
 from tenacity import (
-    Retrying,
+    AsyncRetrying,
     retry_if_exception_type,
     stop_after_attempt,
     wait_exponential,
@@ -184,7 +186,7 @@ class GitHubConnector:
         if self.circuit_breaker:
             self.circuit_breaker.record_failure()
 
-    def create_issue(
+    async def create_issue(
         self,
         repo_owner: str,
         repo_name: str,
@@ -216,13 +218,13 @@ class GitHubConnector:
 
         # Try MCP first
         if self.mcp_available:
-            result = self._create_issue_via_mcp(title, body, labels)
+            result = await self._create_issue_via_mcp(title, body, labels)
             self._record_success()
             return result
 
         # Try GitHub API
         if self.token:
-            return self._create_issue_via_api(
+            return await self._create_issue_via_api(
                 repo_owner,
                 repo_name,
                 title,
@@ -234,7 +236,7 @@ class GitHubConnector:
         # Fallback to local
         return self._create_issue_local(title, body, labels, reason="no_remote_service")
 
-    def _create_issue_via_mcp(
+    async def _create_issue_via_mcp(
         self, title: str, body: str, labels: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """
@@ -254,7 +256,7 @@ class GitHubConnector:
             self.circuit_breaker.record_success()
         return response
 
-    def _create_issue_via_api(
+    async def _create_issue_via_api(
         self,
         repo_owner: str,
         repo_name: str,
@@ -264,16 +266,6 @@ class GitHubConnector:
         timeout: int = 10,
     ) -> Dict[str, Any]:
         """Create issue via GitHub API with timeout, retries, and fallback."""
-        try:
-            import requests
-        except ImportError:
-            logger.warning(
-                "requests library not available; falling back to local issue storage"
-            )
-            return self._create_issue_local(
-                title, body, labels, reason="requests_not_available"
-            )
-
         url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues"
         headers = {
             "Authorization": f"Bearer {self.token}",
@@ -286,40 +278,41 @@ class GitHubConnector:
 
         try:
             timeout_value = timeout or self.default_timeout
-            retrying = Retrying(
+            retrying = AsyncRetrying(
                 stop=stop_after_attempt(self.retry_attempts),
                 wait=self._retry_wait,
                 retry=retry_if_exception_type(
-                    (requests.exceptions.Timeout, requests.exceptions.ConnectionError)
+                    (httpx.TimeoutException, httpx.ConnectError)
                 ),
                 reraise=True,
             )
 
-            response = None
-            for attempt in retrying:
-                with attempt:
-                    response = requests.post(
-                        url,
-                        headers=headers,
-                        json=data,
-                        timeout=timeout_value,
-                    )
-                    response.raise_for_status()
+            async with httpx.AsyncClient() as client:
+                response = None
+                async for attempt in retrying:
+                    with attempt:
+                        response = await client.post(
+                            url,
+                            headers=headers,
+                            json=data,
+                            timeout=timeout_value,
+                        )
+                        response.raise_for_status()
 
-            assert response is not None
-            self._record_success()
-            return response.json()
-        except requests.exceptions.Timeout as exc:
+                assert response is not None
+                self._record_success()
+                return response.json()
+        except httpx.TimeoutException as exc:
             logger.warning("GitHub API timeout (%ss): %s", timeout_value, exc)
             self._record_failure()
             return self._create_issue_local(title, body, labels, reason="timeout")
-        except requests.exceptions.ConnectionError as exc:
+        except httpx.ConnectError as exc:
             logger.error("GitHub API connection error: %s", exc)
             self._record_failure()
             return self._create_issue_local(
                 title, body, labels, reason="connection_error"
             )
-        except requests.exceptions.HTTPError as exc:
+        except httpx.HTTPStatusError as exc:
             logger.error("GitHub API HTTP error: %s", exc)
             self._record_failure()
             return self._create_issue_local(title, body, labels, reason="http_error")
@@ -385,29 +378,30 @@ class GitConnector:
     def __init__(self):
         self.repo_path = Path.cwd()
 
-    def create_branch(
+    async def create_branch(
         self, branch_name: str, base_branch: str = "main"
     ) -> Dict[str, Any]:
         """Create a new git branch."""
         try:
             # Fetch latest changes
-            subprocess.run(
-                ["git", "fetch", "origin", base_branch],
+            proc_fetch = await asyncio.create_subprocess_exec(
+                "git", "fetch", "origin", base_branch,
                 cwd=self.repo_path,
-                capture_output=True,
-                check=False,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
+            await proc_fetch.wait()
 
             # Create branch
-            result = subprocess.run(
-                ["git", "checkout", "-b", branch_name, f"origin/{base_branch}"],
+            proc_checkout = await asyncio.create_subprocess_exec(
+                "git", "checkout", "-b", branch_name, f"origin/{base_branch}",
                 cwd=self.repo_path,
-                capture_output=True,
-                text=True,
-                check=False,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
+            _, stderr = await proc_checkout.communicate()
 
-            if result.returncode == 0:
+            if proc_checkout.returncode == 0:
                 return {
                     "success": True,
                     "branch": branch_name,
@@ -416,7 +410,7 @@ class GitConnector:
             else:
                 return {
                     "success": False,
-                    "error": result.stderr,
+                    "error": stderr.decode(),
                     "message": "Failed to create branch",
                 }
         except Exception as e:
@@ -426,42 +420,36 @@ class GitConnector:
                 "message": "Error creating branch",
             }
 
-    def commit_changes(
+    async def commit_changes(
         self, message: str, files: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """Commit changes to git repository."""
         try:
             # Add files
-            if files:
-                subprocess.run(
-                    ["git", "add"] + files,
-                    cwd=self.repo_path,
-                    capture_output=True,
-                    check=False,
-                )
-            else:
-                subprocess.run(
-                    ["git", "add", "."],
-                    cwd=self.repo_path,
-                    capture_output=True,
-                    check=False,
-                )
+            add_command = ["git", "add"] + (files if files else ["."])
+            proc_add = await asyncio.create_subprocess_exec(
+                *add_command,
+                cwd=self.repo_path,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            await proc_add.wait()
 
             # Commit
-            result = subprocess.run(
-                ["git", "commit", "-m", message],
+            proc_commit = await asyncio.create_subprocess_exec(
+                "git", "commit", "-m", message,
                 cwd=self.repo_path,
-                capture_output=True,
-                text=True,
-                check=False,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
+            _, stderr = await proc_commit.communicate()
 
-            if result.returncode == 0:
+            if proc_commit.returncode == 0:
                 return {"success": True, "message": "Changes committed successfully"}
             else:
                 return {
                     "success": False,
-                    "error": result.stderr,
+                    "error": stderr.decode(),
                     "message": "Failed to commit changes",
                 }
         except Exception as e:
@@ -471,18 +459,18 @@ class GitConnector:
                 "message": "Error committing changes",
             }
 
-    def push_branch(self, branch_name: str) -> Dict[str, Any]:
+    async def push_branch(self, branch_name: str) -> Dict[str, Any]:
         """Push a branch to remote repository."""
         try:
-            result = subprocess.run(
-                ["git", "push", "-u", "origin", branch_name],
+            proc_push = await asyncio.create_subprocess_exec(
+                "git", "push", "-u", "origin", branch_name,
                 cwd=self.repo_path,
-                capture_output=True,
-                text=True,
-                check=False,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
+            _, stderr = await proc_push.communicate()
 
-            if result.returncode == 0:
+            if proc_push.returncode == 0:
                 return {
                     "success": True,
                     "message": f"Branch {branch_name} pushed successfully",
@@ -490,7 +478,7 @@ class GitConnector:
             else:
                 return {
                     "success": False,
-                    "error": result.stderr,
+                    "error": stderr.decode(),
                     "message": "Failed to push branch",
                 }
         except Exception as e:
@@ -551,7 +539,7 @@ class ServiceConnectorFactory:
         self._connectors[service_type] = connector
         return connector
 
-    def is_service_available(self, service_type: str) -> bool:
+    async def is_service_available(self, service_type: str) -> bool:
         """Check if a service is available and configured."""
         try:
             connector = self.get_connector(service_type)
@@ -567,7 +555,7 @@ class ServiceConnectorFactory:
         except Exception:
             return False
 
-    def get_service_status(self) -> Dict[str, Dict[str, Any]]:
+    async def get_service_status(self) -> Dict[str, Dict[str, Any]]:
         """Get status of all configured services."""
         status = {}
 
