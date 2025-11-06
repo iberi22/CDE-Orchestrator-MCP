@@ -1,0 +1,14 @@
+name: default_workflow
+phases:
+- id: define
+  title: Define
+- id: decompose
+  title: Decompose
+- id: design
+  title: Design
+- id: implement
+  title: Implement
+- id: test
+  title: Test
+- id: review
+  title: Review

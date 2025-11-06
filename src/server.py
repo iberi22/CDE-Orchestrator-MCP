@@ -18,6 +18,7 @@ from mcp_tools import (
     cde_selectAgent,
     cde_executeWithBestAgent,
 )
+from mcp_tools.full_implementation import cde_executeFullImplementation
 
 # Configuration
 load_dotenv()
@@ -28,17 +29,18 @@ logger = logging.getLogger(__name__)
 app = FastMCP("CDE Orchestrator MCP")
 
 # Tool Registration with Dependency Injection
-app.tool()(partial(cde_onboardingProject, manage_state_use_case=container.manage_state_use_case))
-app.tool()(partial(cde_publishOnboarding, manage_state_use_case=container.manage_state_use_case))
+app.tool()(cde_onboardingProject)
+app.tool()(cde_publishOnboarding)
 app.tool()(cde_setupProject)
 app.tool()(cde_scanDocumentation)
 app.tool()(cde_analyzeDocumentation)
-app.tool()(partial(cde_selectWorkflow, select_workflow_use_case=container.select_workflow_use_case))
+app.tool()(cde_selectWorkflow)
 app.tool()(cde_sourceSkill)
 app.tool()(cde_updateSkill)
 app.tool()(cde_listAvailableAgents)
 app.tool()(cde_selectAgent)
 app.tool()(cde_executeWithBestAgent)
+app.tool()(cde_executeFullImplementation)  # ✅ Nueva herramienta meta de orquestación
 
 
 # Server Entry Point

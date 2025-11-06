@@ -1,26 +1,21 @@
-------
-title: CDE Orchestrator MCP - AI Agent Instructions# CDE Orchestrator MCP - Agent
-  Instructions
-description: '**CRITICAL**: You are an AI agent working with the **CDE Orchestrator
-  MCP server**. Instead of making direct file changes or running commands immediat'
+---
+title: "CDE Orchestrator MCP - AI Agent Instructions"
+description: "Instructions for AI coding agents working with CDE Orchestrator MCP server"
 type: guide
-status: draft
-created: '2025-11-02'
-updated: '2025-11-02'
-author: Auto-Generated
+status: active
+created: "2025-11-02"
+updated: "2025-11-05"
+author: "CDE Team"
 tags:
-- agents
-- api
-- architecture
-- authentication
-- database
-- documentation
-llm_summary: "User guide for CDE Orchestrator MCP - AI Agent Instructions# CDE Orchestrator\
-  \ MCP - Agent Instructions.\n  > **Format**: AGENTS.md (OpenAI Standard)  > **Format**:\
-  \ AGENTS.md (OpenAI Standard) > **Target**: AI Coding Agents (Cursor, Windsurf,\
-  \ Aider, Claude Desktop, Gemini, etc.)  > **Target**: AI Coding Agents (Cursor,\
-  \ Windsurf, Aider, Bolt, etc.)\n  Reference when working with guide documentation."
-------
+  - agents
+  - api
+  - mcp-tools
+  - orchestration
+llm_summary: |
+  Instructions for AI agents using CDE Orchestrator MCP.
+  Explains MCP-first workflow, tool contracts, and governance rules.
+  Reference for GitHub Copilot, Cursor, Windsurf, and other AI assistants.
+---
 
 # CDE Orchestrator MCP - AI Agent Instructions# CDE Orchestrator MCP - Agent Instructions
 

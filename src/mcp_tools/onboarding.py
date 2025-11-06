@@ -2,14 +2,14 @@
 import json
 from typing import Dict
 from fastmcp import Context
-from cde_orchestrator.application.use_cases.manage_state import ManageStateUseCase
 from ._base import tool_handler
 
 from cde_orchestrator.application.onboarding.project_analysis_use_case import ProjectAnalysisUseCase
+from cde_orchestrator.infrastructure.dependency_injection import container
 import os
 
 @tool_handler
-async def cde_onboardingProject(ctx: Context, manage_state_use_case: ManageStateUseCase, project_path: str = ".") -> str:
+async def cde_onboardingProject(ctx: Context, project_path: str = ".") -> str:
     """
     Analyzes project structure and performs onboarding setup.
 
@@ -23,10 +23,10 @@ async def cde_onboardingProject(ctx: Context, manage_state_use_case: ManageState
 
     analysis_result = analysis_use_case.execute(project_path)
 
-    state = manage_state_use_case.load()
+    state = container.manage_state_use_case.load()
     state['project_analysis'] = analysis_result
     state['onboarding_status'] = 'analysis_completed'
-    manage_state_use_case.save(state)
+    container.manage_state_use_case.save(state)
 
     return json.dumps(analysis_result, indent=2)
 
@@ -57,7 +57,6 @@ async def cde_setupProject(ctx: Context, project_path: str = ".", force: bool = 
 @tool_handler
 def cde_publishOnboarding(
     documents: Dict[str, str],
-    manage_state_use_case: ManageStateUseCase,
     project_path: str = ".",
     approve: bool = True
 ) -> str:
@@ -80,8 +79,8 @@ def cde_publishOnboarding(
 
     # Update state only if successful
     if result["status"] == "success":
-        state = manage_state_use_case.load()
+        state = container.manage_state_use_case.load()
         state['published_documents'] = result["files_written"]
-        manage_state_use_case.save(state)
+        container.manage_state_use_case.save(state)
 
     return json.dumps(result, indent=2)

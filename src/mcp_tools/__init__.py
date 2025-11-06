@@ -4,15 +4,17 @@ MCP Tools Package.
 Exports all CDE Orchestrator MCP tools for registration in server.py.
 """
 
-from .onboarding import cde_onboardingProject, cde_publishOnboarding
+from .onboarding import cde_onboardingProject, cde_publishOnboarding, cde_setupProject
 from .documentation import cde_scanDocumentation, cde_analyzeDocumentation
 from .orchestration import cde_selectWorkflow, cde_sourceSkill, cde_updateSkill
 from .agents import cde_delegateToJules, cde_listAvailableAgents, cde_selectAgent, cde_executeWithBestAgent
+from .full_implementation import cde_executeFullImplementation
 
 __all__ = [
     # Onboarding
     "cde_onboardingProject",
     "cde_publishOnboarding",
+    "cde_setupProject",
     # Documentation
     "cde_scanDocumentation",
     "cde_analyzeDocumentation",
@@ -25,4 +27,6 @@ __all__ = [
     "cde_listAvailableAgents",
     "cde_selectAgent",
     "cde_executeWithBestAgent",
+    # Full Implementation (Meta-orchestration)
+    "cde_executeFullImplementation",
 ]
