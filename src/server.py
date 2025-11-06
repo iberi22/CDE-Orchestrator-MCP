@@ -19,6 +19,7 @@ from mcp_tools import (
     cde_executeWithBestAgent,
 )
 from mcp_tools.full_implementation import cde_executeFullImplementation
+from mcp_tools.test_progress import cde_testProgressReporting
 
 # Configuration
 load_dotenv()
@@ -41,6 +42,7 @@ app.tool()(cde_listAvailableAgents)
 app.tool()(cde_selectAgent)
 app.tool()(cde_executeWithBestAgent)
 app.tool()(cde_executeFullImplementation)  # ✅ Nueva herramienta meta de orquestación
+app.tool()(cde_testProgressReporting)  # ✅ Test herramienta con progreso para status bar
 
 
 # Server Entry Point

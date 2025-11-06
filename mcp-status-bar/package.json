@@ -1,0 +1,64 @@
+{
+  "name": "mcp-status-bar",
+  "displayName": "MCP Status Bar",
+  "description": "Shows MCP server progress in VS Code status bar",
+  "version": "0.1.0",
+  "publisher": "cde-orchestrator",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iberi22/CDE-Orchestrator-MCP"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["*"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "MCP Status Bar",
+      "properties": {
+        "mcpStatusBar.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable MCP progress in status bar"
+        },
+        "mcpStatusBar.proxyUrl": {
+          "type": "string",
+          "default": "ws://localhost:8766",
+          "description": "MCP Proxy WebSocket URL"
+        },
+        "mcpStatusBar.showPercentage": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show percentage in status bar"
+        },
+        "mcpStatusBar.showElapsedTime": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show elapsed time in status bar"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@types/ws": "^8.5.10",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3",
+    "@vscode/vsce": "^2.22.0"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  }
+}
