@@ -112,7 +112,7 @@ import urllib.request
 
 for step in range(steps + 1):
     percentage = step / steps
-    
+
     # Create progress event
     event = {
         "server": "CDE",
@@ -121,7 +121,7 @@ for step in range(steps + 1):
         "elapsed": time.time() - start_time,
         "message": f"Step {step}/{steps}"
     }
-    
+
     # Send via HTTP (fail-safe)
     try:
         data = json.dumps(event).encode('utf-8')
@@ -155,16 +155,16 @@ class ProgressHandler(BaseHTTPRequestHandler):
                 content_length = int(self.headers.get('Content-Length', 0))
                 body = self.rfile.read(content_length)
                 event = json.loads(body.decode('utf-8'))
-                
+
                 # Log received progress
                 print(f"📊 Received progress: {event['tool']} {event['percentage']:.0%}")
-                
+
                 # Broadcast to connected clients
                 asyncio.run_coroutine_threadsafe(
                     broadcast(event),
                     event_loop
                 )
-                
+
                 # Send response
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
@@ -191,7 +191,7 @@ print(f"🌐 HTTP progress endpoint listening on http://localhost:8767/progress"
 ```python
 async def broadcast(message: dict):
     """Broadcast to WebSocket clients + HTTP extension"""
-    
+
     # WebSocket broadcast (for WebSocket-capable clients)
     if active_connections:
         print(f"📡 Broadcasting to {len(active_connections)} clients")
@@ -199,7 +199,7 @@ async def broadcast(message: dict):
             *[conn.send(json.dumps(message)) for conn in active_connections],
             return_exceptions=True
         )
-    
+
     # HTTP POST to VS Code extension (port 8768)
     try:
         import urllib.request
@@ -325,17 +325,17 @@ async def cde_installMcpExtension(
 ) -> str:
     """
     Install MCP extension via VS Code CLI.
-    
+
     Args:
         extension_name: Folder name in project root (default: mcp-status-bar)
         force: Force reinstall even if already installed
-    
+
     Returns:
         JSON with installation status
     """
     import subprocess
     import json
-    
+
     # Check if already installed
     if not force:
         try:
@@ -351,27 +351,27 @@ async def cde_installMcpExtension(
                 })
         except Exception:
             pass  # Continue with installation
-    
+
     # Build and install
     extension_dir = Path(extension_name)
-    
+
     # Compile TypeScript
     subprocess.run(["npm", "run", "compile"], cwd=extension_dir, check=True)
-    
+
     # Package
     subprocess.run(
         ["npx", "vsce", "package", "--allow-star-activation"],
         cwd=extension_dir,
         check=True
     )
-    
+
     # Install
     vsix_file = extension_dir / f"{extension_name}-0.1.0.vsix"
     subprocess.run(
         ["code", "--install-extension", str(vsix_file), "--force"],
         check=True
     )
-    
+
     return json.dumps({
         "status": "success",
         "extension": extension_name,

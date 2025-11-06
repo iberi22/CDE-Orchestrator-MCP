@@ -11,13 +11,28 @@ class ProjectAnalysisUseCase:
     """
 
     def execute(self, project_path: str) -> Dict[str, Any]:
+        # Import here to avoid circular import
+        from mcp_tools._progress_http import report_progress_http
+
         project = Path(project_path)
 
-        files = self._list_files(project)
+        # Report initial progress
+        report_progress_http("onboardingProject", 0.0, "Starting project analysis")
+
+        files = self._list_files(project, report_progress_http)
+
+        # Report progress after file listing
+        report_progress_http("onboardingProject", 0.25, f"Found {len(files)} files")
 
         language_stats = self._analyze_languages(files)
 
+        # Report progress after language analysis
+        report_progress_http("onboardingProject", 0.5, "Analyzed language distribution")
+
         dependency_files = self._find_dependency_files(files)
+
+        # Report progress after dependency analysis
+        report_progress_http("onboardingProject", 0.75, "Found dependency files")
 
         summary = (
             f"Project '{project.name}' contains {len(files)} files. "
@@ -25,7 +40,7 @@ class ProjectAnalysisUseCase:
             f"Found dependency files: {', '.join(dependency_files) if dependency_files else 'None'}."
         )
 
-        return {
+        result = {
             "status": "Analysis complete",
             "file_count": len(files),
             "language_stats": language_stats,
@@ -33,7 +48,12 @@ class ProjectAnalysisUseCase:
             "summary": summary,
         }
 
-    def _list_files(self, project_path: Path) -> List[Path]:
+        # Report completion
+        report_progress_http("onboardingProject", 1.0, "Analysis complete")
+
+        return result
+
+    def _list_files(self, project_path: Path, report_progress_http) -> List[Path]:
         """Lists all files in the project, respecting .gitignore."""
         gitignore_path = project_path / ".gitignore"
         spec = None
@@ -41,10 +61,11 @@ class ProjectAnalysisUseCase:
             with open(gitignore_path, "r") as f:
                 spec = pathspec.PathSpec.from_lines('gitwildmatch', f)
 
-        all_files = project_path.rglob("*")
+        all_files = list(project_path.rglob("*"))
+        total_items = len(all_files)
 
         files_to_process = []
-        for file in all_files:
+        for idx, file in enumerate(all_files):
             if file.is_dir():
                 continue
 
@@ -59,6 +80,15 @@ class ProjectAnalysisUseCase:
                 continue
 
             files_to_process.append(file)
+
+            # Report progress every 100 items or at regular intervals
+            if (idx + 1) % max(1, total_items // 10) == 0:
+                progress = 0.01 + (idx / total_items) * 0.24  # 1%-25%
+                report_progress_http(
+                    "onboardingProject",
+                    progress,
+                    f"Processing {idx + 1}/{total_items} files"
+                )
 
         return files_to_process
 

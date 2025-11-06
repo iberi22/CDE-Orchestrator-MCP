@@ -37,6 +37,9 @@ class AnalyzeDocumentationUseCase:
                 - issues: List of problems found
                 - suggestions: Actionable improvements
         """
+        # Import here to avoid circular import
+        from mcp_tools._progress_http import report_progress_http
+
         project = Path(project_path)
 
         if not project.exists():
@@ -50,9 +53,12 @@ class AnalyzeDocumentationUseCase:
             if not any(excluded in f.parts for excluded in excluded_dirs)
         ]
 
+        # Report initial progress
+        report_progress_http("analyzeDocumentation", 0.0, f"Starting analysis of {len(md_files)} files")
+
         results = {
             "total_analyzed": len(md_files),
-            "link_analysis": self._analyze_links(md_files, project),
+            "link_analysis": self._analyze_links(md_files, project, report_progress_http),
             "metadata_analysis": self._analyze_metadata(md_files),
             "quality_indicators": self._analyze_quality(md_files),
             "issues": [],
@@ -60,16 +66,23 @@ class AnalyzeDocumentationUseCase:
             "quality_score": 0.0,
         }
 
+        # Report progress: analysis done, now calculating score
+        report_progress_http("analyzeDocumentation", 0.7, "Calculating quality score")
+
         # Calculate quality score
         results["quality_score"] = self._calculate_quality_score(results)
 
         # Generate issues and suggestions
+        report_progress_http("analyzeDocumentation", 0.85, "Generating recommendations")
         results["issues"] = self._generate_issues(results)
         results["suggestions"] = self._generate_suggestions(results)
 
+        # Report completion
+        report_progress_http("analyzeDocumentation", 1.0, "Analysis complete")
+
         return results
 
-    def _analyze_links(self, md_files: List[Path], project: Path) -> Dict[str, Any]:
+    def _analyze_links(self, md_files: List[Path], project: Path, report_progress_http) -> Dict[str, Any]:
         """Analyze internal links between documents."""
         link_pattern = r'\[([^\]]+)\]\(([^\)]+)\)'
 
@@ -78,7 +91,7 @@ class AnalyzeDocumentationUseCase:
         valid_links = 0
         external_links = 0
 
-        for md_file in md_files:
+        for idx, md_file in enumerate(md_files):
             try:
                 content = md_file.read_text(encoding="utf-8", errors="ignore")
                 links = re.findall(link_pattern, content)
@@ -109,6 +122,15 @@ class AnalyzeDocumentationUseCase:
                         })
             except Exception:
                 continue
+
+            # Report progress
+            if (idx + 1) % max(1, len(md_files) // 5) == 0:  # Update every 20%
+                progress = 0.15 + (idx / len(md_files)) * 0.15  # 15%-30%
+                report_progress_http(
+                    "analyzeDocumentation",
+                    progress,
+                    f"Analyzing links: {idx + 1}/{len(md_files)}"
+                )
 
         return {
             "total_links": total_links,

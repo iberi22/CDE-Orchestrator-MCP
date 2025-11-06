@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 from typing import Dict, Any, List
 from datetime import datetime
+import time
 
 
 class ScanDocumentationUseCase:
@@ -134,6 +135,9 @@ class ScanDocumentationUseCase:
 
     def _scan_with_python(self, project_path: str) -> Dict[str, Any]:
         """Fallback Python implementation."""
+        # Import here to avoid circular import
+        from mcp_tools._progress_http import report_progress_http
+
         project = Path(project_path)
 
         # Find all markdown files
@@ -173,7 +177,10 @@ class ScanDocumentationUseCase:
             "other": [],
         }
 
-        for md_file in md_files:
+        # Report initial progress
+        report_progress_http("scanDocumentation", 0.0, f"Found {len(md_files)} markdown files to scan")
+
+        for idx, md_file in enumerate(md_files):
             relative = md_file.relative_to(project)
             file_info = {
                 "path": str(relative),
@@ -206,6 +213,14 @@ class ScanDocumentationUseCase:
             }:
                 results["orphaned_docs"].append(str(relative))
 
+            # Report progress after each file
+            progress = (idx + 1) / len(md_files)
+            report_progress_http(
+                "scanDocumentation",
+                progress,
+                f"Scanned {idx + 1}/{len(md_files)} files"
+            )
+
         # Populate by_location
         results["by_location"] = {
             loc: files for loc, files in standard_dirs.items() if files
@@ -213,6 +228,9 @@ class ScanDocumentationUseCase:
 
         # Generate recommendations
         results["recommendations"] = self._generate_recommendations(results)
+
+        # Report completion
+        report_progress_http("scanDocumentation", 1.0, "Scan complete")
 
         return results
 

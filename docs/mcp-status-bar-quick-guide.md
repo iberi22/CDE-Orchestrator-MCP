@@ -42,7 +42,7 @@ async def cde_installMcpExtension(
     """Install MCP extension automatically."""
     import subprocess
     from pathlib import Path
-    
+
     # Check if installed
     if not force:
         try:
@@ -53,7 +53,7 @@ async def cde_installMcpExtension(
             if "mcp-status-bar" in result.stdout:
                 return json.dumps({"status": "already_installed"})
         except: pass
-    
+
     # Build
     ext_dir = Path(extension_name)
     subprocess.run(["npm", "run", "compile"], cwd=ext_dir, check=True)
@@ -61,14 +61,14 @@ async def cde_installMcpExtension(
         ["npx", "vsce", "package", "--allow-star-activation"],
         cwd=ext_dir, check=True
     )
-    
+
     # Install
     vsix = ext_dir / f"{extension_name}-0.1.0.vsix"
     subprocess.run(
         ["code", "--install-extension", str(vsix), "--force"],
         check=True
     )
-    
+
     return json.dumps({"status": "success", "extension": extension_name})
 ```
 
@@ -127,11 +127,11 @@ import urllib.request
 
 async def my_long_tool(ctx: Context, items: list):
     total = len(items)
-    
+
     for i, item in enumerate(items):
         # Do work
         process_item(item)
-        
+
         # Report progress
         event = {
             "server": "CDE",
@@ -140,7 +140,7 @@ async def my_long_tool(ctx: Context, items: list):
             "elapsed": time.time() - start_time,
             "message": f"Processing {i+1}/{total}"
         }
-        
+
         try:
             data = json.dumps(event).encode('utf-8')
             req = urllib.request.Request(
