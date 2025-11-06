@@ -1,0 +1,175 @@
+{
+  "timestamp": "2025-11-05_20-06-21",
+  "summary": {
+    "total_sessions": 12,
+    "planning": 0,
+    "in_progress": 1,
+    "completed": 0
+  },
+  "phases": {
+    "PHASE 2": [
+      {
+        "id": "12681249831754826324",
+        "description": "PHASE 2: Testing Infrastructure - Complete all 12 testing t\u00e2\u20ac\u00a6",
+        "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+        "last_active": "1s",
+        "status": "ago Planning"
+      },
+      {
+        "id": "3533087581296894047",
+        "description": "PHASE 2: Testing Infrastructure - Complete all 12 testing t\u00e2\u20ac\u00a6 iberi22/CDE-Orchestra\u00e2\u20ac\u00a6 0s",
+        "repo": "ago",
+        "last_active": "Awaiting",
+        "status": "Plan A"
+      },
+      {
+        "id": "12339304137927824532",
+        "description": "PHASE 2: Testing Infrastructure - Complete all 12 testing t\u00e2\u20ac\u00a6",
+        "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+        "last_active": "31s",
+        "status": "ago Planning"
+      }
+    ],
+    "PHASE 3": [
+      {
+        "id": "6550513765712426553",
+        "description": "PHASE 3: Performance Optimization - Complete all 13 perform\u00e2\u20ac\u00a6",
+        "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+        "last_active": "3s",
+        "status": "ago Planning"
+      },
+      {
+        "id": "17136017125407979517",
+        "description": "PHASE 3: Performance Optimization - Complete all 13 perform\u00e2\u20ac\u00a6",
+        "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+        "last_active": "8s",
+        "status": "ago Planning"
+      },
+      {
+        "id": "10494367534309543550",
+        "description": "PHASE 3: Performance Optimization - Complete all 13 perform\u00e2\u20ac\u00a6",
+        "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+        "last_active": "10s",
+        "status": "ago Planning"
+      }
+    ],
+    "PHASE 4": [
+      {
+        "id": "7799211204418211739",
+        "description": "PHASE 4: Documentation Consolidation - Complete all 11 docu\u00e2\u20ac\u00a6",
+        "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+        "last_active": "11s",
+        "status": "ago Planning"
+      },
+      {
+        "id": "443657936940575260",
+        "description": "PHASE 4: Documentation Consolidation - Complete all 11 docu\u00e2\u20ac\u00a6",
+        "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+        "last_active": "2s",
+        "status": "ago Planning"
+      }
+    ],
+    "PHASE 5": [
+      {
+        "id": "8637524736114058330",
+        "description": "PHASE 5: Advanced Features - Complete critical advanced fea\u00e2\u20ac\u00a6",
+        "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+        "last_active": "8s",
+        "status": "ago Planning"
+      },
+      {
+        "id": "2738444897899046925",
+        "description": "PHASE 5: Advanced Features - Complete critical advanced fea\u00e2\u20ac\u00a6",
+        "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+        "last_active": "5s",
+        "status": "ago Planning"
+      }
+    ]
+  },
+  "sessions": [
+    {
+      "id": "8637524736114058330",
+      "description": "PHASE 5: Advanced Features - Complete critical advanced fea\u00e2\u20ac\u00a6",
+      "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+      "last_active": "8s",
+      "status": "ago Planning"
+    },
+    {
+      "id": "2738444897899046925",
+      "description": "PHASE 5: Advanced Features - Complete critical advanced fea\u00e2\u20ac\u00a6",
+      "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+      "last_active": "5s",
+      "status": "ago Planning"
+    },
+    {
+      "id": "7799211204418211739",
+      "description": "PHASE 4: Documentation Consolidation - Complete all 11 docu\u00e2\u20ac\u00a6",
+      "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+      "last_active": "11s",
+      "status": "ago Planning"
+    },
+    {
+      "id": "443657936940575260",
+      "description": "PHASE 4: Documentation Consolidation - Complete all 11 docu\u00e2\u20ac\u00a6",
+      "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+      "last_active": "2s",
+      "status": "ago Planning"
+    },
+    {
+      "id": "6550513765712426553",
+      "description": "PHASE 3: Performance Optimization - Complete all 13 perform\u00e2\u20ac\u00a6",
+      "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+      "last_active": "3s",
+      "status": "ago Planning"
+    },
+    {
+      "id": "17136017125407979517",
+      "description": "PHASE 3: Performance Optimization - Complete all 13 perform\u00e2\u20ac\u00a6",
+      "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+      "last_active": "8s",
+      "status": "ago Planning"
+    },
+    {
+      "id": "10494367534309543550",
+      "description": "PHASE 3: Performance Optimization - Complete all 13 perform\u00e2\u20ac\u00a6",
+      "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+      "last_active": "10s",
+      "status": "ago Planning"
+    },
+    {
+      "id": "12681249831754826324",
+      "description": "PHASE 2: Testing Infrastructure - Complete all 12 testing t\u00e2\u20ac\u00a6",
+      "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+      "last_active": "1s",
+      "status": "ago Planning"
+    },
+    {
+      "id": "3533087581296894047",
+      "description": "PHASE 2: Testing Infrastructure - Complete all 12 testing t\u00e2\u20ac\u00a6 iberi22/CDE-Orchestra\u00e2\u20ac\u00a6 0s",
+      "repo": "ago",
+      "last_active": "Awaiting",
+      "status": "Plan A"
+    },
+    {
+      "id": "12339304137927824532",
+      "description": "PHASE 2: Testing Infrastructure - Complete all 12 testing t\u00e2\u20ac\u00a6",
+      "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+      "last_active": "31s",
+      "status": "ago Planning"
+    },
+    {
+      "id": "5265852870843424225",
+      "description": "Sprint Fase 3: Mejorar cobertura de tests de 40% a 50%+, Re\u00e2\u20ac\u00a6 iberi22/cerebro",
+      "repo": "28s",
+      "last_active": "ago",
+      "status": "In Progress"
+    },
+    {
+      "id": "11880554162614589850",
+      "description": "quiero que continues con las siguientes fases del proyecto,\u00e2\u20ac\u00a6",
+      "repo": "iberi22/CDE-Orchestra\u00e2\u20ac\u00a6",
+      "last_active": "4h18m59s",
+      "status": "ago Completed"
+    }
+  ]
+}

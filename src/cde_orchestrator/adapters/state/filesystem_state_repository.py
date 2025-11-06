@@ -21,7 +21,11 @@ class FileSystemStateRepository(IStateStore):
     - Rotating old backups to save space.
     """
 
-    def __init__(self, state_file_path: Path, max_backups: int = 10):
+    def __init__(self, state_file_path, max_backups: int = 10):
+        # Ensure state_file_path is a Path object
+        if isinstance(state_file_path, str):
+            state_file_path = Path(state_file_path)
+
         self.state_file_path = state_file_path
         self.backup_dir = self.state_file_path.parent / "backups"
         self.max_backups = max_backups

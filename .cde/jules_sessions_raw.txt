@@ -1,0 +1,14 @@
+           ID                                    Description                                    Repo                Last active                Status         
+ 8637524736114058330     PHASE 5: Advanced Features - Complete critical advanced feaÔÇª  iberi22/CDE-OrchestraÔÇª  5s ago                  Planning       
+ 2738444897899046925     PHASE 5: Advanced Features - Complete critical advanced feaÔÇª  iberi22/CDE-OrchestraÔÇª  3s ago                  Planning       
+ 7799211204418211739     PHASE 4: Documentation Consolidation - Complete all 11 docuÔÇª  iberi22/CDE-OrchestraÔÇª  4s ago                  In Progress    
+ 443657936940575260      PHASE 4: Documentation Consolidation - Complete all 11 docuÔÇª  iberi22/CDE-OrchestraÔÇª  0s ago                  Planning       
+ 6550513765712426553     PHASE 3: Performance Optimization - Complete all 13 performÔÇª  iberi22/CDE-OrchestraÔÇª  4s ago                  Planning       
+ 17136017125407979517    PHASE 3: Performance Optimization - Complete all 13 performÔÇª  iberi22/CDE-OrchestraÔÇª  0s ago                  Planning       
+ 10494367534309543550    PHASE 3: Performance Optimization - Complete all 13 performÔÇª  iberi22/CDE-OrchestraÔÇª  0s ago                  Planning       
+ 12681249831754826324    PHASE 2: Testing Infrastructure - Complete all 12 testing tÔÇª  iberi22/CDE-OrchestraÔÇª  10s ago                 Planning       
+ 3533087581296894047     PHASE 2: Testing Infrastructure - Complete all 12 testing tÔÇª  iberi22/CDE-OrchestraÔÇª  6s ago                  In Progress    
+ 12339304137927824532    PHASE 2: Testing Infrastructure - Complete all 12 testing tÔÇª  iberi22/CDE-OrchestraÔÇª  4s ago                  In Progress    
+ 5265852870843424225     Sprint Fase 3: Mejorar cobertura de tests de 40% a 50%+, ReÔÇª  iberi22/cerebro         4s ago                  In Progress    
+ 11880554162614589850    quiero que continues con las siguientes fases del proyecto,ÔÇª  iberi22/CDE-OrchestraÔÇª  4h19m19s ago            Completed      
+                                                                                                                                                      
