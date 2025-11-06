@@ -1,0 +1,45 @@
+{
+  "generated_at": "2025-11-05T20:10:00Z",
+  "source_monitor": ".cde/jules_monitor_2025-11-05_20-06-21.json",
+  "selection_criteria": "Prefer Completed > In Progress > most recent Planning; in ambiguous Planning choose most recent last_active",
+  "integrated_sessions": [
+    {
+      "phase": "PHASE 2",
+      "selected_id": "12339304137927824532",
+      "description": "Testing Infrastructure - Complete all 12 testing tasks",
+      "reason": "Most recent valid Planning entry (last_active 31s)",
+      "path": ".cde/integrated_sessions/12339304137927824532.json"
+    },
+    {
+      "phase": "PHASE 3",
+      "selected_id": "6550513765712426553",
+      "description": "Performance Optimization - Complete all 13 performance tasks",
+      "reason": "Most recent Planning entry (last_active 3s)",
+      "path": ".cde/integrated_sessions/6550513765712426553.json"
+    },
+    {
+      "phase": "PHASE 4",
+      "selected_id": "443657936940575260",
+      "description": "Documentation Consolidation - Complete all 11 documentation tasks",
+      "reason": "Most recent Planning entry (last_active 2s)",
+      "path": ".cde/integrated_sessions/443657936940575260.json"
+    },
+    {
+      "phase": "PHASE 5",
+      "selected_id": "2738444897899046925",
+      "description": "Advanced Features - Complete critical advanced features",
+      "reason": "Most recent Planning entry (last_active 5s)",
+      "path": ".cde/integrated_sessions/2738444897899046925.json"
+    }
+  ],
+  "summary": {
+    "total_phases": 4,
+    "total_tasks": 50,
+    "breakdown": {
+      "phase_2_testing": 12,
+      "phase_3_performance": 13,
+      "phase_4_documentation": 11,
+      "phase_5_advanced": 14
+    }
+  }
+}
