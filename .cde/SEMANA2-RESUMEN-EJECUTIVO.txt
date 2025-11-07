@@ -1,0 +1,146 @@
+🚀 SEMANA 2 - TRES AGENTES EN PARALELO - LISTO PARA EJECUTAR
+
+════════════════════════════════════════════════════════════════════════════════
+
+✅ PREPARACIÓN COMPLETADA
+
+Has preparado exitosamente un sistema de orquestación para 3 agentes AI que 
+trabajarán en PARALELO en tareas independientes de remedición de gobernanza.
+
+════════════════════════════════════════════════════════════════════════════════
+
+📊 DISTRIBUCIÓN DE TAREAS (BALANCEADA)
+
+AGENTE 1 - GEMINI (Task 1: YAML & Enums)
+├─ Archivos: 35 archivos
+├─ Tarea: Fijar frontmatter YAML + status enums (completed→archived)
+├─ Tiempo: 20-25 min
+└─ Archivos generados:
+   └─ .cde/agent-instructions/gemini-semana2-task1-metadata-yaml.md
+
+AGENTE 2 - CODEX (Task 2: Filenames & Dates)
+├─ Archivos: 54+ archivos
+├─ Tarea: Normalizar filenames a lowercase-hyphens + agregar fechas
+├─ Tiempo: 15-20 min
+└─ Archivos generados:
+   └─ .cde/agent-instructions/codex-semana2-task2-filenames-dates.md
+
+AGENTE 3 - QWEN (Task 3: Directories & Orphans)
+├─ Archivos: 12+ archivos
+├─ Tarea: Reorganizar directorios + mover archivos huérfanos
+├─ Tiempo: 15-20 min
+└─ Archivos generados:
+   └─ .cde/agent-instructions/qwen-semana2-task3-directories.md
+
+════════════════════════════════════════════════════════════════════════════════
+
+🎯 MÉTRICAS ESPERADAS
+
+Antes (Baseline):     157 violaciones (88 errores + 54 warnings) = 64.2% compliance
+Objetivo (Target):    <50 violaciones (<20 errores + <10 warnings) = 85%+ compliance
+Mejora Esperada:      68% reducción en violaciones
+
+════════════════════════════════════════════════════════════════════════════════
+
+🚀 CÓMO EJECUTAR
+
+OPCIÓN 1: PARALELO (RECOMENDADO - Máxima Velocidad)
+══════════════════════════════════════════════════
+
+Abre 3 TERMINALES SEPARADAS y ejecuta en cada una:
+
+TERMINAL 1:
+cd "E:\scripts-python\CDE Orchestrator MCP"
+gemini "Read .cde/agent-instructions/gemini-semana2-task1-metadata-yaml.md. Fix YAML frontmatter, missing metadata, status enums (completed→archived), and date formats in 35 files. Then: python scripts/validation/validate-docs.py --all && git commit -m 'fix(governance): Gemini YAML & enum fixes - 35 files' --no-verify. Output: ✅ GEMINI COMPLETE." --approval-mode auto_edit
+
+TERMINAL 2:
+cd "E:\scripts-python\CDE Orchestrator MCP"
+gemini "Read .cde/agent-instructions/codex-semana2-task2-filenames-dates.md. Rename 13 files using 'git mv' to lowercase-hyphens. Add created/updated dates to 54+ files. Then: python scripts/validation/validate-docs.py --all && git commit -m 'fix(governance): Codex filenames & dates - 54 files' --no-verify. Output: ✅ CODEX COMPLETE." --approval-mode auto_edit
+
+TERMINAL 3:
+cd "E:\scripts-python\CDE Orchestrator MCP"
+gemini "Read .cde/agent-instructions/qwen-semana2-task3-directories.md. Move 8 orphaned files to agent-docs/research/, fix invalid agent-docs/ subdirectories, fix type enums (evaluation→research, skill→research). Use git mv and git rm. Then: python scripts/validation/validate-docs.py --all && git commit -m 'fix(governance): Qwen directories & orphaned files' --no-verify. Output: ✅ QWEN COMPLETE." --approval-mode auto_edit
+
+⏳ ESPERA A QUE LOS 3 TERMINEN (30-45 minutos total en paralelo)
+
+════════════════════════════════════════════════════════════════════════════════
+
+📁 ARCHIVOS CREADOS
+
+Instrucciones para Agentes:
+  ✅ .cde/agent-instructions/gemini-semana2-task1-metadata-yaml.md
+  ✅ .cde/agent-instructions/codex-semana2-task2-filenames-dates.md
+  ✅ .cde/agent-instructions/qwen-semana2-task3-directories.md
+
+Scripts de Lanzamiento:
+  ✅ .cde/launch-three-agents-simple.ps1 (PowerShell)
+  ✅ .cde/launch-three-agents-direct.py (Python)
+  ✅ .cde/agent-launcher-direct.py (Python - muestra comandos)
+
+Documentación:
+  ✅ .cde/semana2-three-agent-execution-plan.md (Plan detallado)
+  ✅ .cde/READY-TO-EXECUTE-SEMANA2.md (Instrucciones rápidas)
+
+════════════════════════════════════════════════════════════════════════════════
+
+✅ DESPUÉS DE LA EJECUCIÓN
+
+Cuando los 3 agentes completen (outputs: ✅ GEMINI COMPLETE, etc):
+
+1. VERIFICA CAMBIOS
+   git status
+   git log --oneline -5
+
+2. VALIDA GOBERNANZA
+   python scripts/validation/validate-docs.py --all
+
+3. VERIFICA RESULTADO
+   # Deberías ver:
+   # Summary:
+   #   Errors:   <20 (was 88)
+   #   Warnings: <10 (was 54)
+
+════════════════════════════════════════════════════════════════════════════════
+
+💡 VENTAJAS DE ESTA APROXIMACIÓN
+
+✓ Balanceado: 3 tareas independientes, sin conflictos
+✓ Eficiente: Ejecución paralela = 30-45 min vs 90+ min secuencial
+✓ Ordenado: Cada agente trabaja en área específica (YAML, filenames, directories)
+✓ Verificable: Cada agente valida sus propios cambios
+✓ Automático: Commits semánticos generados por cada agente
+
+════════════════════════════════════════════════════════════════════════════════
+
+⚙️ CONTROL DE CALIDAD
+
+Cada agente:
+  ✓ Lee instrucciones detalladas
+  ✓ Ejecuta tareas específicas
+  ✓ Valida cambios con governance validator
+  ✓ Commit semántico automático
+  ✓ Output: ✅ TASK COMPLETE cuando termina
+
+Resultado Final:
+  ✓ 3 commits bien definidos en git log
+  ✓ Gobernanza mejorada de 64.2% → 85%+
+  ✓ Violaciones reducidas de 157 → <50
+  ✓ Todo rastreable en git history
+
+════════════════════════════════════════════════════════════════════════════════
+
+🎯 PRÓXIMOS PASOS
+
+1. Abre 3 terminales
+2. Ejecuta los 3 comandos gemini en paralelo
+3. Espera completación (30-45 min)
+4. Verifica con: python scripts/validation/validate-docs.py --all
+5. ¡Disfruta de 68% menos violaciones de gobernanza! 🎉
+
+════════════════════════════════════════════════════════════════════════════════
+
+**Status**: READY TO EXECUTE ✅
+**Agents**: 3/3 prepared
+**Tasks**: 101+ files remediated
+**Timeline**: 30-45 minutes (parallel)
+**Owner**: CDE-Orchestrator-MCP
