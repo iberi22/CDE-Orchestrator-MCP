@@ -16,27 +16,25 @@ NO infrastructure dependencies - pure business logic only.
 """
 
 from .entities import (
+    DocumentStatus,
+    DocumentType,
+    LinkRelationship,
+    SemanticLink,
     Specification,
     SpecificationId,
-    DocumentType,
-    DocumentStatus,
-    SemanticLink,
-    LinkRelationship,
 )
-
-from .ports import (
-    ISpecificationRepository,
-    ISemanticContext,
-    IDocumentationRenderer,
-    ILLMSummaryGenerator,
-)
-
 from .exceptions import (
+    InvalidLinkError,
+    InvalidStatusTransitionError,
     SpecificationError,
     SpecificationNotFoundError,
-    InvalidStatusTransitionError,
-    InvalidLinkError,
     SpecificationValidationError,
+)
+from .ports import (
+    IDocumentationRenderer,
+    ILLMSummaryGenerator,
+    ISemanticContext,
+    ISpecificationRepository,
 )
 
 __all__ = [

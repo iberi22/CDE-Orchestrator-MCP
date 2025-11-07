@@ -12,7 +12,6 @@ Configuration via ENV:
 import os
 import time
 from typing import Optional
-from pathlib import Path
 
 
 class SystemNotifier:
@@ -35,19 +34,24 @@ class SystemNotifier:
 
     def __init__(self):
         self.enabled = os.getenv("CDE_NOTIFY_PROGRESS", "true").lower() == "true"
-        self.milestones_only = os.getenv("CDE_NOTIFY_MILESTONES_ONLY", "true").lower() == "true"
+        self.milestones_only = (
+            os.getenv("CDE_NOTIFY_MILESTONES_ONLY", "true").lower() == "true"
+        )
         self.app_name = "CDE Orchestrator"
 
         # Try to import plyer (graceful fallback if not installed)
         try:
             from plyer import notification as plyer_notification
+
             self.notification = plyer_notification
             self.available = True
         except ImportError:
             self.notification = None
             self.available = False
             if self.enabled:
-                print("⚠️  plyer not installed - notifications disabled. Install with: pip install plyer")
+                print(
+                    "⚠️  plyer not installed - notifications disabled. Install with: pip install plyer"
+                )
 
     def notify_start(self, task_name: str):
         """
@@ -64,7 +68,7 @@ class SystemNotifier:
                 title=f"🚀 {self.app_name}",
                 message=f"Started: {task_name}",
                 app_name=self.app_name,
-                timeout=3
+                timeout=3,
             )
         except Exception as e:
             # Silently fail - don't crash MCP operation
@@ -94,7 +98,7 @@ class SystemNotifier:
                 title=f"{emoji} {self.app_name} - {percentage}%",
                 message=f"{task_name}: {message}",
                 app_name=self.app_name,
-                timeout=2
+                timeout=2,
             )
         except Exception as e:
             self._log_error(f"Failed to send progress notification: {e}")
@@ -115,7 +119,7 @@ class SystemNotifier:
                 title=f"✅ {self.app_name} - Complete",
                 message=f"{task_name} finished in {duration:.1f}s",
                 app_name=self.app_name,
-                timeout=5
+                timeout=5,
             )
         except Exception as e:
             self._log_error(f"Failed to send complete notification: {e}")
@@ -139,7 +143,7 @@ class SystemNotifier:
                 title=f"❌ {self.app_name} - Error",
                 message=f"{task_name}: {error_short}",
                 app_name=self.app_name,
-                timeout=10
+                timeout=10,
             )
         except Exception as e:
             self._log_error(f"Failed to send error notification: {e}")

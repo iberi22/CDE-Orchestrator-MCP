@@ -1,10 +1,13 @@
-import os
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 import yaml
 
+
 class CreateSpecificationUseCase:
-    def execute(self, project_path: str, feature_name: str, description: str, author: str) -> dict:
+    def execute(
+        self, project_path: str, feature_name: str, description: str, author: str
+    ) -> dict:
         specs_dir = Path(project_path) / "specs" / "features"
         specs_dir.mkdir(parents=True, exist_ok=True)
 

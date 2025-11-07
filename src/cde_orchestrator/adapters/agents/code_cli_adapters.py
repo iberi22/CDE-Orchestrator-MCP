@@ -20,27 +20,29 @@ Architecture:
 """
 
 import asyncio
-import subprocess
 import shutil
-from typing import Dict, Any, List, Optional
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Any, Dict, List
 
 from ...domain.ports import ICodeExecutor
 
 
 class CodeCLIError(Exception):
     """Base exception for code CLI execution errors."""
+
     pass
 
 
 class CodeCLINotFoundError(CodeCLIError):
     """Raised when CLI executable not found."""
+
     pass
 
 
 class CodeCLIExecutionError(CodeCLIError):
     """Raised when CLI execution fails."""
+
     pass
 
 
@@ -113,9 +115,7 @@ class CodeCLIAdapter(ABC):
                 f"{self.cli_command} not found: {self.get_install_instructions()}"
             )
         except Exception as e:
-            raise CodeCLIExecutionError(
-                f"{self.cli_command} execution error: {str(e)}"
-            )
+            raise CodeCLIExecutionError(f"{self.cli_command} execution error: {str(e)}")
 
     @abstractmethod
     def _build_command(self, prompt: str, context: Dict[str, Any]) -> List[str]:
@@ -214,17 +214,17 @@ class CopilotCLIAdapter(CodeCLIAdapter, ICodeExecutor):
         """Extract code from Copilot CLI response."""
         # Copilot CLI responses are typically just the suggestion
         # Remove any prefixes or formatting
-        lines = response.strip().split('\n')
+        lines = response.strip().split("\n")
 
         # Remove common prefixes
-        if lines and lines[0].startswith(('```', 'Suggestion:', 'Code:')):
+        if lines and lines[0].startswith(("```", "Suggestion:", "Code:")):
             lines = lines[1:]
 
         # Remove trailing code fences
-        if lines and lines[-1].strip() == '```':
+        if lines and lines[-1].strip() == "```":
             lines = lines[:-1]
 
-        return '\n'.join(lines).strip()
+        return "\n".join(lines).strip()
 
 
 class GeminiCLIAdapter(CodeCLIAdapter, ICodeExecutor):
@@ -264,7 +264,9 @@ class GeminiCLIAdapter(CodeCLIAdapter, ICodeExecutor):
         return cmd
 
     def get_install_instructions(self) -> str:
-        return "Install Google Gemini CLI from https://ai.google.dev/gemini-api/docs/cli"
+        return (
+            "Install Google Gemini CLI from https://ai.google.dev/gemini-api/docs/cli"
+        )
 
     async def execute_prompt(
         self, project_path: Path, prompt: str, context: Dict[str, Any]
@@ -310,19 +312,19 @@ Request: {prompt}"""
         # Look for code blocks
         if "```" in response:
             # Extract from code blocks
-            lines = response.split('\n')
+            lines = response.split("\n")
             in_code_block = False
             code_lines = []
 
             for line in lines:
-                if line.strip().startswith('```'):
+                if line.strip().startswith("```"):
                     in_code_block = not in_code_block
                     continue
                 if in_code_block:
                     code_lines.append(line)
 
             if code_lines:
-                return '\n'.join(code_lines).strip()
+                return "\n".join(code_lines).strip()
 
         # If no code blocks, return as-is but clean up
         return response.strip()
@@ -410,19 +412,19 @@ class QwenCLIAdapter(CodeCLIAdapter, ICodeExecutor):
         # Qwen responses might be in Chinese or mixed
         # Look for code blocks first
         if "```" in response:
-            lines = response.split('\n')
+            lines = response.split("\n")
             in_code_block = False
             code_lines = []
 
             for line in lines:
-                if line.strip().startswith('```'):
+                if line.strip().startswith("```"):
                     in_code_block = not in_code_block
                     continue
                 if in_code_block:
                     code_lines.append(line)
 
             if code_lines:
-                return '\n'.join(code_lines).strip()
+                return "\n".join(code_lines).strip()
 
         # If no code blocks, return as-is
         return response.strip()

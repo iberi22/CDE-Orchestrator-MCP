@@ -11,13 +11,12 @@ import asyncio
 import json
 import time
 import urllib.request
+
 from fastmcp import Context
 
 
 async def cde_testProgressReporting(
-    ctx: Context,
-    duration: int = 10,
-    steps: int = 10
+    ctx: Context, duration: int = 10, steps: int = 10
 ) -> str:
     """
     Test tool that demonstrates progress reporting for the status bar.
@@ -55,14 +54,14 @@ async def cde_testProgressReporting(
                 "tool": "testProgressReporting",
                 "percentage": percentage,
                 "elapsed": elapsed,
-                "message": message
+                "message": message,
             }
 
-            data = json.dumps(event).encode('utf-8')
+            data = json.dumps(event).encode("utf-8")
             req = urllib.request.Request(
                 "http://localhost:8767/progress",
                 data=data,
-                headers={'Content-Type': 'application/json'}
+                headers={"Content-Type": "application/json"},
             )
 
             try:
@@ -81,9 +80,12 @@ async def cde_testProgressReporting(
     await ctx.info("✅ Progress test completed")
 
     # Return result
-    return json.dumps({
-        "status": "success",
-        "steps_completed": steps,
-        "total_duration": f"{duration}s",
-        "message": "Progress test completed successfully"
-    }, indent=2)
+    return json.dumps(
+        {
+            "status": "success",
+            "steps_completed": steps,
+            "total_duration": f"{duration}s",
+            "message": "Progress test completed successfully",
+        },
+        indent=2,
+    )

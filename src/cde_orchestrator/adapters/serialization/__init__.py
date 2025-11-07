@@ -6,6 +6,8 @@ This module contains Pydantic models for JSON serialization/deserialization
 of domain entities. These are infrastructure concerns, not domain logic.
 """
 
+# Re-export domain enums for convenience
+from ...domain.entities import FeatureStatus, PhaseStatus
 from .models import (
     Phase,
     Recipe,
@@ -15,9 +17,6 @@ from .models import (
     WorkflowOutput,
     WorkflowType,
 )
-
-# Re-export domain enums for convenience
-from ...domain.entities import FeatureStatus, PhaseStatus
 
 __all__ = [
     "FeatureStatus",

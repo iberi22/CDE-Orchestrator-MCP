@@ -70,10 +70,7 @@ def cde_scanDocumentation(project_path: str = ".") -> str:
 
 @tool_handler
 def cde_createSpecification(
-    feature_name: str,
-    description: str,
-    author: str,
-    project_path: str = "."
+    feature_name: str, description: str, author: str, project_path: str = "."
 ) -> str:
     """
     Creates a new feature specification document.
@@ -99,7 +96,7 @@ def cde_createSpecification(
         project_path=project_path,
         feature_name=feature_name,
         description=description,
-        author=author
+        author=author,
     )
     return json.dumps(result, indent=2)
 

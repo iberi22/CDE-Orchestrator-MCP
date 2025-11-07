@@ -2,13 +2,11 @@
 """
 Unit tests for AIConfigUseCase.
 """
-import pytest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
-from src.cde_orchestrator.application.ai_config import (
-    AIConfigUseCase,
-    AgentConfig,
-)
+
+import pytest
+
+from src.cde_orchestrator.application.ai_config import AgentConfig, AIConfigUseCase
 
 
 @pytest.fixture

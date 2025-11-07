@@ -5,13 +5,11 @@ Analyzes project documentation structure and identifies issues.
 Uses high-performance Rust core for I/O intensive operations.
 """
 
-import os
-import re
 import json
-from pathlib import Path
-from typing import Dict, Any, List
+import re
 from datetime import datetime
-import time
+from pathlib import Path
+from typing import Any, Dict, List
 
 
 class ScanDocumentationUseCase:
@@ -51,6 +49,7 @@ class ScanDocumentationUseCase:
         # Try to use Rust core for performance
         try:
             import cde_rust_core
+
             rust_result = self._scan_with_rust(project_path)
             return self._process_rust_result(rust_result, project_path)
         except ImportError:
@@ -61,6 +60,7 @@ class ScanDocumentationUseCase:
         """Use high-performance Rust core for scanning."""
         try:
             import cde_rust_core
+
             # Call the fast Rust scanning function
             result_json = cde_rust_core.scan_documentation_py(project_path)
             return json.loads(result_json)
@@ -69,10 +69,14 @@ class ScanDocumentationUseCase:
             raise ImportError("Rust core module not available")
         except Exception as e:
             # Rust module failed, log and fallback to Python
-            print(f"Warning: Rust scanning failed ({e}), falling back to Python implementation")
+            print(
+                f"Warning: Rust scanning failed ({e}), falling back to Python implementation"
+            )
             raise ImportError("Rust scanning failed")
 
-    def _process_rust_result(self, rust_result: List[Dict[str, Any]], project_path: str) -> Dict[str, Any]:
+    def _process_rust_result(
+        self, rust_result: List[Dict[str, Any]], project_path: str
+    ) -> Dict[str, Any]:
         """Process and enhance Rust scan results with Python logic."""
         project = Path(project_path)
 
@@ -88,21 +92,28 @@ class ScanDocumentationUseCase:
         }
 
         standard_dirs = {
-            "specs/features": [], "specs/design": [], "specs/tasks": [],
-            "specs/governance": [], "docs": [], "agent-docs/sessions": [],
-            "agent-docs/execution": [], "agent-docs/feedback": [],
-            "agent-docs/research": [], "root": [], "other": [],
+            "specs/features": [],
+            "specs/design": [],
+            "specs/tasks": [],
+            "specs/governance": [],
+            "docs": [],
+            "agent-docs/sessions": [],
+            "agent-docs/execution": [],
+            "agent-docs/feedback": [],
+            "agent-docs/research": [],
+            "root": [],
+            "other": [],
         }
 
         for doc_data in rust_result:
-            md_file = project / doc_data['path']
+            md_file = project / doc_data["path"]
             relative = md_file.relative_to(project)
 
             # Re-use Python logic for analysis
             file_info = {
                 "path": str(relative),
-                "size": len(doc_data['content']), # Approximation
-                "lines": doc_data['content'].count('\n') + 1,
+                "size": len(doc_data["content"]),  # Approximation
+                "lines": doc_data["content"].count("\n") + 1,
             }
 
             has_metadata = self._has_yaml_frontmatter(md_file)
@@ -114,20 +125,31 @@ class ScanDocumentationUseCase:
             standard_dirs[location].append(file_info)
 
             if file_info["lines"] > 1000:
-                results["large_files"].append({"path": str(relative), "lines": file_info["lines"]})
+                results["large_files"].append(
+                    {"path": str(relative), "lines": file_info["lines"]}
+                )
 
             if relative.parent == Path(".") and relative.name not in {
-                "README.md", "CHANGELOG.md", "CONTRIBUTING.md",
-                "CODE_OF_CONDUCT.md", "LICENSE.md", "AGENTS.md", "GEMINI.md"
+                "README.md",
+                "CHANGELOG.md",
+                "CONTRIBUTING.md",
+                "CODE_OF_CONDUCT.md",
+                "LICENSE.md",
+                "AGENTS.md",
+                "GEMINI.md",
             }:
                 results["orphaned_docs"].append(str(relative))
 
-        results["by_location"] = {loc: files for loc, files in standard_dirs.items() if files}
+        results["by_location"] = {
+            loc: files for loc, files in standard_dirs.items() if files
+        }
         results["recommendations"] = self._generate_recommendations(results)
 
         return results
 
-    def _enhance_location_categorization(self, by_location: Dict[str, Any], project: Path) -> Dict[str, Any]:
+    def _enhance_location_categorization(
+        self, by_location: Dict[str, Any], project: Path
+    ) -> Dict[str, Any]:
         """Enhance location categorization with additional Python logic."""
         # The Rust version provides basic categorization
         # Python can add more sophisticated analysis if needed
@@ -144,9 +166,17 @@ class ScanDocumentationUseCase:
         md_files = list(project.rglob("*.md"))
 
         # Exclude common directories
-        excluded_dirs = {".git", ".venv", "node_modules", "venv", "__pycache__", ".pytest_cache"}
+        excluded_dirs = {
+            ".git",
+            ".venv",
+            "node_modules",
+            "venv",
+            "__pycache__",
+            ".pytest_cache",
+        }
         md_files = [
-            f for f in md_files
+            f
+            for f in md_files
             if not any(excluded in f.parts for excluded in excluded_dirs)
         ]
 
@@ -178,14 +208,18 @@ class ScanDocumentationUseCase:
         }
 
         # Report initial progress
-        report_progress_http("scanDocumentation", 0.0, f"Found {len(md_files)} markdown files to scan")
+        report_progress_http(
+            "scanDocumentation", 0.0, f"Found {len(md_files)} markdown files to scan"
+        )
 
         for idx, md_file in enumerate(md_files):
             relative = md_file.relative_to(project)
             file_info = {
                 "path": str(relative),
                 "size": md_file.stat().st_size,
-                "lines": sum(1 for _ in open(md_file, encoding="utf-8", errors="ignore")),
+                "lines": sum(
+                    1 for _ in open(md_file, encoding="utf-8", errors="ignore")
+                ),
             }
 
             # Check for YAML frontmatter
@@ -201,15 +235,22 @@ class ScanDocumentationUseCase:
 
             # Check for large files
             if file_info["lines"] > 1000:
-                results["large_files"].append({
-                    "path": str(relative),
-                    "lines": file_info["lines"],
-                })
+                results["large_files"].append(
+                    {
+                        "path": str(relative),
+                        "lines": file_info["lines"],
+                    }
+                )
 
             # Check if orphaned (root level .md files except standard ones)
             if relative.parent == Path(".") and relative.name not in {
-                "README.md", "CHANGELOG.md", "CONTRIBUTING.md",
-                "CODE_OF_CONDUCT.md", "LICENSE.md", "AGENTS.md", "GEMINI.md"
+                "README.md",
+                "CHANGELOG.md",
+                "CONTRIBUTING.md",
+                "CODE_OF_CONDUCT.md",
+                "LICENSE.md",
+                "AGENTS.md",
+                "GEMINI.md",
             }:
                 results["orphaned_docs"].append(str(relative))
 
@@ -218,7 +259,7 @@ class ScanDocumentationUseCase:
             report_progress_http(
                 "scanDocumentation",
                 progress,
-                f"Scanned {idx + 1}/{len(md_files)} files"
+                f"Scanned {idx + 1}/{len(md_files)} files",
             )
 
         # Populate by_location

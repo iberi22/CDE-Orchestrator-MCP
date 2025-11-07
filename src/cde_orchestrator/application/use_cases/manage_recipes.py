@@ -11,7 +11,9 @@ class ManageRecipesUseCase:
     Use case for managing and suggesting recipes.
     """
 
-    def __init__(self, recipe_repository: IRecipeRepository, recipe_service: RecipeService):
+    def __init__(
+        self, recipe_repository: IRecipeRepository, recipe_service: RecipeService
+    ):
         self._recipe_repository = recipe_repository
         self._recipe_service = recipe_service
         self._recipes: Optional[List[Recipe]] = None
@@ -24,6 +26,8 @@ class ManageRecipesUseCase:
         self._load_recipes_if_needed()
         return self._recipes
 
-    def suggest_recipe(self, user_prompt: str, phase_id: str) -> Optional[RecipeSuggestion]:
+    def suggest_recipe(
+        self, user_prompt: str, phase_id: str
+    ) -> Optional[RecipeSuggestion]:
         self._load_recipes_if_needed()
         return self._recipe_service.suggest_recipe(user_prompt, phase_id, self._recipes)

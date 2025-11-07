@@ -6,11 +6,12 @@ without any I/O or external dependencies.
 """
 
 import pytest
+
 from cde_orchestrator.application.orchestration import (
-    WorkflowSelectorUseCase,
-    WorkflowComplexity,
-    WorkflowType,
     DomainCategory,
+    WorkflowComplexity,
+    WorkflowSelectorUseCase,
+    WorkflowType,
 )
 
 
@@ -88,10 +89,12 @@ class TestComplexityDetection:
         short_complexity = use_case._detect_complexity(short)
 
         # Long detailed prompt (>300 chars)
-        long = "Add a comprehensive user management endpoint with full CRUD operations, " \
-               "role-based access control, audit logging, email notifications, data validation, " \
-               "error handling, unit tests, integration tests, API documentation, performance " \
-               "monitoring, rate limiting, caching strategy, database migrations, and deployment scripts"
+        long = (
+            "Add a comprehensive user management endpoint with full CRUD operations, "
+            "role-based access control, audit logging, email notifications, data validation, "
+            "error handling, unit tests, integration tests, API documentation, performance "
+            "monitoring, rate limiting, caching strategy, database migrations, and deployment scripts"
+        )
         long_complexity = use_case._detect_complexity(long)
 
         # Long prompt should be at least MODERATE
@@ -200,32 +203,28 @@ class TestWorkflowTypeInference:
     def test_quick_fix_workflow_for_trivial_complexity(self, use_case):
         """Test QUICK_FIX workflow for TRIVIAL complexity."""
         workflow_type = use_case._detect_workflow_type(
-            "Fix typo",
-            WorkflowComplexity.TRIVIAL
+            "Fix typo", WorkflowComplexity.TRIVIAL
         )
         assert workflow_type == WorkflowType.QUICK_FIX
 
     def test_quick_fix_workflow_with_quick_keyword(self, use_case):
         """Test QUICK_FIX workflow with 'quick' keyword."""
         workflow_type = use_case._detect_workflow_type(
-            "Quick fix for login bug",
-            WorkflowComplexity.SIMPLE
+            "Quick fix for login bug", WorkflowComplexity.SIMPLE
         )
         assert workflow_type == WorkflowType.QUICK_FIX
 
     def test_research_workflow_with_research_keyword(self, use_case):
         """Test RESEARCH workflow with 'research' keyword."""
         workflow_type = use_case._detect_workflow_type(
-            "Research best practices for microservices",
-            WorkflowComplexity.COMPLEX
+            "Research best practices for microservices", WorkflowComplexity.COMPLEX
         )
         assert workflow_type == WorkflowType.RESEARCH
 
     def test_documentation_workflow_for_documentation_domain(self, use_case):
         """Test DOCUMENTATION workflow for DOCUMENTATION domain."""
         workflow_type = use_case._detect_workflow_type(
-            "Write feature specification",
-            WorkflowComplexity.SIMPLE
+            "Write feature specification", WorkflowComplexity.SIMPLE
         )
         assert workflow_type == WorkflowType.STANDARD
 
@@ -233,23 +232,21 @@ class TestWorkflowTypeInference:
         """Test REFACTOR workflow with 'refactor' keyword."""
         workflow_type = use_case._detect_workflow_type(
             "Refactor authentication module for better testability",
-            WorkflowComplexity.MODERATE
+            WorkflowComplexity.MODERATE,
         )
         assert workflow_type == WorkflowType.REFACTOR
 
     def test_hotfix_workflow_with_hotfix_keyword(self, use_case):
         """Test HOTFIX workflow with 'hotfix' keyword."""
         workflow_type = use_case._detect_workflow_type(
-            "Hotfix for production database connection leak",
-            WorkflowComplexity.SIMPLE
+            "Hotfix for production database connection leak", WorkflowComplexity.SIMPLE
         )
         assert workflow_type == WorkflowType.QUICK_FIX
 
     def test_standard_workflow_for_moderate_feature(self, use_case):
         """Test STANDARD workflow for moderate feature development."""
         workflow_type = use_case._detect_workflow_type(
-            "Add user profile editing functionality",
-            WorkflowComplexity.MODERATE
+            "Add user profile editing functionality", WorkflowComplexity.MODERATE
         )
         assert workflow_type == WorkflowType.STANDARD
 
@@ -264,32 +261,26 @@ class TestRecipeSelection:
     def test_documentation_writer_for_documentation_domain(self, use_case):
         """Test documentation-writer recipe for DOCUMENTATION domain."""
         recipe = use_case._select_recipe(
-            DomainCategory.DOCUMENTATION,
-            WorkflowType.DOCUMENTATION
+            DomainCategory.DOCUMENTATION, WorkflowType.DOCUMENTATION
         )
         assert recipe == "documentation-writer"
 
     def test_deep_research_for_research_workflow(self, use_case):
         """Test deep-research recipe for RESEARCH workflow."""
         recipe = use_case._select_recipe(
-            DomainCategory.ARCHITECTURE,
-            WorkflowType.RESEARCH
+            DomainCategory.ARCHITECTURE, WorkflowType.RESEARCH
         )
         assert recipe == "deep-research"
 
     def test_quick_fix_recipe_for_quick_fix_workflow(self, use_case):
         """Test quick-fix recipe for QUICK_FIX workflow."""
-        recipe = use_case._select_recipe(
-            DomainCategory.GENERAL,
-            WorkflowType.QUICK_FIX
-        )
+        recipe = use_case._select_recipe(DomainCategory.GENERAL, WorkflowType.QUICK_FIX)
         assert recipe == "ai-engineer"
 
     def test_ai_engineer_for_standard_workflow(self, use_case):
         """Test ai-engineer recipe for STANDARD workflow."""
         recipe = use_case._select_recipe(
-            DomainCategory.WEB_DEVELOPMENT,
-            WorkflowType.STANDARD
+            DomainCategory.WEB_DEVELOPMENT, WorkflowType.STANDARD
         )
         assert recipe == "ai-engineer"
 
@@ -304,18 +295,16 @@ class TestSkillIdentification:
     def test_simple_complexity_returns_empty_skills(self, use_case):
         """Test SIMPLE complexity returns no required skills."""
         skills = use_case._identify_skills(
-            DomainCategory.WEB_DEVELOPMENT,
-            WorkflowComplexity.SIMPLE,
-            ""
+            DomainCategory.WEB_DEVELOPMENT, WorkflowComplexity.SIMPLE, ""
         )
-        assert set(skills) == set(["problem-solving", "react-patterns", "web-performance"])
+        assert set(skills) == set(
+            ["problem-solving", "react-patterns", "web-performance"]
+        )
 
     def test_moderate_web_development_skills(self, use_case):
         """Test MODERATE WEB_DEVELOPMENT returns relevant skills."""
         skills = use_case._identify_skills(
-            DomainCategory.WEB_DEVELOPMENT,
-            WorkflowComplexity.MODERATE,
-            ""
+            DomainCategory.WEB_DEVELOPMENT, WorkflowComplexity.MODERATE, ""
         )
         assert "web-performance" in skills
         assert "react-patterns" in skills
@@ -323,9 +312,7 @@ class TestSkillIdentification:
     def test_complex_database_skills(self, use_case):
         """Test COMPLEX DATABASE returns relevant skills."""
         skills = use_case._identify_skills(
-            DomainCategory.DATABASE,
-            WorkflowComplexity.COMPLEX,
-            ""
+            DomainCategory.DATABASE, WorkflowComplexity.COMPLEX, ""
         )
         assert "sql-optimization" in skills
         assert "system-design" in skills
@@ -333,9 +320,7 @@ class TestSkillIdentification:
     def test_epic_ai_ml_skills(self, use_case):
         """Test EPIC AI_ML returns comprehensive skills."""
         skills = use_case._identify_skills(
-            DomainCategory.AI_ML,
-            WorkflowComplexity.EPIC,
-            ""
+            DomainCategory.AI_ML, WorkflowComplexity.EPIC, ""
         )
         assert "ai-integration" in skills
         assert "system-design" in skills
@@ -344,9 +329,7 @@ class TestSkillIdentification:
     def test_moderate_security_skills(self, use_case):
         """Test MODERATE SECURITY returns security skills."""
         skills = use_case._identify_skills(
-            DomainCategory.SECURITY,
-            WorkflowComplexity.MODERATE,
-            ""
+            DomainCategory.SECURITY, WorkflowComplexity.MODERATE, ""
         )
         assert "encryption" in skills
         assert "auth-best-practices" in skills
@@ -402,7 +385,10 @@ class TestEndToEndRecommendation:
         result = use_case.execute("Add Redis caching to authentication module")
 
         assert result["recommendation"]["workflow_type"] == WorkflowType.STANDARD.value
-        assert result["recommendation"]["complexity"] == WorkflowComplexity.SIMPLE.to_string()
+        assert (
+            result["recommendation"]["complexity"]
+            == WorkflowComplexity.SIMPLE.to_string()
+        )
         assert result["recommendation"]["recipe_id"] == "ai-engineer"
 
         assert result["recommendation"]["confidence"] > 0.6
@@ -414,20 +400,33 @@ class TestEndToEndRecommendation:
         """Test complete recommendation for simple typo fix."""
         result = use_case.execute("Fix typo in README.md")
 
-        assert result["recommendation"]["workflow_type"] == WorkflowType.DOCUMENTATION.value
-        assert result["recommendation"]["complexity"] == WorkflowComplexity.TRIVIAL.to_string()
+        assert (
+            result["recommendation"]["workflow_type"]
+            == WorkflowType.DOCUMENTATION.value
+        )
+        assert (
+            result["recommendation"]["complexity"]
+            == WorkflowComplexity.TRIVIAL.to_string()
+        )
         assert result["recommendation"]["recipe_id"] == "documentation-writer"
-        assert len(result["recommendation"]["phases_to_skip"]) > 0  # Should skip some phases
+        assert (
+            len(result["recommendation"]["phases_to_skip"]) > 0
+        )  # Should skip some phases
         assert "implement" in result["recommendation"]["phases_to_skip"]
         assert "test" in result["recommendation"]["phases_to_skip"]
 
     def test_complete_recommendation_for_research_task(self, use_case):
         """Test complete recommendation for research task."""
-        result = use_case.execute("Research best practices for microservices communication")
+        result = use_case.execute(
+            "Research best practices for microservices communication"
+        )
 
         assert result["recommendation"]["workflow_type"] == WorkflowType.RESEARCH.value
         assert result["recommendation"]["recipe_id"] == "deep-research"
-        assert result["recommendation"]["complexity"] == WorkflowComplexity.SIMPLE.to_string()
+        assert (
+            result["recommendation"]["complexity"]
+            == WorkflowComplexity.SIMPLE.to_string()
+        )
 
     def test_complete_recommendation_for_documentation(self, use_case):
         """Test complete recommendation for documentation task."""

@@ -1,12 +1,14 @@
-
 # tests/unit/application/test_project_locator.py
 """
 Unit tests for the ProjectLocator application service.
 """
-import pytest
 from pathlib import Path
 from unittest.mock import patch
+
+import pytest
+
 from src.cde_orchestrator.application.project_locator import ProjectLocator
+
 
 @pytest.fixture
 def temp_projects(tmp_path):
@@ -20,7 +22,6 @@ def temp_projects(tmp_path):
     (project1_path / ".git").mkdir()
     (project1_path / ".cde").mkdir()
 
-
     # Another valid project
     project2_path = projects_root / "project2"
     project2_path.mkdir()
@@ -33,6 +34,7 @@ def temp_projects(tmp_path):
 
     return projects_root
 
+
 class TestProjectLocator:
     """Tests for the ProjectLocator."""
 
@@ -44,12 +46,16 @@ class TestProjectLocator:
     def test_validate_project_path_invalid(self, temp_projects):
         """Test that a path without a .git directory is invalidated."""
         locator = ProjectLocator()
-        assert locator.validate_project_path(str(temp_projects / "not_a_project")) is False
+        assert (
+            locator.validate_project_path(str(temp_projects / "not_a_project")) is False
+        )
 
     def test_validate_project_path_nonexistent(self, temp_projects):
         """Test that a nonexistent path is invalidated."""
         locator = ProjectLocator()
-        assert locator.validate_project_path(str(temp_projects / "nonexistent")) is False
+        assert (
+            locator.validate_project_path(str(temp_projects / "nonexistent")) is False
+        )
 
     def test_find_project_by_name(self, temp_projects):
         """Test finding a project by its directory name."""
@@ -107,7 +113,9 @@ class TestProjectLocator:
         """Test that explicit path has priority over name."""
         locator = ProjectLocator(scan_roots=[str(temp_projects)])
         path1 = str(temp_projects / "project1")
-        resolved = locator.resolve_project_path(project_path=path1, project_name="project2")
+        resolved = locator.resolve_project_path(
+            project_path=path1, project_name="project2"
+        )
         assert resolved == path1
 
     def test_resolve_project_path_invalid_path_returns_none(self, temp_projects):

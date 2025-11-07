@@ -18,11 +18,10 @@ Design for Multiple LLM Providers:
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional, Dict, Any, AsyncIterator
 from enum import Enum
+from typing import Any, AsyncIterator, Dict, List, Optional
 
-from .entities import Specification, SpecificationId, DocumentType, DocumentStatus
-
+from .entities import DocumentStatus, DocumentType, Specification, SpecificationId
 
 # ============================================================================
 # PERSISTENCE PORT

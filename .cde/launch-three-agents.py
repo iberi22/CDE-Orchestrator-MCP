@@ -5,7 +5,7 @@
 
 Lanza 3 agentes AI en paralelo usando CLI headless:
 1. GEMINI (Task 1: YAML fixes - 35 files)
-2. CODEX (Task 2: Filenames - 54 files) 
+2. CODEX (Task 2: Filenames - 54 files)
 3. QWEN (Task 3: Directories - 12+ files)
 
 Cada agente trabaja en paralelo en tareas independientes.
@@ -52,18 +52,18 @@ AGENTS = {
 def read_task_file(agent_name):
     """Lee el archivo de instrucciones de la tarea."""
     task_file = AGENT_INSTRUCTIONS_DIR / AGENTS[agent_name]["task_file"]
-    
+
     if not task_file.exists():
         print(f"❌ Task file not found: {task_file}")
         return None
-    
+
     with open(task_file, 'r', encoding='utf-8') as f:
         return f.read()
 
 
 def create_prompt_for_agent(agent_name, task_content):
     """Crea el prompt específico para cada agente."""
-    
+
     prompts = {
         "GEMINI": f"""You are GEMINI-AGENT-1. You are an expert at fixing documentation governance issues.
 
@@ -143,7 +143,7 @@ You have 30 minutes to complete this task.
 
 Output format: Start with ✅ QWEN TASK 3 START, and end with ✅ QWEN TASK 3 COMPLETE followed by validation summary."""
     }
-    
+
     return prompts.get(agent_name, "")
 
 
@@ -155,7 +155,7 @@ def launch_agent_cli(agent_name):
     print(f"Task: {AGENTS[agent_name]['task_id']}")
     print(f"Description: {AGENTS[agent_name]['description']}")
     print(f"Started: {datetime.now().isoformat()}")
-    
+
     # Read task file
     task_content = read_task_file(agent_name)
     if not task_content:
@@ -165,26 +165,26 @@ def launch_agent_cli(agent_name):
             "error": "Task file not found",
             "timestamp": datetime.now().isoformat(),
         }
-    
+
     # Create prompt
     prompt = create_prompt_for_agent(agent_name, task_content)
-    
+
     # Create output file for session
     output_file = RESULTS_DIR / AGENTS[agent_name]["output_file"]
     session_log = RESULTS_DIR / f"{agent_name.lower()}-session.log"
-    
+
     try:
         # Launch gemini CLI with the prompt (using all 3 agents through gemini)
         # In real implementation, you'd use different CLIs for each agent
-        
+
         print(f"\n📝 Executing {agent_name} task...")
         print(f"   Prompt length: {len(prompt)} chars")
         print(f"   Output file: {output_file}")
         print(f"   Session log: {session_log}")
-        
+
         # Call gemini CLI
         cmd = ["gemini", prompt]
-        
+
         with open(session_log, 'w', encoding='utf-8') as log_file:
             result = subprocess.run(
                 cmd,
@@ -193,7 +193,7 @@ def launch_agent_cli(agent_name):
                 timeout=1800,  # 30 minutes
                 cwd=str(PROJECT_ROOT)
             )
-        
+
         # Save results
         output_data = {
             "agent": agent_name,
@@ -203,23 +203,23 @@ def launch_agent_cli(agent_name):
             "return_code": result.returncode,
             "timestamp": datetime.now().isoformat(),
         }
-        
+
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(output_data, f, indent=2)
-        
+
         # Write to session log
         with open(session_log, 'a', encoding='utf-8') as f:
             f.write(f"\n\n--- EXECUTION RESULT ---\n")
             f.write(f"Status: {output_data['status']}\n")
             f.write(f"Return Code: {result.returncode}\n")
             f.write(f"Timestamp: {output_data['timestamp']}\n")
-        
+
         print(f"✅ {agent_name} execution completed")
         print(f"   Status: {output_data['status']}")
         print(f"   Return code: {result.returncode}")
-        
+
         return output_data
-        
+
     except subprocess.TimeoutExpired:
         error_msg = f"Task timeout after 30 minutes"
         print(f"❌ {agent_name}: {error_msg}")
@@ -229,7 +229,7 @@ def launch_agent_cli(agent_name):
             "error": error_msg,
             "timestamp": datetime.now().isoformat(),
         }
-    
+
     except Exception as e:
         error_msg = str(e)
         print(f"❌ {agent_name}: {error_msg}")
@@ -243,7 +243,7 @@ def launch_agent_cli(agent_name):
 
 def main():
     """Main orchestration function."""
-    
+
     print("\n" + "="*60)
     print("🎯 SEMANA 2 - THREE-AGENT PARALLEL ORCHESTRATION")
     print("="*60)
@@ -256,17 +256,17 @@ def main():
     print("  3️⃣  QWEN     - Directory structure & orphaned files (12+ files)")
     print("\nExecution: PARALLEL HEADLESS MODE")
     print("="*60)
-    
+
     # Launch all 3 agents in parallel using ThreadPoolExecutor
     results = {}
     start_time = time.time()
-    
+
     with ThreadPoolExecutor(max_workers=3) as executor:
         future_to_agent = {
-            executor.submit(launch_agent_cli, agent_name): agent_name 
+            executor.submit(launch_agent_cli, agent_name): agent_name
             for agent_name in ["GEMINI", "CODEX", "QWEN"]
         }
-        
+
         # Wait for all to complete
         for future in as_completed(future_to_agent):
             agent_name = future_to_agent[future]
@@ -280,32 +280,32 @@ def main():
                     "error": str(e),
                     "timestamp": datetime.now().isoformat(),
                 }
-    
+
     elapsed = time.time() - start_time
-    
+
     # Print summary
     print("\n" + "="*60)
     print("📊 EXECUTION SUMMARY")
     print("="*60)
-    
+
     completed = 0
     failed = 0
-    
+
     for agent_name in ["GEMINI", "CODEX", "QWEN"]:
         result = results.get(agent_name, {})
         status = result.get("status", "UNKNOWN")
         icon = "✅" if status == "COMPLETED" else "❌"
-        
+
         print(f"{icon} {agent_name:8} | Status: {status:12} | Error: {result.get('error', 'None')}")
-        
+
         if status == "COMPLETED":
             completed += 1
         else:
             failed += 1
-    
+
     print(f"\n📈 Total: {completed} completed, {failed} failed")
     print(f"⏱️  Total execution time: {elapsed:.1f} seconds")
-    
+
     # Save orchestration results
     orchestration_file = RESULTS_DIR / "orchestration-results.json"
     with open(orchestration_file, 'w', encoding='utf-8') as f:
@@ -319,9 +319,9 @@ def main():
                 "total": 3,
             }
         }, f, indent=2)
-    
+
     print(f"\n📄 Results saved: {orchestration_file}")
-    
+
     print("\n" + "="*60)
     print("🎯 NEXT STEPS")
     print("="*60)
@@ -330,7 +330,7 @@ def main():
     print("3. Run validation: python scripts/validation/validate-docs.py --all")
     print("4. Verify target: < 50 errors (currently 88)")
     print("="*60 + "\n")
-    
+
     return 0 if failed == 0 else 1
 
 

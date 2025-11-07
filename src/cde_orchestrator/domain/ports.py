@@ -2,15 +2,23 @@
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import AsyncGenerator, List, Optional, AsyncIterator, Dict, Any
+from typing import Any, AsyncGenerator, AsyncIterator, Dict, List, Optional
 
+from cde_orchestrator.domain.entities import (
+    Project,
+    ProjectId,
+    Recipe,
+    Workflow,
+    WorkflowPhase,
+)
 from cde_orchestrator.domain.git import Commit, Modification
-from cde_orchestrator.domain.entities import Project, ProjectId, WorkflowPhase, Workflow, Recipe
+
 
 class IGitAdapter(ABC):
     """
     Port for interacting with a Git repository.
     """
+
     @abstractmethod
     async def traverse_commits(self) -> AsyncGenerator[Commit, None]:
         pass
@@ -19,10 +27,12 @@ class IGitAdapter(ABC):
     async def get_modifications(self, commit_hash: str) -> List[Modification]:
         pass
 
+
 class IProjectRepository(ABC):
     """
     Port for project persistence.
     """
+
     @abstractmethod
     def get_by_id(self, project_id: ProjectId) -> Optional[Project]:
         pass
@@ -40,7 +50,9 @@ class IProjectRepository(ABC):
         pass
 
     @abstractmethod
-    async def list_all_async(self, limit: Optional[int] = None) -> AsyncIterator[Project]:
+    async def list_all_async(
+        self, limit: Optional[int] = None
+    ) -> AsyncIterator[Project]:
         pass
 
     @abstractmethod
@@ -55,10 +67,12 @@ class IProjectRepository(ABC):
     def delete_by_path(self, path: str) -> None:
         pass
 
+
 class IWorkflowEngine(ABC):
     """
     Port for workflow management.
     """
+
     @abstractmethod
     def detect_workflow_type(self, user_prompt: str) -> str:
         pass
@@ -79,34 +93,44 @@ class IWorkflowEngine(ABC):
     def get_workflow_progress(self, current_phase_id: str) -> Dict[str, Any]:
         pass
 
+
 class ICodeExecutor(ABC):
     """
     Port for executing code or prompts.
     """
+
     @abstractmethod
-    async def execute_prompt(self, project_path: Path, prompt: str, context: Dict[str, Any]) -> str:
+    async def execute_prompt(
+        self, project_path: Path, prompt: str, context: Dict[str, Any]
+    ) -> str:
         pass
+
 
 class IAgentOrchestrator(ABC):
     """
     Port for orchestrating AI agents.
     """
+
     @abstractmethod
     async def run_agent(self, agent_id: str, inputs: Dict[str, Any]) -> Dict[str, Any]:
         pass
+
 
 class IPromptRenderer(ABC):
     """
     Port for rendering prompts.
     """
+
     @abstractmethod
     def load_and_prepare(self, poml_path: Path, context: Dict[str, Any]) -> str:
         pass
+
 
 class IStateStore(ABC):
     """
     Port for loading and saving state.
     """
+
     @abstractmethod
     def load_state(self) -> Dict[str, Any]:
         pass
@@ -115,18 +139,22 @@ class IStateStore(ABC):
     def save_state(self, state: Dict[str, Any]):
         pass
 
+
 class IWorkflowRepository(ABC):
     """
     Port for loading workflow definitions.
     """
+
     @abstractmethod
     def load_workflow(self) -> Workflow:
         pass
+
 
 class IRecipeRepository(ABC):
     """
     Port for loading recipe definitions.
     """
+
     @abstractmethod
     def list_all(self) -> List[Recipe]:
         pass

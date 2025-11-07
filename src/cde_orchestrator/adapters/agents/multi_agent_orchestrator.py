@@ -10,14 +10,14 @@ Implements: ICodeExecutor port from domain/ports.py
 
 import logging
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 
-from cde_orchestrator.domain.ports import ICodeExecutor
 from cde_orchestrator.adapters.agents.agent_selection_policy import (
     AgentSelectionPolicy,
     AgentType,
     TaskComplexity,
 )
+from cde_orchestrator.domain.ports import ICodeExecutor
 
 __all__ = [
     "MultiAgentOrchestrator",
@@ -241,9 +241,7 @@ class MultiAgentOrchestrator(ICodeExecutor):
             raise ValueError(f"No adapter found for agent: {selected_agent.value}")
 
         try:
-            logger.info(
-                f"Executing with {selected_agent.value}: {prompt[:50]}..."
-            )
+            logger.info(f"Executing with {selected_agent.value}: {prompt[:50]}...")
             result = await adapter.execute_prompt(project_path, prompt, context)
             logger.info(f"{selected_agent.value} execution completed successfully")
             return result
@@ -269,9 +267,7 @@ class MultiAgentOrchestrator(ICodeExecutor):
                     result = await fallback_adapter.execute_prompt(
                         project_path, prompt, context
                     )
-                    logger.info(
-                        f"Fallback succeeded with {fallback_agent.value}"
-                    )
+                    logger.info(f"Fallback succeeded with {fallback_agent.value}")
                     return result
 
                 except Exception as fallback_error:

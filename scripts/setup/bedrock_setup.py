@@ -5,10 +5,11 @@ Bedrock Setup and Configuration Script
 Verifica y configura Bedrock para usar con Claude Code y Aider
 """
 
-import sys
 import json
-import boto3
+import sys
 from pathlib import Path
+
+import boto3
 
 
 def check_aws_credentials():
@@ -21,7 +22,7 @@ def check_aws_credentials():
             print("\n📋 Configura con: aws configure --profile bedrock")
             return False
 
-        print(f"✅ Credenciales AWS encontradas")
+        print("✅ Credenciales AWS encontradas")
         print(f"   Region: {session.region_name or 'default'}")
         return True
     except Exception as e:
@@ -32,17 +33,17 @@ def check_aws_credentials():
 def check_bedrock_access():
     """Verificar acceso a Bedrock"""
     try:
-        client = boto3.client('bedrock', region_name='us-east-1')
+        client = boto3.client("bedrock", region_name="us-east-1")
         response = client.list_foundation_models()
 
-        models = response.get('modelSummaries', [])
-        print(f"\n✅ Bedrock accesible")
+        models = response.get("modelSummaries", [])
+        print("\n✅ Bedrock accesible")
         print(f"   Modelos disponibles: {len(models)}")
 
         # Listar modelos de Claude
-        claude_models = [m for m in models if 'claude' in m.get('modelId', '').lower()]
+        claude_models = [m for m in models if "claude" in m.get("modelId", "").lower()]
         if claude_models:
-            print(f"\n   🤖 Modelos Claude disponibles:")
+            print("\n   🤖 Modelos Claude disponibles:")
             for model in claude_models:
                 print(f"      - {model['modelId']}")
 
@@ -53,7 +54,9 @@ def check_bedrock_access():
         print("   1. Ejecutar: aws configure --profile bedrock")
         print("   2. Ingresar Access Key ID y Secret Access Key")
         print("   3. Region: us-east-1")
-        print("   4. Habilitar modelos en Bedrock console: https://console.aws.amazon.com/bedrock/")
+        print(
+            "   4. Habilitar modelos en Bedrock console: https://console.aws.amazon.com/bedrock/"
+        )
         return False
 
 
@@ -63,7 +66,7 @@ def generate_claude_code_config():
         "provider": "bedrock",
         "model": "anthropic.claude-3-5-sonnet-20241022-v2:0",
         "region": "us-east-1",
-        "profile": "bedrock"
+        "profile": "bedrock",
     }
     return config
 
@@ -73,7 +76,7 @@ def generate_aider_config():
     config = {
         "model": "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0",
         "aws-region": "us-east-1",
-        "aws-profile": "bedrock"
+        "aws-profile": "bedrock",
     }
     return config
 

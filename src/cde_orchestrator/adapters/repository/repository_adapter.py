@@ -4,13 +4,11 @@ Provides a small digest (tree, top files, content snippets) suitable to include 
 LLM prompts. Non-invasive: does not write files or modify repo.
 """
 
-import json
-import logging
-import subprocess
 import asyncio
-from datetime import datetime, timezone
+import logging
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, AsyncGenerator
+from typing import AsyncGenerator, List
 
 from cde_orchestrator.domain.git import Commit, Modification
 from cde_orchestrator.domain.ports import IGitAdapter
@@ -22,10 +20,12 @@ except ImportError:  # pragma: no cover
 
 logger = logging.getLogger(__name__)
 
+
 class GitAdapter(IGitAdapter):
     """
     Adapter for interacting with a local Git repository.
     """
+
     def __init__(self, project_root: Path):
         self.project_root = project_root
 
@@ -51,7 +51,7 @@ class GitAdapter(IGitAdapter):
         await process.wait()
         if process.returncode != 0:
             stderr = (await process.stderr.read()).decode("utf-8").strip()
-            raise RuntimeError("Git command failed: " + ' '.join(args) + "\n" + stderr)
+            raise RuntimeError("Git command failed: " + " ".join(args) + "\n" + stderr)
 
     async def traverse_commits(self) -> AsyncGenerator[Commit, None]:
         """
@@ -89,12 +89,12 @@ class GitAdapter(IGitAdapter):
             if not line.strip():
                 continue
 
-            parts = line.split('\t')
+            parts = line.split("\t")
             if len(parts) < 2:
                 continue
 
             change_type = parts[0].strip()
-            old_path = Path(parts[1].strip()) if change_type != 'A' else Path("")
+            old_path = Path(parts[1].strip()) if change_type != "A" else Path("")
             new_path = Path(parts[-1].strip())
 
             modifications.append(

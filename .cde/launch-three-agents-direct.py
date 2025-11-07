@@ -48,7 +48,7 @@ AGENTS = {
 
 def get_agent_system_prompt(agent_key):
     """Retorna el system prompt específico para cada agente."""
-    
+
     prompts = {
         "GEMINI-YAML": """You are GEMINI-AGENT-1, specialized in YAML and metadata validation.
 
@@ -98,23 +98,23 @@ Work directory: E:\\scripts-python\\CDE Orchestrator MCP
 
 Success indicator: Output "✅ QWEN TASK 3 COMPLETE" when done."""
     }
-    
+
     return prompts.get(agent_key, "")
 
 
 def create_agent_prompt(agent_key):
     """Crea el prompt completo para cada agente."""
-    
+
     task_file = AGENT_INSTRUCTIONS_DIR / AGENTS[agent_key]["task_file"]
-    
+
     if not task_file.exists():
         return None
-    
+
     with open(task_file, 'r', encoding='utf-8') as f:
         task_instructions = f.read()
-    
+
     system_prompt = get_agent_system_prompt(agent_key)
-    
+
     combined_prompt = f"""{system_prompt}
 
 DETAILED TASK INSTRUCTIONS:
@@ -127,13 +127,13 @@ CRITICAL REMINDERS:
 - After completing fixes, run: python scripts/validation/validate-docs.py --all
 - Commit with appropriate semantic message
 - End with either "✅ TASK COMPLETE" or "❌ TASK FAILED" plus summary"""
-    
+
     return combined_prompt
 
 
 def launch_agent_gemini_cli(agent_key):
     """Lanza un agente usando gemini CLI."""
-    
+
     agent_name = AGENTS[agent_key]["name"]
     print(f"\n{'='*70}")
     print(f"🚀 Launching {agent_name} Agent")
@@ -141,7 +141,7 @@ def launch_agent_gemini_cli(agent_key):
     print(f"Task ID: {AGENTS[agent_key]['task_id']}")
     print(f"Description: {AGENTS[agent_key]['description']}")
     print(f"Started at: {datetime.now().strftime('%H:%M:%S')}")
-    
+
     # Create prompt
     prompt = create_agent_prompt(agent_key)
     if not prompt:
@@ -152,17 +152,17 @@ def launch_agent_gemini_cli(agent_key):
             "error": "Could not create prompt",
             "timestamp": datetime.now().isoformat(),
         }
-    
+
     # Save prompt to temporary file
     prompt_file = RESULTS_DIR / f"{agent_key.lower()}-prompt.md"
     with open(prompt_file, 'w', encoding='utf-8') as f:
         f.write(prompt)
-    
+
     output_file = RESULTS_DIR / f"{agent_key.lower()}-output.txt"
-    
+
     print(f"📝 Prompt saved: {prompt_file}")
     print(f"📄 Output will be saved to: {output_file}")
-    
+
     try:
         # Execute gemini CLI with prompt from file
         cmd = [
@@ -170,10 +170,10 @@ def launch_agent_gemini_cli(agent_key):
             "--read", str(prompt_file),
             "--output", str(output_file),
         ]
-        
+
         print(f"⏳ Running: gemini --read {prompt_file.name} --output {output_file.name}")
         print(f"   (This may take 5-15 minutes per agent)...")
-        
+
         result = subprocess.run(
             cmd,
             capture_output=False,
@@ -181,16 +181,16 @@ def launch_agent_gemini_cli(agent_key):
             timeout=1800,  # 30 minutes
             cwd=str(PROJECT_ROOT)
         )
-        
+
         # Read output
         output_text = ""
         if output_file.exists():
             with open(output_file, 'r', encoding='utf-8') as f:
                 output_text = f.read()
-        
+
         # Determine if complete (look for success marker)
         completed = f"✅ {agent_name.upper()} TASK" in output_text.upper()
-        
+
         print(f"\n{'='*70}")
         if completed:
             print(f"✅ {agent_name} Task Completed Successfully")
@@ -199,7 +199,7 @@ def launch_agent_gemini_cli(agent_key):
         print(f"Return Code: {result.returncode}")
         print(f"Output file: {output_file}")
         print(f"{'='*70}")
-        
+
         return {
             "agent": agent_name,
             "status": "COMPLETED" if completed else "COMPLETED_UNCLEAR",
@@ -207,7 +207,7 @@ def launch_agent_gemini_cli(agent_key):
             "output_file": str(output_file),
             "timestamp": datetime.now().isoformat(),
         }
-        
+
     except subprocess.TimeoutExpired:
         print(f"❌ {agent_name}: Timeout after 30 minutes")
         return {
@@ -216,7 +216,7 @@ def launch_agent_gemini_cli(agent_key):
             "error": "Execution timeout (30 minutes)",
             "timestamp": datetime.now().isoformat(),
         }
-    
+
     except Exception as e:
         print(f"❌ {agent_name}: {str(e)}")
         return {
@@ -229,7 +229,7 @@ def launch_agent_gemini_cli(agent_key):
 
 def main():
     """Main orchestration function."""
-    
+
     print("\n" + "="*70)
     print("🎯 SEMANA 2 - THREE-AGENT PARALLEL ORCHESTRATION")
     print("="*70)
@@ -243,19 +243,19 @@ def main():
     print("\n⚙️  Execution Mode: PARALLEL HEADLESS (via Gemini CLI)")
     print("⏱️  Timeout: 30 minutes per agent")
     print("="*70)
-    
+
     # Launch all 3 agents in parallel
     results = {}
     start_time = time.time()
-    
+
     print("\n📡 Launching agents in parallel threads...\n")
-    
+
     with ThreadPoolExecutor(max_workers=3) as executor:
         future_to_agent = {
             executor.submit(launch_agent_gemini_cli, agent_key): agent_key
             for agent_key in ["GEMINI-YAML", "CODEX-FILES", "QWEN-DIRS"]
         }
-        
+
         # Collect results as they complete
         for future in as_completed(future_to_agent):
             agent_key = future_to_agent[future]
@@ -271,32 +271,32 @@ def main():
                     "error": str(e),
                     "timestamp": datetime.now().isoformat(),
                 }
-    
+
     elapsed = time.time() - start_time
-    
+
     # Print summary
     print("\n" + "="*70)
     print("📊 EXECUTION SUMMARY")
     print("="*70)
-    
+
     completed_count = 0
-    
+
     for agent_key in ["GEMINI-YAML", "CODEX-FILES", "QWEN-DIRS"]:
         agent_name = AGENTS[agent_key]["name"]
         result = results.get(agent_name, {})
         status = result.get("status", "UNKNOWN")
-        
+
         if status in ["COMPLETED", "COMPLETED_UNCLEAR"]:
             icon = "✅"
             completed_count += 1
         else:
             icon = "❌"
-        
+
         print(f"{icon} {agent_name:8} | {status:20} | {result.get('error', 'OK')}")
-    
+
     print(f"\n📈 Results: {completed_count}/3 agents completed")
     print(f"⏱️  Total execution time: {elapsed/60:.1f} minutes ({elapsed:.0f} seconds)")
-    
+
     # Save orchestration results
     orchestration_file = RESULTS_DIR / "orchestration-summary.json"
     with open(orchestration_file, 'w', encoding='utf-8') as f:
@@ -307,16 +307,16 @@ def main():
             "agents_total": 3,
             "results": results,
         }, f, indent=2)
-    
+
     print(f"\n📄 Summary saved: {orchestration_file}")
-    
+
     # Post-execution validation
     print("\n" + "="*70)
     print("🔍 POST-EXECUTION VALIDATION")
     print("="*70)
-    
+
     print("\nRunning governance validation...\n")
-    
+
     try:
         result = subprocess.run(
             ["python", "scripts/validation/validate-docs.py", "--all"],
@@ -324,16 +324,16 @@ def main():
             text=True,
             cwd=str(PROJECT_ROOT)
         )
-        
+
         # Show last lines (summary)
         output_lines = result.stdout.split('\n')
         for line in output_lines[-10:]:
             if line.strip():
                 print(line)
-    
+
     except Exception as e:
         print(f"⚠️  Could not run validation: {e}")
-    
+
     # Next steps
     print("\n" + "="*70)
     print("🎯 NEXT STEPS")
@@ -344,7 +344,7 @@ def main():
     print(f"4. Full validation: python scripts/validation/validate-docs.py --all")
     print(f"5. Expected target: < 50 errors (currently 88)")
     print("="*70 + "\n")
-    
+
     return 0 if completed_count == 3 else 1
 
 

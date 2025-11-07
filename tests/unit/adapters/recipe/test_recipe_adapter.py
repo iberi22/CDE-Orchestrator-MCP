@@ -1,9 +1,13 @@
 """
 Unit tests for the RecipeAdapter.
 """
-import pytest
+
 from pathlib import Path
+
+import pytest
+
 from cde_orchestrator.adapters.recipe.recipe_adapter import RecipeAdapter
+
 
 @pytest.fixture
 def recipe_dir(tmp_path):
@@ -13,24 +17,29 @@ def recipe_dir(tmp_path):
     engineering_path.mkdir(parents=True)
 
     # Sample ai-engineer recipe
-    (engineering_path / "ai-engineer.poml").write_text("""
+    (engineering_path / "ai-engineer.poml").write_text(
+        """
     <poml>
         <let name="tools">["file", "shell"]</let>
         <let name="providers">{ "openai": { "model": "gpt-5" } }</let>
         <role>You are an AI engineer.</role>
     </poml>
-    """)
+    """
+    )
 
     # Sample sprint-prioritizer recipe
     (recipes_path / "planning").mkdir()
-    (recipes_path / "planning" / "sprint-prioritizer.poml").write_text("""
+    (recipes_path / "planning" / "sprint-prioritizer.poml").write_text(
+        """
     <poml>
         <let name="tools">["jira"]</let>
         <role>You prioritize sprints.</role>
     </poml>
-    """)
+    """
+    )
 
     return recipes_path
+
 
 def test_load_recipes(recipe_dir):
     """Tests that recipes are loaded and parsed correctly."""
@@ -43,12 +52,16 @@ def test_load_recipes(recipe_dir):
     assert "file" in ai_engineer.tools
     assert "openai" in ai_engineer.providers
 
+
 def test_suggest_recipe_by_keyword(recipe_dir):
     """Tests recipe suggestion based on keywords in the user prompt."""
     adapter = RecipeAdapter(recipes_dir=recipe_dir)
-    recipe = adapter.suggest_recipe("prioritize the backlog for our next sprint", "define")
+    recipe = adapter.suggest_recipe(
+        "prioritize the backlog for our next sprint", "define"
+    )
     assert recipe is not None
     assert recipe.id == "sprint-prioritizer"
+
 
 def test_suggest_recipe_by_phase(recipe_dir):
     """Tests recipe suggestion based on the workflow phase."""
@@ -56,6 +69,7 @@ def test_suggest_recipe_by_phase(recipe_dir):
     recipe = adapter.suggest_recipe("a generic user prompt", "implement")
     assert recipe is not None
     assert recipe.id == "ai-engineer"
+
 
 def test_list_recipes_by_category(recipe_dir):
     """Tests that recipes are correctly listed and grouped by category."""
@@ -65,6 +79,7 @@ def test_list_recipes_by_category(recipe_dir):
     assert "planning" in categories
     assert "ai-engineer" in categories["engineering"]
     assert "sprint-prioritizer" in categories["planning"]
+
 
 def test_empty_recipe_dir():
     """Tests that the adapter handles an empty or non-existent recipe directory gracefully."""

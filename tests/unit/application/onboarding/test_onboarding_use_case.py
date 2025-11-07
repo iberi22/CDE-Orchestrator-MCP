@@ -1,13 +1,17 @@
 # tests/unit/application/onboarding/test_onboarding_use_case.py
 
-import pytest
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import AsyncMock
 
-from cde_orchestrator.application.onboarding.onboarding_use_case import OnboardingUseCase
-from cde_orchestrator.domain.ports import IGitAdapter
+import pytest
+
+from cde_orchestrator.application.onboarding.onboarding_use_case import (
+    OnboardingUseCase,
+)
 from cde_orchestrator.domain.git import Commit
-from datetime import datetime
+from cde_orchestrator.domain.ports import IGitAdapter
+
 
 async def mock_commits_async_generator():
     yield Commit(
@@ -16,6 +20,7 @@ async def mock_commits_async_generator():
         date=datetime.now(),
         message="Test commit message",
     )
+
 
 @pytest.mark.asyncio
 async def test_onboarding_plan_uses_git_adapter():

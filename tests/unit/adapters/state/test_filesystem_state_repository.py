@@ -1,27 +1,36 @@
 # tests/unit/adapters/state/test_filesystem_state_repository.py
 import json
-import pytest
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
-from src.cde_orchestrator.adapters.state.filesystem_state_repository import FileSystemStateRepository
+import pytest
+
+from src.cde_orchestrator.adapters.state.filesystem_state_repository import (
+    FileSystemStateRepository,
+)
+
 
 @pytest.fixture
 def temp_state_file(tmp_path: Path) -> Path:
     """Provides a temporary state file path for testing."""
     return tmp_path / "state" / "test_state.json"
 
+
 @pytest.fixture
 def state_repository(temp_state_file: Path) -> FileSystemStateRepository:
     """Provides a FileSystemStateRepository instance using a temp file."""
     return FileSystemStateRepository(temp_state_file)
+
 
 def test_load_state_non_existent_file(state_repository: FileSystemStateRepository):
     """Should return an empty dict if the state file does not exist."""
     state = state_repository.load_state()
     assert state == {}
 
-def test_save_and_load_state(state_repository: FileSystemStateRepository, temp_state_file: Path):
+
+def test_save_and_load_state(
+    state_repository: FileSystemStateRepository, temp_state_file: Path
+):
     """Should correctly save and then load the state."""
     test_state: Dict[str, Any] = {"features": {"feat1": {"status": "defining"}}}
     state_repository.save_state(test_state)
@@ -31,7 +40,10 @@ def test_save_and_load_state(state_repository: FileSystemStateRepository, temp_s
     loaded_state = state_repository.load_state()
     assert loaded_state == test_state
 
-def test_save_state_creates_backup(state_repository: FileSystemStateRepository, temp_state_file: Path):
+
+def test_save_state_creates_backup(
+    state_repository: FileSystemStateRepository, temp_state_file: Path
+):
     """Should create a backup of the existing state file before saving."""
     # First save
     state_repository.save_state({"version": 1})
@@ -49,6 +61,7 @@ def test_save_state_creates_backup(state_repository: FileSystemStateRepository, 
         backup_content = json.load(f)
 
     assert backup_content == {"version": 1}
+
 
 def test_backup_rotation(tmp_path: Path):
     """Should keep only the configured number of recent backups."""
@@ -74,7 +87,10 @@ def test_backup_rotation(tmp_path: Path):
 
     assert backup_versions == {1, 2, 3}
 
-def test_load_state_handles_json_error(state_repository: FileSystemStateRepository, temp_state_file: Path):
+
+def test_load_state_handles_json_error(
+    state_repository: FileSystemStateRepository, temp_state_file: Path
+):
     """Should return an empty dict if the state file is corrupted."""
     temp_state_file.parent.mkdir(parents=True, exist_ok=True)
     temp_state_file.write_text("this is not json")

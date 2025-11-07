@@ -1,9 +1,10 @@
 # src/cde_orchestrator/application/use_cases/manage_state.py
 import logging
 from typing import Any, Dict, List, Tuple
+
 from pydantic import ValidationError
 
-from ...domain.entities import Feature, FeatureState, FeatureStatus, PhaseStatus
+from ...domain.entities import FeatureState, FeatureStatus, PhaseStatus
 from ...domain.ports import IStateStore
 
 logger = logging.getLogger(__name__)

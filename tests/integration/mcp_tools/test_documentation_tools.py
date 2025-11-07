@@ -1,14 +1,15 @@
 # tests/integration/mcp_tools/test_documentation_tools.py
 import json
-import os
-import unittest
-from pathlib import Path
 
 # Add project root to path
 import sys
+import unittest
+from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from src.mcp_tools.documentation import cde_scanDocumentation
+
 
 class TestDocumentationTools(unittest.TestCase):
 
@@ -50,8 +51,9 @@ class TestDocumentationTools(unittest.TestCase):
         """
         Verify that cde_createSpecification creates a file and returns its path.
         """
-        from src.mcp_tools.documentation import cde_createSpecification
         import tempfile
+
+        from src.mcp_tools.documentation import cde_createSpecification
 
         with tempfile.TemporaryDirectory() as temp_dir:
             project_path = Path(temp_dir)
@@ -61,7 +63,7 @@ class TestDocumentationTools(unittest.TestCase):
                 feature_name="Test Feature",
                 description="A feature for testing.",
                 author="Test Runner",
-                project_path=str(project_path)
+                project_path=str(project_path),
             )
 
             self.assertIsInstance(result_json, str)
@@ -70,6 +72,7 @@ class TestDocumentationTools(unittest.TestCase):
             self.assertIn("filepath", data)
             self.assertTrue((project_path / data["filepath"]).exists())
             self.assertIn("test-feature.md", data["filepath"])
+
 
 if __name__ == "__main__":
     unittest.main()

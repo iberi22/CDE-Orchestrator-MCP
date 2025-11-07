@@ -3,17 +3,14 @@
 Test script to validate onboarding functionality directly
 without needing the full MCP server running.
 """
-import json
 import sys
 from pathlib import Path
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from cde_orchestrator.application.onboarding import OnboardingUseCase
 from cde_orchestrator.adapters.state import StateAdapter
-from cde_orchestrator.adapters.prompt import PromptAdapter
-
+from cde_orchestrator.application.onboarding import OnboardingUseCase
 
 
 def test_onboarding():
@@ -64,8 +61,6 @@ def test_onboarding():
             for file in obsolete:
                 print(f"   - {file}")
 
-
-
     # Step 5: Check if prompt template exists
     print("\n5. VALIDATING PROMPT TEMPLATE...")
     prompt_path = project_root / ".cde" / "prompts" / "00_onboarding.poml"
@@ -85,7 +80,7 @@ def test_onboarding():
         state = state_mgr.load_state()
         onboarding_data = state.get("onboarding", {})
 
-        print(f"   ✅ State file exists")
+        print("   ✅ State file exists")
         print(f"   Has onboarding data: {bool(onboarding_data)}")
 
         if onboarding_data:

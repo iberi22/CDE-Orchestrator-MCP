@@ -9,18 +9,19 @@ Downloads and adapts skills from external repositories:
 Transforms external formats to CDE-compatible skill markdown.
 """
 
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Dict, Any, List, Optional
 import re
-import asyncio
-import aiohttp
+from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import aiohttp
 
 
 @dataclass
 class ExternalSkill:
     """Represents a skill from external repository."""
+
     name: str
     description: str
     source_url: str
@@ -33,6 +34,7 @@ class ExternalSkill:
 @dataclass
 class SkillAdaptation:
     """Result of adapting external skill to CDE format."""
+
     skill_name: str
     file_path: str
     content: str
@@ -50,8 +52,12 @@ class SkillSourcingUseCase:
     - Direct URLs to skill files
     """
 
-    AWESOME_CLAUDE_SKILLS_REPO = "https://api.github.com/repos/travisvn/awesome-claude-skills"
-    AWESOME_CLAUDE_SKILLS_RAW = "https://raw.githubusercontent.com/travisvn/awesome-claude-skills/main"
+    AWESOME_CLAUDE_SKILLS_REPO = (
+        "https://api.github.com/repos/travisvn/awesome-claude-skills"
+    )
+    AWESOME_CLAUDE_SKILLS_RAW = (
+        "https://raw.githubusercontent.com/travisvn/awesome-claude-skills/main"
+    )
 
     # Category mappings from external format to CDE format
     CATEGORY_MAPPING = {
@@ -60,7 +66,7 @@ class SkillSourcingUseCase:
         "analysis": "research",
         "productivity": "general",
         "research": "research",
-        "development": "engineering"
+        "development": "engineering",
     }
 
     def __init__(self, skills_base_path: Optional[Path] = None):
@@ -76,7 +82,7 @@ class SkillSourcingUseCase:
         self,
         skill_query: str,
         source: str = "awesome-claude-skills",
-        destination: str = "base"
+        destination: str = "base",
     ) -> Dict[str, Any]:
         """
         Search and download skill from external repository.
@@ -102,7 +108,7 @@ class SkillSourcingUseCase:
                 "status": "not_found",
                 "skills_found": 0,
                 "skills_downloaded": [],
-                "message": f"No skills found matching '{skill_query}' in {source}"
+                "message": f"No skills found matching '{skill_query}' in {source}",
             }
 
         # 2. Adapt skills to CDE format
@@ -129,17 +135,15 @@ class SkillSourcingUseCase:
                     "name": a.skill_name,
                     "path": a.file_path,
                     "adaptations": a.adaptations_made,
-                    "metadata": a.metadata
+                    "metadata": a.metadata,
                 }
                 for a in adapted_skills
             ],
             "destination_path": str(destination_path),
-            "saved_files": saved_files
+            "saved_files": saved_files,
         }
 
-    async def _search_skills(
-        self, query: str, source: str
-    ) -> List[ExternalSkill]:
+    async def _search_skills(self, query: str, source: str) -> List[ExternalSkill]:
         """
         Search for skills in external repository.
 
@@ -180,7 +184,7 @@ class SkillSourcingUseCase:
 
                 # 2. Parse skill entries
                 # Pattern: [Skill Name](path/to/skill.md) - Description
-                pattern = r'\[([^\]]+)\]\(([^\)]+\.md)\)\s*-?\s*(.+)?'
+                pattern = r"\[([^\]]+)\]\(([^\)]+\.md)\)\s*-?\s*(.+)?"
                 matches = re.finditer(pattern, readme_content, re.MULTILINE)
 
                 # 3. Score and filter by relevance
@@ -212,15 +216,19 @@ class SkillSourcingUseCase:
                             if skill_response.status == 200:
                                 content = await skill_response.text()
 
-                                external_skills.append(ExternalSkill(
-                                    name=skill_name,
-                                    description=skill_desc,
-                                    source_url=skill_url,
-                                    content=content,
-                                    tags=self._extract_tags(skill_name, skill_desc),
-                                    category=self._infer_category(skill_name, skill_desc),
-                                    rating=relevance / 20.0  # Normalize to 0-1
-                                ))
+                                external_skills.append(
+                                    ExternalSkill(
+                                        name=skill_name,
+                                        description=skill_desc,
+                                        source_url=skill_url,
+                                        content=content,
+                                        tags=self._extract_tags(skill_name, skill_desc),
+                                        category=self._infer_category(
+                                            skill_name, skill_desc
+                                        ),
+                                        rating=relevance / 20.0,  # Normalize to 0-1
+                                    )
+                                )
 
                 # Sort by rating
                 external_skills.sort(key=lambda s: s.rating or 0, reverse=True)
@@ -238,12 +246,36 @@ class SkillSourcingUseCase:
 
         # Common tag patterns
         tag_keywords = [
-            "python", "javascript", "typescript", "react", "vue", "angular",
-            "api", "rest", "graphql", "database", "sql", "nosql",
-            "testing", "debugging", "refactoring", "optimization",
-            "web", "frontend", "backend", "fullstack",
-            "ai", "ml", "llm", "gpt", "claude",
-            "devops", "docker", "kubernetes", "aws", "azure"
+            "python",
+            "javascript",
+            "typescript",
+            "react",
+            "vue",
+            "angular",
+            "api",
+            "rest",
+            "graphql",
+            "database",
+            "sql",
+            "nosql",
+            "testing",
+            "debugging",
+            "refactoring",
+            "optimization",
+            "web",
+            "frontend",
+            "backend",
+            "fullstack",
+            "ai",
+            "ml",
+            "llm",
+            "gpt",
+            "claude",
+            "devops",
+            "docker",
+            "kubernetes",
+            "aws",
+            "azure",
         ]
 
         for keyword in tag_keywords:
@@ -268,7 +300,9 @@ class SkillSourcingUseCase:
         else:
             return "general"
 
-    def _adapt_skill_to_cde_format(self, external_skill: ExternalSkill) -> SkillAdaptation:
+    def _adapt_skill_to_cde_format(
+        self, external_skill: ExternalSkill
+    ) -> SkillAdaptation:
         """
         Adapt external skill format to CDE-compatible markdown.
 
@@ -340,7 +374,9 @@ rating: {external_skill.rating or 0.0}
             adaptations_made.append("Preserved 'Examples' section")
 
         if "best_practices" in content_sections:
-            main_content += f"## Best Practices\n\n{content_sections['best_practices']}\n\n"
+            main_content += (
+                f"## Best Practices\n\n{content_sections['best_practices']}\n\n"
+            )
             adaptations_made.append("Preserved 'Best Practices' section")
 
         # 4. Add remaining content as-is
@@ -360,8 +396,8 @@ rating: {external_skill.rating or 0.0}
         full_content = frontmatter + main_content + footer
 
         # 6. Sanitize filename
-        skill_filename = re.sub(r'[^a-z0-9-]', '-', external_skill.name.lower())
-        skill_filename = re.sub(r'-+', '-', skill_filename).strip('-')
+        skill_filename = re.sub(r"[^a-z0-9-]", "-", external_skill.name.lower())
+        skill_filename = re.sub(r"-+", "-", skill_filename).strip("-")
 
         return SkillAdaptation(
             skill_name=skill_filename,
@@ -372,9 +408,9 @@ rating: {external_skill.rating or 0.0}
                 "source": "awesome-claude-skills",
                 "rating": external_skill.rating,
                 "tags": external_skill.tags,
-                "category": external_skill.category
+                "category": external_skill.category,
             },
-            adaptations_made=adaptations_made
+            adaptations_made=adaptations_made,
         )
 
     def _parse_external_content(self, content: str) -> Dict[str, str]:
@@ -383,10 +419,10 @@ rating: {external_skill.rating or 0.0}
 
         # Common section patterns
         patterns = {
-            "when_to_use": r'(?:## When to Use|## Use Cases?)(.*?)(?=##|$)',
-            "tools": r'(?:## Tools?|## Context|## Requirements?)(.*?)(?=##|$)',
-            "examples": r'(?:## Examples?|## Usage)(.*?)(?=##|$)',
-            "best_practices": r'(?:## Best Practices|## Guidelines)(.*?)(?=##|$)'
+            "when_to_use": r"(?:## When to Use|## Use Cases?)(.*?)(?=##|$)",
+            "tools": r"(?:## Tools?|## Context|## Requirements?)(.*?)(?=##|$)",
+            "examples": r"(?:## Examples?|## Usage)(.*?)(?=##|$)",
+            "best_practices": r"(?:## Best Practices|## Guidelines)(.*?)(?=##|$)",
         }
 
         for section_key, pattern in patterns.items():

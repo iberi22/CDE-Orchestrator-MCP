@@ -13,11 +13,11 @@ tags:
 - mcp
 - python
 - testing
-llm_summary: "User guide for TASK.md: CDE Orchestrator MCP Implementation.\n  | ID\
-  \ | Task | Priority | Status | |---|---|---|---| | SETUP-01 | Create the project\
-  \ directory structure as defined in `README.md`. | HIGH | ✅ Complete | | SETUP-02\
-  \ | Initialize a Python virtual environment and create `requirements.txt`. | HIGH\
-  \ | ✅ Complete |\n  Reference when working with guide documentation."
+llm_summary: 'User guide for TASK.md: CDE Orchestrator MCP Implementation.
+
+  | ID | Task | Priority | Status | |---|---|---|---| | SETUP-01 | Create the project directory structure as defined in `README.md`. | HIGH | ✅ Complete | | SETUP-02 | Initialize a Python virtual environment and create `requirements.txt`. | HIGH | ✅ Complete |
+
+  Reference when working with guide documentation.'
 ---
 
 # TASK.md: CDE Orchestrator MCP Implementation

@@ -5,9 +5,9 @@ Provides detailed insights about documentation quality and structure.
 """
 
 import re
-from pathlib import Path
-from typing import Dict, Any, List
 from collections import defaultdict
+from pathlib import Path
+from typing import Any, Dict, List
 
 
 class AnalyzeDocumentationUseCase:
@@ -49,16 +49,21 @@ class AnalyzeDocumentationUseCase:
         md_files = list(project.rglob("*.md"))
         excluded_dirs = {".git", ".venv", "node_modules", "venv", "__pycache__"}
         md_files = [
-            f for f in md_files
+            f
+            for f in md_files
             if not any(excluded in f.parts for excluded in excluded_dirs)
         ]
 
         # Report initial progress
-        report_progress_http("analyzeDocumentation", 0.0, f"Starting analysis of {len(md_files)} files")
+        report_progress_http(
+            "analyzeDocumentation", 0.0, f"Starting analysis of {len(md_files)} files"
+        )
 
         results = {
             "total_analyzed": len(md_files),
-            "link_analysis": self._analyze_links(md_files, project, report_progress_http),
+            "link_analysis": self._analyze_links(
+                md_files, project, report_progress_http
+            ),
             "metadata_analysis": self._analyze_metadata(md_files),
             "quality_indicators": self._analyze_quality(md_files),
             "issues": [],
@@ -82,9 +87,11 @@ class AnalyzeDocumentationUseCase:
 
         return results
 
-    def _analyze_links(self, md_files: List[Path], project: Path, report_progress_http) -> Dict[str, Any]:
+    def _analyze_links(
+        self, md_files: List[Path], project: Path, report_progress_http
+    ) -> Dict[str, Any]:
         """Analyze internal links between documents."""
-        link_pattern = r'\[([^\]]+)\]\(([^\)]+)\)'
+        link_pattern = r"\[([^\]]+)\]\(([^\)]+)\)"
 
         total_links = 0
         broken_links = []
@@ -115,11 +122,13 @@ class AnalyzeDocumentationUseCase:
                     if target.exists():
                         valid_links += 1
                     else:
-                        broken_links.append({
-                            "source": str(md_file.relative_to(project)),
-                            "target": link_url,
-                            "link_text": link_text,
-                        })
+                        broken_links.append(
+                            {
+                                "source": str(md_file.relative_to(project)),
+                                "target": link_url,
+                                "link_text": link_text,
+                            }
+                        )
             except Exception:
                 continue
 
@@ -129,13 +138,13 @@ class AnalyzeDocumentationUseCase:
                 report_progress_http(
                     "analyzeDocumentation",
                     progress,
-                    f"Analyzing links: {idx + 1}/{len(md_files)}"
+                    f"Analyzing links: {idx + 1}/{len(md_files)}",
                 )
 
         return {
             "total_links": total_links,
             "valid_links": valid_links,
-            "broken_links": broken_links, # Return the list itself
+            "broken_links": broken_links,  # Return the list itself
             "external_links": external_links,
         }
 
@@ -145,7 +154,14 @@ class AnalyzeDocumentationUseCase:
         files_with_metadata = 0
         files_without_metadata = 0
 
-        required_fields = {"title", "description", "type", "status", "created", "updated"}
+        required_fields = {
+            "title",
+            "description",
+            "type",
+            "status",
+            "created",
+            "updated",
+        }
         missing_required = []
 
         for md_file in md_files:
@@ -168,10 +184,12 @@ class AnalyzeDocumentationUseCase:
                     # Check required fields
                     missing = required_fields - set(fields)
                     if missing:
-                        missing_required.append({
-                            "file": md_file.name,
-                            "missing": list(missing),
-                        })
+                        missing_required.append(
+                            {
+                                "file": md_file.name,
+                                "missing": list(missing),
+                            }
+                        )
                 else:
                     files_without_metadata += 1
             except Exception:
@@ -180,7 +198,9 @@ class AnalyzeDocumentationUseCase:
         return {
             "files_with_metadata": files_with_metadata,
             "files_without_metadata": files_without_metadata,
-            "common_fields": dict(sorted(metadata_fields.items(), key=lambda x: -x[1])[:10]),
+            "common_fields": dict(
+                sorted(metadata_fields.items(), key=lambda x: -x[1])[:10]
+            ),
             "missing_required_fields": len(missing_required),
             "missing_required_details": missing_required[:5],
         }
@@ -248,7 +268,9 @@ class AnalyzeDocumentationUseCase:
         links = results["link_analysis"]
         num_broken_links = len(links["broken_links"])
         if links["total_links"] > 0:
-            link_health = links["valid_links"] / (links["valid_links"] + num_broken_links)
+            link_health = links["valid_links"] / (
+                links["valid_links"] + num_broken_links
+            )
             score -= (1 - link_health) * 30
 
         # Content quality (20 points)
@@ -279,9 +301,7 @@ class AnalyzeDocumentationUseCase:
 
         num_broken_links = len(links["broken_links"])
         if num_broken_links > 0:
-            issues.append(
-                f"🔴 {num_broken_links} broken internal links detected"
-            )
+            issues.append(f"🔴 {num_broken_links} broken internal links detected")
 
         if quality["very_short_files"] > 5:
             issues.append(

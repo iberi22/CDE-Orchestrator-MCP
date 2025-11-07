@@ -129,7 +129,9 @@ class SkillManager:
 
         # If not enough coverage, recommend skill generation
         covered_gaps = self._get_covered_gaps(skills, requirement.knowledge_gaps)
-        uncovered_gaps = [g for g in requirement.knowledge_gaps if g not in covered_gaps]
+        uncovered_gaps = [
+            g for g in requirement.knowledge_gaps if g not in covered_gaps
+        ]
 
         if uncovered_gaps:
             # TODO: Would trigger SkillGenerator here to create ephemeral skills

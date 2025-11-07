@@ -1,3 +1,12 @@
+---
+title: "MCP Status Bar Solution"
+description: "A professional solution for the MCP status bar."
+type: "guide"
+status: "draft"
+created: "2025-11-07"
+updated: "2025-11-07"
+author: "Gemini-Agent-1"
+---
 # MCP Status Bar - Solución Profesional Implementada
 
 ## 🎯 Problema Identificado

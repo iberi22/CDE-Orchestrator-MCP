@@ -20,19 +20,12 @@ Architecture:
 """
 
 import asyncio
-import subprocess
 import shutil
-from typing import List, Optional
 from abc import ABC, abstractmethod
+from typing import List
 
-from ...domain.documentation.ports import (
-    ILLMSummaryGenerator,
-    LLMProvider,
-)
-from ...domain.documentation.entities import (
-    Specification,
-    DocumentType,
-)
+from ...domain.documentation.entities import DocumentType, Specification
+from ...domain.documentation.ports import ILLMSummaryGenerator, LLMProvider
 
 
 class LLMCLIError(Exception):
@@ -121,9 +114,7 @@ class BaseLLMCLIAdapter(ABC):
                 f"{self.cli_command} not found: {self.get_install_instructions()}"
             )
         except Exception as e:
-            raise LLMCLIExecutionError(
-                f"{self.cli_command} execution error: {str(e)}"
-            )
+            raise LLMCLIExecutionError(f"{self.cli_command} execution error: {str(e)}")
 
     @abstractmethod
     def _build_command(
@@ -175,7 +166,9 @@ class GeminiCLIAdapter(BaseLLMCLIAdapter, ILLMSummaryGenerator):
         ]
 
     def get_install_instructions(self) -> str:
-        return "Install Google Gemini CLI from https://ai.google.dev/gemini-api/docs/cli"
+        return (
+            "Install Google Gemini CLI from https://ai.google.dev/gemini-api/docs/cli"
+        )
 
     async def generate_summary(
         self,
@@ -231,9 +224,14 @@ Summary:"""
         """Extract and validate summary from LLM response."""
         # Remove common prefixes
         summary = response.strip()
-        for prefix in ["Summary:", "summary:", "Here's the summary:", "Here is the summary:"]:
+        for prefix in [
+            "Summary:",
+            "summary:",
+            "Here's the summary:",
+            "Here is the summary:",
+        ]:
             if summary.startswith(prefix):
-                summary = summary[len(prefix):].strip()
+                summary = summary[len(prefix) :].strip()
 
         # Validate length
         if len(summary.split()) > 100:
@@ -338,7 +336,7 @@ class QwenCLIAdapter(BaseLLMCLIAdapter, ILLMSummaryGenerator):
         summary = response.strip()
         for prefix in ["总结：", "摘要：", "Summary:", "summary:"]:
             if summary.startswith(prefix):
-                summary = summary[len(prefix):].strip()
+                summary = summary[len(prefix) :].strip()
 
         if len(summary.split()) > 100:
             words = summary.split()[:100]
@@ -438,7 +436,7 @@ Summary:"""
         summary = response.strip()
         for prefix in ["Summary:", "summary:", "Suggestion:", "suggestion:"]:
             if summary.startswith(prefix):
-                summary = summary[len(prefix):].strip()
+                summary = summary[len(prefix) :].strip()
 
         if len(summary.split()) > 100:
             words = summary.split()[:100]
@@ -551,9 +549,7 @@ class MultiProviderLLMCLIAdapter(ILLMSummaryGenerator):
     def is_provider_available(self, provider: LLMProvider) -> bool:
         """Check if specific provider is available."""
         if provider == LLMProvider.AUTO:
-            return any(
-                self.providers[p].is_available() for p in self.fallback_order
-            )
+            return any(self.providers[p].is_available() for p in self.fallback_order)
         return self.providers[provider].is_available()
 
     def get_available_providers(self) -> List[LLMProvider]:

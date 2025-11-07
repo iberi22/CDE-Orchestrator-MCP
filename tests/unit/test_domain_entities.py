@@ -6,27 +6,24 @@ Tests business logic, invariants, and state transitions WITHOUT infrastructure.
 All tests should be fast (<5ms) and require no I/O.
 """
 
-import pytest
-from datetime import datetime, timezone
+from datetime import datetime
 from uuid import UUID
 
+import pytest
+
 from src.cde_orchestrator.domain.entities import (
+    Feature,
+    FeatureStatus,
     Project,
     ProjectId,
     ProjectStatus,
-    Feature,
-    FeatureStatus,
     Workflow,
     WorkflowPhase,
 )
 from src.cde_orchestrator.domain.exceptions import (
     InvalidStateTransitionError,
-    ProjectNotFoundError,
-    FeatureNotFoundError,
     WorkflowValidationError,
-    PhaseNotFoundError,
 )
-
 
 # ============================================================================
 # VALUE OBJECTS
@@ -160,15 +157,18 @@ class TestProject:
         """Test that activating from archived status fails."""
         project = Project.create(name="Test", path="/tmp/test")
         project.activate()
-        project.archive() # Correctly transition to ARCHIVED state
+        project.archive()  # Correctly transition to ARCHIVED state
 
         # Now, trying to activate from ARCHIVED should work (reactivation)
         project.activate()
         assert project.status == ProjectStatus.ACTIVE
 
         # Let's test a truly invalid transition, e.g., from ERROR
-        project.status = ProjectStatus.ERROR # Manually set for test
-        with pytest.raises(InvalidStateTransitionError, match="Cannot transition Project from 'error' to 'active'"):
+        project.status = ProjectStatus.ERROR  # Manually set for test
+        with pytest.raises(
+            InvalidStateTransitionError,
+            match="Cannot transition Project from 'error' to 'active'",
+        ):
             project.activate()
 
     def test_archive_active_project(self):
@@ -184,7 +184,10 @@ class TestProject:
         """Onboarding projects cannot be archived (invalid transition)."""
         project = Project.create(name="Test", path="/tmp/test")
 
-        with pytest.raises(InvalidStateTransitionError, match="Cannot transition Project from 'onboarding' to 'archived'"):
+        with pytest.raises(
+            InvalidStateTransitionError,
+            match="Cannot transition Project from 'onboarding' to 'archived'",
+        ):
             project.archive()
 
     def test_start_feature_when_active(self):
@@ -334,8 +337,12 @@ class TestWorkflow:
     def test_create_workflow(self):
         """Create workflow with phases (using correct field names)."""
         phases = [
-            WorkflowPhase(id="define", description="Define", prompt_recipe="define.poml"),
-            WorkflowPhase(id="implement", description="Implement", prompt_recipe="impl.poml"),
+            WorkflowPhase(
+                id="define", description="Define", prompt_recipe="define.poml"
+            ),
+            WorkflowPhase(
+                id="implement", description="Implement", prompt_recipe="impl.poml"
+            ),
         ]
 
         workflow = Workflow(name="Test Workflow", version="1.0", phases=phases)
@@ -347,8 +354,12 @@ class TestWorkflow:
     def test_get_phase_by_id(self):
         """Retrieve phase by ID (returns object or None)."""
         phases = [
-            WorkflowPhase(id="define", description="Define", prompt_recipe="define.poml"),
-            WorkflowPhase(id="implement", description="Implement", prompt_recipe="impl.poml"),
+            WorkflowPhase(
+                id="define", description="Define", prompt_recipe="define.poml"
+            ),
+            WorkflowPhase(
+                id="implement", description="Implement", prompt_recipe="impl.poml"
+            ),
         ]
         workflow = Workflow(name="Test", version="1.0", phases=phases)
 
@@ -360,7 +371,11 @@ class TestWorkflow:
 
     def test_get_nonexistent_phase_returns_none(self):
         """Non-existent phase lookup returns None (safe lookup)."""
-        phases = [WorkflowPhase(id="define", description="Define", prompt_recipe="define.poml")]
+        phases = [
+            WorkflowPhase(
+                id="define", description="Define", prompt_recipe="define.poml"
+            )
+        ]
         workflow = Workflow(name="Test", version="1.0", phases=phases)
 
         assert workflow.get_phase("unknown") is None
@@ -368,8 +383,12 @@ class TestWorkflow:
     def test_get_next_phase(self):
         """Get next phase in sequence."""
         phases = [
-            WorkflowPhase(id="define", description="Define", prompt_recipe="define.poml"),
-            WorkflowPhase(id="implement", description="Implement", prompt_recipe="impl.poml"),
+            WorkflowPhase(
+                id="define", description="Define", prompt_recipe="define.poml"
+            ),
+            WorkflowPhase(
+                id="implement", description="Implement", prompt_recipe="impl.poml"
+            ),
             WorkflowPhase(id="test", description="Test", prompt_recipe="test.poml"),
         ]
         workflow = Workflow(name="Test", version="1.0", phases=phases)
@@ -382,8 +401,12 @@ class TestWorkflow:
     def test_get_next_phase_returns_none_for_last_phase(self):
         """Last phase has no next phase."""
         phases = [
-            WorkflowPhase(id="define", description="Define", prompt_recipe="define.poml"),
-            WorkflowPhase(id="implement", description="Implement", prompt_recipe="impl.poml"),
+            WorkflowPhase(
+                id="define", description="Define", prompt_recipe="define.poml"
+            ),
+            WorkflowPhase(
+                id="implement", description="Implement", prompt_recipe="impl.poml"
+            ),
         ]
         workflow = Workflow(name="Test", version="1.0", phases=phases)
 
@@ -394,8 +417,12 @@ class TestWorkflow:
     def test_get_initial_phase(self):
         """First phase is returned correctly."""
         phases = [
-            WorkflowPhase(id="define", description="Define", prompt_recipe="define.poml"),
-            WorkflowPhase(id="implement", description="Implement", prompt_recipe="impl.poml"),
+            WorkflowPhase(
+                id="define", description="Define", prompt_recipe="define.poml"
+            ),
+            WorkflowPhase(
+                id="implement", description="Implement", prompt_recipe="impl.poml"
+            ),
         ]
         workflow = Workflow(name="Test", version="1.0", phases=phases)
 
@@ -406,7 +433,9 @@ class TestWorkflow:
     def test_empty_workflow_raises_error(self):
         """Workflow with no phases is invalid (get_initial_phase)."""
         workflow = Workflow(name="Test", version="1.0", phases=[])
-        with pytest.raises(WorkflowValidationError, match="Workflow has no phases defined"):
+        with pytest.raises(
+            WorkflowValidationError, match="Workflow has no phases defined"
+        ):
             workflow.get_initial_phase()
 
 

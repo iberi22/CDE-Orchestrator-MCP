@@ -22,14 +22,14 @@ Allowed root-level .md files:
 See: specs/governance/DOCUMENTATION_GOVERNANCE.md
 """
 
-import os
 import sys
 from pathlib import Path
 
 # Ensure UTF-8 encoding on Windows
-if sys.stdout.encoding.lower() not in ['utf-8', 'utf8']:
+if sys.stdout.encoding.lower() not in ["utf-8", "utf8"]:
     import io
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 
 # Configuration
@@ -39,9 +39,9 @@ ALLOWED_ROOT_FILES = {
     "CONTRIBUTING.md",
     "CODE_OF_CONDUCT.md",
     "LICENSE",
-    "AGENTS.md",      # OpenAI/general AI agents format
-    "GEMINI.md",      # Google AI Studio format
-    "CLAUDE.md",      # Anthropic Claude format (if needed)
+    "AGENTS.md",  # OpenAI/general AI agents format
+    "GEMINI.md",  # Google AI Studio format
+    "CLAUDE.md",  # Anthropic Claude format (if needed)
 }
 
 ALLOWED_DIRECTORIES = {
@@ -87,7 +87,9 @@ def validate_agent_docs_structure(file_path: str) -> tuple[bool, str]:
         return True, "Root README for agent-docs directory"
 
     # Must be in one of the defined subdirectories
-    in_valid_subdir = any(path_str.startswith(subdir + "/") for subdir in AGENT_DOCS_SUBDIRS)
+    in_valid_subdir = any(
+        path_str.startswith(subdir + "/") for subdir in AGENT_DOCS_SUBDIRS
+    )
     if not in_valid_subdir:
         return False, (
             f"Agent document '{file_path}' must be in a valid subdirectory.\n"
@@ -188,7 +190,11 @@ def validate_script_location(file_path: str) -> tuple[bool, str]:
     # Scripts should be in scripts/ subdirectories
     if path_str.startswith("scripts/"):
         # Check if in proper subdirectory
-        valid_script_dirs = ["scripts/validation/", "scripts/metadata/", "scripts/setup/"]
+        valid_script_dirs = [
+            "scripts/validation/",
+            "scripts/metadata/",
+            "scripts/setup/",
+        ]
         in_valid_dir = any(path_str.startswith(d) for d in valid_script_dirs)
 
         if not in_valid_dir and not path_str == "scripts/README.md":

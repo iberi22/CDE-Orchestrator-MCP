@@ -641,4 +641,3 @@ All tasks must:
 - Existing AI Config: `specs/features/ai-assistant-config.md`
 - PR #2: Hexagonal Architecture Migration
 - Main Roadmap: `specs/tasks/improvement-roadmap.md`
-

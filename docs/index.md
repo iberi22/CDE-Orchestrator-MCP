@@ -14,11 +14,11 @@ tags:
 - deployment
 - documentation
 - index
-llm_summary: "User guide for CDE Orchestrator MCP - Documentation Index.\n  Welcome\
-  \ to the CDE Orchestrator MCP documentation. This index will help you navigate all\
-  \ project documentation. | Document | Description | Audience | |----------|-------------|----------|\
-  \ | [Executive Summary](../EXECUTIVE_SUMMARY.md) | High-level project status, metrics,\
-  \ and roadmap | Stakeholders,\n  Reference when working with guide documentation."
+llm_summary: 'User guide for CDE Orchestrator MCP - Documentation Index.
+
+  Welcome to the CDE Orchestrator MCP documentation. This index will help you navigate all project documentation. | Document | Description | Audience | |----------|-------------|----------| | [Executive Summary](../EXECUTIVE_SUMMARY.md) | High-level project status, metrics, and roadmap | Stakeholders,
+
+  Reference when working with guide documentation.'
 ---
 
 # CDE Orchestrator MCP - Documentation Index

@@ -22,14 +22,14 @@ Example:
 
 import asyncio
 import subprocess
-from pathlib import Path
-from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
-from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 try:
     from jules_agent_sdk import AsyncJulesClient
-    from jules_agent_sdk.models import SessionState, Session, Activity
+    from jules_agent_sdk.models import Activity, Session, SessionState
+
     JULES_AVAILABLE = True
 except ImportError:
     JULES_AVAILABLE = False
@@ -38,27 +38,31 @@ except ImportError:
     Session = None
     Activity = None
 
-from ...domain.ports import ICodeExecutor
 from ...domain.exceptions import DomainError
+from ...domain.ports import ICodeExecutor
 
 
 class JulesError(DomainError):
     """Base exception for Jules adapter errors."""
+
     pass
 
 
 class JulesNotInstalledError(JulesError):
     """Raised when jules-agent-sdk is not installed."""
+
     pass
 
 
 class JulesSourceNotFoundError(JulesError):
     """Raised when project source is not found in Jules."""
+
     pass
 
 
 class JulesExecutionError(JulesError):
     """Raised when Jules session fails."""
+
     pass
 
 
@@ -76,6 +80,7 @@ class ExecutionResult:
         log: Human-readable activity log
         metadata: Additional session metadata (URL, prompt, etc.)
     """
+
     success: bool
     session_id: str
     state: str
@@ -122,7 +127,7 @@ class JulesAsyncAdapter(ICodeExecutor):
         api_key: str,
         base_url: Optional[str] = None,
         default_timeout: int = 1800,  # 30 minutes
-        require_plan_approval: bool = False
+        require_plan_approval: bool = False,
     ):
         """
         Initialize Jules adapter.
@@ -151,16 +156,12 @@ class JulesAsyncAdapter(ICodeExecutor):
         """Get or create Jules client (lazy initialization)."""
         if self._client is None:
             self._client = AsyncJulesClient(
-                api_key=self.api_key,
-                base_url=self.base_url
+                api_key=self.api_key, base_url=self.base_url
             )
         return self._client
 
     async def execute_prompt(
-        self,
-        project_path: Path,
-        prompt: str,
-        context: Dict[str, Any]
+        self, project_path: Path, prompt: str, context: Dict[str, Any]
     ) -> str:
         """
         Execute code generation with Jules.
@@ -201,8 +202,7 @@ class JulesAsyncAdapter(ICodeExecutor):
             timeout = context.get("timeout", self.default_timeout)
             detached = context.get("detached", False)
             require_approval = context.get(
-                "require_plan_approval",
-                self.require_plan_approval
+                "require_plan_approval", self.require_plan_approval
             )
 
             # 3. Create session
@@ -210,7 +210,7 @@ class JulesAsyncAdapter(ICodeExecutor):
                 prompt=prompt,
                 source=source_id,
                 starting_branch=branch,
-                require_plan_approval=require_approval
+                require_plan_approval=require_approval,
             )
 
             # 4. Handle plan approval if required
@@ -220,9 +220,7 @@ class JulesAsyncAdapter(ICodeExecutor):
             # 5. Wait for completion (unless detached)
             if not detached:
                 session = await client.sessions.wait_for_completion(
-                    session.id,
-                    poll_interval=5,
-                    timeout=timeout
+                    session.id, poll_interval=5, timeout=timeout
                 )
 
             # 6. Collect activities
@@ -243,28 +241,27 @@ class JulesAsyncAdapter(ICodeExecutor):
                     "prompt": prompt,
                     "source": source_id,
                     "branch": branch,
-                }
+                },
             )
 
-            return json.dumps({
-                "success": result.success,
-                "session_id": result.session_id,
-                "state": result.state,
-                "modified_files": result.modified_files,
-                "activities_count": len(result.activities),
-                "log": result.log,
-                "metadata": result.metadata
-            }, indent=2)
+            return json.dumps(
+                {
+                    "success": result.success,
+                    "session_id": result.session_id,
+                    "state": result.state,
+                    "modified_files": result.modified_files,
+                    "activities_count": len(result.activities),
+                    "log": result.log,
+                    "metadata": result.metadata,
+                },
+                indent=2,
+            )
 
         except Exception as e:
-            raise JulesExecutionError(
-                f"Jules execution failed: {str(e)}"
-            ) from e
+            raise JulesExecutionError(f"Jules execution failed: {str(e)}") from e
 
     async def _resolve_source(
-        self,
-        client: AsyncJulesClient,
-        project_path: Path
+        self, client: AsyncJulesClient, project_path: Path
     ) -> str:
         """
         Resolve project path to Jules source ID.
@@ -328,7 +325,7 @@ class JulesAsyncAdapter(ICodeExecutor):
                 cwd=project_path,
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             if result.returncode == 0:
                 return result.stdout.strip()
@@ -337,9 +334,7 @@ class JulesAsyncAdapter(ICodeExecutor):
         return None
 
     async def _handle_plan_approval(
-        self,
-        client: AsyncJulesClient,
-        session_id: str
+        self, client: AsyncJulesClient, session_id: str
     ) -> Session:
         """
         Wait for plan generation and approve.

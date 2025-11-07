@@ -13,11 +13,11 @@ tags:
 - performance
 - python
 - workflow
-llm_summary: "User guide for Ephemeral Skill Smart Reuse Strategy.\n  > **Document\
-  \ Type**: Implementation Guide (Replaces 24h Auto-Delete) > **Version**: 2.0 > **Date**:\
-  \ 2025-11-01 > **Status**: Approved by Gemini CLI Research | Field | Purpose | When\
-  \ Updated | |-------|---------|--------------|\n  Reference when working with guide\
-  \ documentation."
+llm_summary: 'User guide for Ephemeral Skill Smart Reuse Strategy.
+
+  > **Document Type**: Implementation Guide (Replaces 24h Auto-Delete) > **Version**: 2.0 > **Date**: 2025-11-01 > **Status**: Approved by Gemini CLI Research | Field | Purpose | When Updated | |-------|---------|--------------|
+
+  Reference when working with guide documentation.'
 ---
 
 # Ephemeral Skill Smart Reuse Strategy

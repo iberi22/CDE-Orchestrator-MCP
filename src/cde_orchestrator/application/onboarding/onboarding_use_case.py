@@ -1,13 +1,10 @@
 import logging
-import subprocess
-import time
-from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, AsyncGenerator
+from typing import Any, Dict, List, Optional
 
-from ...application.ai_config import AIConfigUseCase
 from cde_orchestrator.domain.ports import IGitAdapter
+
 
 logger = logging.getLogger(__name__)
 
@@ -120,21 +117,22 @@ class OnboardingUseCase:
 
             if first_commit_date:
                 git_info["project_age_days"] = (
-                    datetime.now(timezone.utc) - first_commit_date.astimezone(timezone.utc)
+                    datetime.now(timezone.utc)
+                    - first_commit_date.astimezone(timezone.utc)
                 ).days
 
             # For branches, we might need a separate git command or a more sophisticated adapter method
             # For now, we'll leave it as an empty list or derive from commit messages if possible
             # This is a simplification for the initial refactoring
-            git_info["branches"] = [] # Placeholder
-            git_info["active_features"] = [] # Placeholder
+            git_info["branches"] = []  # Placeholder
+            git_info["active_features"] = []  # Placeholder
 
         except Exception as exc:
-            logger.warning("Error analyzing git history with adapter: %s", exc, exc_info=True)
+            logger.warning(
+                "Error analyzing git history with adapter: %s", exc, exc_info=True
+            )
 
         return git_info
-
-
 
     def _generate_recommendations(self, analysis: Dict[str, Any]) -> List[str]:
         """
@@ -227,7 +225,7 @@ class OnboardingUseCase:
         Returns:
             Dict with onboarding plan including tasks and structure
         """
-        analysis = await self.needs_onboarding() # needs to be awaited now
+        analysis = await self.needs_onboarding()  # needs to be awaited now
 
         plan = {
             "project_root": str(self.project_root),
@@ -334,7 +332,7 @@ class OnboardingUseCase:
             "missing_structure": analysis["missing_structure"],
             "existing_structure": analysis["existing_structure"],
             "tech_stack": self._detect_tech_stack(),
-            "repository_synthesis": {}, # Placeholder
+            "repository_synthesis": {},  # Placeholder
             "cleanup_plan": plan["cleanup_plan"],
             "recommendations": self._generate_recommendations(analysis),
         }
@@ -510,7 +508,6 @@ When making technical decisions:
 - [Workflows](.cde/)
 - [Project Overview](../README.md)
 """
-
 
 
 class SpecKitStructureGenerator:

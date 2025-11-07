@@ -13,11 +13,11 @@ llm_summary: "Fix invalid YAML (quoted scalars, missing fields) and change statu
 
 ## 🎯 PRIMARY OBJECTIVE
 
-**Agent**: Gemini  
-**Task Type**: YAML Frontmatter Validation & Status Enum Fixes  
-**Files Affected**: 35 files  
-**Estimated Time**: 20-25 minutes  
-**Complexity**: Medium  
+**Agent**: Gemini
+**Task Type**: YAML Frontmatter Validation & Status Enum Fixes
+**Files Affected**: 35 files
+**Estimated Time**: 20-25 minutes
+**Complexity**: Medium
 
 ---
 
@@ -214,7 +214,7 @@ When PART 4 is done, create commit with message:
 fix(governance): Gemini YAML frontmatter & enum fixes - 35 files
 
 - Fixed 18 files with invalid YAML quoted scalars
-- Added missing frontmatter to 12 files  
+- Added missing frontmatter to 12 files
 - Changed status: completed → archived (12 files)
 - Fixed date formats: ISO 8601 → YYYY-MM-DD (1 file)
 
@@ -226,7 +226,7 @@ Then output: `✅ GEMINI TASK 1 COMPLETE`
 
 ---
 
-**Assignment**: GEMINI AGENT  
-**Status**: READY FOR EXECUTION  
-**Priority**: 🔴 CRITICAL (blocks Codex & Qwen tasks)  
+**Assignment**: GEMINI AGENT
+**Status**: READY FOR EXECUTION
+**Priority**: 🔴 CRITICAL (blocks Codex & Qwen tasks)
 **Estimated Duration**: 20-25 minutes

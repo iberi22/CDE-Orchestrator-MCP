@@ -13,11 +13,11 @@ tags:
 - documentation
 - governance
 - implementation
-llm_summary: "User guide for Session Summary: Agent Documentation Governance Implementation.\n\
-  \  > **Date**: 2025-11-01 > **Agent**: KERNEL v3.1 > **Duration**: 2h 15m > **Status**:\
-  \ ✅ COMPLETE | Deliverable | Status | Location | |-------------|--------|----------|\
-  \ | Directory structure | ✅ Complete | `/agent-docs/` (sessions, execution, feedback,\
-  \ research) |\n  Reference when working with guide documentation."
+llm_summary: 'User guide for Session Summary: Agent Documentation Governance Implementation.
+
+  > **Date**: 2025-11-01 > **Agent**: KERNEL v3.1 > **Duration**: 2h 15m > **Status**: ✅ COMPLETE | Deliverable | Status | Location | |-------------|--------|----------| | Directory structure | ✅ Complete | `/agent-docs/` (sessions, execution, feedback, research) |
+
+  Reference when working with guide documentation.'
 ---
 
 # Session Summary: Agent Documentation Governance Implementation

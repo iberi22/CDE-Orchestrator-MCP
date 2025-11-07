@@ -17,15 +17,15 @@ Design Principles:
     - LLM-first metadata
 """
 
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import List, Dict, Any, Optional, NewType
-import uuid
+from typing import Any, Dict, List, NewType, Optional
 
 from .exceptions import (
-    InvalidStatusTransitionError,
     InvalidLinkError,
+    InvalidStatusTransitionError,
     SpecificationValidationError,
 )
 
@@ -296,7 +296,9 @@ class Specification:
         self.status = DocumentStatus.ACTIVE
         self.updated_at = datetime.now(timezone.utc)
 
-    def deprecate(self, reason: str, successor_id: Optional[SpecificationId] = None) -> None:
+    def deprecate(
+        self, reason: str, successor_id: Optional[SpecificationId] = None
+    ) -> None:
         """
         Mark specification as deprecated.
 

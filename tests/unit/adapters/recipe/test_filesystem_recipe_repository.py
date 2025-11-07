@@ -1,9 +1,15 @@
 """
 Unit tests for the FileSystemRecipeRepository.
 """
-import pytest
+
 from pathlib import Path
-from cde_orchestrator.adapters.recipe.filesystem_recipe_repository import FileSystemRecipeRepository
+
+import pytest
+
+from cde_orchestrator.adapters.recipe.filesystem_recipe_repository import (
+    FileSystemRecipeRepository,
+)
+
 
 @pytest.fixture
 def recipe_dir(tmp_path):
@@ -13,24 +19,29 @@ def recipe_dir(tmp_path):
     engineering_path.mkdir(parents=True)
 
     # Sample ai-engineer recipe
-    (engineering_path / "ai-engineer.poml").write_text("""
+    (engineering_path / "ai-engineer.poml").write_text(
+        """
     <poml>
         <let name="tools">["file", "shell"]</let>
         <let name="providers">{ "openai": { "model": "gpt-5" } }</let>
         <role>You are an AI engineer.</role>
     </poml>
-    """)
+    """
+    )
 
     # Sample sprint-prioritizer recipe
     (recipes_path / "planning").mkdir()
-    (recipes_path / "planning" / "sprint-prioritizer.poml").write_text("""
+    (recipes_path / "planning" / "sprint-prioritizer.poml").write_text(
+        """
     <poml>
         <let name="tools">["jira"]</let>
         <role>You prioritize sprints.</role>
     </poml>
-    """)
+    """
+    )
 
     return recipes_path
+
 
 def test_list_all_recipes(recipe_dir):
     """Tests that all recipes are loaded and parsed correctly."""
@@ -43,11 +54,13 @@ def test_list_all_recipes(recipe_dir):
     assert "ai-engineer" in recipe_ids
     assert "sprint-prioritizer" in recipe_ids
 
+
 def test_empty_recipe_dir():
     """Tests that an empty list is returned for a non-existent directory."""
     repo = FileSystemRecipeRepository(recipes_dir=Path("non_existent_dir"))
     recipes = repo.list_all()
     assert len(recipes) == 0
+
 
 def test_parsing_logic(recipe_dir):
     """Tests the parsing logic for a single recipe."""

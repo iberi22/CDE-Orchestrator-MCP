@@ -4,13 +4,18 @@ MCP Tools Package.
 Exports all CDE Orchestrator MCP tools for registration in server.py.
 """
 
-from .onboarding import cde_onboardingProject, cde_publishOnboarding, cde_setupProject
-from .documentation import cde_scanDocumentation, cde_analyzeDocumentation
-from .orchestration import cde_selectWorkflow, cde_sourceSkill, cde_updateSkill
-from .agents import cde_delegateToJules, cde_listAvailableAgents, cde_selectAgent, cde_executeWithBestAgent
-from .full_implementation import cde_executeFullImplementation
-from .test_progress import cde_testProgressReporting
+from .agents import (
+    cde_delegateToJules,
+    cde_executeWithBestAgent,
+    cde_listAvailableAgents,
+    cde_selectAgent,
+)
+from .documentation import cde_analyzeDocumentation, cde_scanDocumentation
 from .extensions import cde_installMcpExtension
+from .full_implementation import cde_executeFullImplementation
+from .onboarding import cde_onboardingProject, cde_publishOnboarding, cde_setupProject
+from .orchestration import cde_selectWorkflow, cde_sourceSkill, cde_updateSkill
+from .test_progress import cde_testProgressReporting
 
 __all__ = [
     # Onboarding

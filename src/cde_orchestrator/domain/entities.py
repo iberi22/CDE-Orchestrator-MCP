@@ -16,17 +16,16 @@ Design Principles:
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 from uuid import uuid4
+
+from pydantic import BaseModel, Field, field_validator
 
 from .exceptions import (
     InvalidStateTransitionError,
-    WorkflowValidationError,
     PhaseNotFoundError,
+    WorkflowValidationError,
 )
-from pydantic import BaseModel, Field, field_validator
-
-
 
 # ============================================================================
 # VALUE OBJECTS
@@ -179,6 +178,7 @@ class Recipe(BaseModel):
 
 class RecipeSuggestion(BaseModel):
     """Represents a recipe suggestion."""
+
     recipe: Recipe
     confidence: float
 
@@ -764,7 +764,9 @@ class Project:
             InvalidStateTransitionError: If transition not allowed
         """
         if not self.status.can_transition_to(target):
-            raise InvalidStateTransitionError("Project", self.status.value, target.value)
+            raise InvalidStateTransitionError(
+                "Project", self.status.value, target.value
+            )
 
         self.status = target
         self.updated_at = datetime.now(timezone.utc)

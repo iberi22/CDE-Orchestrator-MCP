@@ -157,7 +157,9 @@ class MetadataGenerator:
         }
 
         sentence1 = f"{type_desc.get(doc_type, 'Document')} for {title}."
-        sentence2 = summary_text if summary_text else "Detailed information and guidelines."
+        sentence2 = (
+            summary_text if summary_text else "Detailed information and guidelines."
+        )
         sentence3 = f"Reference when working with {doc_type} documentation."
 
         return f"{sentence1}\n  {sentence2}\n  {sentence3}"
@@ -196,7 +198,9 @@ class MetadataGenerator:
 
         return sorted(list(tags))[:6]  # Max 6 tags
 
-    def generate_metadata(self, file_path: Path, author: str = "Auto-Generated") -> Dict:
+    def generate_metadata(
+        self, file_path: Path, author: str = "Auto-Generated"
+    ) -> Dict:
         """Generate complete metadata for a file."""
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
@@ -223,7 +227,9 @@ class MetadataGenerator:
 
         return metadata
 
-    def insert_frontmatter(self, file_path: Path, metadata: Dict, dry_run: bool = False) -> bool:
+    def insert_frontmatter(
+        self, file_path: Path, metadata: Dict, dry_run: bool = False
+    ) -> bool:
         """Insert frontmatter at the beginning of file."""
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
@@ -233,7 +239,9 @@ class MetadataGenerator:
             return False
 
         # Generate YAML
-        yaml_content = yaml.dump(metadata, default_flow_style=False, allow_unicode=True, sort_keys=False)
+        yaml_content = yaml.dump(
+            metadata, default_flow_style=False, allow_unicode=True, sort_keys=False
+        )
         frontmatter = f"---\n{yaml_content}---\n\n"
 
         new_content = frontmatter + content
@@ -255,10 +263,18 @@ def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Add metadata to markdown files")
     parser.add_argument("--path", type=str, help="Add metadata to specific file")
-    parser.add_argument("--directory", type=str, help="Add metadata to all files in directory")
-    parser.add_argument("--all", action="store_true", help="Add metadata to all markdown files")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be done without writing")
-    parser.add_argument("--author", type=str, default="Auto-Generated", help="Author name to use")
+    parser.add_argument(
+        "--directory", type=str, help="Add metadata to all files in directory"
+    )
+    parser.add_argument(
+        "--all", action="store_true", help="Add metadata to all markdown files"
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Show what would be done without writing"
+    )
+    parser.add_argument(
+        "--author", type=str, default="Auto-Generated", help="Author name to use"
+    )
 
     args = parser.parse_args()
 

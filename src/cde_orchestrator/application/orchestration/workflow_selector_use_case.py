@@ -11,13 +11,12 @@ This is the entry point for all agent interactions with CDE.
 
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
-from typing import Dict, Any, List, Optional
-import re
+from typing import Any, Dict, List
 
 
 class WorkflowComplexity(Enum):
     """Task complexity levels."""
+
     TRIVIAL = 1  # < 5 min (typo fix, doc update)
     SIMPLE = 2  # 15-30 min (single file change)
     MODERATE = 3  # 1-2 hours (multiple files, tests)
@@ -44,8 +43,11 @@ class WorkflowComplexity(Enum):
         """Convert to string representation for API."""
         names = {1: "trivial", 2: "simple", 3: "moderate", 4: "complex", 5: "epic"}
         return names.get(self.value, "unknown")
+
+
 class WorkflowType(Enum):
     """Available workflow types."""
+
     STANDARD = "standard"  # Full 6-phase workflow
     QUICK_FIX = "quick-fix"  # Skip define/design, direct to implement
     RESEARCH = "research"  # Heavy research, light implementation
@@ -56,6 +58,7 @@ class WorkflowType(Enum):
 
 class DomainCategory(Enum):
     """Domain categories for skill matching."""
+
     WEB_DEVELOPMENT = "web-dev"
     AI_ML = "ai-ml"
     DATABASE = "database"
@@ -71,6 +74,7 @@ class DomainCategory(Enum):
 @dataclass
 class WorkflowRecommendation:
     """Result of workflow analysis."""
+
     workflow_type: WorkflowType
     complexity: WorkflowComplexity
     recipe_id: str
@@ -92,89 +96,213 @@ class WorkflowSelectorUseCase:
     # Keywords for complexity detection
     COMPLEXITY_INDICATORS = {
         WorkflowComplexity.TRIVIAL: [
-            "fix typo", "update comment", "rename variable", "fix formatting",
-            "add docstring", "update readme", "fix lint"
+            "fix typo",
+            "update comment",
+            "rename variable",
+            "fix formatting",
+            "add docstring",
+            "update readme",
+            "fix lint",
         ],
         WorkflowComplexity.SIMPLE: [
-            "add function", "fix bug", "update config", "add test",
-            "improve error message", "add logging"
+            "add function",
+            "fix bug",
+            "update config",
+            "add test",
+            "improve error message",
+            "add logging",
         ],
         WorkflowComplexity.MODERATE: [
-            "implement feature", "add endpoint", "create component",
-            "refactor module", "add validation", "integrate api"
+            "implement feature",
+            "add endpoint",
+            "create component",
+            "refactor module",
+            "add validation",
+            "integrate api",
         ],
         WorkflowComplexity.COMPLEX: [
-            "new feature", "redesign", "major refactor", "migrate",
-            "implement system", "add authentication", "create workflow"
+            "new feature",
+            "redesign",
+            "major refactor",
+            "migrate",
+            "implement system",
+            "add authentication",
+            "create workflow",
         ],
         WorkflowComplexity.EPIC: [
-            "build platform", "complete rewrite", "architecture change",
-            "multi-service", "new product", "full migration"
-        ]
+            "build platform",
+            "complete rewrite",
+            "architecture change",
+            "multi-service",
+            "new product",
+            "full migration",
+        ],
     }
 
     # Keywords for workflow type detection
     WORKFLOW_KEYWORDS = {
         WorkflowType.QUICK_FIX: [
-            "quick", "hotfix", "urgent", "emergency", "asap", "bug fix",
-            "broken", "not working", "crash"
+            "quick",
+            "hotfix",
+            "urgent",
+            "emergency",
+            "asap",
+            "bug fix",
+            "broken",
+            "not working",
+            "crash",
         ],
         WorkflowType.RESEARCH: [
-            "research", "investigate", "analyze", "explore", "compare",
-            "evaluate", "what is", "how does", "best way"
+            "research",
+            "investigate",
+            "analyze",
+            "explore",
+            "compare",
+            "evaluate",
+            "what is",
+            "how does",
+            "best way",
         ],
         WorkflowType.DOCUMENTATION: [
-            "document", "write spec", "create guide", "add docs",
-            "explain", "tutorial", "readme", "api docs"
+            "document",
+            "write spec",
+            "create guide",
+            "add docs",
+            "explain",
+            "tutorial",
+            "readme",
+            "api docs",
         ],
         WorkflowType.REFACTOR: [
-            "refactor", "clean up", "improve", "optimize", "restructure",
-            "modernize", "technical debt", "code quality"
+            "refactor",
+            "clean up",
+            "improve",
+            "optimize",
+            "restructure",
+            "modernize",
+            "technical debt",
+            "code quality",
         ],
         WorkflowType.HOTFIX: [
-            "production down", "critical bug", "security issue", "data loss",
-            "outage", "failing", "broken prod"
-        ]
+            "production down",
+            "critical bug",
+            "security issue",
+            "data loss",
+            "outage",
+            "failing",
+            "broken prod",
+        ],
     }
 
     # Domain detection patterns
     DOMAIN_PATTERNS = {
         DomainCategory.WEB_DEVELOPMENT: [
-            "react", "vue", "angular", "frontend", "ui", "component",
-            "html", "css", "javascript", "typescript", "dom"
+            "react",
+            "vue",
+            "angular",
+            "frontend",
+            "ui",
+            "component",
+            "html",
+            "css",
+            "javascript",
+            "typescript",
+            "dom",
         ],
         DomainCategory.AI_ML: [
-            "ai", "ml", "machine learning", "neural", "model", "training",
-            "llm", "gpt", "gemini", "copilot", "embedding", "vector"
+            "ai",
+            "ml",
+            "machine learning",
+            "neural",
+            "model",
+            "training",
+            "llm",
+            "gpt",
+            "gemini",
+            "copilot",
+            "embedding",
+            "vector",
         ],
         DomainCategory.DATABASE: [
-            "database", "sql", "nosql", "redis", "postgres", "mongo",
-            "query", "schema", "migration", "orm", "index"
+            "database",
+            "sql",
+            "nosql",
+            "redis",
+            "postgres",
+            "mongo",
+            "query",
+            "schema",
+            "migration",
+            "orm",
+            "index",
         ],
         DomainCategory.DEVOPS: [
-            "deploy", "ci/cd", "docker", "kubernetes", "aws", "azure",
-            "pipeline", "infrastructure", "terraform", "helm"
+            "deploy",
+            "ci/cd",
+            "docker",
+            "kubernetes",
+            "aws",
+            "azure",
+            "pipeline",
+            "infrastructure",
+            "terraform",
+            "helm",
         ],
         DomainCategory.TESTING: [
-            "test", "unit test", "integration test", "e2e", "mock",
-            "pytest", "jest", "coverage", "qa", "validation"
+            "test",
+            "unit test",
+            "integration test",
+            "e2e",
+            "mock",
+            "pytest",
+            "jest",
+            "coverage",
+            "qa",
+            "validation",
         ],
         DomainCategory.DOCUMENTATION: [
-            "docs", "documentation", "spec", "guide", "tutorial",
-            "readme", "changelog", "api docs", "architecture"
+            "docs",
+            "documentation",
+            "spec",
+            "guide",
+            "tutorial",
+            "readme",
+            "changelog",
+            "api docs",
+            "architecture",
         ],
         DomainCategory.ARCHITECTURE: [
-            "architecture", "design pattern", "hexagonal", "clean arch",
-            "microservices", "event-driven", "ddd", "ports and adapters"
+            "architecture",
+            "design pattern",
+            "hexagonal",
+            "clean arch",
+            "microservices",
+            "event-driven",
+            "ddd",
+            "ports and adapters",
         ],
         DomainCategory.SECURITY: [
-            "security", "auth", "authentication", "authorization", "oauth",
-            "jwt", "encryption", "vulnerability", "penetration"
+            "security",
+            "auth",
+            "authentication",
+            "authorization",
+            "oauth",
+            "jwt",
+            "encryption",
+            "vulnerability",
+            "penetration",
         ],
         DomainCategory.PERFORMANCE: [
-            "performance", "optimize", "slow", "latency", "throughput",
-            "cache", "scale", "bottleneck", "profiling"
-        ]
+            "performance",
+            "optimize",
+            "slow",
+            "latency",
+            "throughput",
+            "cache",
+            "scale",
+            "bottleneck",
+            "profiling",
+        ],
     }
 
     # Recipe recommendations by domain
@@ -188,21 +316,33 @@ class WorkflowSelectorUseCase:
         DomainCategory.ARCHITECTURE: "ai-engineer",
         DomainCategory.SECURITY: "ai-engineer",
         DomainCategory.PERFORMANCE: "ai-engineer",
-        DomainCategory.GENERAL: "ai-engineer"
+        DomainCategory.GENERAL: "ai-engineer",
     }
 
     # Skill requirements by domain
     SKILL_BY_DOMAIN = {
         DomainCategory.AI_ML: ["ai-integration", "llm-prompting", "vector-db"],
-        DomainCategory.WEB_DEVELOPMENT: ["react-patterns", "web-performance", "accessibility"],
-        DomainCategory.DATABASE: ["sql-optimization", "nosql-patterns", "data-modeling"],
+        DomainCategory.WEB_DEVELOPMENT: [
+            "react-patterns",
+            "web-performance",
+            "accessibility",
+        ],
+        DomainCategory.DATABASE: [
+            "sql-optimization",
+            "nosql-patterns",
+            "data-modeling",
+        ],
         DomainCategory.DEVOPS: ["containerization", "ci-cd", "infrastructure"],
         DomainCategory.TESTING: ["test-strategy", "mocking", "e2e-testing"],
         DomainCategory.DOCUMENTATION: ["technical-writing", "spec-kit", "markdown"],
-        DomainCategory.ARCHITECTURE: ["design-patterns", "hexagonal-arch", "system-design"],
+        DomainCategory.ARCHITECTURE: [
+            "design-patterns",
+            "hexagonal-arch",
+            "system-design",
+        ],
         DomainCategory.SECURITY: ["auth-best-practices", "encryption", "owasp"],
         DomainCategory.PERFORMANCE: ["profiling", "caching", "optimization"],
-        DomainCategory.GENERAL: ["problem-solving", "code-quality"]
+        DomainCategory.GENERAL: ["problem-solving", "code-quality"],
     }
 
     def execute(self, user_prompt: str, project_path: str = ".") -> Dict[str, Any]:
@@ -257,7 +397,7 @@ class WorkflowSelectorUseCase:
             required_skills=required_skills,
             phases_to_skip=phases_to_skip,
             reasoning=reasoning,
-            confidence=confidence
+            confidence=confidence,
         )
 
         # 10. Determine next action
@@ -274,10 +414,10 @@ class WorkflowSelectorUseCase:
                 "phases_to_skip": phases_to_skip,
                 "reasoning": reasoning,
                 "confidence": confidence,
-                "domain": domain.value
+                "domain": domain.value,
             },
             "next_action": next_action,
-            "user_prompt": user_prompt
+            "user_prompt": user_prompt,
         }
 
     def _detect_complexity(self, prompt: str) -> WorkflowComplexity:
@@ -301,7 +441,9 @@ class WorkflowSelectorUseCase:
             else:
                 return WorkflowComplexity.COMPLEX
 
-        return max(scores.items(), key=lambda x: (x[1], list(WorkflowComplexity).index(x[0])))[0]
+        return max(
+            scores.items(), key=lambda x: (x[1], list(WorkflowComplexity).index(x[0]))
+        )[0]
 
     def _detect_workflow_type(
         self, prompt: str, complexity: WorkflowComplexity
@@ -338,7 +480,9 @@ class WorkflowSelectorUseCase:
 
         return max(scores.items(), key=lambda x: x[1])[0]
 
-    def _select_recipe(self, domain: DomainCategory, workflow_type: WorkflowType) -> str:
+    def _select_recipe(
+        self, domain: DomainCategory, workflow_type: WorkflowType
+    ) -> str:
         """Select best recipe for domain and workflow."""
         # Override recipe for specific workflow types
         if workflow_type == WorkflowType.DOCUMENTATION:
@@ -391,7 +535,7 @@ class WorkflowSelectorUseCase:
             WorkflowComplexity.SIMPLE: "15-30 minutes",
             WorkflowComplexity.MODERATE: "1-2 hours",
             WorkflowComplexity.COMPLEX: "4-8 hours",
-            WorkflowComplexity.EPIC: "2-5 days"
+            WorkflowComplexity.EPIC: "2-5 days",
         }
         return duration_map[complexity]
 
@@ -401,7 +545,7 @@ class WorkflowSelectorUseCase:
         complexity: WorkflowComplexity,
         workflow_type: WorkflowType,
         domain: DomainCategory,
-        recipe_id: str
+        recipe_id: str,
     ) -> str:
         """Generate human-readable reasoning for recommendation."""
         return (
@@ -441,7 +585,10 @@ class WorkflowSelectorUseCase:
         """Determine next action based on recommendation."""
         if recommendation.confidence < 0.6:
             return "clarify_requirements"
-        elif recommendation.complexity in [WorkflowComplexity.COMPLEX, WorkflowComplexity.EPIC]:
+        elif recommendation.complexity in [
+            WorkflowComplexity.COMPLEX,
+            WorkflowComplexity.EPIC,
+        ]:
             return "research_skills"
         else:
             return "start_workflow"

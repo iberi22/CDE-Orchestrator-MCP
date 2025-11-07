@@ -53,7 +53,15 @@ TYPE_TO_DIR = {
 }
 
 # Required fields
-REQUIRED_FIELDS = {"title", "description", "type", "status", "created", "updated", "author"}
+REQUIRED_FIELDS = {
+    "title",
+    "description",
+    "type",
+    "status",
+    "created",
+    "updated",
+    "author",
+}
 
 
 class MetadataValidator:
@@ -172,23 +180,33 @@ class MetadataValidator:
         try:
             datetime.strptime(date_str, "%Y-%m-%d")
         except ValueError:
-            self.errors.append(f"Invalid {field_name} date '{date_str}'. Must be YYYY-MM-DD format")
+            self.errors.append(
+                f"Invalid {field_name} date '{date_str}'. Must be YYYY-MM-DD format"
+            )
 
     def _validate_description(self, description: str) -> None:
         """Validate description length."""
         length = len(description)
         if length < 50:
-            self.warnings.append(f"Description too short ({length} chars). Minimum 50 recommended.")
+            self.warnings.append(
+                f"Description too short ({length} chars). Minimum 50 recommended."
+            )
         elif length > 150:
-            self.warnings.append(f"Description too long ({length} chars). Maximum 150 recommended.")
+            self.warnings.append(
+                f"Description too long ({length} chars). Maximum 150 recommended."
+            )
 
     def _validate_llm_summary(self, summary: str) -> None:
         """Validate LLM summary length and structure."""
         length = len(summary)
         if length < 100:
-            self.warnings.append(f"LLM summary too short ({length} chars). Minimum 100 recommended.")
+            self.warnings.append(
+                f"LLM summary too short ({length} chars). Minimum 100 recommended."
+            )
         elif length > 500:
-            self.warnings.append(f"LLM summary too long ({length} chars). Maximum 500 recommended.")
+            self.warnings.append(
+                f"LLM summary too long ({length} chars). Maximum 500 recommended."
+            )
 
         # Check for 3-sentence pattern (very rough heuristic)
         sentences = summary.count(".") + summary.count("!") + summary.count("?")
@@ -249,10 +267,16 @@ def get_staged_files(repo_root: Path) -> List[Path]:
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Validate markdown file metadata")
-    parser.add_argument("--all", action="store_true", help="Validate all markdown files")
+    parser.add_argument(
+        "--all", action="store_true", help="Validate all markdown files"
+    )
     parser.add_argument("--path", type=str, help="Validate specific file")
-    parser.add_argument("--staged", action="store_true", help="Validate staged files (pre-commit)")
-    parser.add_argument("--strict", action="store_true", help="Treat warnings as errors")
+    parser.add_argument(
+        "--staged", action="store_true", help="Validate staged files (pre-commit)"
+    )
+    parser.add_argument(
+        "--strict", action="store_true", help="Treat warnings as errors"
+    )
 
     args = parser.parse_args()
 

@@ -10,19 +10,20 @@ Performs intelligent web research to:
 Uses LLM CLI adapters for summarization and synthesis.
 """
 
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
-import asyncio
-import aiohttp
 import re
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import aiohttp
 from bs4 import BeautifulSoup
 
 
 @dataclass(frozen=True)
 class ResearchSource:
     """Represents a researched source."""
+
     url: str
     title: str
     content: str
@@ -34,6 +35,7 @@ class ResearchSource:
 @dataclass
 class ResearchInsight:
     """Key insight from research."""
+
     category: str  # "breaking_change", "best_practice", "deprecation", "new_feature"
     summary: str
     details: str
@@ -44,6 +46,7 @@ class ResearchInsight:
 @dataclass
 class SkillUpdate:
     """Result of skill research and update."""
+
     skill_name: str
     version_before: str
     version_after: str
@@ -69,31 +72,25 @@ class WebResearchUseCase:
         "python": [
             "https://docs.python.org",
             "https://peps.python.org",
-            "https://realpython.com"
+            "https://realpython.com",
         ],
         "javascript": [
             "https://developer.mozilla.org",
             "https://tc39.es",
-            "https://nodejs.org/docs"
+            "https://nodejs.org/docs",
         ],
-        "react": [
-            "https://react.dev",
-            "https://github.com/facebook/react"
-        ],
-        "redis": [
-            "https://redis.io/docs",
-            "https://github.com/redis/redis"
-        ],
+        "react": ["https://react.dev", "https://github.com/facebook/react"],
+        "redis": ["https://redis.io/docs", "https://github.com/redis/redis"],
         "fastapi": [
             "https://fastapi.tiangolo.com",
-            "https://github.com/tiangolo/fastapi"
-        ]
+            "https://github.com/tiangolo/fastapi",
+        ],
     }
 
     # Search engines (rate-limited, use sparingly)
     SEARCH_APIS = {
         "duckduckgo": "https://api.duckduckgo.com/?q={query}&format=json",
-        "github": "https://api.github.com/search/repositories?q={query}"
+        "github": "https://api.github.com/search/repositories?q={query}",
     }
 
     def __init__(self, llm_cli_adapter=None):
@@ -110,7 +107,7 @@ class WebResearchUseCase:
         skill_name: str,
         topics: List[str],
         max_sources: int = 10,
-        skill_file_path: Optional[Path] = None
+        skill_file_path: Optional[Path] = None,
     ) -> Dict[str, Any]:
         """
         Research and update a skill with latest information.
@@ -168,13 +165,13 @@ class WebResearchUseCase:
                     "summary": i.summary,
                     "details": i.details,
                     "sources": i.sources,
-                    "confidence": i.confidence
+                    "confidence": i.confidence,
                 }
                 for i in ranked_insights
             ],
             "update_note": update_note,
             "sources": len(all_sources),  # Count of sources consulted
-            "version_info": version_info
+            "version_info": version_info,
         }
 
     async def _research_topic(
@@ -207,7 +204,9 @@ class WebResearchUseCase:
 
         # 3. Web search for additional sources (if needed)
         if len(sources) < max_sources:
-            web_sources = await self._web_search(topic, max_results=max_sources - len(sources))
+            web_sources = await self._web_search(
+                topic, max_results=max_sources - len(sources)
+            )
             sources.extend(web_sources)
 
         return sources[:max_sources]
@@ -236,29 +235,35 @@ class WebResearchUseCase:
         """
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
+                async with session.get(
+                    url, timeout=aiohttp.ClientTimeout(total=10)
+                ) as response:
                     if response.status != 200:
                         return None
 
                     html = await response.text()
-                    soup = BeautifulSoup(html, 'html.parser')
+                    soup = BeautifulSoup(html, "html.parser")
 
                     # Extract title
-                    title = soup.find('title')
+                    title = soup.find("title")
                     title_text = title.string if title else "Unknown"
 
                     # Extract main content (heuristic)
                     content_blocks = []
-                    for tag in ['article', 'main', 'div.content', 'div.documentation']:
+                    for tag in ["article", "main", "div.content", "div.documentation"]:
                         element = soup.select_one(tag)
                         if element:
-                            content_blocks.append(element.get_text(separator=' ', strip=True))
+                            content_blocks.append(
+                                element.get_text(separator=" ", strip=True)
+                            )
 
                     if not content_blocks:
                         # Fallback to all paragraphs
-                        content_blocks = [p.get_text(strip=True) for p in soup.find_all('p')]
+                        content_blocks = [
+                            p.get_text(strip=True) for p in soup.find_all("p")
+                        ]
 
-                    content = ' '.join(content_blocks[:50])  # Limit content
+                    content = " ".join(content_blocks[:50])  # Limit content
 
                     # Calculate relevance
                     relevance = self._calculate_relevance(content, topic)
@@ -271,7 +276,7 @@ class WebResearchUseCase:
                         title=title_text,
                         content=content[:2000],  # Limit to 2000 chars
                         relevance_score=relevance,
-                        source_type=source_type
+                        source_type=source_type,
                     )
 
         except Exception as e:
@@ -302,7 +307,9 @@ class WebResearchUseCase:
         else:
             return "blog"
 
-    async def _search_github(self, topic: str, max_results: int = 3) -> List[ResearchSource]:
+    async def _search_github(
+        self, topic: str, max_results: int = 3
+    ) -> List[ResearchSource]:
         """Search GitHub for repositories and issues related to topic."""
         sources = []
 
@@ -315,20 +322,24 @@ class WebResearchUseCase:
                     if response.status == 200:
                         data = await response.json()
                         for item in data.get("items", []):
-                            sources.append(ResearchSource(
-                                url=item["html_url"],
-                                title=item["name"],
-                                content=item.get("description", ""),
-                                relevance_score=0.7,  # GitHub results assumed relevant
-                                source_type="github"
-                            ))
+                            sources.append(
+                                ResearchSource(
+                                    url=item["html_url"],
+                                    title=item["name"],
+                                    content=item.get("description", ""),
+                                    relevance_score=0.7,  # GitHub results assumed relevant
+                                    source_type="github",
+                                )
+                            )
 
         except Exception as e:
             print(f"Error searching GitHub: {e}")
 
         return sources
 
-    async def _web_search(self, topic: str, max_results: int = 5) -> List[ResearchSource]:
+    async def _web_search(
+        self, topic: str, max_results: int = 5
+    ) -> List[ResearchSource]:
         """Perform web search using DuckDuckGo API."""
         sources = []
 
@@ -344,13 +355,15 @@ class WebResearchUseCase:
                         # Extract related topics
                         for result in data.get("RelatedTopics", [])[:max_results]:
                             if isinstance(result, dict) and "FirstURL" in result:
-                                sources.append(ResearchSource(
-                                    url=result["FirstURL"],
-                                    title=result.get("Text", "")[:100],
-                                    content=result.get("Text", ""),
-                                    relevance_score=0.5,
-                                    source_type="web"
-                                ))
+                                sources.append(
+                                    ResearchSource(
+                                        url=result["FirstURL"],
+                                        title=result.get("Text", "")[:100],
+                                        content=result.get("Text", ""),
+                                        relevance_score=0.5,
+                                        source_type="web",
+                                    )
+                                )
 
         except Exception as e:
             print(f"Error in web search: {e}")
@@ -370,28 +383,28 @@ class WebResearchUseCase:
                 r"deprecated",
                 r"no longer supported",
                 r"removed in version",
-                r"migration required"
+                r"migration required",
             ],
             "best_practice": [
                 r"best practice",
                 r"recommended approach",
                 r"should use",
                 r"prefer.*over",
-                r"best way to"
+                r"best way to",
             ],
             "new_feature": [
                 r"new feature",
                 r"now supports",
                 r"added support",
                 r"introducing",
-                r"released.*version"
+                r"released.*version",
             ],
             "deprecation": [
                 r"deprecated",
                 r"will be removed",
                 r"legacy",
-                r"no longer maintained"
-            ]
+                r"no longer maintained",
+            ],
         }
 
         for source in sources:
@@ -406,17 +419,21 @@ class WebResearchUseCase:
                         end = min(len(content), match.end() + 100)
                         context = content[start:end]
 
-                        insights.append(ResearchInsight(
-                            category=category,
-                            summary=context[:100],
-                            details=context,
-                            sources=[source.url],
-                            confidence=source.relevance_score
-                        ))
+                        insights.append(
+                            ResearchInsight(
+                                category=category,
+                                summary=context[:100],
+                                details=context,
+                                sources=[source.url],
+                                confidence=source.relevance_score,
+                            )
+                        )
 
         return insights
 
-    def _deduplicate_insights(self, insights: List[ResearchInsight]) -> List[ResearchInsight]:
+    def _deduplicate_insights(
+        self, insights: List[ResearchInsight]
+    ) -> List[ResearchInsight]:
         """Remove duplicate insights based on similarity."""
         unique = []
         seen_summaries = set()
@@ -436,13 +453,13 @@ class WebResearchUseCase:
             "breaking_change": 4,
             "deprecation": 3,
             "new_feature": 2,
-            "best_practice": 1
+            "best_practice": 1,
         }
 
         sorted_insights = sorted(
             insights,
             key=lambda i: (category_priority.get(i.category, 0), i.confidence),
-            reverse=True
+            reverse=True,
         )
 
         return sorted_insights[:10]  # Top 10
@@ -451,7 +468,7 @@ class WebResearchUseCase:
         self,
         skill_name: str,
         insights: List[ResearchInsight],
-        sources: List[ResearchSource]
+        sources: List[ResearchSource],
     ) -> str:
         """Generate structured update note from insights."""
         note = f"## 📅 Update Log - {datetime.now().strftime('%Y-%m-%d')}\n\n"
@@ -467,7 +484,7 @@ class WebResearchUseCase:
             "breaking_change": "🔴 Breaking Changes",
             "deprecation": "⚠️ Deprecations",
             "new_feature": "✨ New Features",
-            "best_practice": "💡 Best Practices"
+            "best_practice": "💡 Best Practices",
         }
 
         for category, label in category_labels.items():
@@ -478,7 +495,7 @@ class WebResearchUseCase:
                     note += f"  - Sources: {', '.join(insight.sources[:2])}\n\n"
 
         # Add sources (deduplicate by URL since ResearchSource is frozen/hashable now)
-        note += f"\n#### 📚 Sources Consulted\n\n"
+        note += "\n#### 📚 Sources Consulted\n\n"
         unique_urls = list(set(source.url for source in sources))
         for i, url in enumerate(unique_urls[:10], 1):
             note += f"{i}. {url}\n"
@@ -495,16 +512,16 @@ class WebResearchUseCase:
         content = skill_file.read_text()
 
         # Extract version mentions
-        version_pattern = r'version[:\s]+(\d+\.\d+(?:\.\d+)?)'
+        version_pattern = r"version[:\s]+(\d+\.\d+(?:\.\d+)?)"
         versions_in_skill = re.findall(version_pattern, content, re.IGNORECASE)
 
         # Extract versions from insights
         versions_in_insights = []
         for insight in insights:
-            versions = re.findall(r'\d+\.\d+(?:\.\d+)?', insight.details)
+            versions = re.findall(r"\d+\.\d+(?:\.\d+)?", insight.details)
             versions_in_insights.extend(versions)
 
         return {
             "current_versions": list(set(versions_in_skill)),
-            "discovered_versions": list(set(versions_in_insights))
+            "discovered_versions": list(set(versions_in_insights)),
         }

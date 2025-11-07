@@ -1,23 +1,23 @@
 # src/server.py
 import logging
 import os
-from functools import partial
+
 from dotenv import load_dotenv
 from fastmcp import FastMCP
-from cde_orchestrator.infrastructure.dependency_injection import container
+
 from mcp_tools import (
-    cde_onboardingProject,
-    cde_publishOnboarding,
-    cde_setupProject,
-    cde_scanDocumentation,
     cde_analyzeDocumentation,
-    cde_selectWorkflow,
-    cde_sourceSkill,
-    cde_updateSkill,
-    cde_listAvailableAgents,
-    cde_selectAgent,
     cde_executeWithBestAgent,
     cde_installMcpExtension,
+    cde_listAvailableAgents,
+    cde_onboardingProject,
+    cde_publishOnboarding,
+    cde_scanDocumentation,
+    cde_selectAgent,
+    cde_selectWorkflow,
+    cde_setupProject,
+    cde_sourceSkill,
+    cde_updateSkill,
 )
 from mcp_tools.full_implementation import cde_executeFullImplementation
 from mcp_tools.test_progress import cde_testProgressReporting
@@ -43,7 +43,9 @@ app.tool()(cde_listAvailableAgents)
 app.tool()(cde_selectAgent)
 app.tool()(cde_executeWithBestAgent)
 app.tool()(cde_executeFullImplementation)  # ✅ Nueva herramienta meta de orquestación
-app.tool()(cde_testProgressReporting)  # ✅ Test herramienta con progreso para status bar
+app.tool()(
+    cde_testProgressReporting
+)  # ✅ Test herramienta con progreso para status bar
 app.tool()(cde_installMcpExtension)  # ✅ Instalar extensión MCP en VS Code
 
 

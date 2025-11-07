@@ -10,7 +10,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
 
 class SkillType(str, Enum):
@@ -187,7 +187,9 @@ class EphemeralSkill(BaseModel):
 
     # Lifecycle
     created_at: datetime
-    expires_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc) + timedelta(hours=24))
+    expires_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc) + timedelta(hours=24)
+    )
     task_id: str  # Link to parent task
     generated_from_base_skill: Optional[str] = None  # Parent base skill ID
 

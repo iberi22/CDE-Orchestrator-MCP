@@ -1,16 +1,24 @@
 # tests/unit/application/onboarding/test_onboarding_use_cases.py
-import unittest
-import tempfile
-from pathlib import Path
-
 # Add project root to path
 import sys
+import tempfile
+import unittest
+from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
-from src.cde_orchestrator.application.onboarding.project_analysis_use_case import ProjectAnalysisUseCase
-from src.cde_orchestrator.application.onboarding.publishing_use_case import PublishingUseCase
-from src.cde_orchestrator.application.onboarding.project_setup_use_case import ProjectSetupUseCase
 from unittest.mock import MagicMock
+
+from src.cde_orchestrator.application.onboarding.project_analysis_use_case import (
+    ProjectAnalysisUseCase,
+)
+from src.cde_orchestrator.application.onboarding.project_setup_use_case import (
+    ProjectSetupUseCase,
+)
+from src.cde_orchestrator.application.onboarding.publishing_use_case import (
+    PublishingUseCase,
+)
+
 
 class TestOnboardingUseCases(unittest.TestCase):
     def test_project_setup_use_case(self):
@@ -25,11 +33,11 @@ class TestOnboardingUseCases(unittest.TestCase):
         mock_analysis_uc.execute.return_value = {
             "language_stats": {".py": 10},
             "dependency_files": ["requirements.txt"],
-            "summary": "A Python project."
+            "summary": "A Python project.",
         }
         mock_publishing_uc.execute.return_value = {
             "status": "success",
-            "files_written": [".gitignore", "AGENTS.md"]
+            "files_written": [".gitignore", "AGENTS.md"],
         }
 
         # Instantiate the use case with mocks
@@ -60,14 +68,15 @@ This document provides instructions for AI agents working on this repository.
 - **Analyze Before You Act:** Use tools like `cde_scanDocumentation` to understand the project state.
 - **Follow the Workflow:** Do not commit directly to `main`. Follow the feature workflow.
 - **Communicate Clearly:** Provide clear commit messages and pull request descriptions.
-"""
+""",
         }
-        mock_publishing_uc.execute.assert_called_once_with("/fake/project", expected_docs)
+        mock_publishing_uc.execute.assert_called_once_with(
+            "/fake/project", expected_docs
+        )
 
         # Verify the final report
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["files_written"], [".gitignore", "AGENTS.md"])
-
 
     def test_project_analysis_use_case(self):
         """
@@ -94,10 +103,7 @@ This document provides instructions for AI agents working on this repository.
         with tempfile.TemporaryDirectory() as temp_dir:
             project_path = Path(temp_dir)
 
-            documents = {
-                "README.md": "# Hello",
-                "docs/guide.md": "A guide."
-            }
+            documents = {"README.md": "# Hello", "docs/guide.md": "A guide."}
 
             use_case = PublishingUseCase()
             result = use_case.execute(str(project_path), documents)
@@ -107,7 +113,10 @@ This document provides instructions for AI agents working on this repository.
 
             self.assertTrue((project_path / "README.md").exists())
             self.assertTrue((project_path / "docs" / "guide.md").exists())
-            self.assertEqual((project_path / "docs" / "guide.md").read_text(), "A guide.")
+            self.assertEqual(
+                (project_path / "docs" / "guide.md").read_text(), "A guide."
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

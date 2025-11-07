@@ -2,6 +2,7 @@
 from pathlib import Path
 from typing import Dict, List
 
+
 class PublishingUseCase:
     """
     Writes a collection of documents to the filesystem.

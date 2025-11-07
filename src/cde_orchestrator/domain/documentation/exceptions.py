@@ -48,9 +48,7 @@ class InvalidLinkError(SpecificationError):
         self.source_id = source_id
         self.target_id = target_id
         self.reason = reason
-        super().__init__(
-            f"Cannot link {source_id} → {target_id}: {reason}"
-        )
+        super().__init__(f"Cannot link {source_id} → {target_id}: {reason}")
 
 
 class SpecificationValidationError(SpecificationError):
@@ -60,6 +58,4 @@ class SpecificationValidationError(SpecificationError):
         self.field = field
         self.value = value
         self.constraint = constraint
-        super().__init__(
-            f"Validation failed for {field}='{value}': {constraint}"
-        )
+        super().__init__(f"Validation failed for {field}='{value}': {constraint}")

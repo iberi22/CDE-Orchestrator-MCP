@@ -10,9 +10,8 @@ Architecture: Application Layer (Use Cases)
 import asyncio
 import logging
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Callable, Coroutine
 from enum import Enum
+from typing import Any, Callable, Coroutine, Dict, List, Optional
 
 __all__ = [
     "TaskStatus",
@@ -26,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 class TaskStatus(Enum):
     """Task execution status."""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -45,6 +45,7 @@ class TaskResult:
         error: Error message (if failed)
         duration_seconds: Execution time in seconds
     """
+
     task_id: str
     status: TaskStatus
     output: Optional[Any] = None
@@ -71,6 +72,7 @@ class Task:
         dependencies: List of task IDs this task depends on
         metadata: Additional task metadata
     """
+
     task_id: str
     coro: Coroutine
     dependencies: List[str] = field(default_factory=list)
@@ -134,8 +136,7 @@ class DependencyGraph:
                 ready.append(task)
             else:
                 all_deps_done = all(
-                    dep_id in self._results
-                    for dep_id in task.dependencies
+                    dep_id in self._results for dep_id in task.dependencies
                 )
                 if all_deps_done:
                     # Check if any dependency failed
@@ -222,8 +223,7 @@ class ParallelExecutionUseCase:
         self._progress_callback: Optional[Callable[[str, TaskStatus], None]] = None
 
     def set_progress_callback(
-        self,
-        callback: Callable[[str, TaskStatus], None]
+        self, callback: Callable[[str, TaskStatus], None]
     ) -> None:
         """
         Set callback for progress updates.
@@ -280,10 +280,7 @@ class ParallelExecutionUseCase:
             logger.info(f"Executing {len(ready_tasks)} tasks concurrently")
 
             # Execute ready tasks concurrently
-            execute_tasks = [
-                self._execute_with_semaphore(task)
-                for task in ready_tasks
-            ]
+            execute_tasks = [self._execute_with_semaphore(task) for task in ready_tasks]
 
             # Wait for all to complete
             results = await asyncio.gather(
@@ -370,10 +367,7 @@ class ParallelExecutionUseCase:
         results = self.graph.get_results()
         completed = sum(1 for r in results.values() if r.is_success())
         failed = sum(1 for r in results.values() if r.is_failed())
-        skipped = sum(
-            1 for r in results.values()
-            if r.status == TaskStatus.SKIPPED
-        )
+        skipped = sum(1 for r in results.values() if r.status == TaskStatus.SKIPPED)
         total_duration = sum(r.duration_seconds for r in results.values())
 
         return {
@@ -383,7 +377,6 @@ class ParallelExecutionUseCase:
             "skipped": skipped,
             "total_duration_seconds": total_duration,
             "success_rate": (
-                completed / len(self.graph._tasks) * 100
-                if self.graph._tasks else 0
+                completed / len(self.graph._tasks) * 100 if self.graph._tasks else 0
             ),
         }

@@ -1,0 +1,20 @@
+diff a/specs/design/rust-pyo3-integration-approach.md b/specs/design/rust-pyo3-integration-approach.md	(rejected hunks)
+@@ -1,10 +1,13 @@
+ ---
+-title: "Rust + PyO3 Integration Approach"
+-status: "in-progress"
+-author: "Jules"
+-date: "2025-11-05"
++updated: '2025-11-07'
++author: Jules
++status: in-progress
++created: '2025-11-07'
++type: design
++title: Rust + PyO3 Integration Approach
++description: A summary of the document.
++date: '2025-11-05'
+ ---
+-
+ # Arquitectura H├¡brida Python + Rust
+ 
+ ## 1. Filosof├¡a

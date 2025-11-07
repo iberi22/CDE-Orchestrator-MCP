@@ -5,17 +5,16 @@ This module demonstrates the integration pattern for invoking Aider with AWS Bed
 in the context of the CDE-Orchestrator-MCP project.
 """
 
-import subprocess
 import json
-import os
-from pathlib import Path
-from typing import Optional, Dict, Any
 import logging
+import os
+import subprocess
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -48,8 +47,8 @@ class AiderBedrockAgent:
     def _setup_environment(self) -> Dict[str, str]:
         """Setup environment variables for Bedrock access."""
         env = os.environ.copy()
-        env['AWS_REGION'] = self.BEDROCK_REGION
-        env['AWS_PROFILE'] = self.BEDROCK_PROFILE
+        env["AWS_REGION"] = self.BEDROCK_REGION
+        env["AWS_PROFILE"] = self.BEDROCK_PROFILE
         return env
 
     def validate_setup(self) -> bool:
@@ -62,27 +61,32 @@ class AiderBedrockAgent:
         # Check Aider installation
         try:
             result = subprocess.run(
-                ['aider', '--version'],
-                capture_output=True,
-                text=True,
-                timeout=5
+                ["aider", "--version"], capture_output=True, text=True, timeout=5
             )
             if result.returncode != 0:
                 logger.error("Aider not found or not working")
                 return False
             logger.info(f"Aider version: {result.stdout.strip()}")
         except FileNotFoundError:
-            logger.error("Aider command not found. Install with: pip install aider-chat")
+            logger.error(
+                "Aider command not found. Install with: pip install aider-chat"
+            )
             return False
 
         # Check AWS credentials
         try:
             result = subprocess.run(
-                ['aws', 'sts', 'get-caller-identity', '--profile', self.BEDROCK_PROFILE],
+                [
+                    "aws",
+                    "sts",
+                    "get-caller-identity",
+                    "--profile",
+                    self.BEDROCK_PROFILE,
+                ],
                 capture_output=True,
                 text=True,
                 env=self.env,
-                timeout=5
+                timeout=5,
             )
             if result.returncode != 0:
                 logger.error(f"AWS credentials invalid: {result.stderr}")
@@ -95,7 +99,7 @@ class AiderBedrockAgent:
             return False
 
         # Check project is a git repository
-        git_dir = self.project_path / '.git'
+        git_dir = self.project_path / ".git"
         if not git_dir.exists():
             logger.warning(f"Project is not a git repository: {self.project_path}")
             logger.info("Aider requires a git repository. Initialize with: git init")
@@ -113,23 +117,17 @@ class AiderBedrockAgent:
         """
         logger.info(f"Starting interactive Aider session in {self.project_path}")
 
-        cmd = [
-            'aider',
-            '--model', f'bedrock/{self.MODEL_ID}',
-            str(self.project_path)
-        ]
+        cmd = ["aider", "--model", f"bedrock/{self.MODEL_ID}", str(self.project_path)]
 
         logger.info(f"Command: {' '.join(cmd)}")
 
-        process = subprocess.run(
-            cmd,
-            env=self.env,
-            cwd=str(self.project_path)
-        )
+        process = subprocess.run(cmd, env=self.env, cwd=str(self.project_path))
 
         return process.returncode
 
-    def execute_task_non_interactive(self, prompt: str, auto_yes: bool = False) -> Dict[str, Any]:
+    def execute_task_non_interactive(
+        self, prompt: str, auto_yes: bool = False
+    ) -> Dict[str, Any]:
         """
         Execute a development task in non-interactive mode.
 
@@ -143,12 +141,13 @@ class AiderBedrockAgent:
         logger.info(f"Executing task (auto_yes={auto_yes}): {prompt}")
 
         cmd = [
-            'aider',
-            '--model', f'bedrock/{self.MODEL_ID}',
+            "aider",
+            "--model",
+            f"bedrock/{self.MODEL_ID}",
         ]
 
         if auto_yes:
-            cmd.append('--yes')
+            cmd.append("--yes")
 
         cmd.append(str(self.project_path))
 
@@ -163,18 +162,18 @@ class AiderBedrockAgent:
                 stderr=subprocess.PIPE,
                 text=True,
                 env=self.env,
-                cwd=str(self.project_path)
+                cwd=str(self.project_path),
             )
 
             # Send the prompt as input
             stdout, stderr = process.communicate(input=prompt, timeout=300)
 
             result = {
-                'status': 'completed' if process.returncode == 0 else 'failed',
-                'exit_code': process.returncode,
-                'stdout': stdout,
-                'stderr': stderr,
-                'prompt': prompt
+                "status": "completed" if process.returncode == 0 else "failed",
+                "exit_code": process.returncode,
+                "stdout": stdout,
+                "stderr": stderr,
+                "prompt": prompt,
             }
 
             logger.info(f"Task completed with exit code: {process.returncode}")
@@ -185,17 +184,13 @@ class AiderBedrockAgent:
             logger.error("Task execution timed out (5 minutes)")
             process.kill()
             return {
-                'status': 'timeout',
-                'exit_code': -1,
-                'error': 'Execution timed out after 5 minutes'
+                "status": "timeout",
+                "exit_code": -1,
+                "error": "Execution timed out after 5 minutes",
             }
         except Exception as e:
             logger.error(f"Task execution failed: {e}")
-            return {
-                'status': 'error',
-                'exit_code': -1,
-                'error': str(e)
-            }
+            return {"status": "error", "exit_code": -1, "error": str(e)}
 
     def get_bedrock_models(self) -> Optional[list]:
         """
@@ -209,19 +204,23 @@ class AiderBedrockAgent:
         try:
             result = subprocess.run(
                 [
-                    'aws', 'bedrock', 'list-foundation-models',
-                    '--region', self.BEDROCK_REGION,
-                    '--profile', self.BEDROCK_PROFILE
+                    "aws",
+                    "bedrock",
+                    "list-foundation-models",
+                    "--region",
+                    self.BEDROCK_REGION,
+                    "--profile",
+                    self.BEDROCK_PROFILE,
                 ],
                 capture_output=True,
                 text=True,
                 env=self.env,
-                timeout=10
+                timeout=10,
             )
 
             if result.returncode == 0:
                 data = json.loads(result.stdout)
-                models = data.get('modelSummaries', [])
+                models = data.get("modelSummaries", [])
                 logger.info(f"Found {len(models)} models")
                 return models
             else:
@@ -237,6 +236,7 @@ class AiderBedrockAgent:
 # MCP INTEGRATION EXAMPLE
 # ============================================================================
 
+
 def create_mcp_tool_start_coding_session() -> Dict[str, Any]:
     """
     MCP tool definition for starting a coding session with Aider.
@@ -251,25 +251,25 @@ def create_mcp_tool_start_coding_session() -> Dict[str, Any]:
             "properties": {
                 "project_path": {
                     "type": "string",
-                    "description": "Path to the project repository"
+                    "description": "Path to the project repository",
                 },
                 "prompt": {
                     "type": "string",
-                    "description": "Initial development request/prompt"
+                    "description": "Initial development request/prompt",
                 },
                 "auto_yes": {
                     "type": "boolean",
                     "description": "Skip confirmation prompts (default: false)",
-                    "default": False
+                    "default": False,
                 },
                 "interactive": {
                     "type": "boolean",
                     "description": "Start interactive session vs non-interactive (default: false)",
-                    "default": False
-                }
+                    "default": False,
+                },
             },
-            "required": ["project_path", "prompt"]
-        }
+            "required": ["project_path", "prompt"],
+        },
     }
 
 
@@ -285,10 +285,7 @@ def mcp_tool_handler(arguments: Dict[str, Any]) -> Dict[str, Any]:
     interactive = arguments.get("interactive", False)
 
     if not prompt:
-        return {
-            "status": "error",
-            "error": "prompt is required"
-        }
+        return {"status": "error", "error": "prompt is required"}
 
     # Initialize agent
     agent = AiderBedrockAgent(project_path)
@@ -297,18 +294,14 @@ def mcp_tool_handler(arguments: Dict[str, Any]) -> Dict[str, Any]:
     if not agent.validate_setup():
         return {
             "status": "error",
-            "error": "Setup validation failed. Check logs for details."
+            "error": "Setup validation failed. Check logs for details.",
         }
 
     # Execute based on mode
     if interactive:
         logger.info("Starting interactive session...")
         exit_code = agent.start_interactive_session()
-        return {
-            "status": "completed",
-            "mode": "interactive",
-            "exit_code": exit_code
-        }
+        return {"status": "completed", "mode": "interactive", "exit_code": exit_code}
     else:
         logger.info("Starting non-interactive task...")
         result = agent.execute_task_non_interactive(prompt, auto_yes=auto_yes)
@@ -320,7 +313,6 @@ def mcp_tool_handler(arguments: Dict[str, Any]) -> Dict[str, Any]:
 # ============================================================================
 
 if __name__ == "__main__":
-    import sys
 
     # Example 1: Validate setup
     print("=" * 60)
@@ -346,12 +338,11 @@ if __name__ == "__main__":
     print("Example 3: Execute Non-Interactive Task")
     print("=" * 60)
     result = agent.execute_task_non_interactive(
-        "Create a simple Python function that adds two numbers",
-        auto_yes=True
+        "Create a simple Python function that adds two numbers", auto_yes=True
     )
     print(f"Status: {result['status']}")
     print(f"Exit Code: {result['exit_code']}")
-    if result.get('stdout'):
+    if result.get("stdout"):
         print(f"Output preview: {result['stdout'][:200]}...")
     print()
 

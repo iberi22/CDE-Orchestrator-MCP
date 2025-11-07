@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """Check if HTTP and WebSocket endpoints are listening."""
 
-import socket
 import json
-import time
-import sys
+import socket
+
 
 def is_port_open(port):
     """Check if port is listening."""
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    result = sock.connect_ex(('localhost', port))
+    result = sock.connect_ex(("localhost", port))
     sock.close()
     return result == 0
+
 
 def test_http_endpoint():
     """Test HTTP endpoint with a progress event."""
@@ -23,22 +23,23 @@ def test_http_endpoint():
             "tool": "test",
             "percentage": 0.5,
             "elapsed": 0,
-            "message": "Test"
+            "message": "Test",
         }
 
-        data = json.dumps(event).encode('utf-8')
+        data = json.dumps(event).encode("utf-8")
         req = urllib.request.Request(
             "http://localhost:8767/progress",
             data=data,
-            headers={'Content-Type': 'application/json'}
+            headers={"Content-Type": "application/json"},
         )
 
         response = urllib.request.urlopen(req, timeout=1)
         status = response.status
         response.close()
         return status == 200
-    except Exception as e:
+    except Exception:
         return False
+
 
 print("🔍 Checking endpoints...\n")
 

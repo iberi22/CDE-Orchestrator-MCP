@@ -25,14 +25,13 @@ For LLMs:
 
 import json
 import logging
-from pathlib import Path
-from typing import Optional, List, AsyncIterator
 from datetime import datetime, timezone
+from pathlib import Path
+from typing import AsyncIterator, List, Optional
 
+from ..domain.entities import Feature, FeatureStatus, Project, ProjectId, ProjectStatus
+from ..domain.exceptions import DomainError, ProjectNotFoundError
 from ..domain.ports import IProjectRepository
-from ..domain.entities import Project, ProjectId, Feature, ProjectStatus, FeatureStatus
-from ..domain.exceptions import ProjectNotFoundError, DomainError
-
 
 logger = logging.getLogger(__name__)
 

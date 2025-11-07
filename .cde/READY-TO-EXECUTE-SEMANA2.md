@@ -48,7 +48,7 @@ gemini "Read .cde/agent-instructions/qwen-semana2-task3-directories.md. Move 8 o
 
 ## Expected Results
 
-**Before**: 157 violations (88 errors + 54 warnings) = 64.2% compliance  
+**Before**: 157 violations (88 errors + 54 warnings) = 64.2% compliance
 **After**: <50 violations (target <20 errors + <10 warnings) = 85%+ compliance
 
 **Improvement**: 68% reduction in violations

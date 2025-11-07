@@ -15,7 +15,7 @@ Example:
 
 import logging
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 

@@ -531,4 +531,3 @@ relevance_score: 0.92
 - ✅ Breaking changes detected: 90%+ catch rate
 - ✅ Project intelligence reports generated: Weekly
 - ✅ Improvement recommendations actioned: 80%+
-

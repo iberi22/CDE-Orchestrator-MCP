@@ -61,36 +61,36 @@ foreach ($key in $tasks.Keys) {
     $task = $tasks[$key]
     $instructionFile = "$ProjectRoot\$($task.Instruction)"
     $outputFile = "$ResultsDir\$($key.ToLower())-output-$timestamp.txt"
-    
+
     if (-not (Test-Path $instructionFile)) {
         Write-Host "❌ Instruction file not found: $instructionFile" -ForegroundColor Red
         continue
     }
-    
+
     # Read instructions
     $instructions = Get-Content $instructionFile -Raw
-    
+
 # Create prompt for this agent
     $agentPrompt = "You are $($task.Agent). Your mission: $($task.Task) ($($task.Files)).`n`nDetailed instructions:`n`n$instructions`n`nAfter completing ALL tasks, commit with semantic message and output completion status."
-    
+
     Write-Host "📡 Launching $($task.Agent)..." -ForegroundColor Yellow
     Write-Host "   Output: $outputFile"
-    
+
     # Create background job
     $job = Start-Job -ScriptBlock {
         param($Agent, $Prompt, $OutputFile, $ProjectRoot)
-        
+
         Push-Location $ProjectRoot
-        
+
         try {
             # Call gemini CLI with prompt
             $output = & gemini "$Prompt" --approval-mode auto_edit 2>&1
-            
+
             # Save output
             $output | Out-File $OutputFile -Encoding UTF8 -Append
-            
+
             Write-Host "✅ $Agent completed - output saved"
-            return @{ 
+            return @{
                 Status = "COMPLETED"
                 Agent = $Agent
                 Output = $output
@@ -107,12 +107,12 @@ foreach ($key in $tasks.Keys) {
             Pop-Location
         }
     } -ArgumentList $task.Agent, $agentPrompt, $outputFile, $ProjectRoot
-    
+
     $jobIds[$key] = @{ JobId = $job.Id; OutputFile = $outputFile; Agent = $task.Agent }
-    
+
     Write-Host "   Job ID: $($job.Id)"
     Write-Host "   Status: QUEUED`n"
-    
+
     Start-Sleep -Seconds 1
 }
 
@@ -132,7 +132,7 @@ $lastCheck = Get-Date
 foreach ($key in $jobIds.Keys) {
     $jobInfo = $jobIds[$key]
     $job = Get-Job -Id $jobInfo.JobId
-    
+
     Write-Host "📊 $($jobInfo.Agent):"
     Write-Host "   Job ID: $($jobInfo.JobId)"
     Write-Host "   Status: Waiting for completion..."
@@ -164,7 +164,7 @@ Write-Host "==================================================`n" -ForegroundCol
 foreach ($key in $jobIds.Keys) {
     $jobInfo = $jobIds[$key]
     $job = Get-Job -Id $jobInfo.JobId
-    
+
     if ($job.State -eq "Completed") {
         $result = Receive-Job -Job $job
         Write-Host "✅ $($jobInfo.Agent): COMPLETED" -ForegroundColor Green
@@ -173,7 +173,7 @@ foreach ($key in $jobIds.Keys) {
         Write-Host "❌ $($jobInfo.Agent): $($job.State)" -ForegroundColor Red
         $failed++
     }
-    
+
     Write-Host "   Output: $($jobInfo.OutputFile)`n"
 }
 

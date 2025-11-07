@@ -67,7 +67,7 @@ class FileSystemStateRepository(IStateStore):
     def _rotate_backups(self):
         """Keep only the latest N backups."""
         backups = sorted(self.backup_dir.glob("state_*.json"), reverse=True)
-        for stale_backup in backups[self.max_backups:]:
+        for stale_backup in backups[self.max_backups :]:
             try:
                 stale_backup.unlink()
             except OSError as exc:

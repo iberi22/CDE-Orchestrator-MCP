@@ -13,7 +13,7 @@ Usage:
 import argparse
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 
 class TestStructureValidator:
@@ -75,7 +75,9 @@ class TestStructureValidator:
         for subdir in expected_subdirs:
             subdir_path = self.tests_dir / subdir
             if not subdir_path.exists():
-                self.warnings.append(f"tests/{subdir}/ directory does not exist (recommended)")
+                self.warnings.append(
+                    f"tests/{subdir}/ directory does not exist (recommended)"
+                )
 
     def _check_test_naming(self) -> None:
         """Check that test files follow naming convention."""
@@ -135,7 +137,9 @@ def find_misplaced_tests(repo_root: Path) -> List[Path]:
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Validate test structure")
-    parser.add_argument("--fix", action="store_true", help="Auto-fix issues (move files)")
+    parser.add_argument(
+        "--fix", action="store_true", help="Auto-fix issues (move files)"
+    )
     parser.add_argument("--staged", action="store_true", help="Check staged files only")
 
     args = parser.parse_args()

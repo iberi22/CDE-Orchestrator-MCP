@@ -13,11 +13,11 @@ tags:
 - api
 - assessment
 - deployment
-llm_summary: "User guide for Evaluación de Actualización a Python 3.14 para CDE Orchestrator\
-  \ MCP.\n  **Agente:** GitHub Copilot **Fecha:** 15 de noviembre de 2025 **Estado:**\
-  \ Completo **Duración:** 45 minutos **Tipo:** Análisis de Viabilidad Técnica | Aspecto\
-  \ | Detalle | |---------|---------| | **Versión** | Python 3.14.0 |\n  Reference\
-  \ when working with guide documentation."
+llm_summary: 'User guide for Evaluación de Actualización a Python 3.14 para CDE Orchestrator MCP.
+
+  **Agente:** GitHub Copilot **Fecha:** 15 de noviembre de 2025 **Estado:** Completo **Duración:** 45 minutos **Tipo:** Análisis de Viabilidad Técnica | Aspecto | Detalle | |---------|---------| | **Versión** | Python 3.14.0 |
+
+  Reference when working with guide documentation.'
 ---
 
 # Evaluación de Actualización a Python 3.14 para CDE Orchestrator MCP

@@ -300,7 +300,9 @@ class SkillRequirementDetector:
             ComplexityLevel enum value
         """
         # Score each complexity level
-        complexity_scores: Dict[ComplexityLevel, int] = {level: 0 for level in ComplexityLevel}
+        complexity_scores: Dict[ComplexityLevel, int] = {
+            level: 0 for level in ComplexityLevel
+        }
 
         for level, indicators in self.COMPLEXITY_INDICATORS.items():
             for indicator in indicators:
@@ -311,7 +313,12 @@ class SkillRequirementDetector:
         max_complexity = ComplexityLevel.LOW
         max_score = 0
 
-        for level in [ComplexityLevel.EPIC, ComplexityLevel.HIGH, ComplexityLevel.MEDIUM, ComplexityLevel.LOW]:
+        for level in [
+            ComplexityLevel.EPIC,
+            ComplexityLevel.HIGH,
+            ComplexityLevel.MEDIUM,
+            ComplexityLevel.LOW,
+        ]:
             if complexity_scores[level] > max_score:
                 max_score = complexity_scores[level]
                 max_complexity = level

@@ -25,7 +25,7 @@ Rules:
     - STATELESS: no caching, no registries
 """
 
-from .project_locator import ProjectLocator, get_project_locator, configure_scan_roots
+from .project_locator import ProjectLocator, configure_scan_roots, get_project_locator
 
 __all__ = [
     "ProjectLocator",

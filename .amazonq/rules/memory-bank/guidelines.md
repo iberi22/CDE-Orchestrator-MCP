@@ -27,11 +27,11 @@ def cde_delegateToJules(
     **When to Use:**
     - Complex feature development (4-8 hours estimated)
     - Large-scale refactoring across multiple files
-    
+
     **Args:**
         user_prompt: Natural language task description
         project_path: Path to project (default: current directory)
-        
+
     **Returns:**
         JSON with execution results and session information
     """
@@ -47,10 +47,10 @@ def cde_delegateToJules(
 ```python
 async def needs_onboarding(self) -> Dict[str, Any]:
     """Check if the project needs onboarding."""
-    
+
 def _calculate_task_complexity(task_description: str) -> str:
     """Calculate task complexity from description."""
-    
+
 class OnboardingUseCase:
     def __init__(self, project_root: Path, git_adapter: IGitAdapter):
 ```
@@ -104,12 +104,12 @@ logger.warning("Error analyzing git history with adapter: %s", exc, exc_info=Tru
 class IGitAdapter:
     async def traverse_commits(self) -> AsyncGenerator[Commit, None]:
         """Traverse Git commits in chronological order."""
-        
+
 # Application use case
 class OnboardingUseCase:
     def __init__(self, project_root: Path, git_adapter: IGitAdapter):
         self.git_adapter = git_adapter  # Dependency injection
-        
+
     async def _analyze_git_history_with_adapter(self) -> Dict[str, Any]:
         # Use adapter through interface
         async for commit in self.git_adapter.traverse_commits():
@@ -153,10 +153,10 @@ class DocumentStatus(Enum):
     ACTIVE = "active"
     DEPRECATED = "deprecated"
     ARCHIVED = "archived"
-    
+
     def can_transition_to(self, target: "DocumentStatus") -> bool:
         """Define valid state transitions."""
-        
+
 def activate(self):
     """Transition from DRAFT to ACTIVE with validation."""
     if self.status != DocumentStatus.DRAFT:
@@ -175,10 +175,10 @@ def activate(self):
 ```python
 def test_create_specification_with_minimal_fields():
     """Test creating specification with only required fields."""
-    
+
 def test_activate_requires_llm_summary():
     """Test that activation requires LLM summary."""
-    
+
 def test_cannot_deprecate_draft():
     """Test that draft specs cannot be deprecated."""
 ```
@@ -196,10 +196,10 @@ def test_cannot_link_archived_specification():
     spec = Specification.create(...)
     spec.activate()
     spec.archive()
-    
+
     with pytest.raises(InvalidLinkError) as exc_info:
         spec.establish_link(target_id, LinkRelationship.IMPLEMENTS)
-    
+
     assert "Cannot link archived specifications" in str(exc_info.value)
 ```
 
@@ -216,7 +216,7 @@ def test_cannot_link_archived_specification():
 class StartFeatureInput(BaseModel):
     """Validation model for cde_startFeature."""
     user_prompt: str
-    
+
     model_config = ConfigDict(
         str_min_length=10,
         str_max_length=5000
@@ -299,7 +299,7 @@ def __init__(self, project_root: Path):
     self.project_root = project_root
     self.specs_root = project_root / "specs"
     self.memory_root = project_root / "memory"
-    
+
 # Path validation
 if ".." in path or path.startswith("/"):
     raise ValueError(f"Invalid path: {path}. Path traversal not allowed.")
@@ -333,7 +333,7 @@ if file_path.exists() and not force:
 async def needs_onboarding(self) -> Dict[str, Any]:
     """Async method that awaits other async operations."""
     git_info = await self._analyze_git_history_with_adapter()
-    
+
 async def traverse_commits(self) -> AsyncGenerator[Commit, None]:
     """Async generator for streaming commits."""
     for commit in commits:

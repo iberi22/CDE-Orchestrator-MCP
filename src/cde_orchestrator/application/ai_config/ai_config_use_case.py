@@ -458,6 +458,7 @@ tests/
 For detailed GitHub Copilot instructions: see `.github/copilot-instructions.md`
 For Google AI Studio (Gemini) instructions: see `GEMINI.md` (if using Gemini)
 """
+
     def _get_gemini_md_template(self, project_name: str) -> str:
         """
         Generate GEMINI.md content template.

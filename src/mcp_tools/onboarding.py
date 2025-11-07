@@ -1,12 +1,17 @@
 # src/mcp_tools/onboarding.py
 import json
+import os
 from typing import Dict
+
 from fastmcp import Context
+
+from cde_orchestrator.application.onboarding.project_analysis_use_case import (
+    ProjectAnalysisUseCase,
+)
+from cde_orchestrator.infrastructure.dependency_injection import container
+
 from ._base import tool_handler
 
-from cde_orchestrator.application.onboarding.project_analysis_use_case import ProjectAnalysisUseCase
-from cde_orchestrator.infrastructure.dependency_injection import container
-import os
 
 @tool_handler
 async def cde_onboardingProject(ctx: Context, project_path: str = ".") -> str:
@@ -24,17 +29,25 @@ async def cde_onboardingProject(ctx: Context, project_path: str = ".") -> str:
     analysis_result = analysis_use_case.execute(project_path)
 
     state = container.manage_state_use_case.load()
-    state['project_analysis'] = analysis_result
-    state['onboarding_status'] = 'analysis_completed'
+    state["project_analysis"] = analysis_result
+    state["onboarding_status"] = "analysis_completed"
     container.manage_state_use_case.save(state)
 
     return json.dumps(analysis_result, indent=2)
 
-from cde_orchestrator.application.onboarding.publishing_use_case import PublishingUseCase
-from cde_orchestrator.application.onboarding.project_setup_use_case import ProjectSetupUseCase
+
+from cde_orchestrator.application.onboarding.project_setup_use_case import (
+    ProjectSetupUseCase,
+)
+from cde_orchestrator.application.onboarding.publishing_use_case import (
+    PublishingUseCase,
+)
+
 
 @tool_handler
-async def cde_setupProject(ctx: Context, project_path: str = ".", force: bool = False) -> str:
+async def cde_setupProject(
+    ctx: Context, project_path: str = ".", force: bool = False
+) -> str:
     """
     Analyzes a project and generates key configuration files (e.g., .gitignore, AGENTS.md).
 
@@ -56,9 +69,7 @@ async def cde_setupProject(ctx: Context, project_path: str = ".", force: bool = 
 
 @tool_handler
 def cde_publishOnboarding(
-    documents: Dict[str, str],
-    project_path: str = ".",
-    approve: bool = True
+    documents: Dict[str, str], project_path: str = ".", approve: bool = True
 ) -> str:
     """
     Applies onboarding documents to the repository.
@@ -80,7 +91,7 @@ def cde_publishOnboarding(
     # Update state only if successful
     if result["status"] == "success":
         state = container.manage_state_use_case.load()
-        state['published_documents'] = result["files_written"]
+        state["published_documents"] = result["files_written"]
         container.manage_state_use_case.save(state)
 
     return json.dumps(result, indent=2)

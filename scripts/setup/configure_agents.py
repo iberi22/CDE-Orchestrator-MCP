@@ -5,8 +5,8 @@ Configure and Test Claude Code and Aider with Bedrock
 This script sets up environment variables and provides test commands
 """
 
-import os
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -47,15 +47,12 @@ def test_claude_code():
     # Verificar si Claude Code está instalado
     try:
         result = subprocess.run(
-            ["claude-code", "--version"],
-            capture_output=True,
-            text=True,
-            timeout=5
+            ["claude-code", "--version"], capture_output=True, text=True, timeout=5
         )
         if result.returncode == 0:
             print(f"\n✅ Claude Code instalado: {result.stdout.strip()}")
         else:
-            print(f"\n❌ Claude Code no responde correctamente")
+            print("\n❌ Claude Code no responde correctamente")
             return False
     except FileNotFoundError:
         print("\n❌ Claude Code no está en PATH")
@@ -66,12 +63,14 @@ def test_claude_code():
 
     # Mostrar comando de prueba
     print("\n📋 Comando para ejecutar Claude Code con Bedrock:")
-    print("""
+    print(
+        """
 claude-code run \\
   --provider bedrock \\
   --model anthropic.claude-3-5-sonnet-20241022-v2:0 \\
   --prompt "Hola, ¿cuál es tu nombre?"
-    """)
+    """
+    )
 
     return True
 
@@ -85,15 +84,12 @@ def test_aider():
     # Verificar si Aider está instalado
     try:
         result = subprocess.run(
-            ["aider", "--version"],
-            capture_output=True,
-            text=True,
-            timeout=5
+            ["aider", "--version"], capture_output=True, text=True, timeout=5
         )
         if result.returncode == 0:
             print(f"\n✅ Aider instalado: {result.stdout.strip()}")
         else:
-            print(f"\n❌ Aider no responde correctamente")
+            print("\n❌ Aider no responde correctamente")
             return False
     except FileNotFoundError:
         print("\n❌ Aider no está en PATH")
@@ -105,9 +101,11 @@ def test_aider():
 
     # Mostrar comando de prueba
     print("\n📋 Comando para ejecutar Aider con Bedrock:")
-    print("""
+    print(
+        """
 aider --model bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0
-    """)
+    """
+    )
 
     return True
 
@@ -122,22 +120,19 @@ def generate_orchestration_config():
                 "enabled": True,
                 "commands": {
                     "run": "claude-code run --provider bedrock --model {model} --prompt {prompt}",
-                    "version": "claude-code --version"
-                }
+                    "version": "claude-code --version",
+                },
             },
             "aider": {
                 "model": "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0",
                 "enabled": True,
                 "commands": {
                     "run": "aider --model {model} --no-auto-commits",
-                    "version": "aider --version"
-                }
-            }
+                    "version": "aider --version",
+                },
+            },
         },
-        "bedrock": {
-            "region": "us-east-1",
-            "profile": "bedrock"
-        }
+        "bedrock": {"region": "us-east-1", "profile": "bedrock"},
     }
 
     config_path = Path(".cde/bedrock-config/orchestration.json")

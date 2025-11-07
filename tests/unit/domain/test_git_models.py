@@ -5,6 +5,7 @@ from pathlib import Path
 
 from cde_orchestrator.domain.git import Commit, Modification
 
+
 def test_commit_model_creation():
     """Tests that the Commit model can be instantiated correctly."""
     now = datetime.now()
@@ -19,6 +20,7 @@ def test_commit_model_creation():
     assert commit.date == now
     assert commit.message == "Test commit message"
     assert commit.modifications == []
+
 
 def test_modification_model_creation():
     """Tests that the Modification model can be instantiated correctly."""

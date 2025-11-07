@@ -13,11 +13,11 @@ llm_summary: "Move orphaned .md files from .amazonq, .copilot, .jules, scripts, 
 
 ## OBJECTIVE
 
-**Agent**: Qwen  
-**Task**: Directory structure corrections + move orphaned files  
-**Files Affected**: 12+ files  
-**Estimated Time**: 15-20 minutes  
-**Complexity**: Medium  
+**Agent**: Qwen
+**Task**: Directory structure corrections + move orphaned files
+**Files Affected**: 12+ files
+**Estimated Time**: 15-20 minutes
+**Complexity**: Medium
 
 ---
 
@@ -157,6 +157,6 @@ Then output: `✅ QWEN TASK 3 COMPLETE`
 
 ---
 
-**Parallel**: Can start AFTER Gemini/Codex start (NOT dependent on completion)  
-**Status**: READY FOR EXECUTION  
+**Parallel**: Can start AFTER Gemini/Codex start (NOT dependent on completion)
+**Status**: READY FOR EXECUTION
 **Priority**: 🟡 HIGH

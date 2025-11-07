@@ -4,11 +4,13 @@ Unit tests for ParallelExecutionUseCase.
 Tests concurrent task execution with dependency management.
 """
 
-import pytest
 import asyncio
+
+import pytest
+
 from cde_orchestrator.application.parallel_execution_use_case import (
-    ParallelExecutionUseCase,
     DependencyGraph,
+    ParallelExecutionUseCase,
     Task,
     TaskResult,
     TaskStatus,
@@ -62,6 +64,7 @@ class TestTask:
     @pytest.mark.asyncio
     async def test_task_without_dependencies(self):
         """Test task with no dependencies."""
+
         async def dummy_coro():
             return "result"
 
@@ -77,6 +80,7 @@ class TestTask:
     @pytest.mark.asyncio
     async def test_task_with_dependencies(self):
         """Test task with dependencies."""
+
         async def dummy_coro():
             return "result"
 
@@ -96,6 +100,7 @@ class TestDependencyGraph:
     @pytest.mark.asyncio
     async def test_add_and_get_tasks(self):
         """Test adding and retrieving tasks."""
+
         async def dummy_coro():
             return "result"
 
@@ -128,6 +133,7 @@ class TestDependencyGraph:
 
     def test_is_complete(self):
         """Test completion check."""
+
         async def dummy_coro():
             return "result"
 
@@ -169,6 +175,7 @@ class TestDependencyGraph:
     @pytest.mark.asyncio
     async def test_get_ready_tasks(self):
         """Test getting ready tasks."""
+
         async def dummy_coro():
             return "result"
 
@@ -206,6 +213,7 @@ class TestParallelExecutionUseCase:
     @pytest.mark.asyncio
     async def test_execute_single_task(self):
         """Test executing single task."""
+
         async def task_coro():
             return "result"
 
@@ -222,6 +230,7 @@ class TestParallelExecutionUseCase:
     @pytest.mark.asyncio
     async def test_get_summary(self):
         """Test summary generation."""
+
         async def success_task():
             await asyncio.sleep(0.01)
             return "success"

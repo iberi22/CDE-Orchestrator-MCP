@@ -1,3 +1,12 @@
+---
+title: "Jules Semana 2 Instructions"
+description: "Delegation for Jules AI agent for week 2 documentation cleanup."
+type: "task"
+status: "active"
+created: "2025-11-07"
+updated: "2025-11-07"
+author: "Gemini-Agent-1"
+---
 # DELEGACIÓN A JULES: SEMANA 2 DOCUMENTATION CLEANUP
 
 ## 🎯 MISIÓN PRINCIPAL

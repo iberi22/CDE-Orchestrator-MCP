@@ -13,24 +13,22 @@ Coverage:
     - Business rule validation
 """
 
-import pytest
 from datetime import datetime, timezone
 
+import pytest
+
 from cde_orchestrator.domain.documentation.entities import (
+    DocumentStatus,
+    DocumentType,
+    LinkRelationship,
     Specification,
     SpecificationId,
-    DocumentType,
-    DocumentStatus,
-    SemanticLink,
-    LinkRelationship,
 )
-
 from cde_orchestrator.domain.documentation.exceptions import (
-    InvalidStatusTransitionError,
     InvalidLinkError,
+    InvalidStatusTransitionError,
     SpecificationValidationError,
 )
-
 
 # ============================================================================
 # FACTORY TESTS
@@ -314,7 +312,9 @@ def test_cannot_create_duplicate_links():
 
     # Duplicate link fails
     with pytest.raises(InvalidLinkError) as exc_info:
-        spec.establish_link(target_id=target_id, relationship=LinkRelationship.IMPLEMENTS)
+        spec.establish_link(
+            target_id=target_id, relationship=LinkRelationship.IMPLEMENTS
+        )
 
     assert "Link with relationship 'implements' already exists" in str(exc_info.value)
 
@@ -558,6 +558,7 @@ def test_updates_modify_updated_at():
 
     # Small delay to ensure timestamp difference
     import time
+
     time.sleep(0.01)
 
     spec.activate()

@@ -15,14 +15,13 @@ Flujo:
 import asyncio
 import json
 import logging
-from typing import Dict, Any, Optional, List
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from cde_orchestrator.infrastructure.multi_agent_orchestrator import (
     MultiAgentOrchestrator,
     TaskDefinition,
-    AgentType,
 )
 
 logger = logging.getLogger(__name__)
@@ -31,6 +30,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class Phase:
     """Define una fase de implementación."""
+
     phase_id: str
     title: str
     description: str
@@ -66,8 +66,8 @@ class FullImplementationOrchestrator:
                 estimated_hours=0.5,
                 acceptance_criteria=[
                     "rustc --version >= 1.75",
-                    "cargo --version >= 1.75"
-                ]
+                    "cargo --version >= 1.75",
+                ],
             ),
             TaskDefinition(
                 task_id="phase1-rust-compile",
@@ -80,8 +80,8 @@ class FullImplementationOrchestrator:
                 acceptance_criteria=[
                     "Compilación sin errores",
                     "import cde_rust_core exitoso",
-                    "scan_documentation_py funciona"
-                ]
+                    "scan_documentation_py funciona",
+                ],
             ),
             TaskDefinition(
                 task_id="phase1-run-tests",
@@ -94,8 +94,8 @@ class FullImplementationOrchestrator:
                 acceptance_criteria=[
                     "Todos los tests pasan",
                     "0 tests skipped",
-                    "test_scan_with_rust_preferred pasa"
-                ]
+                    "test_scan_with_rust_preferred pasa",
+                ],
             ),
             TaskDefinition(
                 task_id="phase1-coverage",
@@ -108,8 +108,8 @@ class FullImplementationOrchestrator:
                 acceptance_criteria=[
                     "Coverage >85%",
                     "HTML report en htmlcov/",
-                    "Métrica documentada"
-                ]
+                    "Métrica documentada",
+                ],
             ),
             TaskDefinition(
                 task_id="phase1-benchmark",
@@ -122,8 +122,8 @@ class FullImplementationOrchestrator:
                 acceptance_criteria=[
                     "Benchmark ejecutado correctamente",
                     "Rust >= 6x más rápido que Python",
-                    "Resultados documentados"
-                ]
+                    "Resultados documentados",
+                ],
             ),
         ]
 
@@ -145,8 +145,8 @@ Campos: type, description, created, updated, llm_summary
                 acceptance_criteria=[
                     "Todos los docs tienen metadata completo",
                     "validate-docs.py --all pasa",
-                    "0 warnings"
-                ]
+                    "0 warnings",
+                ],
             ),
             TaskDefinition(
                 task_id="phase2-llm-summary",
@@ -167,8 +167,8 @@ Formato: 2-3 oraciones que resuman el documento para LLM
                 acceptance_criteria=[
                     "llm_summary en 4+ docs",
                     "Cada resumen: 2-3 oraciones",
-                    "Capturan esencia del documento"
-                ]
+                    "Capturan esencia del documento",
+                ],
             ),
             TaskDefinition(
                 task_id="phase2-governance-validation",
@@ -190,8 +190,8 @@ Asegurar:
                 acceptance_criteria=[
                     "validate-docs.py pasa",
                     "0 errors, 0 warnings",
-                    "Reporte generado"
-                ]
+                    "Reporte generado",
+                ],
             ),
             TaskDefinition(
                 task_id="phase2-token-optimization",
@@ -212,8 +212,8 @@ Objetivo: 30-40% reducción de tokens totales
                 acceptance_criteria=[
                     "30-40% reducción de tokens",
                     "Información igual, menos verbosidad",
-                    "Documentos más claros"
-                ]
+                    "Documentos más claros",
+                ],
             ),
         ]
 
@@ -244,8 +244,8 @@ Ejemplo de AGENTS.md dinámico:
                     "ProjectSetupUseCase funciona",
                     "AGENTS.md generado dinámicamente",
                     "GEMINI.md generado si Python",
-                    ".gitignore inteligente según lenguajes"
-                ]
+                    ".gitignore inteligente según lenguajes",
+                ],
             ),
             TaskDefinition(
                 task_id="phase3-setup-tests",
@@ -269,8 +269,8 @@ Usar pyfakefs para simular filesystem
                 acceptance_criteria=[
                     "5+ tests implementados",
                     "Todos los tests pasan",
-                    "100% coverage de cde_setupProject"
-                ]
+                    "100% coverage de cde_setupProject",
+                ],
             ),
             TaskDefinition(
                 task_id="phase3-mcp-integration",
@@ -289,8 +289,8 @@ Actualizar src/server.py:
                 acceptance_criteria=[
                     "cde_setupProject registrada en MCP",
                     "Funciona desde cliente MCP",
-                    "Documentación actualizada"
-                ]
+                    "Documentación actualizada",
+                ],
             ),
         ]
 
@@ -323,8 +323,8 @@ Estructura de datos:
                     "Detecta Python, JS, TS, Rust, Go",
                     "LOC calculado correctamente",
                     "Complejidad ciclomática aproximada",
-                    "JSON válido devuelto"
-                ]
+                    "JSON válido devuelto",
+                ],
             ),
             TaskDefinition(
                 task_id="phase4-code-analysis-python",
@@ -343,8 +343,8 @@ Actualizar:
                 acceptance_criteria=[
                     "cde_rust_core.analyze_code_py() funciona",
                     "Fallback Python funciona",
-                    "Output JSON tiene campos correctos"
-                ]
+                    "Output JSON tiene campos correctos",
+                ],
             ),
             TaskDefinition(
                 task_id="phase4-code-analysis-tests",
@@ -367,8 +367,8 @@ Casos:
                 acceptance_criteria=[
                     "6+ tests implementados",
                     "Todos pasan",
-                    "Benchmark documenta 8x+ speedup"
-                ]
+                    "Benchmark documenta 8x+ speedup",
+                ],
             ),
         ]
 
@@ -379,7 +379,7 @@ Casos:
                 description="Instalar Rust, compilar núcleo, ejecutar tests, benchmark",
                 tasks=phase1_tasks,
                 estimated_hours=2.0,
-                dependencies=[]
+                dependencies=[],
             ),
             "phase2": Phase(
                 phase_id="phase2",
@@ -387,7 +387,7 @@ Casos:
                 description="100% compliance governance, LLM optimization",
                 tasks=phase2_tasks,
                 estimated_hours=4.0,
-                dependencies=["phase1"]
+                dependencies=["phase1"],
             ),
             "phase3": Phase(
                 phase_id="phase3",
@@ -395,7 +395,7 @@ Casos:
                 description="Completar herramienta MCP faltante",
                 tasks=phase3_tasks,
                 estimated_hours=4.0,
-                dependencies=["phase2"]
+                dependencies=["phase2"],
             ),
             "phase4": Phase(
                 phase_id="phase4",
@@ -403,7 +403,7 @@ Casos:
                 description="Migrar análisis de código a Rust",
                 tasks=phase4_tasks,
                 estimated_hours=7.5,
-                dependencies=["phase1", "phase3"]
+                dependencies=["phase1", "phase3"],
             ),
         }
 
@@ -412,7 +412,7 @@ Casos:
         start_phase: str = "phase1",
         skills_context: Optional[Dict[str, Any]] = None,
         dry_run: bool = False,
-        preferred_agents: Optional[List[str]] = None
+        preferred_agents: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Orquesta todas las fases necesarias.
@@ -431,7 +431,9 @@ Casos:
         5. Publicar cambios
         """
         mode = "DRY-RUN" if dry_run else "EJECUCIÓN REAL"
-        logger.info(f"🚀 Iniciando orquestación completa de implementación 100% ({mode})")
+        logger.info(
+            f"🚀 Iniciando orquestación completa de implementación 100% ({mode})"
+        )
         logger.info(f"📅 Fases a ejecutar: {list(self.phases.keys())}")
         if preferred_agents:
             logger.info(f"🎯 Agentes preferidos: {', '.join(preferred_agents)}")
@@ -459,29 +461,29 @@ Casos:
 
                     if dry_run:
                         # Modo simulación: solo reportar qué se haría
-                        logger.info(f"   [DRY-RUN] Simularía ejecución con agente óptimo")
-                        logger.info(f"   [DRY-RUN] Skills requeridos: {', '.join(task.required_skills)}")
+                        logger.info(
+                            "   [DRY-RUN] Simularía ejecución con agente óptimo"
+                        )
+                        logger.info(
+                            f"   [DRY-RUN] Skills requeridos: {', '.join(task.required_skills)}"
+                        )
                         phase_results[task.task_id] = {
                             "status": "simulated",
                             "task": task.title,
-                            "would_execute": True
+                            "would_execute": True,
                         }
                         logger.info(f"✅ [DRY-RUN] Tarea simulada: {task.title}")
                     else:
                         # Ejecución real
                         result = await self.multi_agent.execute_task(
-                            task,
-                            skills_context
+                            task, skills_context
                         )
                         phase_results[task.task_id] = result
                         logger.info(f"✅ Completada: {task.title}")
 
                 except Exception as e:
                     logger.error(f"❌ Error en {task.title}: {e}")
-                    phase_results[task.task_id] = {
-                        "status": "failed",
-                        "error": str(e)
-                    }
+                    phase_results[task.task_id] = {"status": "failed", "error": str(e)}
 
             all_results[phase_id] = phase_results
             self.phase_results[phase_id] = phase_results
@@ -493,7 +495,8 @@ Casos:
 
         total_tasks = sum(len(p.tasks) for p in self.phases.values())
         completed = sum(
-            1 for phase_results in self.phase_results.values()
+            1
+            for phase_results in self.phase_results.values()
             for task_result in phase_results.values()
             if task_result.get("status") == "success"
         )
@@ -501,25 +504,31 @@ Casos:
         return {
             "total_tasks": total_tasks,
             "completed_tasks": completed,
-            "completion_percentage": (completed / total_tasks * 100) if total_tasks > 0 else 0,
+            "completion_percentage": (
+                (completed / total_tasks * 100) if total_tasks > 0 else 0
+            ),
             "phases_status": {
                 phase_id: {
                     "total": len(phase.tasks),
-                    "completed": sum(
-                        1 for task_id in phase_results.values()
-                        if task_id.get("status") == "success"
-                    ) if phase_id in self.phase_results else 0,
-                    "estimated_hours": phase.estimated_hours
+                    "completed": (
+                        sum(
+                            1
+                            for task_id in phase_results.values()
+                            if task_id.get("status") == "success"
+                        )
+                        if phase_id in self.phase_results
+                        else 0
+                    ),
+                    "estimated_hours": phase.estimated_hours,
                 }
                 for phase_id, phase in self.phases.items()
                 for phase_results in [self.phase_results.get(phase_id, {})]
-            }
+            },
         }
 
 
 async def cde_executeFullImplementation(
-    start_phase: str = "phase1",
-    phases: Optional[List[str]] = None
+    start_phase: str = "phase1", phases: Optional[List[str]] = None
 ) -> str:
     """
     MCP Tool: Ejecuta orquestación completa (100% funcionalidad).
@@ -532,7 +541,7 @@ async def cde_executeFullImplementation(
 
     Retorna JSON con resultados de cada fase y tarea.
     """
-    logger.info(f"🎯 cde_executeFullImplementation iniciado")
+    logger.info("🎯 cde_executeFullImplementation iniciado")
     logger.info(f"   Start phase: {start_phase}")
 
     try:
@@ -549,20 +558,19 @@ async def cde_executeFullImplementation(
             "status": "success",
             "completion": status,
             "phase_results": results,
-            "summary": orchestrator.multi_agent.get_execution_summary()
+            "summary": orchestrator.multi_agent.get_execution_summary(),
         }
 
-        logger.info(f"✅ Orquestación completada")
-        logger.info(f"📊 Progreso: {status['completed_tasks']}/{status['total_tasks']} tareas")
+        logger.info("✅ Orquestación completada")
+        logger.info(
+            f"📊 Progreso: {status['completed_tasks']}/{status['total_tasks']} tareas"
+        )
 
         return json.dumps(final_result, indent=2, default=str)
 
     except Exception as e:
         logger.error(f"❌ Error en cde_executeFullImplementation: {e}")
-        return json.dumps({
-            "status": "error",
-            "error": str(e)
-        })
+        return json.dumps({"status": "error", "error": str(e)})
 
 
 if __name__ == "__main__":

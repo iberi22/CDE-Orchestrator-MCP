@@ -1,16 +1,19 @@
 # src/cde_orchestrator/adapters/repository/git_adapter.py
 
-from pathlib import Path
 import asyncio
-from typing import AsyncGenerator, Dict, Any, List
-from datetime import datetime, timezone
+from datetime import datetime
+from pathlib import Path
+from typing import AsyncGenerator, List
+
 from cde_orchestrator.domain.git import Commit, Modification
 from cde_orchestrator.domain.ports import IGitAdapter
+
 
 class GitAdapter(IGitAdapter):
     """
     Adapter for interacting with a local Git repository.
     """
+
     def __init__(self, project_root: Path):
         self.project_root = project_root
 
@@ -73,12 +76,12 @@ class GitAdapter(IGitAdapter):
             if not line.strip():
                 continue
 
-            parts = line.split('\t')
+            parts = line.split("\t")
             if len(parts) < 2:
                 continue
 
             change_type = parts[0].strip()
-            old_path = Path(parts[1].strip()) if change_type != 'A' else Path("")
+            old_path = Path(parts[1].strip()) if change_type != "A" else Path("")
             new_path = Path(parts[-1].strip())
 
             modifications.append(

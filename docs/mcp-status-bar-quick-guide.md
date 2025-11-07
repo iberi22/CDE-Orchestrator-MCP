@@ -182,4 +182,3 @@ Expected output:
 - Complete docs: `docs/mcp-status-bar-complete-implementation.md`
 - Original design: `specs/design/mcp-status-bar-minimal-mvp.md`
 - Source code: `mcp-status-bar/`, `mcp-monitor/proxy/mcp_proxy.py`
-

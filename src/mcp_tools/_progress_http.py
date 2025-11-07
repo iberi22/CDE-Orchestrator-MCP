@@ -9,18 +9,19 @@ MCP tools can POST progress events to this endpoint, which broadcasts
 to all connected VS Code extensions via WebSocket.
 """
 
-import sys
 import os
+import sys
 
 # Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
 
 def report_progress_http(
     tool_name: str,
     percentage: float,
     message: str = "",
     server_name: str = "CDE",
-    endpoint: str = "http://localhost:8767/progress"
+    endpoint: str = "http://localhost:8767/progress",
 ):
     """
     Report progress via HTTP POST to proxy endpoint.
@@ -45,15 +46,13 @@ def report_progress_http(
             "tool": tool_name,
             "percentage": percentage,
             "elapsed": time.time(),
-            "message": message
+            "message": message,
         }
 
         # POST to proxy
-        data = json.dumps(event).encode('utf-8')
+        data = json.dumps(event).encode("utf-8")
         req = urllib.request.Request(
-            endpoint,
-            data=data,
-            headers={'Content-Type': 'application/json'}
+            endpoint, data=data, headers={"Content-Type": "application/json"}
         )
 
         try:
@@ -63,6 +62,6 @@ def report_progress_http(
         except Exception:
             pass  # Silently fail - endpoint may not be available
 
-    except Exception as e:
+    except Exception:
         # Silently fail - we don't want to break tools if this fails
         pass

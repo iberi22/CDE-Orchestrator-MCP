@@ -1,13 +1,15 @@
 # tests/integration/adapters/test_git_adapter.py
 
-import pytest
 from pathlib import Path
 
+import pytest
+
 from cde_orchestrator.adapters.repository.git_adapter import GitAdapter
-from cde_orchestrator.domain.git import Commit, Modification
+from cde_orchestrator.domain.git import Commit
 
 # Use the project root as the test repository
 TEST_REPO_PATH = Path(__file__).parent.parent.parent.parent
+
 
 @pytest.mark.asyncio
 async def test_traverse_commits_returns_commits():
@@ -17,6 +19,7 @@ async def test_traverse_commits_returns_commits():
     assert len(commits) > 0
     assert isinstance(commits[0], Commit)
     assert len(commits[0].hash) == 40
+
 
 @pytest.mark.asyncio
 async def test_get_modifications_returns_modifications():

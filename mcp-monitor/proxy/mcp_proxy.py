@@ -15,11 +15,10 @@ Example:
 import asyncio
 import json
 import sys
-import time
-from typing import Dict, Any, Set
-from pathlib import Path
-from http.server import HTTPServer, BaseHTTPRequestHandler
 import threading
+import time
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from typing import Any, Dict, Set
 
 # Check if websockets is installed
 try:
@@ -41,28 +40,28 @@ class ProgressHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         """Handle POST request with progress event"""
-        if self.path == '/progress':
+        if self.path == "/progress":
             try:
-                content_length = int(self.headers.get('Content-Length', 0))
+                content_length = int(self.headers.get("Content-Length", 0))
                 body = self.rfile.read(content_length)
-                event = json.loads(body.decode('utf-8'))
+                event = json.loads(body.decode("utf-8"))
 
                 # Log received progress
-                print(f"📊 Received progress: {event['tool']} {event['percentage']:.0%} - {event.get('message', '')}", file=sys.stderr)
+                print(
+                    f"📊 Received progress: {event['tool']} {event['percentage']:.0%} - {event.get('message', '')}",
+                    file=sys.stderr,
+                )
 
                 # Schedule broadcast in event loop
-                asyncio.run_coroutine_threadsafe(
-                    broadcast(event),
-                    event_loop
-                )
+                asyncio.run_coroutine_threadsafe(broadcast(event), event_loop)
 
                 # Send response
                 self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
                 self.wfile.write(b'{"status": "ok"}')
 
-            except Exception as e:
+            except Exception:
                 self.send_response(400)
                 self.end_headers()
         else:
@@ -77,27 +76,34 @@ class ProgressHandler(BaseHTTPRequestHandler):
 async def broadcast(message: dict):
     """Broadcast message to all connected VS Code extensions"""
     if active_connections:
-        print(f"📡 Broadcasting to {len(active_connections)} clients: {message.get('tool', 'unknown')} {message.get('percentage', 0):.0%}", file=sys.stderr)
+        print(
+            f"📡 Broadcasting to {len(active_connections)} clients: {message.get('tool', 'unknown')} {message.get('percentage', 0):.0%}",
+            file=sys.stderr,
+        )
         await asyncio.gather(
             *[conn.send(json.dumps(message)) for conn in active_connections],
-            return_exceptions=True
+            return_exceptions=True,
         )
     else:
-        print(f"⚠️ No WebSocket clients connected! Cannot broadcast progress.", file=sys.stderr)
+        print(
+            "⚠️ No WebSocket clients connected! Cannot broadcast progress.",
+            file=sys.stderr,
+        )
 
     # Also send to HTTP endpoint on port 8768 (VS Code extension)
     try:
         import urllib.request
-        event_data = json.dumps(message).encode('utf-8')
+
+        event_data = json.dumps(message).encode("utf-8")
         req = urllib.request.Request(
             "http://localhost:8768/progress",
             data=event_data,
-            headers={'Content-Type': 'application/json'}
+            headers={"Content-Type": "application/json"},
         )
         response = urllib.request.urlopen(req, timeout=0.5)
         response.close()
-        print(f"📨 Sent to VS Code extension HTTP (port 8768)", file=sys.stderr)
-    except Exception as e:
+        print("📨 Sent to VS Code extension HTTP (port 8768)", file=sys.stderr)
+    except Exception:
         # Silently continue if extension HTTP not available
         pass
 
@@ -105,7 +111,10 @@ async def broadcast(message: dict):
 async def handle_websocket(websocket):
     """Handle WebSocket connection from VS Code extension"""
     active_connections.add(websocket)
-    print(f"✅ VS Code extension connected. Total: {len(active_connections)}", file=sys.stderr)
+    print(
+        f"✅ VS Code extension connected. Total: {len(active_connections)}",
+        file=sys.stderr,
+    )
 
     try:
         # Send current active operations on connect
@@ -122,7 +131,10 @@ async def handle_websocket(websocket):
 
     finally:
         active_connections.remove(websocket)
-        print(f"❌ VS Code extension disconnected. Total: {len(active_connections)}", file=sys.stderr)
+        print(
+            f"❌ VS Code extension disconnected. Total: {len(active_connections)}",
+            file=sys.stderr,
+        )
 
 
 async def run_proxy(server_name: str, command: list):
@@ -135,14 +147,14 @@ async def run_proxy(server_name: str, command: list):
         *command,
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
+        stderr=asyncio.subprocess.PIPE,
     )
 
     # Forward messages
     await asyncio.gather(
         forward_client_to_server(process, server_name),
         forward_server_to_client(process, server_name),
-        monitor_stderr(process)
+        monitor_stderr(process),
     )
 
 
@@ -172,26 +184,31 @@ async def forward_client_to_server(process, server_name: str):
                         "percentage": 0.0,
                         "elapsed": 0.0,
                         "message": "Starting...",
-                        "start_time": time.time()
+                        "start_time": time.time(),
                     }
 
-                    print(f"📝 Tool call started: {tool_name} (id: {op_id})", file=sys.stderr)
+                    print(
+                        f"📝 Tool call started: {tool_name} (id: {op_id})",
+                        file=sys.stderr,
+                    )
                     await broadcast(active_operations[op_id])
 
-            except Exception as e:
+            except Exception:
                 # Not JSON or parse error - that's OK
                 pass
 
             # Forward to server
             if process.stdin:
                 # Encode as UTF-8 bytes
-                line_bytes = line.encode('utf-8') if isinstance(line, str) else line
+                line_bytes = line.encode("utf-8") if isinstance(line, str) else line
                 process.stdin.write(line_bytes)
                 await process.stdin.drain()
 
         except Exception as e:
             print(f"❌ Error in forward_client_to_server: {e}", file=sys.stderr)
             break
+
+
 async def forward_server_to_client(process, server_name: str):
     """Forward MCP Server → VS Code"""
     while True:
@@ -206,13 +223,13 @@ async def forward_server_to_client(process, server_name: str):
 
             # Decode with UTF-8 and handle errors gracefully
             try:
-                line_str = line.decode('utf-8')
+                line_str = line.decode("utf-8")
             except UnicodeDecodeError:
-                line_str = line.decode('utf-8', errors='replace')
+                line_str = line.decode("utf-8", errors="replace")
 
             # Parse and extract progress
             try:
-                msg = json.loads(line_str)                # Progress notification
+                msg = json.loads(line_str)  # Progress notification
                 if msg.get("method") == "notifications/progress":
                     params = msg.get("params", {})
                     token = str(params.get("progressToken", ""))
@@ -220,7 +237,10 @@ async def forward_server_to_client(process, server_name: str):
                     total = params.get("total", 100)
                     percentage = progress / total if total > 0 else 0.0
 
-                    print(f"📊 Progress: {progress}/{total} ({percentage*100:.0f}%)", file=sys.stderr)
+                    print(
+                        f"📊 Progress: {progress}/{total} ({percentage*100:.0f}%)",
+                        file=sys.stderr,
+                    )
 
                     # Find matching operation
                     for op_id, op_data in active_operations.items():
@@ -243,18 +263,25 @@ async def forward_server_to_client(process, server_name: str):
                     op_id = str(msg["id"])
 
                     if op_id in active_operations:
-                        start_time = active_operations[op_id].get("start_time", time.time())
+                        start_time = active_operations[op_id].get(
+                            "start_time", time.time()
+                        )
                         active_operations[op_id]["percentage"] = 1.0
                         active_operations[op_id]["elapsed"] = time.time() - start_time
-                        active_operations[op_id]["message"] = "Complete" if "result" in msg else "Error"
+                        active_operations[op_id]["message"] = (
+                            "Complete" if "result" in msg else "Error"
+                        )
 
-                        print(f"✅ Tool call completed: {active_operations[op_id]['tool']}", file=sys.stderr)
+                        print(
+                            f"✅ Tool call completed: {active_operations[op_id]['tool']}",
+                            file=sys.stderr,
+                        )
 
                         await broadcast(active_operations[op_id])
 
                         asyncio.create_task(cleanup_operation(op_id))
 
-            except Exception as e:
+            except Exception:
                 # Not JSON or parse error - that's OK
                 pass
 
@@ -262,7 +289,7 @@ async def forward_server_to_client(process, server_name: str):
             try:
                 sys.stdout.buffer.write(line)
                 sys.stdout.buffer.flush()
-            except Exception as e:
+            except Exception:
                 # Fallback: try writing as string
                 try:
                     sys.stdout.write(line_str)
@@ -273,6 +300,8 @@ async def forward_server_to_client(process, server_name: str):
         except Exception as e:
             print(f"❌ Error in forward_server_to_client: {e}", file=sys.stderr)
             break
+
+
 async def monitor_stderr(process):
     """Monitor server stderr"""
     while True:
@@ -287,7 +316,7 @@ async def monitor_stderr(process):
             # Check for special progress marker
             line_str = None
             try:
-                line_str = line.decode('utf-8', errors='replace')
+                line_str = line.decode("utf-8", errors="replace")
 
                 # Intercept progress messages
                 if "__MCP_PROGRESS__" in line_str:
@@ -301,7 +330,7 @@ async def monitor_stderr(process):
 
                         # Don't log this line to stderr
                         continue
-                    except Exception as e:
+                    except Exception:
                         # If parsing fails, log normally
                         pass
             except:
@@ -316,13 +345,15 @@ async def monitor_stderr(process):
                     if line_str:
                         sys.stderr.write(line_str)
                     else:
-                        sys.stderr.write(line.decode('utf-8', errors='replace'))
+                        sys.stderr.write(line.decode("utf-8", errors="replace"))
                     sys.stderr.flush()
                 except:
                     pass  # Skip lines that can't be written
 
-        except Exception as e:
+        except Exception:
             break
+
+
 async def cleanup_operation(op_id: str):
     """Remove operation after 5 seconds"""
     await asyncio.sleep(5)
@@ -347,25 +378,27 @@ async def main():
 
     # Start HTTP server in background thread (for progress endpoint)
     try:
-        http_server = HTTPServer(('localhost', 8767), ProgressHandler)
+        http_server = HTTPServer(("localhost", 8767), ProgressHandler)
         http_thread = threading.Thread(target=http_server.serve_forever, daemon=True)
         http_thread.start()
-        print(f"🌐 HTTP progress endpoint listening on http://localhost:8767/progress", file=sys.stderr)
+        print(
+            "🌐 HTTP progress endpoint listening on http://localhost:8767/progress",
+            file=sys.stderr,
+        )
     except Exception as e:
         print(f"⚠️ Could not start HTTP server: {e}", file=sys.stderr)
 
     # Try to start WebSocket server, but continue even if it fails
     ws_server = None
     try:
-        ws_server = await websockets.serve(
-            handle_websocket,
-            "localhost",
-            8766
-        )
-        print(f"📡 WebSocket server listening on ws://localhost:8766", file=sys.stderr)
+        ws_server = await websockets.serve(handle_websocket, "localhost", 8766)
+        print("📡 WebSocket server listening on ws://localhost:8766", file=sys.stderr)
     except Exception as e:
         print(f"⚠️ Could not start WebSocket server: {e}", file=sys.stderr)
-        print(f"   Continuing without WebSocket (proxy will still work for JSON-RPC)", file=sys.stderr)
+        print(
+            "   Continuing without WebSocket (proxy will still work for JSON-RPC)",
+            file=sys.stderr,
+        )
 
     # Start proxy (works with or without WebSocket)
     try:
@@ -376,6 +409,8 @@ async def main():
         if ws_server:
             ws_server.close()
             await ws_server.wait_closed()
+
+
 if __name__ == "__main__":
     try:
         asyncio.run(main())

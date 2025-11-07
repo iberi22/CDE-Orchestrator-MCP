@@ -14,10 +14,11 @@ tags:
 - architecture
 - authentication
 - documentation
-llm_summary: "User guide for Documentation Reorganization Summary.\n  **Date:** October\
-  \ 31, 2025 **Action:** Professional review and documentation restructuring | File\
-  \ | Purpose | Status | |------|---------|--------| | [README.md](README.md) | Main\
-  \ project documentation | ✅ Updated |\n  Reference when working with guide documentation."
+llm_summary: 'User guide for Documentation Reorganization Summary.
+
+  **Date:** October 31, 2025 **Action:** Professional review and documentation restructuring | File | Purpose | Status | |------|---------|--------| | [README.md](README.md) | Main project documentation | ✅ Updated |
+
+  Reference when working with guide documentation.'
 ---
 
 # Documentation Reorganization Summary

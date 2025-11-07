@@ -279,4 +279,3 @@ If using GitHub API, be aware of rate limits. Consider using GitHub MCP for bett
 - PR creation workflows
 - GitHub Actions integration
 - Multi-repository support
-

@@ -1,15 +1,18 @@
 # tests/integration/mcp_tools/test_onboarding_tools.py
 import json
+
+# Add project root to path
+import sys
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock
 
-# Add project root to path
-import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from src.mcp_tools.onboarding import cde_onboardingProject, cde_publishOnboarding
 from fastmcp import Context
+
+from src.mcp_tools.onboarding import cde_onboardingProject, cde_publishOnboarding
+
 
 class TestOnboardingTools(unittest.TestCase):
 
@@ -24,10 +27,10 @@ class TestOnboardingTools(unittest.TestCase):
 
         # The tool is async
         import asyncio
-        result_json = asyncio.run(cde_onboardingProject(
-            ctx=mock_ctx,
-            manage_state_use_case=mock_use_case
-        ))
+
+        result_json = asyncio.run(
+            cde_onboardingProject(ctx=mock_ctx, manage_state_use_case=mock_use_case)
+        )
 
         self.assertIsInstance(result_json, str)
         data = json.loads(result_json)
@@ -48,7 +51,7 @@ class TestOnboardingTools(unittest.TestCase):
         result_json = cde_publishOnboarding(
             documents={"doc1.md": "content"},
             manage_state_use_case=mock_use_case,
-            approve=True
+            approve=True,
         )
 
         self.assertIsInstance(result_json, str)
@@ -64,9 +67,10 @@ class TestOnboardingTools(unittest.TestCase):
         """
         Verify that cde_setupProject analyzes and creates config files.
         """
-        from src.mcp_tools.onboarding import cde_setupProject
-        import tempfile
         import asyncio
+        import tempfile
+
+        from src.mcp_tools.onboarding import cde_setupProject
 
         with tempfile.TemporaryDirectory() as temp_dir:
             project_path = Path(temp_dir)
@@ -76,11 +80,11 @@ class TestOnboardingTools(unittest.TestCase):
 
             mock_ctx = MagicMock(spec=Context)
 
-            result_json = asyncio.run(cde_setupProject(
-                ctx=mock_ctx,
-                project_path=str(project_path),
-                force=True
-            ))
+            result_json = asyncio.run(
+                cde_setupProject(
+                    ctx=mock_ctx, project_path=str(project_path), force=True
+                )
+            )
 
             data = json.loads(result_json)
 
@@ -96,6 +100,7 @@ class TestOnboardingTools(unittest.TestCase):
             gitignore_content = (project_path / ".gitignore").read_text()
             self.assertIn(".venv/", gitignore_content)
             self.assertIn(".pytest_cache/", gitignore_content)
+
 
 if __name__ == "__main__":
     unittest.main()

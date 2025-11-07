@@ -11,4 +11,3 @@ title: Skill_Lifecycle_Revised
 type: design
 updated: '2025-11-02'
 ---
-

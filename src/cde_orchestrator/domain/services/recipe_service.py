@@ -3,6 +3,7 @@ from typing import List, Optional
 
 from ..entities import Recipe, RecipeSuggestion
 
+
 class RecipeService:
     """
     Domain service for recipe-related business logic.

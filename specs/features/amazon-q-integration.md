@@ -209,4 +209,3 @@ class AmazonQCLIAdapter(CodeCLIAdapter, ICodeExecutor):
 
 [aws-q]: https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/
 [bedrock]: https://docs.aws.amazon.com/bedrock/latest/userguide/
-

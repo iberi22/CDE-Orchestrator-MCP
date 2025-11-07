@@ -5,11 +5,15 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 
+
 @dataclass
 class Modification:
-    change_type: str  # e.g., 'A' for added, 'M' for modified, 'D' for deleted, 'R' for renamed
+    change_type: (
+        str  # e.g., 'A' for added, 'M' for modified, 'D' for deleted, 'R' for renamed
+    )
     old_path: Path
     new_path: Path
+
 
 @dataclass
 class Commit:

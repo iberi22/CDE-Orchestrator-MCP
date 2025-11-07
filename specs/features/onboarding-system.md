@@ -576,4 +576,3 @@ Ahora los usuarios pueden:
 - **Iterar**: Workflows CDE completos
 
 Todo funciona de manera coherente, desde el primer día. 🚀
-

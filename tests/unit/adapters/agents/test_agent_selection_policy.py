@@ -4,13 +4,12 @@ Unit tests for AgentSelectionPolicy.
 Tests agent selection logic, capability matrix, and fallback chain.
 """
 
-import pytest
+
 from cde_orchestrator.adapters.agents.agent_selection_policy import (
+    AgentCapability,
     AgentSelectionPolicy,
     AgentType,
     TaskComplexity,
-    AgentCapabilities,
-    AgentCapability,
 )
 
 
@@ -64,9 +63,7 @@ class TestAgentSelectionPolicy:
 
     def test_suggest_agent_simple_task(self):
         """Test suggestion for simple task."""
-        agent = AgentSelectionPolicy.suggest_agent(
-            "Fix typo in documentation"
-        )
+        agent = AgentSelectionPolicy.suggest_agent("Fix typo in documentation")
         # Simple keywords → trivial task → fallback to first available
         assert agent == AgentType.COPILOT
 
@@ -91,6 +88,7 @@ class TestAgentTypeEnum:
         assert AgentType.DEEPAGENTS.value == "deepagents"
         assert AgentType.CODEX.value == "codex"
         assert AgentType.ROVODEV.value == "rovodev"
+
 
 class TestTaskComplexityEnum:
     """Test TaskComplexity enum."""

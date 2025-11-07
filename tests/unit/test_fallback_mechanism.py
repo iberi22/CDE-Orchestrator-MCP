@@ -1,14 +1,20 @@
 # tests/unit/test_fallback_mechanism.py
 import os
-import tempfile
-import unittest
-from unittest.mock import patch, MagicMock
 
 # Ensure src is in the path
 import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'src')))
+import tempfile
+import unittest
+from unittest.mock import patch
 
-from cde_orchestrator.application.documentation.scan_documentation_use_case import ScanDocumentationUseCase
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
+)
+
+from cde_orchestrator.application.documentation.scan_documentation_use_case import (
+    ScanDocumentationUseCase,
+)
+
 
 class TestFallbackMechanism(unittest.TestCase):
 
@@ -22,7 +28,9 @@ class TestFallbackMechanism(unittest.TestCase):
         os.makedirs(os.path.join(self.project_path, "docs"))
 
         # Add a file to specs/features to satisfy the check
-        with open(os.path.join(self.project_path, "specs", "features", "feature.md"), "w") as f:
+        with open(
+            os.path.join(self.project_path, "specs", "features", "feature.md"), "w"
+        ) as f:
             f.write("---\ntitle: Feature\n---\n")
 
         # Create a README with frontmatter
@@ -43,14 +51,15 @@ class TestFallbackMechanism(unittest.TestCase):
         """Clean up the temporary directory."""
         self.temp_dir.cleanup()
 
-    @patch('builtins.__import__')
+    @patch("builtins.__import__")
     def test_scan_with_python_fallback(self, mock_import):
         """
         Verify that the Python implementation is used when the Rust module is not available.
         """
+
         # Simulate ImportError for cde_rust_core
         def import_mock(name, *args, **kwargs):
-            if name == 'cde_rust_core':
+            if name == "cde_rust_core":
                 raise ImportError("No module named cde_rust_core")
             return __builtins__.__import__(name, *args, **kwargs)
 
@@ -59,19 +68,24 @@ class TestFallbackMechanism(unittest.TestCase):
         use_case = ScanDocumentationUseCase()
 
         # We need to mock the internal python scan method to check if it was called
-        with patch.object(use_case, '_scan_with_python', wraps=use_case._scan_with_python) as spy_python_scan:
+        with patch.object(
+            use_case, "_scan_with_python", wraps=use_case._scan_with_python
+        ) as spy_python_scan:
             result = use_case.execute(self.project_path)
 
             # Verify that the Python method was called
             spy_python_scan.assert_called_once_with(self.project_path)
 
             # Verify the results are from the Python implementation
-            self.assertEqual(result['total_docs'], 3)
-            self.assertIn('README.md', result['by_location']['root'][0]['path'])
-            self.assertIn('guide.md', result['by_location']['docs'][0]['path'])
-            self.assertIn('feature.md', result['by_location']['specs/features'][0]['path'])
-            self.assertIn('✅', result['recommendations'][0]) # Should be a success message
-
+            self.assertEqual(result["total_docs"], 3)
+            self.assertIn("README.md", result["by_location"]["root"][0]["path"])
+            self.assertIn("guide.md", result["by_location"]["docs"][0]["path"])
+            self.assertIn(
+                "feature.md", result["by_location"]["specs/features"][0]["path"]
+            )
+            self.assertIn(
+                "✅", result["recommendations"][0]
+            )  # Should be a success message
 
     def test_scan_with_rust_preferred(self):
         """
@@ -89,12 +103,13 @@ class TestFallbackMechanism(unittest.TestCase):
         result = use_case.execute(self.project_path)
 
         # Verify the structure of the result, confirming full processing
-        self.assertEqual(result['total_docs'], 3)
-        self.assertIn('by_location', result)
-        self.assertIn('root', result['by_location'])
-        self.assertIn('docs', result['by_location'])
-        self.assertIn('specs/features', result['by_location'])
-        self.assertIn('✅', result['recommendations'][0])
+        self.assertEqual(result["total_docs"], 3)
+        self.assertIn("by_location", result)
+        self.assertIn("root", result["by_location"])
+        self.assertIn("docs", result["by_location"])
+        self.assertIn("specs/features", result["by_location"])
+        self.assertIn("✅", result["recommendations"][0])
+
 
 if __name__ == "__main__":
     unittest.main()

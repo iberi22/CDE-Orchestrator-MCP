@@ -404,4 +404,3 @@ A: They should obtain a Commercial License. Grandfather clauses available upon r
 **Implementation Owner:** GitHub Copilot / CDE Team
 **Review Date:** 2025-11-12
 **Approval Required:** Project Lead & Legal Review
-

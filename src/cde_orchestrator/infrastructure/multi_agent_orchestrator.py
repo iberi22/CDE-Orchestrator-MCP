@@ -17,45 +17,48 @@ Flujo:
 import asyncio
 import json
 import logging
-import subprocess
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
-from dataclasses import dataclass, asdict
-from enum import Enum
 import os
+import subprocess
+from dataclasses import asdict, dataclass
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class AgentType(Enum):
     """Tipos de agentes CLI disponibles."""
-    CLAUDE_CODE = "claude-code"      # Bedrock via CloudCode
-    AIDER = "aider"                   # Aider CLI
-    CODEX = "codex"                   # GitHub Copilot CLI
-    JULES = "jules"                   # Jules AI agent
-    CODEIUM = "codeium"               # Codeium CLI
+
+    CLAUDE_CODE = "claude-code"  # Bedrock via CloudCode
+    AIDER = "aider"  # Aider CLI
+    CODEX = "codex"  # GitHub Copilot CLI
+    JULES = "jules"  # Jules AI agent
+    CODEIUM = "codeium"  # Codeium CLI
 
 
 @dataclass
 class AgentCapability:
     """Capacidades de cada agente."""
+
     agent_type: AgentType
-    strengths: List[str]              # Lo que hace bien
-    limitations: List[str]            # Lo que NO hace
-    requires_auth: bool               # Requiere autenticación
-    requires_bedrock: bool            # Requiere AWS Bedrock
-    installed: bool = False           # Detectado en sistema
-    version: Optional[str] = None     # Versión instalada
+    strengths: List[str]  # Lo que hace bien
+    limitations: List[str]  # Lo que NO hace
+    requires_auth: bool  # Requiere autenticación
+    requires_bedrock: bool  # Requiere AWS Bedrock
+    installed: bool = False  # Detectado en sistema
+    version: Optional[str] = None  # Versión instalada
 
 
 @dataclass
 class TaskDefinition:
     """Define una tarea de implementación."""
+
     task_id: str
     title: str
     description: str
-    phase: str                         # "verify", "implement", "test", "document"
-    complexity: str                    # "trivial", "simple", "moderate", "complex"
+    phase: str  # "verify", "implement", "test", "document"
+    complexity: str  # "trivial", "simple", "moderate", "complex"
     required_skills: List[str]
     estimated_hours: float
     acceptance_criteria: List[str]
@@ -89,13 +92,13 @@ class MultiAgentOrchestrator:
                     "Análisis de código completo",
                     "Refactoring de arquitectura",
                     "Integración con sistemas existentes",
-                    "Debugging avanzado"
+                    "Debugging avanzado",
                 ],
                 limitations=["No acceso a filesystem directo", "Requiere Bedrock"],
                 requires_auth=True,
                 requires_bedrock=True,
                 installed=True,
-                version=self._get_command_version("claude-code")
+                version=self._get_command_version("claude-code"),
             )
 
         # Aider CLI
@@ -106,13 +109,16 @@ class MultiAgentOrchestrator:
                     "Edición de archivos multilenguaje",
                     "Pair programming interactivo",
                     "Tests y debugging",
-                    "Refactoring seguro"
+                    "Refactoring seguro",
                 ],
-                limitations=["Sesiones largas son lentas", "Menos análisis de alto nivel"],
+                limitations=[
+                    "Sesiones largas son lentas",
+                    "Menos análisis de alto nivel",
+                ],
                 requires_auth=False,
                 requires_bedrock=False,
                 installed=True,
-                version=self._get_command_version("aider")
+                version=self._get_command_version("aider"),
             )
 
         # Codex via GitHub CLI
@@ -123,16 +129,18 @@ class MultiAgentOrchestrator:
                     "Sugerencias de código rápidas",
                     "Generación de tests",
                     "Snippets y templates",
-                    "Explicaciones de código"
+                    "Explicaciones de código",
                 ],
                 limitations=["Limpio para contexto largo", "Sin acceso a filesystem"],
                 requires_auth=True,
                 requires_bedrock=False,
                 installed=True,
-                version=self._get_command_version("gh")
+                version=self._get_command_version("gh"),
             )
 
-        logger.info(f"Detectados {len(agents)} agentes disponibles: {list(agents.keys())}")
+        logger.info(
+            f"Detectados {len(agents)} agentes disponibles: {list(agents.keys())}"
+        )
         return agents
 
     @staticmethod
@@ -142,7 +150,7 @@ class MultiAgentOrchestrator:
             subprocess.run(
                 ["where" if os.name == "nt" else "which", cmd.split()[0]],
                 capture_output=True,
-                timeout=2
+                timeout=2,
             )
             return True
         except (subprocess.TimeoutExpired, FileNotFoundError):
@@ -153,20 +161,15 @@ class MultiAgentOrchestrator:
         """Obtiene la versión de un comando."""
         try:
             result = subprocess.run(
-                [cmd.split()[0], "--version"],
-                capture_output=True,
-                text=True,
-                timeout=3
+                [cmd.split()[0], "--version"], capture_output=True, text=True, timeout=3
             )
-            return result.stdout.strip().split('\n')[0]
+            return result.stdout.strip().split("\n")[0]
         except Exception as e:
             logger.warning(f"No se pudo obtener versión de {cmd}: {e}")
             return None
 
     def _select_best_agent(
-        self,
-        task: TaskDefinition,
-        available_agents: Optional[List[AgentType]] = None
+        self, task: TaskDefinition, available_agents: Optional[List[AgentType]] = None
     ) -> AgentType:
         """
         Selecciona el mejor agente para una tarea.
@@ -206,9 +209,7 @@ class MultiAgentOrchestrator:
         return available_agents[0] if available_agents else AgentType.JULES
 
     async def execute_task(
-        self,
-        task: TaskDefinition,
-        skills_context: Optional[Dict[str, Any]] = None
+        self, task: TaskDefinition, skills_context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Ejecuta una tarea delegándola al agente más apropiado.
@@ -231,7 +232,7 @@ class MultiAgentOrchestrator:
             "task": asdict(task),
             "agent": agent.value,
             "skills": skills_context or {},
-            "status": "in_progress"
+            "status": "in_progress",
         }
 
         try:
@@ -243,13 +244,15 @@ class MultiAgentOrchestrator:
             self.context_stack[task.task_id]["result"] = result
 
             # Registrar en log
-            self.execution_log.append({
-                "task_id": task.task_id,
-                "agent": agent.value,
-                "status": "success",
-                "duration": result.get("duration", 0),
-                "files_modified": result.get("files_modified", [])
-            })
+            self.execution_log.append(
+                {
+                    "task_id": task.task_id,
+                    "agent": agent.value,
+                    "status": "success",
+                    "duration": result.get("duration", 0),
+                    "files_modified": result.get("files_modified", []),
+                }
+            )
 
             return result
 
@@ -263,7 +266,7 @@ class MultiAgentOrchestrator:
         self,
         agent: AgentType,
         task: TaskDefinition,
-        skills_context: Optional[Dict[str, Any]] = None
+        skills_context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """Ejecuta tarea con un agente específico."""
 
@@ -279,9 +282,7 @@ class MultiAgentOrchestrator:
             raise ValueError(f"Agente no soportado: {agent}")
 
     async def _execute_with_claude_code(
-        self,
-        task: TaskDefinition,
-        skills_context: Optional[Dict[str, Any]] = None
+        self, task: TaskDefinition, skills_context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Ejecuta tarea usando Claude Code CLI con Bedrock.
@@ -296,7 +297,7 @@ class MultiAgentOrchestrator:
         # Construir prompt con contexto de skills
         prompt = self._build_prompt_with_context(task, skills_context)
 
-        logger.info(f"🔄 Delegando a Claude Code...")
+        logger.info("🔄 Delegando a Claude Code...")
         start_time = time.time()
 
         try:
@@ -304,9 +305,12 @@ class MultiAgentOrchestrator:
             cmd = [
                 "claude-code",
                 "run",
-                "--provider", "bedrock",
-                "--model", "anthropic.claude-sonnet-4-5-20250929-v1:0",
-                "--prompt", prompt
+                "--provider",
+                "bedrock",
+                "--model",
+                "anthropic.claude-sonnet-4-5-20250929-v1:0",
+                "--prompt",
+                prompt,
             ]
 
             result = subprocess.run(
@@ -314,7 +318,7 @@ class MultiAgentOrchestrator:
                 capture_output=True,
                 text=True,
                 timeout=3600,  # 1 hora max
-                cwd=str(self.project_path)
+                cwd=str(self.project_path),
             )
 
             elapsed = time.time() - start_time
@@ -336,7 +340,7 @@ class MultiAgentOrchestrator:
                 "duration": elapsed,
                 "files_modified": files_modified,
                 "output": output,
-                "errors": []
+                "errors": [],
             }
 
         except subprocess.TimeoutExpired:
@@ -347,9 +351,7 @@ class MultiAgentOrchestrator:
             raise
 
     async def _execute_with_aider(
-        self,
-        task: TaskDefinition,
-        skills_context: Optional[Dict[str, Any]] = None
+        self, task: TaskDefinition, skills_context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Ejecuta tarea usando Aider CLI.
@@ -361,14 +363,15 @@ class MultiAgentOrchestrator:
         import time
 
         prompt = self._build_prompt_with_context(task, skills_context)
-        logger.info(f"🔄 Delegando a Aider...")
+        logger.info("🔄 Delegando a Aider...")
         start_time = time.time()
 
         try:
             # Construir comando Aider
             cmd = [
                 "aider",
-                "--message", prompt,
+                "--message",
+                prompt,
                 "--yes",  # No preguntar confirmación
                 "--no-auto-commits",  # No hacer commits automáticos
             ]
@@ -382,7 +385,7 @@ class MultiAgentOrchestrator:
                 capture_output=True,
                 text=True,
                 timeout=1800,  # 30 minutos max
-                cwd=str(self.project_path)
+                cwd=str(self.project_path),
             )
 
             elapsed = time.time() - start_time
@@ -402,7 +405,7 @@ class MultiAgentOrchestrator:
                 "duration": elapsed,
                 "files_modified": files_modified,
                 "output": result.stdout,
-                "errors": [result.stderr] if result.stderr else []
+                "errors": [result.stderr] if result.stderr else [],
             }
 
         except subprocess.TimeoutExpired:
@@ -413,9 +416,7 @@ class MultiAgentOrchestrator:
             raise
 
     async def _execute_with_codex(
-        self,
-        task: TaskDefinition,
-        skills_context: Optional[Dict[str, Any]] = None
+        self, task: TaskDefinition, skills_context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Ejecuta tarea usando GitHub Copilot CLI (Codex).
@@ -427,21 +428,18 @@ class MultiAgentOrchestrator:
         import time
 
         prompt = self._build_prompt_with_context(task, skills_context)
-        logger.info(f"🔄 Delegando a Codex (GitHub Copilot)...")
+        logger.info("🔄 Delegando a Codex (GitHub Copilot)...")
         start_time = time.time()
 
         try:
-            cmd = [
-                "gh", "copilot", "suggest",
-                prompt
-            ]
+            cmd = ["gh", "copilot", "suggest", prompt]
 
             result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
                 timeout=300,  # 5 minutos max
-                cwd=str(self.project_path)
+                cwd=str(self.project_path),
             )
 
             elapsed = time.time() - start_time
@@ -458,7 +456,7 @@ class MultiAgentOrchestrator:
                 "duration": elapsed,
                 "files_modified": [],
                 "output": result.stdout,
-                "suggestion": result.stdout
+                "suggestion": result.stdout,
             }
 
         except Exception as e:
@@ -466,9 +464,7 @@ class MultiAgentOrchestrator:
             raise
 
     async def _execute_with_jules(
-        self,
-        task: TaskDefinition,
-        skills_context: Optional[Dict[str, Any]] = None
+        self, task: TaskDefinition, skills_context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Ejecuta tarea usando Jules AI agent.
@@ -477,12 +473,10 @@ class MultiAgentOrchestrator:
         from mcp_tools.agents import cde_delegateToJules
 
         prompt = self._build_prompt_with_context(task, skills_context)
-        logger.info(f"🔄 Delegando a Jules...")
+        logger.info("🔄 Delegando a Jules...")
 
         result = await cde_delegateToJules(
-            user_prompt=prompt,
-            require_plan_approval=False,
-            timeout=3600
+            user_prompt=prompt, require_plan_approval=False, timeout=3600
         )
 
         try:
@@ -493,19 +487,13 @@ class MultiAgentOrchestrator:
                 "duration": result_json.get("duration", 0),
                 "files_modified": result_json.get("modified_files", []),
                 "session_id": result_json.get("session_id"),
-                "output": result_json.get("log", "")
+                "output": result_json.get("log", ""),
             }
         except json.JSONDecodeError:
-            return {
-                "status": "completed",
-                "agent": "jules",
-                "output": result
-            }
+            return {"status": "completed", "agent": "jules", "output": result}
 
     def _build_prompt_with_context(
-        self,
-        task: TaskDefinition,
-        skills_context: Optional[Dict[str, Any]] = None
+        self, task: TaskDefinition, skills_context: Optional[Dict[str, Any]] = None
     ) -> str:
         """Construye un prompt enriquecido con contexto de skills."""
         skills_str = ""
@@ -586,14 +574,17 @@ Comienza la implementación:
         modified = []
 
         # Buscar patrones comunes
-        for line in output.split('\n'):
-            if any(x in line.lower() for x in ['modified:', 'created:', 'updated:', 'wrote']):
+        for line in output.split("\n"):
+            if any(
+                x in line.lower()
+                for x in ["modified:", "created:", "updated:", "wrote"]
+            ):
                 # Intenta extraer nombre de archivo
-                if ':' in line:
-                    parts = line.split(':')
+                if ":" in line:
+                    parts = line.split(":")
                     if len(parts) > 1:
                         file_path = parts[-1].strip().strip("'\"")
-                        if file_path and not file_path.startswith('//'):
+                        if file_path and not file_path.startswith("//"):
                             modified.append(file_path)
 
         return list(set(modified))  # Remover duplicados
@@ -629,8 +620,8 @@ Pasos:
                 acceptance_criteria=[
                     "rustc --version devuelve 1.75+",
                     "cargo --version devuelve 1.75+",
-                    "Archivo de versiones registrado"
-                ]
+                    "Archivo de versiones registrado",
+                ],
             ),
             TaskDefinition(
                 task_id="rust-compile",
@@ -658,8 +649,8 @@ print(f"✅ Compuesto correctamente: {len(result)} bytes")
                 acceptance_criteria=[
                     "No errores de compilación",
                     "cde_rust_core se importa sin excepciones",
-                    "scan_documentation_py devuelve JSON válido"
-                ]
+                    "scan_documentation_py devuelve JSON válido",
+                ],
             ),
             TaskDefinition(
                 task_id="run-all-tests",
@@ -680,8 +671,8 @@ Esperado: 23+ tests pasando, 0 skipped
                 acceptance_criteria=[
                     "pytest ejecuta sin errores",
                     "0 tests skipped",
-                    "Todos los tests pasando"
-                ]
+                    "Todos los tests pasando",
+                ],
             ),
             TaskDefinition(
                 task_id="coverage-report",
@@ -702,8 +693,8 @@ Expected: Coverage >85%
                 acceptance_criteria=[
                     "Coverage >85%",
                     "HTML report generado en htmlcov/",
-                    "Reporte mínimo registrado"
-                ]
+                    "Reporte mínimo registrado",
+                ],
             ),
         ]
 
@@ -732,7 +723,7 @@ Expected: Coverage >85%
             "success_rate": (successful / total_tasks * 100) if total_tasks > 0 else 0,
             "total_time_seconds": total_time,
             "execution_log": self.execution_log,
-            "context_stack": self.context_stack
+            "context_stack": self.context_stack,
         }
 
 
@@ -752,7 +743,9 @@ async def main():
 
     # Mostrar resumen
     summary = orchestrator.get_execution_summary()
-    logger.info(f"✅ Fase 1 completada: {summary['successful']}/{summary['total_tasks']} tareas exitosas")
+    logger.info(
+        f"✅ Fase 1 completada: {summary['successful']}/{summary['total_tasks']} tareas exitosas"
+    )
     logger.info(f"⏱️  Tiempo total: {summary['total_time_seconds']:.1f}s")
 
     return summary
@@ -760,4 +753,5 @@ async def main():
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(main())

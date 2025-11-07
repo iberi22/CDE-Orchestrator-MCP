@@ -1,9 +1,10 @@
 # src/cde_orchestrator/application/onboarding/project_analysis_use_case.py
-import os
-from pathlib import Path
-from typing import Dict, Any, List
 from collections import Counter
+from pathlib import Path
+from typing import Any, Dict, List
+
 import pathspec
+
 
 class ProjectAnalysisUseCase:
     """
@@ -59,7 +60,7 @@ class ProjectAnalysisUseCase:
         spec = None
         if gitignore_path.exists():
             with open(gitignore_path, "r") as f:
-                spec = pathspec.PathSpec.from_lines('gitwildmatch', f)
+                spec = pathspec.PathSpec.from_lines("gitwildmatch", f)
 
         all_files = list(project_path.rglob("*"))
         total_items = len(all_files)
@@ -76,7 +77,7 @@ class ProjectAnalysisUseCase:
                 continue
 
             # Skip .git directory
-            if '.git' in relative_path.parts:
+            if ".git" in relative_path.parts:
                 continue
 
             files_to_process.append(file)
@@ -87,7 +88,7 @@ class ProjectAnalysisUseCase:
                 report_progress_http(
                     "onboardingProject",
                     progress,
-                    f"Processing {idx + 1}/{total_items} files"
+                    f"Processing {idx + 1}/{total_items} files",
                 )
 
         return files_to_process
@@ -100,8 +101,12 @@ class ProjectAnalysisUseCase:
     def _find_dependency_files(self, files: List[Path]) -> List[str]:
         """Finds common dependency management files."""
         common_files = [
-            "requirements.txt", "package.json", "pyproject.toml",
-            "pom.xml", "build.gradle", "Cargo.toml"
+            "requirements.txt",
+            "package.json",
+            "pyproject.toml",
+            "pom.xml",
+            "build.gradle",
+            "Cargo.toml",
         ]
 
         found_files = []

@@ -15,32 +15,34 @@ Usage:
     python scripts/validation/validate-docs.py --staged            # Validate staged files only (pre-commit)
 """
 
-import sys
-import os
-import re
-import json
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional
 import argparse
+import re
+import sys
 from datetime import datetime
+from pathlib import Path
+from typing import List, Optional
+
 import yaml
 
 # Force UTF-8 encoding on Windows
-if sys.platform == 'win32':
+if sys.platform == "win32":
     import io
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
+
 
 # ANSI colors for output
 class Colors:
-    HEADER = '\033[95m'
-    BLUE = '\033[94m'
-    CYAN = '\033[96m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    RED = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
+    HEADER = "\033[95m"
+    BLUE = "\033[94m"
+    CYAN = "\033[96m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+
 
 # Governance rules
 ROOT_EXCEPTIONS = {
@@ -51,7 +53,7 @@ ROOT_EXCEPTIONS = {
     "LICENSE",
     "AGENTS.md",
     "GEMINI.md",
-    ".github/copilot-instructions.md"
+    ".github/copilot-instructions.md",
 }
 
 DISALLOWED_ROOT_PATTERNS = [
@@ -70,8 +72,15 @@ DISALLOWED_ROOT_PATTERNS = [
 ]
 
 VALID_TYPES = {
-    "feature", "design", "task", "guide", "governance",
-    "session", "execution", "feedback", "research"
+    "feature",
+    "design",
+    "task",
+    "guide",
+    "governance",
+    "session",
+    "execution",
+    "feedback",
+    "research",
 }
 
 VALID_STATUSES = {"draft", "active", "deprecated", "archived"}
@@ -91,7 +100,13 @@ ALLOWED_DIRECTORIES = {
 }
 
 REQUIRED_FRONTMATTER_FIELDS = {
-    "title", "description", "type", "status", "created", "updated", "author"
+    "title",
+    "description",
+    "type",
+    "status",
+    "created",
+    "updated",
+    "author",
 }
 
 # Paths to skip validation
@@ -109,7 +124,9 @@ SKIP_PATHS = {
 
 
 class ValidationError:
-    def __init__(self, file_path: str, error_type: str, message: str, severity: str = "error"):
+    def __init__(
+        self, file_path: str, error_type: str, message: str, severity: str = "error"
+    ):
         self.file_path = file_path
         self.error_type = error_type
         self.message = message
@@ -117,11 +134,7 @@ class ValidationError:
 
     def __str__(self):
         color = Colors.RED if self.severity == "error" else Colors.YELLOW
-        emoji_map = {
-            "error": "[ERR]",
-            "warning": "[WRN]",
-            "info": "[INF]"
-        }
+        emoji_map = {"error": "[ERR]", "warning": "[WRN]", "info": "[INF]"}
         emoji = emoji_map.get(self.severity, "[?]")
         return f"{color}{emoji}{Colors.ENDC} {self.file_path}: {self.message}"
 
@@ -129,14 +142,15 @@ class ValidationError:
 def get_staged_files() -> List[str]:
     """Get list of staged files from git."""
     import subprocess
+
     try:
         result = subprocess.run(
             ["git", "diff", "--cached", "--name-only"],
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
-        return [f for f in result.stdout.strip().split('\n') if f.endswith('.md')]
+        return [f for f in result.stdout.strip().split("\n") if f.endswith(".md")]
     except subprocess.CalledProcessError:
         return []
 
@@ -161,8 +175,8 @@ def validate_location(file_path: str) -> Optional[ValidationError]:
                 return ValidationError(
                     file_path,
                     "LOCATION",
-                    f"[ERR] '.md' files not allowed in root. Move to: agent-docs/execution/, agent-docs/sessions/, specs/design/, etc.",
-                    "error"
+                    "[ERR] '.md' files not allowed in root. Move to: agent-docs/execution/, agent-docs/sessions/, specs/design/, etc.",
+                    "error",
                 )
 
         # Generic root check
@@ -170,7 +184,7 @@ def validate_location(file_path: str) -> Optional[ValidationError]:
             file_path,
             "LOCATION",
             f"[ERR] '.md' files in root must be in ROOT_EXCEPTIONS list. Got: {filename}",
-            "error"
+            "error",
         )
 
     # Check if in valid directory (normalize backslashes to forward slashes)
@@ -181,8 +195,8 @@ def validate_location(file_path: str) -> Optional[ValidationError]:
     return ValidationError(
         file_path,
         "LOCATION",
-        f"[ERR] File in unknown directory. Must be in: specs/, agent-docs/, docs/, .cde/, memory/, or root exceptions",
-        "error"
+        "[ERR] File in unknown directory. Must be in: specs/, agent-docs/, docs/, .cde/, memory/, or root exceptions",
+        "error",
     )
 
 
@@ -201,7 +215,7 @@ def validate_naming(file_path: str) -> Optional[ValidationError]:
             file_path,
             "NAMING",
             f"[ERR] Filename must be lowercase. Use hyphens for spaces: '{filename.lower()}'",
-            "warning"
+            "warning",
         )
 
     # Check for spaces
@@ -209,8 +223,8 @@ def validate_naming(file_path: str) -> Optional[ValidationError]:
         return ValidationError(
             file_path,
             "NAMING",
-            f"[ERR] Filename must not contain spaces. Use hyphens instead.",
-            "warning"
+            "[ERR] Filename must not contain spaces. Use hyphens instead.",
+            "warning",
         )
 
     # Check for valid characters
@@ -218,8 +232,8 @@ def validate_naming(file_path: str) -> Optional[ValidationError]:
         return ValidationError(
             file_path,
             "NAMING",
-            f"[ERR] Filename contains invalid characters. Use only: a-z, 0-9, hyphens, underscores, dots",
-            "warning"
+            "[ERR] Filename contains invalid characters. Use only: a-z, 0-9, hyphens, underscores, dots",
+            "warning",
         )
 
     return None
@@ -234,88 +248,99 @@ def validate_frontmatter(file_path: str) -> List[ValidationError]:
         return errors
 
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
     except (OSError, UnicodeDecodeError) as e:
-        errors.append(ValidationError(
-            file_path,
-            "READ",
-            f"[ERR] Cannot read file: {e}",
-            "error"
-        ))
+        errors.append(
+            ValidationError(file_path, "READ", f"[ERR] Cannot read file: {e}", "error")
+        )
         return errors
 
     # Check for frontmatter
     if not content.startswith("---"):
-        errors.append(ValidationError(
-            file_path,
-            "FRONTMATTER",
-            f"[ERR] File must start with YAML frontmatter block (---).",
-            "error"
-        ))
+        errors.append(
+            ValidationError(
+                file_path,
+                "FRONTMATTER",
+                "[ERR] File must start with YAML frontmatter block (---).",
+                "error",
+            )
+        )
         return errors
 
     # Extract frontmatter
     try:
         end_marker = content.find("---", 3)
         if end_marker == -1:
-            errors.append(ValidationError(
-                file_path,
-                "FRONTMATTER",
-                "[ERR] Invalid frontmatter: closing --- not found",
-                "error"
-            ))
+            errors.append(
+                ValidationError(
+                    file_path,
+                    "FRONTMATTER",
+                    "[ERR] Invalid frontmatter: closing --- not found",
+                    "error",
+                )
+            )
             return errors
 
         frontmatter_text = content[3:end_marker].strip()
         frontmatter = yaml.safe_load(frontmatter_text)
 
         if not isinstance(frontmatter, dict):
-            errors.append(ValidationError(
-                file_path,
-                "FRONTMATTER",
-                "[ERR] Frontmatter must be valid YAML dictionary",
-                "error"
-            ))
+            errors.append(
+                ValidationError(
+                    file_path,
+                    "FRONTMATTER",
+                    "[ERR] Frontmatter must be valid YAML dictionary",
+                    "error",
+                )
+            )
             return errors
     except yaml.YAMLError as e:
-        errors.append(ValidationError(
-            file_path,
-            "FRONTMATTER",
-            f"[ERR] Invalid YAML in frontmatter: {str(e)[:60]}",
-            "error"
-        ))
+        errors.append(
+            ValidationError(
+                file_path,
+                "FRONTMATTER",
+                f"[ERR] Invalid YAML in frontmatter: {str(e)[:60]}",
+                "error",
+            )
+        )
         return errors
 
     # Validate required fields
     missing_fields = REQUIRED_FRONTMATTER_FIELDS - set(frontmatter.keys())
     if missing_fields:
-        errors.append(ValidationError(
-            file_path,
-            "FRONTMATTER",
-            f"[ERR] Missing required frontmatter fields: {', '.join(sorted(missing_fields))}",
-            "error"
-        ))
+        errors.append(
+            ValidationError(
+                file_path,
+                "FRONTMATTER",
+                f"[ERR] Missing required frontmatter fields: {', '.join(sorted(missing_fields))}",
+                "error",
+            )
+        )
 
     # Validate type field
     doc_type = frontmatter.get("type", "").lower()
     if doc_type and doc_type not in VALID_TYPES:
-        errors.append(ValidationError(
-            file_path,
-            "FRONTMATTER",
-            f"[ERR] Invalid type '{doc_type}'. Must be one of: {', '.join(sorted(VALID_TYPES))}",
-            "error"
-        ))
+        errors.append(
+            ValidationError(
+                file_path,
+                "FRONTMATTER",
+                f"[ERR] Invalid type '{doc_type}'. Must be one of: {', '.join(sorted(VALID_TYPES))}",
+                "error",
+            )
+        )
 
     # Validate status field
     status = frontmatter.get("status", "").lower()
     if status and status not in VALID_STATUSES:
-        errors.append(ValidationError(
-            file_path,
-            "FRONTMATTER",
-            f"[ERR] Invalid status '{status}'. Must be one of: {', '.join(sorted(VALID_STATUSES))}",
-            "error"
-        ))
+        errors.append(
+            ValidationError(
+                file_path,
+                "FRONTMATTER",
+                f"[ERR] Invalid status '{status}'. Must be one of: {', '.join(sorted(VALID_STATUSES))}",
+                "error",
+            )
+        )
 
     # Validate date fields
     for date_field in ["created", "updated"]:
@@ -324,12 +349,14 @@ def validate_frontmatter(file_path: str) -> List[ValidationError]:
             try:
                 datetime.strptime(str(date_str), "%Y-%m-%d")
             except ValueError:
-                errors.append(ValidationError(
-                    file_path,
-                    "FRONTMATTER",
-                    f"[ERR] Invalid {date_field} date format '{date_str}'. Use YYYY-MM-DD",
-                    "error"
-                ))
+                errors.append(
+                    ValidationError(
+                        file_path,
+                        "FRONTMATTER",
+                        f"[ERR] Invalid {date_field} date format '{date_str}'. Use YYYY-MM-DD",
+                        "error",
+                    )
+                )
 
     return errors
 
@@ -348,7 +375,7 @@ def validate_agent_docs_structure(file_path: str) -> Optional[ValidationError]:
             file_path,
             "STRUCTURE",
             "[ERR] agent-docs files must be in subdirectories (execution/, sessions/, feedback/, research/)",
-            "error"
+            "error",
         )
 
     subdir = parts[1]
@@ -357,7 +384,7 @@ def validate_agent_docs_structure(file_path: str) -> Optional[ValidationError]:
             file_path,
             "STRUCTURE",
             f"[ERR] agent-docs subdirectory '{subdir}' not recognized. Use: execution/, sessions/, feedback/, research/",
-            "error"
+            "error",
         )
 
     # Validate filename pattern for agent-docs
@@ -369,7 +396,7 @@ def validate_agent_docs_structure(file_path: str) -> Optional[ValidationError]:
                 file_path,
                 "STRUCTURE",
                 f"[WRN] agent-docs/{subdir}/ files should include date: YYYY-MM or YYYY-MM-DD",
-                "warning"
+                "warning",
             )
 
     return None
@@ -420,7 +447,9 @@ def find_all_md_files(root_dir: str = ".") -> List[str]:
 def print_report(errors: List[ValidationError], verbose: bool = False):
     """Print professional validation report."""
     if not errors:
-        print(f"\n{Colors.GREEN}[PASS] All documentation is compliant with DOCUMENTATION_GOVERNANCE.md{Colors.ENDC}\n")
+        print(
+            f"\n{Colors.GREEN}[PASS] All documentation is compliant with DOCUMENTATION_GOVERNANCE.md{Colors.ENDC}\n"
+        )
         return False
 
     # Group by severity
@@ -430,19 +459,25 @@ def print_report(errors: List[ValidationError], verbose: bool = False):
 
     # Print header
     total = len(errors)
-    print(f"\n{Colors.RED}{Colors.BOLD}[AUDIT] DOCUMENTATION GOVERNANCE AUDIT{Colors.ENDC}\n")
+    print(
+        f"\n{Colors.RED}{Colors.BOLD}[AUDIT] DOCUMENTATION GOVERNANCE AUDIT{Colors.ENDC}\n"
+    )
     print(f"{Colors.RED}[FAIL] Found {total} violation(s){Colors.ENDC}\n")
 
     # Print errors
     if by_severity["error"]:
-        print(f"{Colors.RED}{Colors.BOLD}[ERROR] ({len(by_severity['error'])}) - MUST FIX:{Colors.ENDC}")
+        print(
+            f"{Colors.RED}{Colors.BOLD}[ERROR] ({len(by_severity['error'])}) - MUST FIX:{Colors.ENDC}"
+        )
         for error in by_severity["error"]:
             print(f"  {error}")
         print()
 
     # Print warnings
     if by_severity["warning"]:
-        print(f"{Colors.YELLOW}{Colors.BOLD}[WARN] ({len(by_severity['warning'])}) - Should fix:{Colors.ENDC}")
+        print(
+            f"{Colors.YELLOW}{Colors.BOLD}[WARN] ({len(by_severity['warning'])}) - Should fix:{Colors.ENDC}"
+        )
         for error in by_severity["warning"]:
             print(f"  {error}")
         print()
@@ -456,8 +491,12 @@ def print_report(errors: List[ValidationError], verbose: bool = False):
     print(f"  Warnings: {warning_count} (should be fixed)")
     print()
 
-    print(f"{Colors.BLUE}Reference: specs/governance/DOCUMENTATION_GOVERNANCE.md{Colors.ENDC}")
-    print(f"{Colors.BLUE}Rules: .github/copilot-instructions.md (AI Agent Governance Checklist){Colors.ENDC}\n")
+    print(
+        f"{Colors.BLUE}Reference: specs/governance/DOCUMENTATION_GOVERNANCE.md{Colors.ENDC}"
+    )
+    print(
+        f"{Colors.BLUE}Rules: .github/copilot-instructions.md (AI Agent Governance Checklist){Colors.ENDC}\n"
+    )
 
     return error_count > 0
 
@@ -471,10 +510,14 @@ Examples:
   python scripts/validation/validate-docs.py --all              # Audit all docs
   python scripts/validation/validate-docs.py --staged            # Validate staged files (pre-commit)
   python scripts/validation/validate-docs.py file1.md file2.md # Validate specific files
-        """
+        """,
     )
-    parser.add_argument("--all", action="store_true", help="Validate all markdown files")
-    parser.add_argument("--staged", action="store_true", help="Validate only staged files (git)")
+    parser.add_argument(
+        "--all", action="store_true", help="Validate all markdown files"
+    )
+    parser.add_argument(
+        "--staged", action="store_true", help="Validate only staged files (git)"
+    )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     parser.add_argument("files", nargs="*", help="Specific files to validate")
 

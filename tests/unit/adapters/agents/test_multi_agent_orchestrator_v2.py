@@ -4,17 +4,18 @@ Unit tests for MultiAgentOrchestrator.
 Tests agent orchestration, fallback chain, and capability reporting.
 """
 
-import pytest
 import asyncio
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock
-from cde_orchestrator.adapters.agents.multi_agent_orchestrator import (
-    MultiAgentOrchestrator,
-    AgentRegistry,
-)
+
+import pytest
+
 from cde_orchestrator.adapters.agents.agent_selection_policy import (
     AgentType,
     TaskComplexity,
+)
+from cde_orchestrator.adapters.agents.multi_agent_orchestrator import (
+    AgentRegistry,
+    MultiAgentOrchestrator,
 )
 from cde_orchestrator.domain.ports import ICodeExecutor
 
@@ -298,7 +299,9 @@ class TestMultiAgentOrchestrator:
                 Path("/test/project1"), "Prompt 1", {"preferred_agent": AgentType.JULES}
             ),
             orchestrator.execute_prompt(
-                Path("/test/project2"), "Prompt 2", {"preferred_agent": AgentType.COPILOT}
+                Path("/test/project2"),
+                "Prompt 2",
+                {"preferred_agent": AgentType.COPILOT},
             ),
         )
 

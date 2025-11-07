@@ -5,8 +5,9 @@ This tool simulates work with progress updates to demonstrate
 the MCP Status Bar extension in VS Code.
 """
 
-import time
 import json
+import time
+
 from fastmcp import FastMCP
 
 # Create a simple test MCP app
@@ -40,11 +41,9 @@ def simulate_work(duration_seconds: int = 10, steps: int = 10) -> str:
         percentage = (step / steps) * 100
         print(f"Progress: {percentage:.0f}%", flush=True)
 
-    return json.dumps({
-        "status": "complete",
-        "steps_completed": steps,
-        "duration": duration_seconds
-    })
+    return json.dumps(
+        {"status": "complete", "steps_completed": steps, "duration": duration_seconds}
+    )
 
 
 if __name__ == "__main__":

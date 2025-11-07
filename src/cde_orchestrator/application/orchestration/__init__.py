@@ -7,25 +7,23 @@ High-level use cases for intelligent workflow orchestration:
 - Web research (keep skills current with latest info)
 """
 
-from .workflow_selector_use_case import (
-    WorkflowSelectorUseCase,
-    WorkflowRecommendation,
-    WorkflowComplexity,
-    WorkflowType,
-    DomainCategory
-)
-
 from .skill_sourcing_use_case import (
-    SkillSourcingUseCase,
     ExternalSkill,
-    SkillAdaptation
+    SkillAdaptation,
+    SkillSourcingUseCase,
 )
-
 from .web_research_use_case import (
-    WebResearchUseCase,
-    ResearchSource,
     ResearchInsight,
-    SkillUpdate
+    ResearchSource,
+    SkillUpdate,
+    WebResearchUseCase,
+)
+from .workflow_selector_use_case import (
+    DomainCategory,
+    WorkflowComplexity,
+    WorkflowRecommendation,
+    WorkflowSelectorUseCase,
+    WorkflowType,
 )
 
 __all__ = [
@@ -35,12 +33,10 @@ __all__ = [
     "WorkflowComplexity",
     "WorkflowType",
     "DomainCategory",
-
     # Skill Sourcing
     "SkillSourcingUseCase",
     "ExternalSkill",
     "SkillAdaptation",
-
     # Web Research
     "WebResearchUseCase",
     "ResearchSource",

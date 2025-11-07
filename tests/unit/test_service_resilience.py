@@ -1,7 +1,6 @@
 import sys
 import types
 
-import pytest
 
 from cde_orchestrator.adapters.service import CircuitBreaker, GitHubConnector
 

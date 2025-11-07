@@ -5,10 +5,10 @@ This module provides direct WebSocket communication for progress reporting,
 bypassing the MCP protocol limitation where clients must send progressToken.
 """
 
-import asyncio
 import json
 import time
 from typing import Optional
+
 import websocket  # pip install websocket-client
 
 
@@ -39,11 +39,7 @@ class ProgressReporter:
             return False
 
     def report_progress(
-        self,
-        server: str,
-        tool: str,
-        percentage: float,
-        message: str = ""
+        self, server: str, tool: str, percentage: float, message: str = ""
     ):
         """
         Report progress to WebSocket server.
@@ -65,7 +61,7 @@ class ProgressReporter:
             "tool": tool,
             "percentage": percentage,
             "elapsed": elapsed,
-            "message": message
+            "message": message,
         }
 
         try:
@@ -97,10 +93,7 @@ def get_progress_reporter() -> ProgressReporter:
 
 
 def report_progress(
-    tool_name: str,
-    percentage: float,
-    message: str = "",
-    server_name: str = "CDE"
+    tool_name: str, percentage: float, message: str = "", server_name: str = "CDE"
 ):
     """
     Convenience function to report progress.
@@ -123,7 +116,7 @@ def report_progress(
         "tool": tool_name,
         "percentage": percentage,
         "elapsed": time.time(),  # Proxy will calculate elapsed
-        "message": message
+        "message": message,
     }
 
     # Send via stderr with special marker for proxy to intercept

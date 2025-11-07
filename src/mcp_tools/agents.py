@@ -11,7 +11,6 @@ from pathlib import Path
 
 from cde_orchestrator.adapters.agents import JulesAsyncAdapter
 from cde_orchestrator.adapters.agents.agent_selection_policy import AgentSelectionPolicy
-from cde_orchestrator.adapters.agents.multi_agent_orchestrator import MultiAgentOrchestrator
 
 from ._base import tool_handler
 
@@ -28,13 +27,47 @@ def _calculate_task_complexity(task_description: str) -> str:
     desc_lower = task_description.lower()
 
     # Epic keywords (architecture/system-level changes)
-    epic_keywords = ["architecture", "system.*wide", "refactor.*entire", "redesign", "restructure", "complete.*rewrite", "platform", "infrastructure", "enterprise", "scalability", "performance.*optimization"]
+    epic_keywords = [
+        "architecture",
+        "system.*wide",
+        "refactor.*entire",
+        "redesign",
+        "restructure",
+        "complete.*rewrite",
+        "platform",
+        "infrastructure",
+        "enterprise",
+        "scalability",
+        "performance.*optimization",
+    ]
 
     # Complex keywords (features, modules, integrations)
-    complex_keywords = ["feature", "module", "integration", "api", "database", "authentication", "authorization", "security", "complex", "multiple.*files", "microservices", "distributed"]
+    complex_keywords = [
+        "feature",
+        "module",
+        "integration",
+        "api",
+        "database",
+        "authentication",
+        "authorization",
+        "security",
+        "complex",
+        "multiple.*files",
+        "microservices",
+        "distributed",
+    ]
 
     # Simple keywords (fixes, docs, comments)
-    simple_keywords = ["fix", "typo", "doc", "comment", "readme", "update", "change", "modify"]
+    simple_keywords = [
+        "fix",
+        "typo",
+        "doc",
+        "comment",
+        "readme",
+        "update",
+        "change",
+        "modify",
+    ]
 
     # Check for epic first (more specific patterns)
     if any(kw in desc_lower for kw in epic_keywords):
@@ -352,7 +385,9 @@ async def cde_listAvailableAgents() -> str:
             "capabilities": ["research", "prototyping", "refactoring"],
             "best_for": ["research", "new_feature_prototyping"],
             "setup_required": (
-                [] if deepagents_available else ["Install DeepAgents CLI: pip install deepagents-cli"]
+                []
+                if deepagents_available
+                else ["Install DeepAgents CLI: pip install deepagents-cli"]
             ),
         }
     )
@@ -368,7 +403,9 @@ async def cde_listAvailableAgents() -> str:
             "capabilities": ["code_review", "analysis"],
             "best_for": ["code_analysis", "task_review"],
             "setup_required": (
-                [] if codex_available else ["Install Codex CLI: npm install -g @openai/codex"]
+                []
+                if codex_available
+                else ["Install Codex CLI: npm install -g @openai/codex"]
             ),
         }
     )
@@ -384,7 +421,9 @@ async def cde_listAvailableAgents() -> str:
             "capabilities": ["task_completion", "jira_integration"],
             "best_for": ["end_to_end_tasks", "jira_workflows"],
             "setup_required": (
-                [] if rovo_available else ["Install Rovo Dev CLI: Follow Atlassian's instructions"]
+                []
+                if rovo_available
+                else ["Install Rovo Dev CLI: Follow Atlassian's instructions"]
             ),
         }
     )
@@ -481,7 +520,10 @@ async def cde_selectAgent(task_description: str) -> str:
         jules_available = bool(os.getenv("JULES_API_KEY"))
         try:
             import importlib.util
-            jules_sdk_installed = importlib.util.find_spec("jules_agent_sdk") is not None
+
+            jules_sdk_installed = (
+                importlib.util.find_spec("jules_agent_sdk") is not None
+            )
         except ImportError:
             jules_sdk_installed = False
 
@@ -520,6 +562,7 @@ async def cde_selectAgent(task_description: str) -> str:
 
         # Convert to AgentType enum values
         from cde_orchestrator.adapters.agents.agent_selection_policy import AgentType
+
         available_agent_types = []
         for agent_name in agents_status:
             if agent_name == "jules":
@@ -551,12 +594,15 @@ async def cde_selectAgent(task_description: str) -> str:
                     break
 
             if not selected_agent:
-                return json.dumps({
-                    "error": "No suitable agent available",
-                    "task_description": task_description,
-                    "available_agents": [a.value for a in available_agent_types],
-                    "message": "No AI agents are currently available. Please install at least one: Jules, Copilot CLI, Gemini CLI, or Qwen CLI."
-                }, indent=2)
+                return json.dumps(
+                    {
+                        "error": "No suitable agent available",
+                        "task_description": task_description,
+                        "available_agents": [a.value for a in available_agent_types],
+                        "message": "No AI agents are currently available. Please install at least one: Jules, Copilot CLI, Gemini CLI, or Qwen CLI.",
+                    },
+                    indent=2,
+                )
 
             # Use fallback
             actual_agent = selected_agent
@@ -593,14 +639,20 @@ async def cde_selectAgent(task_description: str) -> str:
             if not jules_available:
                 requirements.append("Add JULES_API_KEY to .env file")
             if not jules_sdk_installed:
-                requirements.append("Install jules-agent-sdk: pip install jules-agent-sdk")
+                requirements.append(
+                    "Install jules-agent-sdk: pip install jules-agent-sdk"
+                )
         elif actual_agent == AgentType.COPILOT:
             if not copilot_available:
                 requirements.append("Install GitHub CLI: https://cli.github.com/")
-                requirements.append("Install Copilot extension: gh extension install github/gh-copilot")
+                requirements.append(
+                    "Install Copilot extension: gh extension install github/gh-copilot"
+                )
         elif actual_agent == AgentType.GEMINI:
             if not gemini_available:
-                requirements.append("Install Gemini CLI: https://ai.google.dev/gemini-api/docs/cli")
+                requirements.append(
+                    "Install Gemini CLI: https://ai.google.dev/gemini-api/docs/cli"
+                )
         elif actual_agent == AgentType.QWEN:
             if not qwen_available:
                 requirements.append("Install Qwen CLI: pip install qwen-cli")
@@ -610,25 +662,32 @@ async def cde_selectAgent(task_description: str) -> str:
 
         # Enhanced reasoning
         if fallback_used:
-            response["reasoning"] = f"Preferred agent not available, using {actual_agent.value} as fallback"
+            response["reasoning"] = (
+                f"Preferred agent not available, using {actual_agent.value} as fallback"
+            )
         else:
             complexity_reasons = {
                 "trivial": "Simple task suitable for quick fixes",
                 "moderate": "Balanced task requiring code generation capabilities",
                 "complex": "Complex task needing full context and planning",
-                "epic": "Large-scale task requiring async execution and plan approval"
+                "epic": "Large-scale task requiring async execution and plan approval",
             }
-            response["reasoning"] = f"{complexity_reasons.get(complexity, 'Task')} - selected {actual_agent.value} based on capabilities and availability"
+            response["reasoning"] = (
+                f"{complexity_reasons.get(complexity, 'Task')} - selected {actual_agent.value} based on capabilities and availability"
+            )
 
         return json.dumps(response, indent=2)
 
     except Exception as e:
-        return json.dumps({
-            "error": "agent_selection_failed",
-            "message": str(e),
-            "task_description": task_description,
-            "type": type(e).__name__,
-        }, indent=2)
+        return json.dumps(
+            {
+                "error": "agent_selection_failed",
+                "message": str(e),
+                "task_description": task_description,
+                "type": type(e).__name__,
+            },
+            indent=2,
+        )
 
 
 @tool_handler
@@ -721,11 +780,17 @@ async def cde_executeWithBestAgent(
     """
     try:
         import time
+
         start_time = time.time()
 
         # Initialize MultiAgentOrchestrator
-        from cde_orchestrator.adapters.agents.multi_agent_orchestrator import MultiAgentOrchestrator
-        from cde_orchestrator.adapters.agents.agent_selection_policy import AgentType, TaskComplexity
+        from cde_orchestrator.adapters.agents.agent_selection_policy import (
+            AgentType,
+            TaskComplexity,
+        )
+        from cde_orchestrator.adapters.agents.multi_agent_orchestrator import (
+            MultiAgentOrchestrator,
+        )
 
         orchestrator = MultiAgentOrchestrator()
 
@@ -737,8 +802,10 @@ async def cde_executeWithBestAgent(
         if jules_api_key:
             try:
                 import importlib.util
+
                 if importlib.util.find_spec("jules_agent_sdk"):
                     from cde_orchestrator.adapters.agents import JulesAsyncAdapter
+
                     jules_adapter = JulesAsyncAdapter(
                         api_key=jules_api_key,
                         default_timeout=timeout,
@@ -752,11 +819,11 @@ async def cde_executeWithBestAgent(
         # Register all CLI adapters
         try:
             from cde_orchestrator.adapters.agents.code_cli_adapters import (
+                CodexAdapter,
                 CopilotCLIAdapter,
+                DeepAgentsAdapter,
                 GeminiCLIAdapter,
                 QwenCLIAdapter,
-                DeepAgentsAdapter,
-                CodexAdapter,
                 RovoDevAdapter,
             )
 
@@ -780,16 +847,19 @@ async def cde_executeWithBestAgent(
             pass
 
         if not available_agents:
-            return json.dumps({
-                "error": "no_agents_available",
-                "message": "No AI agents are configured or available",
-                "task_description": task_description,
-                "suggestions": [
-                    "Install Jules: pip install jules-agent-sdk + add JULES_API_KEY to .env",
-                    "Install GitHub CLI: https://cli.github.com/ + gh extension install github/gh-copilot",
-                    "Install Gemini CLI: https://ai.google.dev/gemini-api/docs/cli",
-                ]
-            }, indent=2)
+            return json.dumps(
+                {
+                    "error": "no_agents_available",
+                    "message": "No AI agents are configured or available",
+                    "task_description": task_description,
+                    "suggestions": [
+                        "Install Jules: pip install jules-agent-sdk + add JULES_API_KEY to .env",
+                        "Install GitHub CLI: https://cli.github.com/ + gh extension install github/gh-copilot",
+                        "Install Gemini CLI: https://ai.google.dev/gemini-api/docs/cli",
+                    ],
+                },
+                indent=2,
+            )
 
         # Determine task complexity using shared logic
         complexity_str = _calculate_task_complexity(task_description)
@@ -820,7 +890,9 @@ async def cde_executeWithBestAgent(
                 "qwen": AgentType.QWEN,
             }
             if preferred_agent.lower() in preferred_agent_map:
-                context["preferred_agent"] = preferred_agent_map[preferred_agent.lower()]
+                context["preferred_agent"] = preferred_agent_map[
+                    preferred_agent.lower()
+                ]
 
         # Execute with orchestrator
         execution_result = await orchestrator.execute_prompt(
@@ -834,25 +906,37 @@ async def cde_executeWithBestAgent(
         # Parse execution result to determine success
         try:
             result_data = json.loads(execution_result)
-            success = result_data.get("success", True)  # Assume success if not specified
+            success = result_data.get(
+                "success", True
+            )  # Assume success if not specified
         except (json.JSONDecodeError, TypeError):
             success = True  # Assume success for non-JSON results
 
-        return json.dumps({
-            "selected_agent": context.get("preferred_agent", "auto-selected").value if "preferred_agent" in context else "auto-selected",
-            "task_description": task_description,
-            "task_complexity": complexity.value,
-            "require_plan_approval": require_plan_approval,
-            "available_agents": available_agents,
-            "execution_time_seconds": round(execution_time, 2),
-            "success": success,
-            "execution_result": execution_result,
-        }, indent=2)
+        return json.dumps(
+            {
+                "selected_agent": (
+                    context.get("preferred_agent", "auto-selected").value
+                    if "preferred_agent" in context
+                    else "auto-selected"
+                ),
+                "task_description": task_description,
+                "task_complexity": complexity.value,
+                "require_plan_approval": require_plan_approval,
+                "available_agents": available_agents,
+                "execution_time_seconds": round(execution_time, 2),
+                "success": success,
+                "execution_result": execution_result,
+            },
+            indent=2,
+        )
 
     except Exception as e:
-        return json.dumps({
-            "error": "orchestration_failed",
-            "message": str(e),
-            "task_description": task_description,
-            "type": type(e).__name__,
-        }, indent=2)
+        return json.dumps(
+            {
+                "error": "orchestration_failed",
+                "message": str(e),
+                "task_description": task_description,
+                "type": type(e).__name__,
+            },
+            indent=2,
+        )

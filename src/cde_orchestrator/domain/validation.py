@@ -129,10 +129,7 @@ class StartFeatureInput(BaseModel):
 
     user_prompt: str
 
-    model_config = ConfigDict(
-        str_min_length=10,
-        str_max_length=5000
-    )
+    model_config = ConfigDict(str_min_length=10, str_max_length=5000)
 
 
 class SubmitWorkInput(BaseModel):
@@ -142,10 +139,7 @@ class SubmitWorkInput(BaseModel):
     phase_id: str
     results: dict
 
-    model_config = ConfigDict(
-        str_min_length=1,
-        str_max_length=100
-    )
+    model_config = ConfigDict(str_min_length=1, str_max_length=100)
 
 
 class CreateBranchInput(BaseModel):
@@ -155,10 +149,7 @@ class CreateBranchInput(BaseModel):
     branch_name: str
     base_branch: str = "main"
 
-    model_config = ConfigDict(
-        str_min_length=1,
-        str_max_length=200
-    )
+    model_config = ConfigDict(str_min_length=1, str_max_length=200)
 
 
 class CreateIssueInput(BaseModel):
@@ -169,7 +160,4 @@ class CreateIssueInput(BaseModel):
     description: str
     labels: list = []
 
-    model_config = ConfigDict(
-        str_min_length=1,
-        str_max_length=1000
-    )
+    model_config = ConfigDict(str_min_length=1, str_max_length=1000)

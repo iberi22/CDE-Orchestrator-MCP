@@ -1,9 +1,10 @@
 # src/cde_orchestrator/application/onboarding/project_setup_use_case.py
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 from .project_analysis_use_case import ProjectAnalysisUseCase
 from .publishing_use_case import PublishingUseCase
+
 
 class ProjectSetupUseCase:
     """
@@ -11,7 +12,11 @@ class ProjectSetupUseCase:
     essential configuration files for AI agent collaboration.
     """
 
-    def __init__(self, analysis_use_case: ProjectAnalysisUseCase, publishing_use_case: PublishingUseCase):
+    def __init__(
+        self,
+        analysis_use_case: ProjectAnalysisUseCase,
+        publishing_use_case: PublishingUseCase,
+    ):
         self._analysis_use_case = analysis_use_case
         self._publishing_use_case = publishing_use_case
 
@@ -53,15 +58,21 @@ class ProjectSetupUseCase:
             if not (project / path).exists() or force:
                 final_documents[path] = content
 
-        publish_result = self._publishing_use_case.execute(project_path, final_documents)
+        publish_result = self._publishing_use_case.execute(
+            project_path, final_documents
+        )
 
         # Step 4: Generate report
         report = {
             "status": "success",
             "analysis_summary": analysis_result.get("summary"),
-            "actions": [f"Generated content for {len(documents_to_publish)} config files."],
+            "actions": [
+                f"Generated content for {len(documents_to_publish)} config files."
+            ],
             "files_written": publish_result.get("files_written", []),
-            "files_skipped": [p for p in documents_to_publish if p not in final_documents],
+            "files_skipped": [
+                p for p in documents_to_publish if p not in final_documents
+            ],
         }
 
         return report

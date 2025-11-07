@@ -21,33 +21,36 @@ __all__ = [
 
 class TaskComplexity(Enum):
     """Task complexity levels for agent selection."""
-    TRIVIAL = "trivial"          # < 5 min (typo fixes, doc updates)
-    SIMPLE = "simple"            # 15-30 min (single file changes)
-    MODERATE = "moderate"        # 1-2 hours (multiple files, tests)
-    COMPLEX = "complex"          # 4-8 hours (new feature, refactor)
-    EPIC = "epic"                # 2-5 days (major feature, architecture)
+
+    TRIVIAL = "trivial"  # < 5 min (typo fixes, doc updates)
+    SIMPLE = "simple"  # 15-30 min (single file changes)
+    MODERATE = "moderate"  # 1-2 hours (multiple files, tests)
+    COMPLEX = "complex"  # 4-8 hours (new feature, refactor)
+    EPIC = "epic"  # 2-5 days (major feature, architecture)
 
 
 class AgentType(Enum):
     """Available AI coding agents."""
-    JULES = "jules"              # Async API with full repo context
-    COPILOT = "copilot"          # GitHub Copilot CLI
-    GEMINI = "gemini"            # Google Gemini CLI
-    QWEN = "qwen"                # Alibaba Qwen CLI
-    DEEPAGENTS = "deepagents"    # DeepAgents CLI for research
-    CODEX = "codex"              # Codex CLI for code analysis
-    ROVODEV = "rovodev"          # Rovo Dev CLI for task completion
+
+    JULES = "jules"  # Async API with full repo context
+    COPILOT = "copilot"  # GitHub Copilot CLI
+    GEMINI = "gemini"  # Google Gemini CLI
+    QWEN = "qwen"  # Alibaba Qwen CLI
+    DEEPAGENTS = "deepagents"  # DeepAgents CLI for research
+    CODEX = "codex"  # Codex CLI for code analysis
+    ROVODEV = "rovodev"  # Rovo Dev CLI for task completion
 
 
 class AgentCapability(Enum):
     """Agent capability types."""
-    ASYNC = "async"              # Supports long-running operations
+
+    ASYNC = "async"  # Supports long-running operations
     PLAN_APPROVAL = "plan_approval"  # Supports interactive plan approval
-    FULL_CONTEXT = "full_context"    # Can access full repository
-    QUICK_FIX = "quick_fix"      # Optimized for quick fixes
-    CODE_GENERATION = "code_gen" # Good at code generation
-    DOCUMENTATION = "docs"       # Good at documentation
-    REFACTORING = "refactor"     # Good at refactoring
+    FULL_CONTEXT = "full_context"  # Can access full repository
+    QUICK_FIX = "quick_fix"  # Optimized for quick fixes
+    CODE_GENERATION = "code_gen"  # Good at code generation
+    DOCUMENTATION = "docs"  # Good at documentation
+    REFACTORING = "refactor"  # Good at refactoring
 
 
 @dataclass
@@ -63,6 +66,7 @@ class AgentCapabilities:
         best_for: List of use cases agent is best for
         requires_auth: Whether agent requires authentication
     """
+
     agent_type: AgentType
     supports_async: bool
     supports_plan_approval: bool
@@ -109,7 +113,7 @@ class AgentSelectionPolicy:
             supports_plan_approval=True,
             max_context_lines=100000,  # Full repository
             best_for=["refactoring", "feature_development", "complex_tasks"],
-            requires_auth=True
+            requires_auth=True,
         ),
         AgentType.COPILOT: AgentCapabilities(
             agent_type=AgentType.COPILOT,
@@ -117,7 +121,7 @@ class AgentSelectionPolicy:
             supports_plan_approval=False,
             max_context_lines=5000,
             best_for=["quick_fixes", "code_generation", "suggestions"],
-            requires_auth=True  # Requires GitHub CLI auth
+            requires_auth=True,  # Requires GitHub CLI auth
         ),
         AgentType.GEMINI: AgentCapabilities(
             agent_type=AgentType.GEMINI,
@@ -125,7 +129,7 @@ class AgentSelectionPolicy:
             supports_plan_approval=False,
             max_context_lines=8000,
             best_for=["documentation", "analysis", "quick_fixes"],
-            requires_auth=False  # Uses CLI auth
+            requires_auth=False,  # Uses CLI auth
         ),
         AgentType.QWEN: AgentCapabilities(
             agent_type=AgentType.QWEN,
@@ -133,7 +137,7 @@ class AgentSelectionPolicy:
             supports_plan_approval=False,
             max_context_lines=4000,
             best_for=["fallback"],
-            requires_auth=False
+            requires_auth=False,
         ),
         AgentType.DEEPAGENTS: AgentCapabilities(
             agent_type=AgentType.DEEPAGENTS,
@@ -141,7 +145,7 @@ class AgentSelectionPolicy:
             supports_plan_approval=False,
             max_context_lines=20000,
             best_for=["research", "prototyping", "refactoring"],
-            requires_auth=True
+            requires_auth=True,
         ),
         AgentType.CODEX: AgentCapabilities(
             agent_type=AgentType.CODEX,
@@ -149,7 +153,7 @@ class AgentSelectionPolicy:
             supports_plan_approval=False,
             max_context_lines=8000,
             best_for=["code_review", "analysis"],
-            requires_auth=True
+            requires_auth=True,
         ),
         AgentType.ROVODEV: AgentCapabilities(
             agent_type=AgentType.ROVODEV,
@@ -157,7 +161,7 @@ class AgentSelectionPolicy:
             supports_plan_approval=False,
             max_context_lines=10000,
             best_for=["task_completion", "jira_integration"],
-            requires_auth=True
+            requires_auth=True,
         ),
     }
 
@@ -208,9 +212,7 @@ class AgentSelectionPolicy:
         if require_plan_approval:
             if AgentType.JULES in available_agents:
                 return AgentType.JULES
-            raise ValueError(
-                "Plan approval requires Jules, but Jules is not available"
-            )
+            raise ValueError("Plan approval requires Jules, but Jules is not available")
 
         # COMPLEX/EPIC → Jules preferred
         if complexity in [TaskComplexity.COMPLEX, TaskComplexity.EPIC]:
@@ -265,13 +267,29 @@ class AgentSelectionPolicy:
         # Specific keywords for each agent
         if any(kw in desc_lower for kw in ["jira", "ticket", "bug-tracker issue"]):
             return AgentType.ROVODEV
-        if any(kw in desc_lower for kw in ["investigate", "research", "prototype", "refactor"]):
+        if any(
+            kw in desc_lower
+            for kw in ["investigate", "research", "prototype", "refactor"]
+        ):
             return AgentType.DEEPAGENTS
         if any(kw in desc_lower for kw in ["typo", "fix syntax", "complete this line"]):
             return AgentType.COPILOT
-        if any(kw in desc_lower for kw in ["analyze", "review", "complexity", "style issues"]):
+        if any(
+            kw in desc_lower
+            for kw in ["analyze", "review", "complexity", "style issues"]
+        ):
             return AgentType.CODEX
-        if any(kw in desc_lower for kw in ["documentation", "generate docs", "csv", "read a file", "help me finish", "quick way to"]):
+        if any(
+            kw in desc_lower
+            for kw in [
+                "documentation",
+                "generate docs",
+                "csv",
+                "read a file",
+                "help me finish",
+                "quick way to",
+            ]
+        ):
             return AgentType.GEMINI
 
         # Fallback to complexity-based selection
@@ -303,9 +321,18 @@ class AgentSelectionPolicy:
 
         # Epic keywords (weight: 3)
         epic_patterns = [
-            "architecture", "system", "migration", "refactor.*entire",
-            "redesign", "restructure", "complete.*rewrite", "platform",
-            "infrastructure", "enterprise", "scalability", "performance.*optimization"
+            "architecture",
+            "system",
+            "migration",
+            "refactor.*entire",
+            "redesign",
+            "restructure",
+            "complete.*rewrite",
+            "platform",
+            "infrastructure",
+            "enterprise",
+            "scalability",
+            "performance.*optimization",
         ]
         for pattern in epic_patterns:
             if pattern in desc_lower:
@@ -313,10 +340,22 @@ class AgentSelectionPolicy:
 
         # Complex keywords (weight: 2)
         complex_patterns = [
-            "feature", "module", "integration", "api", "database",
-            "authentication", "authorization", "security", "complex",
-            "multiple.*files", "cross-cutting", "dependency.*injection",
-            "microservices", "distributed", "concurrent", "async.*await"
+            "feature",
+            "module",
+            "integration",
+            "api",
+            "database",
+            "authentication",
+            "authorization",
+            "security",
+            "complex",
+            "multiple.*files",
+            "cross-cutting",
+            "dependency.*injection",
+            "microservices",
+            "distributed",
+            "concurrent",
+            "async.*await",
         ]
         for pattern in complex_patterns:
             if pattern in desc_lower:
@@ -324,9 +363,19 @@ class AgentSelectionPolicy:
 
         # Moderate keywords (weight: 1)
         moderate_patterns = [
-            "test", "testing", "documentation", "config", "settings",
-            "validation", "error.*handling", "logging", "monitoring",
-            "deployment", "ci.*cd", "docker", "kubernetes"
+            "test",
+            "testing",
+            "documentation",
+            "config",
+            "settings",
+            "validation",
+            "error.*handling",
+            "logging",
+            "monitoring",
+            "deployment",
+            "ci.*cd",
+            "docker",
+            "kubernetes",
         ]
         for pattern in moderate_patterns:
             if pattern in desc_lower:
@@ -334,8 +383,17 @@ class AgentSelectionPolicy:
 
         # Simple keywords (weight: 0.5, but reduce complexity)
         simple_patterns = [
-            "fix", "bug", "typo", "comment", "readme", "doc",
-            "update", "change", "modify", "add.*field", "remove.*field"
+            "fix",
+            "bug",
+            "typo",
+            "comment",
+            "readme",
+            "doc",
+            "update",
+            "change",
+            "modify",
+            "add.*field",
+            "remove.*field",
         ]
         for pattern in simple_patterns:
             if pattern in desc_lower:
@@ -358,9 +416,19 @@ class AgentSelectionPolicy:
 
         # High complexity technologies
         high_complexity_tech = [
-            "kubernetes", "docker.*compose", "microservices", "graphql",
-            "blockchain", "machine.*learning", "ai", "neural", "tensorflow",
-            "pytorch", "cuda", "gpu", "distributed.*computing"
+            "kubernetes",
+            "docker.*compose",
+            "microservices",
+            "graphql",
+            "blockchain",
+            "machine.*learning",
+            "ai",
+            "neural",
+            "tensorflow",
+            "pytorch",
+            "cuda",
+            "gpu",
+            "distributed.*computing",
         ]
         for tech in high_complexity_tech:
             if tech in desc_lower:
@@ -368,9 +436,20 @@ class AgentSelectionPolicy:
 
         # Medium complexity technologies
         medium_complexity_tech = [
-            "react", "vue", "angular", "typescript", "webpack",
-            "database", "sql", "nosql", "redis", "mongodb",
-            "authentication", "oauth", "jwt", "encryption"
+            "react",
+            "vue",
+            "angular",
+            "typescript",
+            "webpack",
+            "database",
+            "sql",
+            "nosql",
+            "redis",
+            "mongodb",
+            "authentication",
+            "oauth",
+            "jwt",
+            "encryption",
         ]
         for tech in medium_complexity_tech:
             if tech in desc_lower:
@@ -385,9 +464,14 @@ class AgentSelectionPolicy:
 
         # Broad scope indicators
         broad_patterns = [
-            "all.*files", "entire.*project", "whole.*system",
-            "every.*component", "all.*modules", "system.*wide",
-            "across.*application", "end.*to.*end"
+            "all.*files",
+            "entire.*project",
+            "whole.*system",
+            "every.*component",
+            "all.*modules",
+            "system.*wide",
+            "across.*application",
+            "end.*to.*end",
         ]
         for pattern in broad_patterns:
             if pattern in desc_lower:
@@ -395,8 +479,11 @@ class AgentSelectionPolicy:
 
         # Medium scope indicators
         medium_patterns = [
-            "multiple.*files", "several.*components", "various.*modules",
-            "different.*parts", "several.*areas"
+            "multiple.*files",
+            "several.*components",
+            "various.*modules",
+            "different.*parts",
+            "several.*areas",
         ]
         for pattern in medium_patterns:
             if pattern in desc_lower:
@@ -408,9 +495,16 @@ class AgentSelectionPolicy:
     def _requires_plan_approval(cls, desc_lower: str) -> bool:
         """Determine if task requires plan approval."""
         approval_keywords = [
-            "approval", "review", "architectural", "design.*review",
-            "stakeholder", "business.*requirements", "critical",
-            "high.*impact", "breaking.*changes", "migration"
+            "approval",
+            "review",
+            "architectural",
+            "design.*review",
+            "stakeholder",
+            "business.*requirements",
+            "critical",
+            "high.*impact",
+            "breaking.*changes",
+            "migration",
         ]
 
         # Check for explicit approval requests
@@ -419,8 +513,12 @@ class AgentSelectionPolicy:
 
         # Check for high-risk patterns
         risk_patterns = [
-            "delete.*data", "drop.*table", "remove.*feature",
-            "breaking.*change", "major.*version", "api.*change"
+            "delete.*data",
+            "drop.*table",
+            "remove.*feature",
+            "breaking.*change",
+            "major.*version",
+            "api.*change",
         ]
 
         return any(pattern in desc_lower for pattern in risk_patterns)
@@ -431,15 +529,23 @@ class AgentSelectionPolicy:
         base_context = 1000  # Default
 
         # Large context indicators
-        if any(kw in desc_lower for kw in ["architecture", "system", "refactor", "migration"]):
+        if any(
+            kw in desc_lower
+            for kw in ["architecture", "system", "refactor", "migration"]
+        ):
             base_context = 50000  # Full codebase
 
         # Medium context indicators
-        elif any(kw in desc_lower for kw in ["feature", "module", "integration", "multiple.*files"]):
+        elif any(
+            kw in desc_lower
+            for kw in ["feature", "module", "integration", "multiple.*files"]
+        ):
             base_context = 10000
 
         # Small context indicators
-        elif any(kw in desc_lower for kw in ["fix", "typo", "single.*file", "one.*file"]):
+        elif any(
+            kw in desc_lower for kw in ["fix", "typo", "single.*file", "one.*file"]
+        ):
             base_context = 500
 
         return base_context

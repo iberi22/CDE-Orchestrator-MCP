@@ -2,7 +2,7 @@
 <#
 .SYNOPSIS
     SEMANA 2 - Three-Agent Parallel Orchestration Script
-    
+
 .DESCRIPTION
     Launches Gemini, Codex, and Qwen agents in parallel headless mode
     to complete 3 independent governance remediation tasks.
@@ -70,41 +70,41 @@ $launchTime = Get-Date
 foreach ($agentName in ("GEMINI", "CODEX", "QWEN")) {
     $taskFile = $agents[$agentName]["TaskFile"]
     $prompt = $agents[$agentName]["Prompt"]
-    
+
     # Read task file content
     if (-not (Test-Path $taskFile)) {
         Write-Host "❌ Task file not found: $taskFile" -ForegroundColor Red
         continue
     }
-    
+
     $taskContent = Get-Content $taskFile -Raw
-    
+
     # Create combined prompt with task file
     $fullPrompt = $prompt + "`n`n--- TASK INSTRUCTIONS (from file) ---`n`n" + $taskContent
-    
+
     # Session file for tracking
     $sessionFile = "$resultsDir/$($agentName.ToLower())-session-$(Get-Date -Format 'yyyyMMdd-HHmmss').txt"
     $sessionFiles[$agentName] = $sessionFile
-    
+
     Write-Host "🔧 $agentName Agent:" -ForegroundColor Cyan
     Write-Host "   Task: SEMANA2-$agentName"
     Write-Host "   Priority: $($agents[$agentName]['Priority'])"
     Write-Host "   Session: $sessionFile"
     Write-Host "   Status: LAUNCHING..."
-    
+
     # Launch gemini CLI in background
     # Note: Using Gemini CLI with prompt
     $jobParams = @{
         ScriptBlock = {
             param($agent, $fullPrompt, $sessionFile)
-            
+
             try {
                 # Call gemini CLI with the full prompt
                 $output = gemini "$fullPrompt" 2>&1
-                
+
                 # Save output to session file
                 $output | Out-File $sessionFile -Encoding UTF8 -Append
-                
+
                 Write-Host "✅ $agent completed"
                 return @{ Agent = $agent; Status = "COMPLETED"; Output = $output }
             } catch {
@@ -116,14 +116,14 @@ foreach ($agentName in ("GEMINI", "CODEX", "QWEN")) {
         }
         ArgumentList = ($agentName, $fullPrompt, $sessionFile)
     }
-    
+
     # Start job
     $job = Start-Job @jobParams
     $jobIds[$agentName] = $job.Id
-    
+
     Write-Host "   Job ID: $($job.Id)"
     Write-Host "   Status: QUEUED`n"
-    
+
     # Small delay between launches
     Start-Sleep -Seconds 2
 }
@@ -144,7 +144,7 @@ while ($completedCount -lt 3) {
     foreach ($agentName in ("GEMINI", "CODEX", "QWEN")) {
         $jobId = $jobIds[$agentName]
         $job = Get-Job -Id $jobId
-        
+
         if ($job.State -eq "Completed") {
             if ($job.HasMoreData) {
                 $result = Receive-Job -Job $job
@@ -156,14 +156,14 @@ while ($completedCount -lt 3) {
             $completedCount++
         }
     }
-    
+
     # Check timeout
     $elapsed = (Get-Date) - $monitorStart
     if ($elapsed.TotalSeconds -gt $TimeoutSeconds) {
         Write-Host "`n⚠️  TIMEOUT reached after $($elapsed.TotalSeconds) seconds" -ForegroundColor Yellow
         break
     }
-    
+
     # Wait before next check
     Start-Sleep -Seconds 5
 }
@@ -183,18 +183,18 @@ foreach ($agentName in ("GEMINI", "CODEX", "QWEN")) {
     $jobId = $jobIds[$agentName]
     $job = Get-Job -Id $jobId
     $sessionFile = $sessionFiles[$agentName]
-    
+
     $status = $job.State
     $icon = if ($status -eq "Completed") { "✅" } elseif ($status -eq "Failed") { "❌" } else { "⏸️ " }
-    
+
     Write-Host "$icon $agentName        | Status: $status | Job: $jobId"
-    
+
     if ($status -eq "Completed") {
         $successCount++
     } else {
         $failureCount++
     }
-    
+
     if (Test-Path $sessionFile) {
         Write-Host "    Session: $sessionFile"
     }

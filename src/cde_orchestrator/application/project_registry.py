@@ -13,11 +13,11 @@ Features:
     - Context isolation per project
 """
 
-import logging
-from pathlib import Path
-from typing import List, Dict, Any, Optional, Set
-import subprocess
 import json
+import logging
+import subprocess
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
 
 from ..domain.entities import Project, ProjectId, ProjectStatus
 from ..domain.ports import IProjectRepository

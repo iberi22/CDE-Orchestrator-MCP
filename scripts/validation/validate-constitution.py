@@ -14,14 +14,17 @@ Usage:
 import sys
 from pathlib import Path
 
+
 # ANSI colors for output
 class Colors:
-    GREEN = '\033[92m'
-    RED = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
+    GREEN = "\033[92m"
+    RED = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+
 
 CONSTITUTION_PATH = Path("memory/constitution.md")
+
 
 def validate_constitution_exists() -> bool:
     """Check if the constitution file exists."""
@@ -32,8 +35,11 @@ def validate_constitution_exists() -> bool:
         print("  - Please create this file and define the project's core principles.")
         return False
 
-    print(f"{Colors.GREEN}[PASS] Project constitution found at {CONSTITUTION_PATH}{Colors.ENDC}")
+    print(
+        f"{Colors.GREEN}[PASS] Project constitution found at {CONSTITUTION_PATH}{Colors.ENDC}"
+    )
     return True
+
 
 def main() -> int:
     """Main validation function."""
@@ -48,8 +54,11 @@ def main() -> int:
     # - Parse the constitution file for key principles.
     # - Validate other documents against these principles.
 
-    print(f"\n{Colors.GREEN}{Colors.BOLD}Constitution validation successful.{Colors.ENDC}\n")
+    print(
+        f"\n{Colors.GREEN}{Colors.BOLD}Constitution validation successful.{Colors.ENDC}\n"
+    )
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -10,20 +10,16 @@ This module contains adapters for various AI coding agents:
 All adapters implement the ICodeExecutor port interface.
 """
 
-from .jules_async_adapter import JulesAsyncAdapter, ExecutionResult
 from .agent_selection_policy import (
+    AgentCapabilities,
+    AgentCapability,
     AgentSelectionPolicy,
     AgentType,
     TaskComplexity,
-    AgentCapabilities,
-    AgentCapability,
 )
-from .multi_agent_orchestrator import MultiAgentOrchestrator, AgentRegistry
-from .code_cli_adapters import (
-    CopilotCLIAdapter,
-    GeminiCLIAdapter,
-    QwenCLIAdapter,
-)
+from .code_cli_adapters import CopilotCLIAdapter, GeminiCLIAdapter, QwenCLIAdapter
+from .jules_async_adapter import ExecutionResult, JulesAsyncAdapter
+from .multi_agent_orchestrator import AgentRegistry, MultiAgentOrchestrator
 
 __all__ = [
     # Jules Adapter

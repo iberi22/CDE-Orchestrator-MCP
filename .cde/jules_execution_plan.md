@@ -1,3 +1,12 @@
+---
+title: "Jules Execution Plan"
+description: "CDE Orchestrator MCP - Jules Parallel Execution Plan"
+type: "task"
+status: "active"
+created: "2025-11-07"
+updated: "2025-11-07"
+author: "Gemini-Agent-1"
+---
 # 🚀 CDE Orchestrator MCP - Jules Parallel Execution Plan
 
 **Fecha:** 5 de noviembre de 2025

@@ -13,11 +13,11 @@ llm_summary: "Normalize 28 filenames (README.md→readme.md, SKILL.md→skill.md
 
 ## OBJECTIVE
 
-**Agent**: Codex  
-**Task**: Filename normalization + missing date fields in agent-docs/  
-**Files Affected**: 28 files  
-**Estimated Time**: 15-20 minutes  
-**Complexity**: Low-Medium  
+**Agent**: Codex
+**Task**: Filename normalization + missing date fields in agent-docs/
+**Files Affected**: 28 files
+**Estimated Time**: 15-20 minutes
+**Complexity**: Low-Medium
 
 ---
 
@@ -127,6 +127,6 @@ Then output: `✅ CODEX TASK 2 COMPLETE`
 
 ---
 
-**Parallel**: Can start AFTER Gemini starts (NOT dependent on Gemini completion)  
-**Status**: READY FOR EXECUTION  
+**Parallel**: Can start AFTER Gemini starts (NOT dependent on Gemini completion)
+**Status**: READY FOR EXECUTION
 **Priority**: 🟡 HIGH
