@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Performance Dashboard</title>
+    <script src="chart.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 1rem;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>MCP Performance Dashboard</h1>
+        <button id="refresh-button">Refresh</button>
+    </div>
+
+    <h2>Tool Execution Timeline</h2>
+    <div class="chart-container">
+        <canvas id="timeline-chart"></canvas>
+    </div>
+
+    <h2>Success/Failure Ratio</h2>
+    <div class="chart-container" style="height: 200px; width: 200px;">
+        <canvas id="ratio-chart"></canvas>
+    </div>
+
+    <h2>Latency Histogram</h2>
+    <div class="chart-container">
+        <canvas id="latency-chart"></canvas>
+    </div>
+
+    <h2>Top 5 Slowest Tools</h2>
+    <div class="chart-container">
+        <canvas id="slowest-chart"></canvas>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

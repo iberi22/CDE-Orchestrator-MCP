@@ -1,9 +1,13 @@
 import * as vscode from 'vscode';
 import * as http from 'http';
+import { HistoryDataProvider, Execution } from './treeView';
+import { OutputPanel } from './outputPanel';
 
 let statusBarItem: vscode.StatusBarItem;
 let hideTimer: NodeJS.Timeout | null = null;
 let httpServer: http.Server | null = null;
+let historyDataProvider: HistoryDataProvider;
+let outputPanel: OutputPanel;
 
 interface ProgressEvent {
     server: string;
@@ -11,6 +15,7 @@ interface ProgressEvent {
     percentage: number;
     elapsed: number;
     message: string;
+    status?: 'success' | 'failure';
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -23,6 +28,9 @@ export function activate(context: vscode.ExtensionContext) {
         return;
     }
 
+    // Initialize OutputPanel
+    outputPanel = new OutputPanel();
+
     // Create status bar item
     statusBarItem = vscode.window.createStatusBarItem(
         vscode.StatusBarAlignment.Right,
@@ -33,6 +41,10 @@ export function activate(context: vscode.ExtensionContext) {
     statusBarItem.tooltip = 'MCP Status Bar - Waiting for tool executions...';
     statusBarItem.show();
     context.subscriptions.push(statusBarItem);
+
+    // Create the TreeView
+    historyDataProvider = new HistoryDataProvider(context);
+    vscode.window.registerTreeDataProvider('mcp-history', historyDataProvider);
 
     // Start HTTP server to receive progress events
     startHttpServer();
@@ -66,6 +78,14 @@ function startHttpServer() {
                     const event: ProgressEvent = JSON.parse(body);
                     console.log('📊 Progress received:', event.tool, `${Math.round(event.percentage * 100)}%`);
                     updateStatusBar(event);
+
+                    // Log to OUTPUT panel
+                    outputPanel.log(
+                        event.tool,
+                        event.percentage,
+                        event.message,
+                        event.elapsed
+                    );
 
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ status: 'ok' }));
@@ -139,8 +159,18 @@ function updateStatusBar(event: ProgressEvent) {
 
     statusBarItem.show();
 
-    // Return to idle state after 5 seconds if complete
+    // Add to history when complete
     if (percentage === 100) {
+        const execution = new Execution(
+            event.tool,
+            event.server,
+            event.status || 'success',
+            new Date(),
+            event.message
+        );
+        historyDataProvider.addExecution(execution);
+
+        // Return to idle state after 5 seconds
         hideTimer = setTimeout(() => {
             console.log('⏰ Returning to idle state');
             statusBarItem.text = '$(radio-tower) MCP: Ready';

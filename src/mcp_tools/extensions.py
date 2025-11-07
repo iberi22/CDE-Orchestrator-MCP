@@ -5,11 +5,9 @@ Tools for installing and managing VS Code extensions for CDE features.
 """
 
 import json
-import os
 import subprocess
-import sys
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 from fastmcp import Context
 
@@ -18,9 +16,7 @@ from ._base import tool_handler
 
 @tool_handler
 async def cde_installMcpExtension(
-    ctx: Context,
-    extension_name: str = "mcp-status-bar",
-    force: bool = False
+    ctx: Context, extension_name: str = "mcp-status-bar", force: bool = False
 ) -> str:
     """
     Install MCP-related VS Code extension.
@@ -64,9 +60,7 @@ async def cde_installMcpExtension(
 
 
 async def _install_extension(
-    ctx: Context,
-    extension_name: str,
-    force: bool
+    ctx: Context, extension_name: str, force: bool
 ) -> Dict[str, Any]:
     """
     Internal implementation of extension installation.
@@ -81,7 +75,7 @@ async def _install_extension(
     extension_sources = {
         "mcp-status-bar": {
             "repo_path": "mcp-status-bar",
-            "description": "Real-time progress tracking in VS Code status bar"
+            "description": "Real-time progress tracking in VS Code status bar",
         }
     }
 
@@ -89,21 +83,19 @@ async def _install_extension(
         return {
             "status": "failed",
             "extension_name": extension_name,
-            "message": f"Unknown extension: {extension_name}. Available: {', '.join(extension_sources.keys())}"
+            "message": f"Unknown extension: {extension_name}. Available: {', '.join(extension_sources.keys())}",
         }
-
-    source_info = extension_sources[extension_name]
 
     # Check if extension already exists
     if extension_path.exists() and not force:
         await ctx.info(f"✅ Extension already exists at {extension_path}")
-        
+
         # Try to get extension status
         return {
             "status": "success",
             "extension_name": extension_name,
             "path": str(extension_path),
-            "message": "Extension already installed. Use force=true to reinstall."
+            "message": "Extension already installed. Use force=true to reinstall.",
         }
 
     # Installation steps
@@ -113,31 +105,33 @@ async def _install_extension(
         # Check if Node.js is available
         try:
             subprocess.run(
-                ["node", "--version"],
-                capture_output=True,
-                check=True,
-                timeout=5
+                ["node", "--version"], capture_output=True, check=True, timeout=5
             )
-        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+        except (
+            subprocess.CalledProcessError,
+            FileNotFoundError,
+            subprocess.TimeoutExpired,
+        ):
             return {
                 "status": "failed",
                 "extension_name": extension_name,
-                "message": "Node.js not found. Please install Node.js to use this extension."
+                "message": "Node.js not found. Please install Node.js to use this extension.",
             }
 
         # Check if npm is available
         try:
             subprocess.run(
-                ["npm", "--version"],
-                capture_output=True,
-                check=True,
-                timeout=5
+                ["npm", "--version"], capture_output=True, check=True, timeout=5
             )
-        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+        except (
+            subprocess.CalledProcessError,
+            FileNotFoundError,
+            subprocess.TimeoutExpired,
+        ):
             return {
                 "status": "failed",
                 "extension_name": extension_name,
-                "message": "npm not found. Please install npm to use this extension."
+                "message": "npm not found. Please install npm to use this extension.",
             }
 
         # Check if extension source directory exists
@@ -146,55 +140,52 @@ async def _install_extension(
                 "status": "warning",
                 "extension_name": extension_name,
                 "path": str(extension_path),
-                "message": f"Extension source not found at {extension_path}. Please ensure mcp-status-bar/ directory exists."
+                "message": f"Extension source not found at {extension_path}. Please ensure mcp-status-bar/ directory exists.",
             }
 
         # Install dependencies
-        await ctx.info(f"📚 Installing dependencies...")
+        await ctx.info("📚 Installing dependencies...")
         result = subprocess.run(
-            ["npm", "install"],
-            cwd=str(extension_path),
-            capture_output=True,
-            timeout=60
+            ["npm", "install"], cwd=str(extension_path), capture_output=True, timeout=60
         )
 
         if result.returncode != 0:
             return {
                 "status": "failed",
                 "extension_name": extension_name,
-                "message": f"npm install failed: {result.stderr.decode()}"
+                "message": f"npm install failed: {result.stderr.decode()}",
             }
 
         # Compile TypeScript
-        await ctx.info(f"🔨 Compiling TypeScript...")
+        await ctx.info("🔨 Compiling TypeScript...")
         result = subprocess.run(
             ["npm", "run", "compile"],
             cwd=str(extension_path),
             capture_output=True,
-            timeout=60
+            timeout=60,
         )
 
         if result.returncode != 0:
             return {
                 "status": "failed",
                 "extension_name": extension_name,
-                "message": f"TypeScript compilation failed: {result.stderr.decode()}"
+                "message": f"TypeScript compilation failed: {result.stderr.decode()}",
             }
 
         # Package extension
-        await ctx.info(f"📦 Packaging extension...")
+        await ctx.info("📦 Packaging extension...")
         result = subprocess.run(
             ["npx", "vsce", "package", "--allow-star-activation"],
             cwd=str(extension_path),
             capture_output=True,
-            timeout=60
+            timeout=60,
         )
 
         if result.returncode != 0:
             return {
                 "status": "failed",
                 "extension_name": extension_name,
-                "message": f"vsce package failed: {result.stderr.decode()}"
+                "message": f"vsce package failed: {result.stderr.decode()}",
             }
 
         # Find .vsix file
@@ -203,18 +194,18 @@ async def _install_extension(
             return {
                 "status": "failed",
                 "extension_name": extension_name,
-                "message": "No .vsix file generated"
+                "message": "No .vsix file generated",
             }
 
         vsix_file = vsix_files[-1]  # Latest file
         await ctx.info(f"📦 Generated: {vsix_file.name}")
 
         # Install extension in VS Code
-        await ctx.info(f"🔧 Installing in VS Code...")
+        await ctx.info("🔧 Installing in VS Code...")
         result = subprocess.run(
             ["code", "--install-extension", str(vsix_file), "--force"],
             capture_output=True,
-            timeout=60
+            timeout=60,
         )
 
         if result.returncode != 0:
@@ -222,27 +213,27 @@ async def _install_extension(
                 "status": "warning",
                 "extension_name": extension_name,
                 "path": str(extension_path),
-                "message": f"Extension packaged but VS Code installation may need manual verification. VSIX: {vsix_file.name}"
+                "message": f"Extension packaged but VS Code installation may need manual verification. VSIX: {vsix_file.name}",
             }
 
-        await ctx.info(f"✅ Extension installed successfully!")
+        await ctx.info("✅ Extension installed successfully!")
 
         return {
             "status": "success",
             "extension_name": extension_name,
             "path": str(extension_path),
-            "message": f"Extension {extension_name} installed and activated in VS Code"
+            "message": f"Extension {extension_name} installed and activated in VS Code",
         }
 
     except subprocess.TimeoutExpired as e:
         return {
             "status": "failed",
             "extension_name": extension_name,
-            "message": f"Installation timeout: {str(e)}"
+            "message": f"Installation timeout: {str(e)}",
         }
     except Exception as e:
         return {
             "status": "failed",
             "extension_name": extension_name,
-            "message": f"Installation error: {str(e)}"
+            "message": f"Installation error: {str(e)}",
         }

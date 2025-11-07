@@ -97,17 +97,17 @@ Create dedicated OUTPUT channel showing:
 // Output channel management
 class ToolOutputPanel {
   private channel: vscode.OutputChannel;
-  
+
   constructor() {
     this.channel = vscode.window.createOutputChannel("MCP Tools");
   }
-  
+
   logExecution(tool: string, percentage: number, message: string) {
     const timestamp = new Date().toISOString();
     const line = `[${timestamp}] ${tool}: ${Math.round(percentage * 100)}% - ${message}`;
     this.channel.appendLine(line);
   }
-  
+
   showMetrics(metrics: ToolMetrics) {
     this.channel.appendLine("=== PERFORMANCE SUMMARY ===");
     this.channel.appendLine(`Avg Execution: ${metrics.avgDuration}s`);
@@ -167,7 +167,7 @@ class DashboardProvider implements vscode.WebviewViewProvider {
       }
     });
   }
-  
+
   private getHtmlContent(): string {
     // Return HTML with Chart.js for visualization
   }
@@ -222,13 +222,13 @@ class ToolMetricsStore {
     avgDuration: 0,
     durations: []
   };
-  
+
   addExecution(execution: ToolExecution) {
     this.history.push(execution);
     this.updateMetrics();
     this.notifyListeners(); // Trigger UI updates
   }
-  
+
   private updateMetrics() {
     // Recalculate success rate, avg duration, etc.
   }
