@@ -1,0 +1,53 @@
+{
+  "timestamp": "2025-11-06 23:50:15",
+  "total_tests": 7,
+  "passed_tests": 6,
+  "success_rate_pct": 85.7,
+  "results": [
+    {
+      "test": "batching_reduces_calls",
+      "batch_size": 10,
+      "calls": 103,
+      "passed": false
+    },
+    {
+      "test": "batching_reduces_calls",
+      "batch_size": 50,
+      "calls": 23,
+      "passed": true
+    },
+    {
+      "test": "batching_reduces_calls",
+      "batch_size": 100,
+      "calls": 13,
+      "passed": true
+    },
+    {
+      "test": "progress_messages_include_time",
+      "total_messages": 5,
+      "all_have_time": true,
+      "passed": true
+    },
+    {
+      "test": "http_failure_doesnt_block",
+      "http_failures": 5,
+      "execution_time_s": 0.25,
+      "passed": true
+    },
+    {
+      "test": "large_workload_performance",
+      "files_scanned": 1500,
+      "http_calls": 17,
+      "execution_time_s": 0.15,
+      "batching_efficiency_pct": 58.8,
+      "passed": true
+    },
+    {
+      "test": "concurrent_tool_progress",
+      "tools": 3,
+      "total_events": 15,
+      "execution_time_s": 0.0,
+      "passed": true
+    }
+  ]
+}
