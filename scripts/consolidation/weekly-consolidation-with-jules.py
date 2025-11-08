@@ -339,157 +339,156 @@ class WeeklyConsolidator:
     def generate_consolidation_prompt(
         self, week_label: str, file_paths: list[str], commit_range: Optional[str]
     ) -> str:
-        """Generate enhanced prompt - Jules reads files from repo with detailed output requirements."""
+        """Generate enhanced prompt - Jules reads files from repo with detailed output requirements (English only)."""
         # Build file list as numbered bullets for clarity
         file_list_text = "\n".join(
             f"{i+1}. `{path}`" for i, path in enumerate(file_paths)
         )
 
-        prompt = f"""🎯 TAREA: Consolidar documentación semanal {week_label}
+        prompt = f"""🎯 TASK: Consolidate Weekly Documentation {week_label}
 
-## 📋 ARCHIVOS A PROCESAR ({len(file_paths)} reportes de ejecución/sesión):
+## 📋 FILES TO PROCESS ({len(file_paths)} execution/session reports):
 {file_list_text}
 
-## 🔗 CONTEXTO GIT:
-- Rango de commits: {commit_range if commit_range else 'N/A'}
-- Tu acceso: Repositorio completo (puedes leer cualquier archivo)
-- Tipo de commits: Usa 'git log' para obtener detalles del rango {commit_range if commit_range else '[rango no disponible]'}
+## 🔗 GIT CONTEXT:
+- Commit range: {commit_range if commit_range else 'N/A'}
+- Your access: Full repository (can read any file)
+- Commit type: Use 'git log' to get details for range {commit_range if commit_range else '[range not available]'}
 
-## 🔍 TU TAREA (Paso a Paso):
+## 🔍 YOUR TASK (Step by Step):
 
-1. **Lectura de Archivos Fuente**
-   - Lee TODOS los {len(file_paths)} archivos listados arriba
-   - Extrae: logros clave, features nuevas, fixes críticos, decisiones técnicas
-   - Nota: Los archivos están en agent-docs/execution/ y agent-docs/sessions/
+1. **Read Source Files**
+   - Read ALL {len(file_paths)} files listed above
+   - Extract: key achievements, new features, critical fixes, technical decisions
+   - Note: Files are in agent-docs/execution/ and agent-docs/sessions/
 
-2. **Análisis de Commit Range**
-   - Si el rango {commit_range if commit_range else '[N/A]'} está disponible, analiza esos commits
-   - Extrae: títulos, cambios de arquitectura, impacto en el sistema
-   - Correlaciona: ¿Qué commits generaron qué documentos?
+2. **Analyze Commit Range**
+   - If range {commit_range if commit_range else '[N/A]'} is available, analyze those commits
+   - Extract: titles, architecture changes, system impact
+   - Correlate: Which commits generated which documents?
 
-3. **Categorización Inteligente**
-   - **Category 1: UX & User Experience**: Mejoras en interfaces, feedback, usabilidad
-   - **Category 2: Performance & Optimization**: Velocidad, memoria, escalabilidad (incluye métricas de mejora)
-   - **Category 3: Architecture & Technical Debt**: Refactorings, cleanup, patrones hexagonales
-   - **Category 4: Features & New Capabilities**: Nuevas funcionalidades, extensiones
+3. **Intelligent Categorization**
+   - **Category 1: UX & User Experience**: Interface improvements, feedback, usability
+   - **Category 2: Performance & Optimization**: Speed, memory, scalability (include improvement metrics)
+   - **Category 3: Architecture & Technical Debt**: Refactorings, cleanup, hexagonal patterns
+   - **Category 4: Features & New Capabilities**: New features, extensions
    - **Category 5: Testing & Stability**: Test coverage, bug fixes, quality gates
    - **Category 6: Documentation & Governance**: Specs, governance, process improvements
 
-4. **Estructuración del Output**
-   - Agrupa logros por categoría (arriba)
-   - Para cada logro: Incluye contexto técnico, impacto, métricas de éxito
+4. **Output Structuring**
+   - Group achievements by category (above)
+   - For each achievement: Include technical context, impact, success metrics
 
-## 📄 SALIDA REQUERIDA:
+## 📄 REQUIRED OUTPUT:
 
-Archivo: `agent-docs/execution/WEEKLY-CONSOLIDATION-{week_label}.md`
+File: `agent-docs/execution/WEEKLY-CONSOLIDATION-{week_label}.md`
 
-**FORMATO EXACTO (copiar estructura):**
+**EXACT FORMAT (copy this structure):**
 
 ```markdown
 ---
 title: "Weekly Consolidation {week_label}"
-description: "Consolidación de documentación de la semana {week_label} de 2025. Resumen de {len(file_paths)} reportes de ejecución."
+description: "Weekly consolidation of execution documentation for {week_label}. Summary of {len(file_paths)} execution reports."
 type: "execution"
 status: "active"
 created: "{datetime.now().strftime('%Y-%m-%d')}"
 updated: "{datetime.now().strftime('%Y-%m-%d')}"
 author: "Jules AI Agent"
 llm_summary: |
-  Resumen ejecutivo de la semana: [2 líneas máximo con hechos clave y métricas]
+  Executive week summary: [2 lines max with key facts and metrics]
 ---
-
-# Weekly Consolidation: {week_label}
 
 ## Executive Summary
 
-[Párrafo 1: Visión general de la semana - qué se logró en términos de negocio/producto]
-[Párrafo 2: Impacto técnico - mejoras de rendimiento, arquitectura, estabilidad]
-[Párrafo 3: Hitos alcanzados - completitud, bloques resueltos, new capabilities]
+[Paragraph 1: Week overview - what was achieved in business/product terms]
+[Paragraph 2: Technical impact - performance improvements, architecture, stability]
+[Paragraph 3: Milestones achieved - completeness, blockers resolved, new capabilities]
 
 ## 📊 Key Metrics & Impact
-| Métrica | Valor | Categoría |
-|---------|-------|----------|
-| Commits Procesados | [N] | Git |
-| Reportes Consolidados | {len(file_paths)} | Documentation |
-| [Métrica de Performance] | [Valor] | Performance |
-| [Métrica de Features] | [Valor] | Features |
+| Metric | Value | Category |
+|--------|-------|----------|
+| Commits Processed | [N] | Git |
+| Reports Consolidated | {len(file_paths)} | Documentation |
+| [Performance Metric] | [Value] | Performance |
+| [Feature Metric] | [Value] | Features |
 
 ## 🎯 Key Accomplishments by Category
 
 ### 1️⃣ UX & User Experience
-- **[Título logro]**: [Descripción técnica + impacto usuario]
-- **[Título logro]**: [Descripción + metrics]
+- **[Achievement Title]**: [Technical description + user impact]
+- **[Achievement Title]**: [Description + metrics]
 
 ### 2️⃣ Performance & Optimization
-- **[Título logro]**: [Descripción + speedup/memory/optimization metrics]
-- **[Título logro]**: [Descripción + performance impact]
+- **[Achievement Title]**: [Description + speedup/memory/optimization metrics]
+- **[Achievement Title]**: [Description + performance impact]
 
 ### 3️⃣ Architecture & Technical Debt
-- **[Título logro]**: [Descripción del refactoring + beneficio]
-- **[Título logro]**: [Descripción + code cleanup metrics]
+- **[Achievement Title]**: [Refactoring description + benefit]
+- **[Achievement Title]**: [Description + code cleanup metrics]
 
 ### 4️⃣ Features & New Capabilities
-- **[Título logro]**: [Descripción técnica + capacidades habilitadas]
-- **[Título logro]**: [Descripción + new functionality]
+- **[Achievement Title]**: [Technical description + enabled capabilities]
+- **[Achievement Title]**: [Description + new functionality]
 
 ### 5️⃣ Testing & Stability
-- **[Título logro]**: [Descripción de fix/test + coverage improvement]
-- **[Título logro]**: [Descripción + quality metrics]
+- **[Achievement Title]**: [Fix/test description + coverage improvement]
+- **[Achievement Title]**: [Description + quality metrics]
 
 ### 6️⃣ Documentation & Governance
-- **[Título logro]**: [Descripción de mejora governance]
-- **[Título logro]**: [Descripción de spec/architecture doc]
+- **[Achievement Title]**: [Governance improvement description]
+- **[Achievement Title]**: [Spec/architecture doc description]
 
 ## 🔧 Technical Deep Dive
 
 ### [Category 1: Main Technical Area]
 - **Component**: `path/to/component`
-- **Change**: Descripción técnica del cambio
-- **Before/After**: Comparación de estado anterior vs nuevo
-- **Impact**: Impacto cuantificable
+- **Change**: Technical description of change
+- **Before/After**: Comparison of previous vs new state
+- **Impact**: Quantifiable impact
 
 ### [Category 2: Second Technical Area]
 - **Component**: `path/to/component`
-- **Change**: Descripción técnica
-- **Before/After**: Comparación
-- **Impact**: Impacto
+- **Change**: Technical description
+- **Before/After**: Comparison
+- **Impact**: Quantifiable impact
 
 ## 📁 Source Files Analyzed
-Estos {len(file_paths)} archivos fueron procesados:
+These {len(file_paths)} files were processed:
 {file_list_text.replace(chr(10), chr(10) + "- ")}
 
 ## 🔗 Related Git Activity
 - **Commit Range**: {commit_range if commit_range else 'N/A'}
-- **Commits in Range**: [Usa 'git log --oneline {commit_range}' si está disponible]
-- **Files Modified**: [Estadística de archivos cambiados]
+- **Commits in Range**: [Use 'git log --oneline {commit_range}' if available]
+- **Files Modified**: [Statistics of changed files]
 
 ## ✅ Week Status
-- **Completeness**: [Porcentaje de trabajo planeado completado]
-- **Blockers Resolved**: [Número de bloques técnicos resueltos]
-- **New Capabilities**: [Número de features nuevas]
-- **Code Quality**: [Cambios en test coverage, debt reduction, etc.]
+- **Completeness**: [Percentage of planned work completed]
+- **Blockers Resolved**: [Number of technical blockers resolved]
+- **New Capabilities**: [Number of new features]
+- **Code Quality**: [Changes in test coverage, debt reduction, etc.]
 
 ## 📌 Next Steps & Recommendations
-- [Basado en los documentos revisados, qué sigue?]
-- [Áreas de mejora identificadas]
-- [Riesgos técnicos o deuda que monitorear]
+- [Based on reviewed documents, what's next?]
+- [Identified improvement areas]
+- [Technical risks or debt to monitor]
 ```
 
-## ⚠️ INSTRUCCIONES CRÍTICAS:
+## ⚠️ CRITICAL INSTRUCTIONS:
 
-**IMPORTANTE**: Lee los archivos directamente del repositorio usando acceso a filesystem. NO esperes que el contenido esté en este prompt.
+**IMPORTANT**: Read files directly from repository using filesystem access. Do NOT expect content to be in this prompt.
 
-**Validación**:
-- ✅ Incluye metadata YAML con TODOS los campos (title, type, status, created, updated, author, llm_summary)
-- ✅ Agrupa por categorías (UX, Performance, Architecture, Features, Testing, Governance)
-- ✅ Incluye tabla de métricas
-- ✅ Lista explícitamente los {len(file_paths)} archivos procesados
-- ✅ Relaciona con commits del rango {commit_range if commit_range else '[N/A]'}
-- ✅ Proporciona contexto técnico detallado (no solo resumen vago)
-- ✅ Incluye números cuantificables (375x, 180 tests, etc.)
+**Validation**:
+- ✅ Include YAML metadata with ALL fields (title, type, status, created, updated, author, llm_summary)
+- ✅ Group by categories (UX, Performance, Architecture, Features, Testing, Governance)
+- ✅ Include metrics table
+- ✅ Explicitly list {len(file_paths)} files processed
+- ✅ Relate to commits in range {commit_range if commit_range else '[N/A]'}
+- ✅ Provide detailed technical context (not just vague summary)
+- ✅ Include quantifiable numbers (375x, 180 tests, etc.)
 
-**Output Path**: DEBE ser `agent-docs/execution/WEEKLY-CONSOLIDATION-{week_label}.md`
-**Output Format**: Markdown con YAML frontmatter (ver ejemplo arriba)
+**Output Path**: MUST be `agent-docs/execution/WEEKLY-CONSOLIDATION-{week_label}.md`
+**Output Format**: Markdown with YAML frontmatter (see example above)
+**Output Language**: ENGLISH ONLY - all documentation in English
 """
         return prompt
 
