@@ -1,7 +1,7 @@
 # src/cde_orchestrator/application/onboarding/publishing_use_case.py
 import re
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List
 
 # Governance: Root-level .md files allowed (exceptions)
 ROOT_ALLOWED_MD_FILES = {
