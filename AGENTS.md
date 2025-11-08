@@ -859,6 +859,19 @@ Path("agent-docs/sessions/session-phase3c-complete-2025-11-04.md").write_text(su
 # AND include YAML frontmatter with required fields
 ```
 
+**RECENT VIOLATIONS (DO NOT REPEAT)**:
+```python
+# ❌ WRONG: These were created in root (now corrected)
+Path("JULIUS_IMPLEMENTATION_SUMMARY.md")  # BLOCKED
+Path("JULIUS_QUICK_START.md")             # BLOCKED
+Path("JULIUS_ACTIVATION_GUIDE.md")        # BLOCKED
+
+# ✅ CORRECT: Now in agent-docs/execution/ with proper naming
+Path("agent-docs/execution/EXECUTIONS-julius-implementation-summary-2025-11-08-0012.md")
+Path("agent-docs/execution/EXECUTIONS-julius-quick-start-2025-11-08-0012.md")
+Path("agent-docs/execution/EXECUTIONS-julius-activation-guide-2025-11-08-0012.md")
+```
+
 ------
 
 ## 📋 Documentation Governance (CRITICAL)

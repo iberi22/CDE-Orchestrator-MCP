@@ -69,6 +69,9 @@ DISALLOWED_ROOT_PATTERNS = [
     r"^RESUMEN.*\.md$",
     r"^SPRINT.*\.md$",
     r"^MEETING.*\.md$",
+    r"^JULIUS.*\.md$",  # Block any JULIUS_*.md in root
+    r"^WEEK-.*\.md$",  # Block WEEK-*.md in root (should be in agent-docs/execution/)
+    r"^TEST.*\.md$",  # Block TEST_*.md in root
 ]
 
 VALID_TYPES = {

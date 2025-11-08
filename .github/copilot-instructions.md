@@ -22,7 +22,8 @@ description: 'AI agent guidelines for CDE Orchestrator MCP with token optimizati
 ❌ BLOCKED BY PRE-COMMIT:
 REPORT_*.md          SESSION_*.md         SUMMARY_*.md
 RESUMEN_*.md         TEST_*.md            PHASE_*.md
-EXECUTION_*.md       FEEDBACK_*.md        Any other .md
+EXECUTION_*.md       FEEDBACK_*.md        JULIUS_*.md
+WEEK-*.md            Any other .md
 ```
 
 ✅ **ONLY 5 APPROVED ROOT FILES**:
@@ -33,6 +34,13 @@ EXECUTION_*.md       FEEDBACK_*.md        Any other .md
 - GEMINI.md (Gemini instructions - Google standard)
 
 **Why**: Prevents documentation sprawl. Keeps root clean. Forces organized structure.
+
+**RECENT VIOLATIONS (DO NOT REPEAT)**:
+```
+❌ JULIUS_IMPLEMENTATION_SUMMARY.md → agent-docs/execution/EXECUTIONS-julius-implementation-summary-YYYY-MM-DD-HHmm.md
+❌ JULIUS_QUICK_START.md            → agent-docs/execution/EXECUTIONS-julius-quick-start-YYYY-MM-DD-HHmm.md
+❌ JULIUS_ACTIVATION_GUIDE.md       → agent-docs/execution/EXECUTIONS-julius-activation-guide-YYYY-MM-DD-HHmm.md
+```
 
 ### Rule 2: DOCUMENTATION GOES TO CORRECT LOCATION
 
@@ -73,15 +81,19 @@ author: "Your Name or Agent ID"
 - SUMMARY.md
 - NOTES.md
 - ANALYSIS.md
+- JULIUS_IMPLEMENTATION_SUMMARY.md  (recent violation)
+- JULIUS_QUICK_START.md             (recent violation)
 
 ✅ RIGHT:
 - execution-phase3c-deployment-2025-11-04.md
 - session-onboarding-complete-2025-11-04.md
 - feedback-governance-improvements-2025-11.md
 - research-async-patterns-2025-11-04.md
+- EXECUTIONS-julius-implementation-summary-2025-11-08-0012.md
+- EXECUTIONS-julius-quick-start-2025-11-08-0012.md
 ```
 
-Pattern: `<type>-<topic>-<YYYY-MM-DD>.md`
+Pattern: `<type>-<topic>-<YYYY-MM-DD>.md` or `EXECUTIONS-<topic>-<YYYY-MM-DD-HHmm>.md`
 
 ### Rule 5: TOKEN OPTIMIZATION OVER VERBOSITY
 

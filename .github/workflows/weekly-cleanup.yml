@@ -1,0 +1,81 @@
+name: Weekly Execution Cleanup & Consolidation
+
+on:
+  schedule:
+    # Runs every Sunday at 23:00 UTC
+    - cron: '0 23 * * 0'
+  workflow_dispatch:  # Manual trigger for testing
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  consolidate-and-cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for Git operations
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install dependencies
+        run: |
+          pip install requests python-dotenv pyyaml
+
+      - name: Run consolidation script
+        env:
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}  # Grok API key (free tier)
+        run: |
+          python scripts/consolidation/weekly-cleanup-with-grok.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Add new weekly summary
+          git add agent-docs/execution/WEEK-*.md
+
+          # Add updated .archive/ if any files were moved
+          git add agent-docs/execution/.archive/ || true
+
+          # Commit with conventional commits format
+          WEEK=$(python -c "from datetime import datetime; print(f'W{datetime.now().isocalendar()[1]:02d}')")
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore(docs): weekly execution cleanup 2025-${WEEK}
+
+          Consolidated execution reports from this week into WEEK-2025-${WEEK}.md
+          Moved processed files to .archive/ for historical reference
+
+          Automated by: .github/workflows/weekly-cleanup.yml
+          Generated with: Grok (xAI API)"
+
+            git push
+          fi
+
+      - name: Create summary
+        run: |
+          echo "## 📊 Weekly Cleanup Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Date**: $(date -u +"%Y-%m-%d %H:%M UTC")" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          FILES_PROCESSED=$(ls agent-docs/execution/*.md 2>/dev/null | wc -l)
+          echo "- Files processed: ${FILES_PROCESSED}" >> $GITHUB_STEP_SUMMARY
+
+          ARCHIVE_COUNT=$(ls agent-docs/execution/.archive/*.md 2>/dev/null | wc -l)
+          echo "- Files archived: ${ARCHIVE_COUNT}" >> $GITHUB_STEP_SUMMARY
+
+          WEEK=$(python -c "from datetime import datetime; print(f'{datetime.now().year}-W{datetime.now().isocalendar()[1]:02d}')")
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Created: \`agent-docs/execution/WEEK-${WEEK}.md\`" >> $GITHUB_STEP_SUMMARY

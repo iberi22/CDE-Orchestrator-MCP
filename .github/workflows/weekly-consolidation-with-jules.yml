@@ -1,0 +1,188 @@
+name: Weekly Consolidation with Jules API
+
+on:
+  schedule:
+    # Every Sunday at 23:00 UTC
+    - cron: '0 23 * * 0'
+
+  workflow_dispatch:
+    inputs:
+      week:
+        description: 'Specific week to consolidate (YYYY-WW format, or empty for current)'
+        required: false
+        default: ''
+
+env:
+  GIT_AUTHOR_NAME: "Jules Consolidator Bot"
+  GIT_AUTHOR_EMAIL: "jules@cde-orchestrator.dev"
+  GIT_COMMITTER_NAME: "Jules Consolidator Bot"
+  GIT_COMMITTER_EMAIL: "jules@cde-orchestrator.dev"
+
+jobs:
+  consolidate:
+    name: Weekly Consolidation
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for commit analysis
+
+      - name: 🐍 Setup Python 3.14
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.14'
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pyyaml
+
+      - name: 🔍 Scan execution files
+        id: scan
+        run: |
+          FILES_COUNT=$(find agent-docs/execution -name "EXECUTIONS-*.md" -type f | wc -l)
+          echo "files_count=$FILES_COUNT" >> $GITHUB_OUTPUT
+          echo "✅ Found $FILES_COUNT execution files"
+
+      - name: ⏳ Run weekly consolidation with Jules
+        id: consolidate
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+        run: |
+          python scripts/consolidation/weekly-consolidation-with-jules.py
+          echo "consolidation_status=success" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: 📊 Check consolidation results
+        id: check
+        run: |
+          WEEK_FILES=$(find agent-docs/execution -name "WEEK-*.md" -type f | wc -l)
+          ARCHIVE_FILES=$(find agent-docs/execution/.archive -type f 2>/dev/null | wc -l)
+
+          echo "week_files=$WEEK_FILES" >> $GITHUB_OUTPUT
+          echo "archive_files=$ARCHIVE_FILES" >> $GITHUB_OUTPUT
+
+          if [ $WEEK_FILES -gt 0 ]; then
+            echo "✅ Consolidation successful: $WEEK_FILES week summaries created"
+          else
+            echo "⚠️  No week summaries created"
+          fi
+
+      - name: 📝 Create summary report
+        id: summary
+        run: |
+          cat > /tmp/summary.txt <<EOF
+          # Weekly Consolidation Report
+
+          **Execution Date**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')
+
+          ## Statistics
+          - Files scanned: ${{ steps.scan.outputs.files_count }}
+          - Week summaries created: ${{ steps.check.outputs.week_files }}
+          - Files archived: ${{ steps.check.outputs.archive_files }}
+
+          ## Status
+          - Consolidation: ${{ steps.consolidate.outputs.consolidation_status || 'failed' }}
+          - Result: ${{ steps.check.outputs.week_files > 0 && 'SUCCESS' || 'PARTIAL' }}
+          EOF
+
+          cat /tmp/summary.txt
+          echo "SUMMARY<<EOF" >> $GITHUB_ENV
+          cat /tmp/summary.txt >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: 🔀 Create pull request
+        if: steps.check.outputs.week_files > 0
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: |
+            chore: Weekly execution consolidation
+
+            - Generated weekly summaries from execution reports
+            - Organized by ISO week (YYYY-WW format)
+            - Archived original reports
+            - Jules API integration
+          branch: weekly-consolidation-${{ github.run_number }}
+          title: 'chore: Weekly execution consolidation - ${{ github.run_number }}'
+          body: |
+            ## Weekly Consolidation Result
+
+            This PR consolidates weekly execution reports using Jules API.
+
+            ### Statistics
+            - Files scanned: ${{ steps.scan.outputs.files_count }}
+            - Week summaries created: ${{ steps.check.outputs.week_files }}
+            - Files archived: ${{ steps.check.outputs.archive_files }}
+
+            ### Changes
+            - ✅ New weekly summary files: `WEEK-{YYYY-WW}.md`
+            - 📦 Archived original files: `.archive/`
+            - 🔗 Commits related to each week documented
+
+            ### Process
+            1. Grouped execution files by ISO week
+            2. Called Jules API for intelligent consolidation
+            3. Awaited Jules session completion (~polling)
+            4. Generated weekly summaries
+            5. Archived original reports
+
+            **Jules Session Tracking**: See commit messages for session IDs
+
+            ---
+            *Automated by Jules Consolidation Workflow*
+          labels: |
+            documentation
+            automation
+            consolidation
+          reviewers: |
+            iberi22
+          team-reviewers: |
+            cde-team
+
+      - name: 📬 Create GitHub Actions summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY <<'EOF'
+          # Weekly Consolidation Summary
+
+          ## Results
+          - **Execution Files**: ${{ steps.scan.outputs.files_count }} scanned
+          - **Summaries Created**: ${{ steps.check.outputs.week_files }} weeks
+          - **Files Archived**: ${{ steps.check.outputs.archive_files }} reports
+          - **Status**: ${{ steps.consolidate.outputs.consolidation_status == 'success' && '✅ Success' || '⚠️ Partial' }}
+
+          ## What Happened
+          1. Scanned `agent-docs/execution/` for execution reports
+          2. Grouped files by ISO week (Monday-Sunday)
+          3. Called Jules API for intelligent consolidation
+          4. Jules analyzed reports and generated weekly summaries
+          5. Waited for Jules to complete processing
+          6. Archived original files to `.archive/`
+          7. Created pull request with consolidated results
+
+          ## Next Steps
+          1. Review the auto-generated PR
+          2. Jules AI provided intelligent consolidation summaries
+          3. Merge when ready to organize execution history by week
+
+          ## Files
+          - **New**: `WEEK-{YYYY-WW}.md` (weekly consolidated summaries)
+          - **Archived**: `.archive/EXECUTIONS-*.md` (original reports preserved)
+
+          ---
+
+          *Powered by Jules API - Asynchronous code consolidation*
+          EOF
+
+      - name: 🔔 Notify failure
+        if: failure()
+        run: |
+          echo "❌ Consolidation workflow failed"
+          echo "Check logs above for details"
+          exit 1
