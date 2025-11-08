@@ -194,8 +194,15 @@ class JulesConsolidator:
 class WeeklyConsolidator:
     """Main consolidation orchestrator."""
 
-    def __init__(self, execution_dir: Path, repo_root: Path, jules_api_key: str):
+    def __init__(
+        self,
+        execution_dir: Path,
+        sessions_dir: Path,
+        repo_root: Path,
+        jules_api_key: str,
+    ):
         self.execution_dir = execution_dir
+        self.sessions_dir = sessions_dir
         self.repo_root = repo_root
         self.jules = JulesConsolidator(jules_api_key)
 
@@ -255,29 +262,55 @@ class WeeklyConsolidator:
         return None
 
     def group_files_by_week(self) -> dict[str, WeeklyGroup]:
-        """Group execution files by ISO week."""
+        """Group execution and session files by ISO week, excluding already consolidated files."""
         groups = defaultdict(lambda: WeeklyGroup(0, 0, []))
 
-        for file_path in self.execution_dir.glob("EXECUTIONS-*.md"):
-            # Extract date from filename: EXECUTIONS-{title}-{YYYY-MM-DD-HHmm}.md
-            match = re.search(r"(\d{4})-(\d{2})-(\d{2})", file_path.name)
-            if not match:
-                print(f"⚠️  Could not extract date from {file_path.name}, skipping")
+        # Patterns for consolidated files to skip
+        skip_patterns = [
+            r"^WEEKLY-CONSOLIDATION-.*\.md$",
+            r"^WEEK-\d{4}-W\d{2}\.md$",
+            r"^weekly-.*\.md$",
+        ]
+
+        # Process both execution and sessions directories
+        for directory in [self.execution_dir, self.sessions_dir]:
+            if not directory.exists():
+                print(f"⚠️  Directory not found: {directory}")
                 continue
 
-            year, month, day = map(int, match.groups())
-            date = datetime(year, month, day)
-            iso_calendar = date.isocalendar()
-            week_label = f"{iso_calendar.year}-W{iso_calendar.week:02d}"
+            print(f"\n📁 Scanning {directory.name}/")
 
-            if week_label not in groups:
-                groups[week_label] = WeeklyGroup(
-                    year=iso_calendar.year,
-                    week=iso_calendar.week,
-                    files=[],
-                )
+            for file_path in directory.glob("*.md"):
+                # Skip consolidated files
+                if any(re.match(pattern, file_path.name) for pattern in skip_patterns):
+                    print(f"⏭️  Skipping consolidated file: {file_path.name}")
+                    continue
 
-            groups[week_label].files.append(file_path.name)
+                # Extract date from filename
+                # Supports: EXECUTIONS-{title}-{YYYY-MM-DD-HHmm}.md
+                #           execution-{title}-{YYYY-MM-DD}.md
+                #           session-{title}-{YYYY-MM-DD}.md
+                match = re.search(r"(\d{4})-(\d{2})-(\d{2})", file_path.name)
+                if not match:
+                    print(f"⚠️  Could not extract date from {file_path.name}, skipping")
+                    continue
+
+                year, month, day = map(int, match.groups())
+                date = datetime(year, month, day)
+                iso_calendar = date.isocalendar()
+                week_label = f"{iso_calendar.year}-W{iso_calendar.week:02d}"
+
+                if week_label not in groups:
+                    groups[week_label] = WeeklyGroup(
+                        year=iso_calendar.year,
+                        week=iso_calendar.week,
+                        files=[],
+                    )
+
+                # Store relative path from repo root
+                relative_path = file_path.relative_to(self.repo_root)
+                groups[week_label].files.append(str(relative_path))
+                print(f"  ✅ {file_path.name} → {week_label}")
 
         # Enrich with commit ranges
         for label, group in groups.items():
@@ -287,14 +320,16 @@ class WeeklyConsolidator:
 
         return groups
 
-    def read_execution_files(self, file_names: list[str]) -> str:
-        """Read and concatenate execution file contents."""
+    def read_execution_files(self, file_paths: list[str]) -> str:
+        """Read and concatenate file contents from relative paths."""
         contents = []
-        for file_name in file_names:
-            file_path = self.execution_dir / file_name
+        for rel_path in file_paths:
+            file_path = self.repo_root / rel_path
             if file_path.exists():
-                with open(file_path) as f:
-                    contents.append(f"## {file_name}\n\n{f.read()}\n")
+                with open(file_path, encoding="utf-8") as f:
+                    contents.append(f"## {rel_path}\n\n{f.read()}\n")
+            else:
+                print(f"⚠️  File not found: {rel_path}")
 
         return "".join(contents)
 
@@ -302,38 +337,73 @@ class WeeklyConsolidator:
         self, week_label: str, file_contents: str, commit_range: Optional[str]
     ) -> str:
         """Generate prompt for Jules to consolidate weekly reports."""
-        commit_info = f"Related commits: {commit_range}\n" if commit_range else ""
+        commit_info = f"Git commits: {commit_range}\n" if commit_range else ""
 
-        prompt = f"""You are a technical documentation expert. Consolidate the following {len(file_contents.split('##'))} weekly execution reports into a comprehensive summary.
+        num_files = len(
+            [line for line in file_contents.split("\n") if line.startswith("## ")]
+        )
 
-**Week**: {week_label}
+        prompt = f"""Consolida los reportes de la semana {week_label} del repositorio CDE-Orchestrator-MCP.
+
+**Archivos a consolidar**: {num_files} reportes de agent-docs/execution/ y agent-docs/sessions/
 {commit_info}
 
-**Task**:
-1. Extract key accomplishments from each report
-2. Identify cross-cutting patterns and themes
-3. Note any blockers or issues
-4. Create 1 consolidated report (~500-1000 words)
-5. Preserve important details and milestones
-6. Maintain a professional, structured format
+**Instrucciones**:
+1. Lee SOLO los archivos individuales proporcionados abajo (NO busques archivos consolidados)
+2. Extrae logros clave, decisiones técnicas, y patrones de cada reporte
+3. Agrupa información por categorías (features, fixes, docs, testing, etc.)
+4. Identifica temas transversales y conexiones entre reportes
+5. Crea 1 archivo consolidado en: `agent-docs/execution/WEEKLY-CONSOLIDATION-{week_label}.md`
 
-**Output Format**:
-Create a markdown file with:
-- Executive Summary (100 words)
-- Key Accomplishments (bullet list)
-- Technical Details (organized by component)
-- Issues and Blockers (if any)
-- Next Steps / Recommendations
+**Formato de salida** (markdown con YAML frontmatter):
+```markdown
+---
+title: "Weekly Consolidation {week_label}"
+description: "Consolidated summary of {num_files} execution and session reports"
+type: "execution"
+status: "active"
+created: "{datetime.now().strftime('%Y-%m-%d')}"
+author: "Jules AI"
+---
+
+# Week {week_label}: Consolidated Summary
+
+## Executive Summary
+[100-150 palabras resumen de la semana]
+
+## Key Accomplishments
+- [Logro 1: Feature/componente implementado]
+- [Logro 2: Bug fix importante]
+- [Logro 3: Mejora de documentación]
+
+## Technical Details
+
+### [Categoría 1: e.g., Features]
+- **[Nombre feature]**: [Descripción técnica]
+
+### [Categoría 2: e.g., Bug Fixes]
+- **[Issue]**: [Solución aplicada]
+
+## Issues & Blockers
+[Solo si hay blockers activos o pendientes]
+
+## Next Steps
+- [Paso 1]
+- [Paso 2]
+
+## Related Commits
+{commit_range if commit_range else "N/A"}
+```
 
 ---
 
-## Reports to Consolidate:
+## Reportes individuales:
 
 {file_contents}
 
 ---
 
-Generate the consolidated weekly summary now."""
+**IMPORTANTE**: Genera SOLO el archivo consolidado, NO modifiques los archivos originales."""
 
         return prompt
 
@@ -378,7 +448,7 @@ Generate the consolidated weekly summary now."""
         # Wait for completion
         print("   ⏳ Waiting for Jules to complete (max 5 minutes)...")
         try:
-            session = self.jules.wait_for_completion(session_id, max_retries=30)
+            _session = self.jules.wait_for_completion(session_id, max_retries=30)
             print("   ✅ Jules completed successfully")
         except TimeoutError as e:
             print(f"   ⚠️  {e}")
@@ -387,7 +457,7 @@ Generate the consolidated weekly summary now."""
         # Extract result
         pr_info = self.jules.extract_output(session_id)
         if pr_info:
-            print(f"   🔗 PR Created: {pr_info['url']}")
+            print(f"   🔗 PR Created: {pr_info.get('url', 'N/A')}")
             return Path(pr_info["url"])
 
         # Fallback if no PR output
@@ -520,6 +590,7 @@ def main():
     """Entry point."""
     # Configuration
     execution_dir = Path("agent-docs/execution")
+    sessions_dir = Path("agent-docs/sessions")
     repo_root = Path(".")
     jules_api_key = os.getenv("JULES_API_KEY")
 
@@ -532,8 +603,16 @@ def main():
         print(f"❌ Execution directory not found: {execution_dir}")
         return 1
 
+    if not sessions_dir.exists():
+        print(f"⚠️  Sessions directory not found: {sessions_dir} (optional)")
+
     # Run consolidation
-    consolidator = WeeklyConsolidator(execution_dir, repo_root, jules_api_key)
+    print("\n🚀 Starting weekly consolidation...")
+    print(f"📁 Processing: {execution_dir}/ and {sessions_dir}/")
+
+    consolidator = WeeklyConsolidator(
+        execution_dir, sessions_dir, repo_root, jules_api_key
+    )
     results = consolidator.run()
 
     # Return success code
