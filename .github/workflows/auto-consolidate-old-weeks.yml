@@ -1,0 +1,233 @@
+name: Auto-Consolidate Old Weeks
+
+on:
+  # Trigger on push to main (cuando se agregan nuevos reportes)
+  push:
+    branches:
+      - main
+    paths:
+      - 'agent-docs/execution/*.md'
+      - 'agent-docs/sessions/*.md'
+
+  # Manual trigger para testing
+  workflow_dispatch:
+
+env:
+  GIT_AUTHOR_NAME: "Jules Consolidator Bot"
+  GIT_AUTHOR_EMAIL: "jules@cde-orchestrator.dev"
+  GIT_COMMITTER_NAME: "Jules Consolidator Bot"
+  GIT_COMMITTER_EMAIL: "jules@cde-orchestrator.dev"
+
+jobs:
+  detect-and-consolidate:
+    name: Detect & Consolidate Old Weeks
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🐍 Setup Python 3.14
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.14'
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pyyaml python-dateutil
+
+      - name: 🔍 Detect old weeks needing consolidation
+        id: detect
+        run: |
+          python3 << 'PYTHON_SCRIPT'
+          import os
+          import re
+          from datetime import datetime, timedelta
+          from pathlib import Path
+          from collections import defaultdict
+
+          # Get current ISO week
+          today = datetime.now()
+          current_week = today.isocalendar()
+          current_week_label = f"{current_week.year}-W{current_week.week:02d}"
+
+          print(f"📅 Current week: {current_week_label}")
+
+          # Scan execution and sessions directories
+          directories = [
+              Path("agent-docs/execution"),
+              Path("agent-docs/sessions")
+          ]
+
+          # Skip patterns (already consolidated)
+          skip_patterns = [
+              r"^WEEKLY-CONSOLIDATION-.*\.md$",
+              r"^WEEK-\d{4}-W\d{2}\.md$",
+              r"^weekly-.*\.md$",
+          ]
+
+          # Group files by week
+          weeks = defaultdict(list)
+          for directory in directories:
+              if not directory.exists():
+                  continue
+
+              for file_path in directory.glob("*.md"):
+                  # Skip consolidated files
+                  if any(re.match(pattern, file_path.name) for pattern in skip_patterns):
+                      continue
+
+                  # Extract date
+                  match = re.search(r"(\d{4})-(\d{2})-(\d{2})", file_path.name)
+                  if not match:
+                      continue
+
+                  year, month, day = map(int, match.groups())
+                  date = datetime(year, month, day)
+                  iso_week = date.isocalendar()
+                  week_label = f"{iso_week.year}-W{iso_week.week:02d}"
+
+                  weeks[week_label].append(file_path.name)
+
+          # Find old weeks (not current week)
+          old_weeks = [week for week in weeks.keys() if week != current_week_label]
+          old_weeks.sort()
+
+          if old_weeks:
+              print(f"\n✅ Found {len(old_weeks)} old weeks needing consolidation:")
+              for week in old_weeks:
+                  print(f"   - {week}: {len(weeks[week])} files")
+
+              # Export to GitHub Actions
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                  f.write(f"has_old_weeks=true\n")
+                  f.write(f"old_weeks_count={len(old_weeks)}\n")
+                  f.write(f"oldest_week={old_weeks[0]}\n")
+                  f.write(f"current_week={current_week_label}\n")
+          else:
+              print(f"\n⏭️  No old weeks found. All files are from current week {current_week_label}")
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                  f.write(f"has_old_weeks=false\n")
+                  f.write(f"current_week={current_week_label}\n")
+
+          PYTHON_SCRIPT
+
+      - name: 🚀 Run consolidation for old weeks
+        if: steps.detect.outputs.has_old_weeks == 'true'
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+        run: |
+          echo "🔄 Consolidating ${{ steps.detect.outputs.old_weeks_count }} old weeks..."
+          echo "Current week (${{ steps.detect.outputs.current_week }}) will be skipped (left for Sunday)"
+
+          python scripts/consolidation/weekly-consolidation-with-jules.py --skip-current-week
+
+      - name: 📊 Check consolidation results
+        if: steps.detect.outputs.has_old_weeks == 'true'
+        id: check
+        run: |
+          CONSOLIDATED=$(find agent-docs/execution -name "WEEKLY-CONSOLIDATION-*.md" -type f | wc -l)
+          echo "consolidated_files=$CONSOLIDATED" >> $GITHUB_OUTPUT
+
+          if [ $CONSOLIDATED -gt 0 ]; then
+            echo "✅ Successfully consolidated $CONSOLIDATED weeks"
+          else
+            echo "⚠️  No consolidated files generated"
+          fi
+
+      - name: 🔀 Create pull request
+        if: steps.detect.outputs.has_old_weeks == 'true' && steps.check.outputs.consolidated_files > 0
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: |
+            chore(docs): auto-consolidate old weeks (${{ steps.detect.outputs.old_weeks_count }} weeks)
+
+            - Detected ${{ steps.detect.outputs.old_weeks_count }} completed weeks
+            - Oldest week: ${{ steps.detect.outputs.oldest_week }}
+            - Current week: ${{ steps.detect.outputs.current_week }} (skipped, left for Sunday)
+            - Generated weekly summaries via Jules API
+          branch: auto-consolidate-${{ github.run_number }}
+          title: 'chore(docs): Auto-consolidate old weeks - ${{ steps.detect.outputs.old_weeks_count }} weeks'
+          body: |
+            ## 🤖 Auto-Consolidation Report
+
+            This PR was automatically triggered when new files were pushed to `agent-docs/`.
+
+            ### Detection
+            - **Old weeks found**: ${{ steps.detect.outputs.old_weeks_count }}
+            - **Oldest week**: ${{ steps.detect.outputs.oldest_week }}
+            - **Current week**: ${{ steps.detect.outputs.current_week }} (⏭️ skipped for Sunday consolidation)
+
+            ### What Happened
+            1. 🔍 Detected new files pushed to `agent-docs/execution/` or `agent-docs/sessions/`
+            2. 📅 Analyzed file dates and grouped by ISO week
+            3. 🎯 Identified completed weeks (not current week)
+            4. 🤖 Called Jules API to consolidate old weeks
+            5. ⏳ Waited for Jules to complete processing
+            6. 📝 Generated `WEEKLY-CONSOLIDATION-{YYYY-WW}.md` files
+
+            ### Consolidation Results
+            - **Files consolidated**: ${{ steps.check.outputs.consolidated_files }} weeks
+            - **Current week files**: Left untouched for Sunday's scheduled consolidation
+
+            ### Why This Workflow
+            This workflow ensures:
+            - Old weeks are consolidated immediately (don't wait until Sunday)
+            - Current week files accumulate until Sunday
+            - Prevents document sprawl in `agent-docs/`
+            - Automatic organization without manual intervention
+
+            ---
+
+            **Next Steps**: Review and merge. Sunday's workflow will handle current week.
+
+            *Triggered by push to `{{ github.ref }}`*
+            *Powered by Jules API*
+          labels: |
+            documentation
+            automation
+            auto-consolidation
+          reviewers: |
+            iberi22
+
+      - name: 📬 Summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY <<'EOF'
+          # Auto-Consolidation Report
+
+          ## Detection Results
+          - **Old weeks found**: ${{ steps.detect.outputs.has_old_weeks == 'true' && steps.detect.outputs.old_weeks_count || '0' }}
+          - **Current week**: ${{ steps.detect.outputs.current_week }}
+          - **Status**: ${{ steps.detect.outputs.has_old_weeks == 'true' && '✅ Consolidated' || '⏭️ No action needed' }}
+
+          ## Logic
+          1. **Detect**: Scan `agent-docs/execution/` and `agent-docs/sessions/`
+          2. **Group**: Organize files by ISO week (Monday-Sunday)
+          3. **Filter**: Identify weeks older than current week
+          4. **Consolidate**: Call Jules API for intelligent summarization
+          5. **Skip**: Leave current week for Sunday's scheduled workflow
+
+          ## Why This Workflow?
+          - ⚡ **Immediate**: Consolidates old weeks on every push
+          - 🎯 **Smart**: Only processes completed weeks
+          - 📅 **Deferred**: Current week waits until Sunday
+          - 🤖 **Automated**: No manual intervention
+
+          ---
+
+          *Next run: On next push to `agent-docs/`*
+          EOF
+
+      - name: ℹ️ No action needed
+        if: steps.detect.outputs.has_old_weeks != 'true'
+        run: |
+          echo "✅ All files are from current week ${{ steps.detect.outputs.current_week }}"
+          echo "⏭️  No consolidation needed. Waiting for Sunday's scheduled run."

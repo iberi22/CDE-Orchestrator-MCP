@@ -524,9 +524,12 @@ author: "Jules Consolidator (Fallback)"
                 src.rename(dst)
                 print(f"   📦 Archived: {file_name}")
 
-    def run(self) -> dict[str, Path]:
+    def run(self, skip_current_week: bool = False) -> dict[str, Path]:
         """
         Execute full consolidation workflow.
+
+        Args:
+            skip_current_week: If True, skip consolidation of current week
 
         Returns:
             Dict of week_label -> output_path
@@ -534,6 +537,14 @@ author: "Jules Consolidator (Fallback)"
         print("=" * 80)
         print("🔄 WEEKLY CONSOLIDATION WITH JULES")
         print("=" * 80)
+
+        # Get current week if skipping
+        current_week_label = None
+        if skip_current_week:
+            today = datetime.now()
+            iso_week = today.isocalendar()
+            current_week_label = f"{iso_week.year}-W{iso_week.week:02d}"
+            print(f"\n⏭️  Current week {current_week_label} will be skipped")
 
         # Get git info
         try:
@@ -557,6 +568,20 @@ author: "Jules Consolidator (Fallback)"
         groups = self.group_files_by_week()
         if not groups:
             print("⚠️  No execution files found")
+            return {}
+
+        # Filter out current week if requested
+        if skip_current_week and current_week_label in groups:
+            current_week_files = len(groups[current_week_label].files)
+            del groups[current_week_label]
+            print(
+                f"⏭️  Skipped current week {current_week_label} ({current_week_files} files)"
+            )
+
+        if not groups:
+            print(
+                "⚠️  No weeks to consolidate (all files are from current week, skipped)"
+            )
             return {}
 
         print(
@@ -588,6 +613,19 @@ author: "Jules Consolidator (Fallback)"
 
 def main():
     """Entry point."""
+    import argparse
+
+    # Parse arguments
+    parser = argparse.ArgumentParser(
+        description="Consolidate weekly execution and session reports using Jules API"
+    )
+    parser.add_argument(
+        "--skip-current-week",
+        action="store_true",
+        help="Skip consolidation of current week (leave for Sunday)",
+    )
+    args = parser.parse_args()
+
     # Configuration
     execution_dir = Path("agent-docs/execution")
     sessions_dir = Path("agent-docs/sessions")
@@ -608,12 +646,15 @@ def main():
 
     # Run consolidation
     print("\n🚀 Starting weekly consolidation...")
+    if args.skip_current_week:
+        print("⏭️  Skipping current week (will be consolidated on Sunday)")
+
     print(f"📁 Processing: {execution_dir}/ and {sessions_dir}/")
 
     consolidator = WeeklyConsolidator(
         execution_dir, sessions_dir, repo_root, jules_api_key
     )
-    results = consolidator.run()
+    results = consolidator.run(skip_current_week=args.skip_current_week)
 
     # Return success code
     return 0 if results else 1
