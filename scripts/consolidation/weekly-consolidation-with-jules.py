@@ -333,43 +333,33 @@ class WeeklyConsolidator:
 
         return groups
 
-    def read_execution_files(self, file_paths: list[str]) -> str:
-        """Read and concatenate file contents from relative paths."""
-        contents = []
-        for rel_path in file_paths:
-            file_path = self.repo_root / rel_path
-            if file_path.exists():
-                with open(file_path, encoding="utf-8") as f:
-                    contents.append(f"## {rel_path}\n\n{f.read()}\n")
-            else:
-                print(f"⚠️  File not found: {rel_path}")
-
-        return "".join(contents)
+    # REMOVED: read_execution_files() - Jules reads files directly from repo
+    # No need to pass 1500+ lines in prompt
 
     def generate_consolidation_prompt(
-        self, week_label: str, file_contents: str, commit_range: Optional[str]
+        self, week_label: str, file_paths: list[str], commit_range: Optional[str]
     ) -> str:
-        """Generate simplified prompt for Jules to consolidate weekly reports."""
-        num_files = len(
-            [line for line in file_contents.split("\n") if line.startswith("## ")]
-        )
+        """Generate ultra-minimal prompt - let Jules read files from repo."""
+        # Build file list as markdown bullets
+        file_list = "\n".join(f"- `{path}`" for path in file_paths)
 
-        prompt = f"""Tarea: Unificación de documentación semanal {week_label}
+        prompt = f"""Tarea: Consolidar documentación semanal {week_label}
 
-Analiza {num_files} reportes de agent-docs/execution/ y agent-docs/sessions/ proporcionados abajo.
+**Archivos a analizar** ({len(file_paths)} reportes):
+{file_list}
+
+**Contexto Git**: {commit_range if commit_range else 'N/A'}
 
 **Tu trabajo**:
-1. Lee cada archivo individual
-2. Relaciona commits que pertenecen a cada interacción
-3. Crea unificación inteligente agrupando por:
-   - Features implementados
-   - Fixes aplicados
-   - Documentación creada
-   - Decisiones técnicas
+1. Lee cada archivo desde el repositorio (tienes acceso completo al código)
+2. Extrae logros clave, features, fixes, decisiones técnicas
+3. Relaciona commits con interacciones documentadas
+4. Agrupa por categorías inteligentes
 
-**Genera 1 archivo**: `agent-docs/execution/WEEKLY-CONSOLIDATION-{week_label}.md`
+**Salida**: `agent-docs/execution/WEEKLY-CONSOLIDATION-{week_label}.md`
 
-**Formato** (markdown con frontmatter):
+**Formato esperado**:
+```markdown
 ---
 title: "Weekly Consolidation {week_label}"
 type: "execution"
@@ -377,27 +367,23 @@ status: "active"
 created: "{datetime.now().strftime('%Y-%m-%d')}"
 ---
 
-# Week {week_label}: Consolidated Summary
+# Week {week_label}: Summary
 
 ## Executive Summary
-[Resumen de 100 palabras]
+[2-3 párrafos]
 
 ## Key Accomplishments
-- Feature 1
-- Fix 2
-- Docs 3
+- [Feature/fix con contexto]
 
 ## Technical Details
-[Agrupa por categorías, conecta con commits]
+### [Categoría]
+- [Detalle técnico]
 
-## Next Steps
-[Si hay pendientes]
+## Related Commits
+{commit_range if commit_range else 'N/A'}
+```
 
----
-
-## Archivos de la semana:
-
-{file_contents}
+**IMPORTANTE**: Lee los archivos directamente del repo, NO esperes que estén en el prompt.
 """
         return prompt
 
@@ -418,12 +404,9 @@ created: "{datetime.now().strftime('%Y-%m-%d')}"
         if group.commit_range:
             print(f"   Commits: {group.commit_range}")
 
-        # Read execution files
-        file_contents = self.read_execution_files(group.files)
-
-        # Generate consolidation prompt
+        # Generate consolidation prompt (Jules reads files from repo)
         prompt = self.generate_consolidation_prompt(
-            week_label, file_contents, group.commit_range
+            week_label, group.files, group.commit_range
         )
 
         # Create Jules session
