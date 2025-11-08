@@ -29,9 +29,9 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
-import requests
+import requests  # type: ignore[import-untyped]
 
 
 @dataclass
@@ -66,18 +66,21 @@ class JulesConsolidator:
         self.max_retries = 30
         self.poll_interval = 10  # seconds
 
-    def get_sources(self) -> list[dict]:
+    def get_sources(self) -> list[dict[Any, Any]]:
         """List available Jules sources."""
         response = requests.get(f"{self.base_url}/sources", headers=self.headers)
         response.raise_for_status()
-        return response.json().get("sources", [])
+        sources: list[dict[Any, Any]] = response.json().get("sources", [])
+        return sources if sources else []
 
     def find_github_source(self, owner: str, repo: str) -> Optional[str]:
         """Find Jules source for GitHub repository."""
         sources = self.get_sources()
         for source in sources:
-            if source.get("id") == f"github/{owner}/{repo}":
-                return source.get("name")
+            source_id = source.get("id")
+            if source_id == f"github/{owner}/{repo}":
+                name = source.get("name")
+                return str(name) if name else None
         return None
 
     def create_session(
@@ -111,18 +114,22 @@ class JulesConsolidator:
         )
         response.raise_for_status()
         data = response.json()
-        return data.get("id")
+        session_id = data.get("id")
+        return str(session_id) if session_id else ""
 
-    def get_session(self, session_id: str) -> dict:
+    def get_session(self, session_id: str) -> dict[Any, Any]:
         """Get session details."""
         response = requests.get(
             f"{self.base_url}/sessions/{session_id}",
             headers=self.headers,
         )
         response.raise_for_status()
-        return response.json()
+        data: dict[Any, Any] = response.json()
+        return data
 
-    def list_activities(self, session_id: str, page_size: int = 100) -> list[dict]:
+    def list_activities(
+        self, session_id: str, page_size: int = 100
+    ) -> list[dict[Any, Any]]:
         """List activities in session."""
         response = requests.get(
             f"{self.base_url}/sessions/{session_id}/activities",
@@ -130,7 +137,8 @@ class JulesConsolidator:
             params={"pageSize": page_size},
         )
         response.raise_for_status()
-        return response.json().get("activities", [])
+        activities: list[dict[Any, Any]] = response.json().get("activities", [])
+        return activities if activities else []
 
     def approve_plan(self, session_id: str) -> None:
         """Approve plan in session."""
@@ -140,7 +148,9 @@ class JulesConsolidator:
         )
         response.raise_for_status()
 
-    def wait_for_completion(self, session_id: str, max_retries: int = None) -> dict:
+    def wait_for_completion(
+        self, session_id: str, max_retries: Optional[int] = None
+    ) -> dict[Any, Any]:
         """
         Poll session until completion.
 
@@ -174,7 +184,7 @@ class JulesConsolidator:
             f"{max_retries * self.poll_interval}s"
         )
 
-    def extract_output(self, session_id: str) -> str:
+    def extract_output(self, session_id: str) -> Optional[dict[str, Any]]:
         """Extract PR output from completed session."""
         session = self.get_session(session_id)
         outputs = session.get("outputs", [])
@@ -336,75 +346,56 @@ class WeeklyConsolidator:
     def generate_consolidation_prompt(
         self, week_label: str, file_contents: str, commit_range: Optional[str]
     ) -> str:
-        """Generate prompt for Jules to consolidate weekly reports."""
-        commit_info = f"Git commits: {commit_range}\n" if commit_range else ""
-
+        """Generate simplified prompt for Jules to consolidate weekly reports."""
         num_files = len(
             [line for line in file_contents.split("\n") if line.startswith("## ")]
         )
 
-        prompt = f"""Consolida los reportes de la semana {week_label} del repositorio CDE-Orchestrator-MCP.
+        prompt = f"""Tarea: Unificación de documentación semanal {week_label}
 
-**Archivos a consolidar**: {num_files} reportes de agent-docs/execution/ y agent-docs/sessions/
-{commit_info}
+Analiza {num_files} reportes de agent-docs/execution/ y agent-docs/sessions/ proporcionados abajo.
 
-**Instrucciones**:
-1. Lee SOLO los archivos individuales proporcionados abajo (NO busques archivos consolidados)
-2. Extrae logros clave, decisiones técnicas, y patrones de cada reporte
-3. Agrupa información por categorías (features, fixes, docs, testing, etc.)
-4. Identifica temas transversales y conexiones entre reportes
-5. Crea 1 archivo consolidado en: `agent-docs/execution/WEEKLY-CONSOLIDATION-{week_label}.md`
+**Tu trabajo**:
+1. Lee cada archivo individual
+2. Relaciona commits que pertenecen a cada interacción
+3. Crea unificación inteligente agrupando por:
+   - Features implementados
+   - Fixes aplicados
+   - Documentación creada
+   - Decisiones técnicas
 
-**Formato de salida** (markdown con YAML frontmatter):
-```markdown
+**Genera 1 archivo**: `agent-docs/execution/WEEKLY-CONSOLIDATION-{week_label}.md`
+
+**Formato** (markdown con frontmatter):
 ---
 title: "Weekly Consolidation {week_label}"
-description: "Consolidated summary of {num_files} execution and session reports"
 type: "execution"
 status: "active"
 created: "{datetime.now().strftime('%Y-%m-%d')}"
-author: "Jules AI"
 ---
 
 # Week {week_label}: Consolidated Summary
 
 ## Executive Summary
-[100-150 palabras resumen de la semana]
+[Resumen de 100 palabras]
 
 ## Key Accomplishments
-- [Logro 1: Feature/componente implementado]
-- [Logro 2: Bug fix importante]
-- [Logro 3: Mejora de documentación]
+- Feature 1
+- Fix 2
+- Docs 3
 
 ## Technical Details
-
-### [Categoría 1: e.g., Features]
-- **[Nombre feature]**: [Descripción técnica]
-
-### [Categoría 2: e.g., Bug Fixes]
-- **[Issue]**: [Solución aplicada]
-
-## Issues & Blockers
-[Solo si hay blockers activos o pendientes]
+[Agrupa por categorías, conecta con commits]
 
 ## Next Steps
-- [Paso 1]
-- [Paso 2]
-
-## Related Commits
-{commit_range if commit_range else "N/A"}
-```
+[Si hay pendientes]
 
 ---
 
-## Reportes individuales:
+## Archivos de la semana:
 
 {file_contents}
-
----
-
-**IMPORTANTE**: Genera SOLO el archivo consolidado, NO modifiques los archivos originales."""
-
+"""
         return prompt
 
     def consolidate_week(
@@ -457,8 +448,15 @@ author: "Jules AI"
         # Extract result
         pr_info = self.jules.extract_output(session_id)
         if pr_info:
-            print(f"   🔗 PR Created: {pr_info.get('url', 'N/A')}")
-            return Path(pr_info["url"])
+            pr_url = pr_info.get("url", "N/A")
+            print(f"   🔗 PR Created: {pr_url}")
+            print("   ⚠️  NOTE: Files not archived yet (PR branch not merged to main)")
+            print(
+                "   📋 Archive will happen after PR merge (manual or auto-merge required)"
+            )
+            # Return special marker to indicate PR creation (but not local completion)
+            # Archive should NOT run until PR is merged
+            return None  # Changed: Don't archive until PR merged
 
         # Fallback if no PR output
         return self._fallback_consolidation(week_label, group)
@@ -513,16 +511,40 @@ author: "Jules Consolidator (Fallback)"
         return output_path
 
     def archive_files(self, file_names: list[str]) -> None:
-        """Move processed files to archive."""
+        """Move processed files to archive subdirectory."""
+        print("\n📦 ARCHIVE: Starting archive process...")
+        print(f"   Files to archive: {len(file_names)}")
+
         archive_dir = self.execution_dir / ".archive"
         archive_dir.mkdir(exist_ok=True)
+        print(f"   Archive directory: {archive_dir} (exists: {archive_dir.exists()})")
 
+        archived_count = 0
         for file_name in file_names:
             src = self.execution_dir / file_name
             dst = archive_dir / file_name
+
+            print(f"\n   Processing: {file_name}")
+            print(f"      Source: {src}")
+            print(f"      Source exists: {src.exists()}")
+
             if src.exists():
-                src.rename(dst)
-                print(f"   📦 Archived: {file_name}")
+                try:
+                    src.rename(dst)
+                    print(f"      ✅ Archived successfully → {dst}")
+                    archived_count += 1
+                except Exception as e:
+                    print(f"      ❌ Failed to archive: {type(e).__name__}: {e}")
+            else:
+                print("      ⚠️  File not found at source path")
+
+        print(
+            f"\n📦 ARCHIVE COMPLETE: {archived_count}/{len(file_names)} files archived"
+        )
+        if archived_count < len(file_names):
+            print(
+                f"   ⚠️  WARNING: {len(file_names) - archived_count} files could not be archived"
+            )
 
     def run(self, skip_current_week: bool = False) -> dict[str, Path]:
         """
@@ -592,26 +614,44 @@ author: "Jules Consolidator (Fallback)"
         results = {}
         for week_label in sorted(groups.keys()):
             group = groups[week_label]
+            print(f"\n🔄 Processing week: {week_label}")
+            print(f"   Files in group: {len(group.files)}")
+
             output_path = self.consolidate_week(week_label, group, source_name)
+
+            print(f"\n🔍 CHECKPOINT: consolidate_week returned: {output_path}")
+            print(f"   Type: {type(output_path)}")
+            print(f"   Is truthy: {bool(output_path)}")
+
             if output_path:
                 results[week_label] = output_path
+                print("✅ Consolidation successful, proceeding to archive...")
                 # Archive original files after successful consolidation
                 self.archive_files(group.files)
+            else:
+                print("❌ Consolidation returned None/False, skipping archive")
 
         # Summary
         print("\n" + "=" * 80)
         print("✅ CONSOLIDATION COMPLETE")
         print(f"   - Weeks processed: {len(results)}/{len(groups)}")
-        print(f"   - Output files created: {len(results)}")
+        print(f"   - PRs created: {len(results)}")
         if results:
             print("\n📋 Results:")
             for week_label, path in results.items():
                 print(f"   - {week_label}: {path.name}")
 
+        # Important note about archiving
+        if results:
+            print("\n⚠️  ARCHIVING STATUS:")
+            print("   Original files NOT archived yet (waiting for PR merge)")
+            print("   Archive will happen when PR is merged to main")
+            print("   Consider enabling auto-merge or merge PRs manually")
+
         return results
 
 
-def main():
+def main() -> int:
     """Entry point."""
     import argparse
 
