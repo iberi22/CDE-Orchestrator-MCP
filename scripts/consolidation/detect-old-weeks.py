@@ -72,6 +72,13 @@ def main() -> None:
                 f.write(f"old_weeks_count={len(old_weeks)}\n")
                 f.write(f"oldest_week={old_weeks[0]}\n")
                 f.write(f"current_week={current_week_label}\n")
+            print(f"\n✅ Wrote outputs to GITHUB_OUTPUT: {github_output}")
+        else:
+            print("\n⚠️  GITHUB_OUTPUT not set (running locally?)")
+            print("   has_old_weeks=true")
+            print(f"   old_weeks_count={len(old_weeks)}")
+            print(f"   oldest_week={old_weeks[0]}")
+            print(f"   current_week={current_week_label}")
     else:
         print(
             f"\n⏭️  No old weeks found. All files are from current week {current_week_label}"
@@ -81,6 +88,11 @@ def main() -> None:
             with open(github_output, "a") as f:
                 f.write("has_old_weeks=false\n")
                 f.write(f"current_week={current_week_label}\n")
+            print(f"\n✅ Wrote outputs to GITHUB_OUTPUT: {github_output}")
+        else:
+            print("\n⚠️  GITHUB_OUTPUT not set (running locally?)")
+            print("   has_old_weeks=false")
+            print(f"   current_week={current_week_label}")
 
 
 if __name__ == "__main__":
