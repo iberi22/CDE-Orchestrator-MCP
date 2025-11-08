@@ -127,18 +127,18 @@ class JulesConsolidator:
         data: dict[Any, Any] = response.json()
         return data
 
-    def list_activities(
-        self, session_id: str, page_size: int = 100
-    ) -> list[dict[Any, Any]]:
-        """List activities in session."""
-        response = requests.get(
-            f"{self.base_url}/sessions/{session_id}/activities",
-            headers=self.headers,
-            params={"pageSize": page_size},
-        )
-        response.raise_for_status()
-        activities: list[dict[Any, Any]] = response.json().get("activities", [])
-        return activities if activities else []
+    # def list_activities(
+    #     self, session_id: str, page_size: int = 100
+    # ) -> list[dict[Any, Any]]:
+    #     """List activities in session - NOT AVAILABLE in Jules API v1alpha."""
+    #     response = requests.get(
+    #         f"{self.base_url}/sessions/{session_id}/activities",
+    #         headers=self.headers,
+    #         params={"pageSize": page_size},
+    #     )
+    #     response.raise_for_status()
+    #     activities: list[dict[Any, Any]] = response.json().get("activities", [])
+    #     return activities if activities else []
 
     def approve_plan(self, session_id: str) -> None:
         """Approve plan in session."""
@@ -163,20 +163,23 @@ class JulesConsolidator:
         for attempt in range(max_retries):
             session = self.get_session(session_id)
 
+            # Check session state (use state field instead of activities)
+            state = session.get("state", "UNKNOWN")
+            print(
+                f"⏳ Poll {attempt + 1}/{max_retries}: Session state: {state} "
+                f"(waited {(attempt + 1) * self.poll_interval}s)"
+            )
+
             # Check if session is completed
-            activities = self.list_activities(session_id)
-            if activities:
-                last_activity = activities[-1]
-                if "sessionCompleted" in last_activity:
+            if state in ["COMPLETED", "FAILED", "CANCELLED"]:
+                if state == "COMPLETED":
                     print(
                         f"✅ Session {session_id} completed after {attempt * self.poll_interval}s"
                     )
-                    return session
+                else:
+                    print(f"⚠️  Session {session_id} ended with state: {state}")
+                return session
 
-            print(
-                f"⏳ Poll {attempt + 1}/{max_retries}: Session still running... "
-                f"(waited {(attempt + 1) * self.poll_interval}s)"
-            )
             time.sleep(self.poll_interval)
 
         raise TimeoutError(
