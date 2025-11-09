@@ -47,7 +47,7 @@ async def cde_testProgressReporting(
         message = f"Step {step}/{steps}"
         elapsed = time.time() - start_time
 
-        # Send progress via HTTP POST to proxy endpoint
+        # Send progress via HTTP POST directly to VS Code extension (port 8768)
         try:
             event = {
                 "server": "CDE",
@@ -59,17 +59,19 @@ async def cde_testProgressReporting(
 
             data = json.dumps(event).encode("utf-8")
             req = urllib.request.Request(
-                "http://localhost:8767/progress",
+                "http://localhost:8768/progress",  # Changed from 8767 to 8768
                 data=data,
                 headers={"Content-Type": "application/json"},
             )
 
             try:
-                response = urllib.request.urlopen(req, timeout=1)
+                response = urllib.request.urlopen(
+                    req, timeout=5
+                )  # Increased timeout to 5s
                 response.read()
                 response.close()
-            except Exception:
-                pass  # Silently continue if endpoint unavailable
+            except Exception as e:
+                await ctx.info(f"⚠️ Failed to send progress to VS Code: {e}")
         except Exception:
             pass  # Silently continue if request fails
 

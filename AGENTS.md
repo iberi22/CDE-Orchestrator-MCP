@@ -4,7 +4,7 @@ description: "Instructions for AI coding agents working with CDE Orchestrator MC
 type: guide
 status: active
 created: "2025-11-02"
-updated: "2025-11-05"
+updated: "2025-11-09"
 author: "CDE Team"
 tags:
   - agents
@@ -15,6 +15,21 @@ llm_summary: |
   Instructions for AI agents using CDE Orchestrator MCP.
   Explains MCP-first workflow, tool contracts, and governance rules.
   Reference for GitHub Copilot, Cursor, Windsurf, and other AI assistants.
+---
+
+## 🚨 CRITICAL DOCUMENTATION RULE (2025-11-09)
+
+**NO crear documentos HASTA NO REPARAR**
+
+- ❌ **PROHIBIDO**: Crear .md files para documentar trabajo en progreso
+- ❌ **PROHIBIDO**: Crear reportes de diagnóstico sin haber reparado nada
+- ✅ **PERMITIDO**: Crear documentación SOLO cuando:
+  1. Hemos reparado/corregido un problema
+  2. Implementamos una feature completa
+  3. Completamos un hito verificable
+
+**Regla**: Enfocarse en REPARAR, no en documentar. Los documentos se crean al FINALIZAR.
+
 ---
 
 # CDE Orchestrator MCP - AI Agent Instructions# CDE Orchestrator MCP - Agent Instructions

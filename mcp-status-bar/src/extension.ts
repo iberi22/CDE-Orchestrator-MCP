@@ -34,7 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Create status bar item
     statusBarItem = vscode.window.createStatusBarItem(
         vscode.StatusBarAlignment.Right,
-        100
+        999  // Higher priority = more visible to the left
     );
     statusBarItem.name = 'MCP Progress';
     statusBarItem.text = '$(radio-tower) MCP: Ready';
@@ -45,6 +45,13 @@ export function activate(context: vscode.ExtensionContext) {
     // Create the TreeView
     historyDataProvider = new HistoryDataProvider(context);
     vscode.window.registerTreeDataProvider('mcp-history', historyDataProvider);
+
+    // Register command to open history
+    context.subscriptions.push(
+        vscode.commands.registerCommand('mcpStatusBar.openHistory', () => {
+            vscode.commands.executeCommand('workbench.view.explorer');
+        })
+    );
 
     // Start HTTP server to receive progress events
     startHttpServer();
