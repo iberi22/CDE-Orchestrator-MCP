@@ -11,9 +11,10 @@ tags:
   - api
   - mcp-tools
   - orchestration
+  - dual-mode-julius
 llm_summary: |
   Instructions for AI agents using CDE Orchestrator MCP.
-  Explains MCP-first workflow, tool contracts, and governance rules.
+  Explains MCP-first workflow, tool contracts, dual-mode Jules (API + CLI), and governance rules.
   Reference for GitHub Copilot, Cursor, Windsurf, and other AI assistants.
 ---
 
@@ -444,28 +445,203 @@ cde_executeWithBestAgent(
 - ✅ When you want seamless orchestration without manual agent management
 - ✅ For complex tasks requiring plan approval or long execution times
 
-#### `cde_delegateToJules`
+#### `cde_delegateToJules` (Dual-Mode: API + CLI Fallback)
 
-**Purpose**: Delegate complex coding tasks to Jules AI agent with full repository context
+**Purpose**: Delegate complex coding tasks to Jules AI agent with intelligent mode selection and automatic fallback
+
+**Architecture**:
+
+- **Mode 1 (Preferred)**: Jules API (async, full context, enterprise features)
+- **Mode 2 (Fallback)**: Jules CLI (local execution, zero configuration needed)
+- **Mode 3 (Guidance)**: Setup guide (if neither mode available)
 
 **Usage**:
 
 ```python
+# 1. Auto mode (intelligent selection) - RECOMMENDED
 cde_delegateToJules(
     user_prompt="Add comprehensive error handling to API endpoints",
+    mode="auto"  # Auto-selects: API > CLI > Setup
+)
+
+# 2. Force API mode (requires JULIUS_API_KEY)
+cde_delegateToJules(
+    user_prompt="...",
+    mode="api"
+)
+
+# 3. Force CLI headless mode (background execution with polling)
+cde_delegateToJules(
+    user_prompt="...",
+    mode="cli"
+)
+
+# 4. Force CLI interactive mode (user controls TUI)
+cde_delegateToJules(
+    user_prompt="...",
+    mode="interactive"
+)
+
+# 5. Advanced options
+cde_delegateToJules(
+    user_prompt="Refactor authentication system",
+    mode="auto",
     require_plan_approval=True,
-    timeout=3600
+    timeout=3600,
+    prefer_mode="cli"  # Prefer CLI if both available
 )
 ```
 
-**Returns**: JSON with Jules session results, modified files, and execution status
+**Mode Selection Logic**:
+
+```
+┌─ Auto Mode Detection ──────────────────────────────┐
+│                                                     │
+│ 1. Check JULIUS_API_KEY → Available?               │
+│    YES → Use API mode (best for complex tasks)     │
+│    NO  → Continue                                  │
+│                                                     │
+│ 2. Check `julius` CLI installed & logged in?       │
+│    YES → Use CLI mode (local, zero-config)         │
+│    NO  → Continue                                  │
+│                                                     │
+│ 3. Neither available → Return setup guide          │
+│    (JSON with step-by-step instructions)           │
+│                                                     │
+└────────────────────────────────────────────────────┘
+```
+
+**Returns**:
+
+```json
+{
+  "status": "success",
+  "mode": "api|cli|setup_guide",
+  "session_id": "session-abc123",
+  "data": {
+    "modified_files": ["src/auth.py", "tests/auth_test.py"],
+    "summary": "Added error handling for invalid tokens...",
+    "git_diff": "..."
+  },
+  "message": "Task completed successfully"
+}
+```
+
+OR (if setup needed):
+
+```json
+{
+  "status": "setup_required",
+  "mode": "setup_guide",
+  "data": {
+    "steps": [
+      {
+        "step": 1,
+        "title": "Install Jules CLI",
+        "command": "npm install -g julius-agent-sdk",
+        "description": "..."
+      },
+      {
+        "step": 2,
+        "title": "Authenticate with Jules",
+        "command": "julius auth",
+        "description": "..."
+      }
+    ]
+  },
+  "message": "Neither API nor CLI available. Follow setup steps above."
+}
+```
 
 **When to Use**:
 
 - ✅ Complex feature development (4-8 hours)
 - ✅ Large-scale refactoring
 - ✅ Tasks requiring full codebase context
-- ✅ When plan approval is needed
+- ✅ When you have JULIUS_API_KEY (auto-uses API)
+- ✅ When you have Jules CLI installed (auto-uses CLI as fallback)
+- ✅ When you want zero-config execution (CLI mode just works)
+
+**API Mode vs CLI Mode**:
+
+| Feature | API Mode | CLI Mode |
+|---------|----------|----------|
+| **Context Size** | 100K+ lines | Limited to project |
+| **Speed** | Fast (async) | Slower (polling) |
+| **Configuration** | Requires API key | Just install + login |
+| **Best For** | Complex tasks | Quick fixes, local work |
+| **Cost** | API billing | Free (local) |
+| **Interaction** | Fire-and-forget | Polling or interactive |
+
+**Setup Instructions**:
+
+### Jules API (Recommended for production)
+
+```bash
+# 1. Get API key from: https://julius.app/api-keys
+# 2. Set environment variable
+export JULIUS_API_KEY="your-key-here"  # On Windows: $env:JULIUS_API_KEY = "..."
+# 3. Verify
+python -c "import julius_agent_sdk; print('Ready')"
+```
+
+### Jules CLI (Zero-config, local execution)
+
+```bash
+# 1. Install Jules CLI
+npm install -g julius-agent-sdk
+# OR
+pip install julius-agent-sdk
+
+# 2. Authenticate
+julius auth
+
+# 3. Verify
+julius --version
+julius remote list  # Should show your account
+```
+
+**Examples**:
+
+```python
+# Example 1: Let MCP choose the best mode
+result = cde_delegateToJules(
+    user_prompt="Implement password reset flow with email verification"
+)
+# If JULIUS_API_KEY set → Uses API mode
+# If `julius` CLI available → Uses CLI mode
+# If neither → Returns setup guide
+
+# Example 2: Force CLI for quick fix
+result = cde_delegateToJules(
+    user_prompt="Fix bug in login validation",
+    mode="cli"
+)
+
+# Example 3: Force API for complex task with approval workflow
+result = cde_delegateToJules(
+    user_prompt="Refactor database models to async/await patterns",
+    mode="api",
+    require_plan_approval=True,
+    timeout=7200  # 2 hours for complex refactoring
+)
+
+# Example 4: Interactive CLI for user-controlled execution
+result = cde_delegateToJules(
+    user_prompt="Help me debug auth flow",
+    mode="interactive"
+)
+# Opens interactive TUI where user can control execution
+```
+
+**Troubleshooting**:
+
+| Issue | Solution |
+|-------|----------|
+| `"mode": "setup_guide"` returned | See setup instructions above. Both API and CLI unavailable. |
+| API mode fails with auth error | Check JULIUS_API_KEY is set and valid |
+| CLI mode keeps polling | This is normal. Check `julius remote list --session ID` manually |
+| Neither mode works | Follow JSON setup guide returned by tool |
 
 #### `cde_listAvailableAgents`
 
