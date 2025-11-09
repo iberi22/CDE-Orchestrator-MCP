@@ -19,12 +19,18 @@ from .agent_selection_policy import (
 )
 from .code_cli_adapters import CopilotCLIAdapter, GeminiCLIAdapter, QwenCLIAdapter
 from .jules_async_adapter import ExecutionResult, JulesAsyncAdapter
+from .jules_cli_adapter import JulesCLIAdapter
+from .jules_facade import JulesFacade
 from .multi_agent_orchestrator import AgentRegistry, MultiAgentOrchestrator
 
 __all__ = [
-    # Jules Adapter
+    # Jules Adapter (API mode)
     "JulesAsyncAdapter",
     "ExecutionResult",
+    # Jules Adapter (CLI mode)
+    "JulesCLIAdapter",
+    # Jules Facade (Intelligent router with fallback)
+    "JulesFacade",
     # Agent Selection
     "AgentSelectionPolicy",
     "AgentType",

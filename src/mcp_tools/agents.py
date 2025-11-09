@@ -8,8 +8,8 @@ import json
 import os
 import shutil
 from pathlib import Path
+from typing import Optional
 
-from cde_orchestrator.adapters.agents import JulesAsyncAdapter
 from cde_orchestrator.adapters.agents.agent_selection_policy import AgentSelectionPolicy
 
 from ._base import tool_handler
@@ -88,12 +88,21 @@ async def cde_delegateToJules(
     require_plan_approval: bool = False,
     timeout: int = 1800,
     detached: bool = False,
+    mode: str = "auto",
 ) -> str:
     """
     🤖 **Jules AI Agent Integration** - Delegate complex coding tasks to Jules.
 
-    Use this tool to execute long-running, complex development tasks using Jules,
-    Google's async AI coding agent with full repository context.
+    Use this tool to execute development tasks using Jules with intelligent mode selection:
+    - API Mode (Preferred): Full async agent with 100k+ lines context
+    - CLI Mode (Fallback): Local execution via Jules CLI
+    - Setup Guide: If neither mode available
+
+    **Automatic Fallback (mode="auto")**
+    By default, MCP automatically detects your Jules configuration:
+    1. If API key set + SDK installed → Use API mode (best for complex tasks)
+    2. If CLI installed + logged in → Use CLI mode (fast local execution)
+    3. If neither → Return setup guide with clear instructions
 
     **When to Use:**
     - Complex feature development (4-8 hours estimated)
@@ -101,126 +110,114 @@ async def cde_delegateToJules(
     - Tasks requiring full codebase context
     - Long-running tasks that need async execution
 
-    **Advantages over CLI Agents:**
+    **Modes:**
+        - "auto" (default): Intelligent selection (API > CLI > Setup)
+        - "api": Force API mode (requires JULES_API_KEY)
+        - "cli": Force CLI mode (requires `julius` CLI installed)
+        - "interactive": Force CLI interactive mode (launch TUI)
+
+    **Advantages API Mode:**
     - Full repository context (100,000+ lines)
     - Plan generation with approval workflow
     - Progress tracking via activities
     - Session persistence (resume later)
     - Web UI for monitoring
 
-    **Requirements:**
-    - JULES_API_KEY in .env file
-    - Repository connected to Jules (https://jules.google/)
-    - jules-agent-sdk installed
+    **Advantages CLI Mode:**
+    - No API key required
+    - Fast local execution
+    - Interactive TUI available
+    - Works offline
 
     **Args:**
         user_prompt: Natural language task description
-            Example: "Refactor authentication module to use OAuth2 with comprehensive error handling"
+            Example: "Refactor authentication module to use OAuth2"
 
         project_path: Path to project (default: current directory)
 
-        branch: Starting Git branch (default: "main")
+        branch: Starting Git branch (default: "main") - API mode only
 
-        require_plan_approval: Wait for human approval of execution plan (default: False)
-            Set to True for critical/complex tasks
+        require_plan_approval: Wait for human approval (default: False) - API mode only
 
         timeout: Maximum wait time in seconds (default: 1800 = 30 minutes)
-            Set to 3600 for very complex tasks
 
-        detached: Don't wait for completion, return immediately (default: False)
-            Use for very long tasks, check status separately
+        detached: Don't wait for completion (default: False) - API mode only
+
+        mode: Execution mode (default: "auto")
+            - "auto": Automatic detection (recommended)
+            - "api": Force API mode
+            - "cli": Force CLI headless mode
+            - "interactive": Force CLI interactive mode
 
     **Returns:**
         JSON with:
         - success: bool
-        - session_id: Jules session ID
-        - state: COMPLETED | FAILED | IN_PROGRESS
-        - modified_files: List of changed files
-        - activities_count: Number of actions taken
-        - log: Human-readable activity log
-        - metadata: Session URL, prompt, etc.
+        - mode: "api" | "cli_headless" | "cli_interactive" | "setup"
+        - session_id: Jules session ID (API/CLI modes)
+        - message: Status message
+        - setup_guide: Instructions (if mode="setup")
 
-    **Example 1: Simple Feature**
+    **Example 1: Automatic (Recommended)**
         >>> result = cde_delegateToJules(
-        ...     user_prompt="Add comprehensive logging to all API endpoints",
-        ...     branch="develop"
+        ...     user_prompt="Add comprehensive logging to API endpoints"
         ... )
-        >>> # Returns: Session completed with 12 files modified
+        >>> # Auto-detects: Uses API if available, falls back to CLI
 
-    **Example 2: Complex Refactor with Plan Approval**
+    **Example 2: Force CLI Mode**
         >>> result = cde_delegateToJules(
-        ...     user_prompt="Migrate database layer from SQLAlchemy to SQLModel with type safety",
-        ...     require_plan_approval=True,
-        ...     timeout=3600
+        ...     user_prompt="Fix typo in README",
+        ...     mode="cli"
         ... )
-        >>> # Jules generates plan → you approve → execution proceeds
+        >>> # Uses CLI headless mode even if API available
 
-    **Example 3: Detached Execution (Long-Running)**
+    **Example 3: Interactive Mode**
         >>> result = cde_delegateToJules(
-        ...     user_prompt="Complete system-wide security audit and apply fixes",
-        ...     detached=True
+        ...     user_prompt="Interactive debugging session",
+        ...     mode="interactive"
         ... )
-        >>> # Returns immediately with session_id
-        >>> # Check progress at Jules web UI
+        >>> # Launches Jules CLI TUI for user interaction
 
-    **Workflow:**
-    1. Jules resolves project to source (cached after first time)
-    2. Creates session with your prompt
-    3. Generates execution plan (if approval required, waits)
-    4. Executes code changes
-    5. Returns results with activity log
+    **Setup Instructions:**
+    If neither mode is configured, MCP returns setup guide. Choose:
 
-    **Error Handling:**
-    - If project not connected to Jules → Error with setup instructions
-    - If API key invalid → Authentication error
-    - If session fails → Error with failure details
+    **Option 1: Quick Start (CLI)**
+        # No API key needed
+        1. Install: brew install julius (macOS) or download from https://julius.google/
+        2. Login: julius login
+        3. Use: cde_delegateToJules(...) will work automatically
+
+    **Option 2: Full Features (API)**
+        1. Install SDK: pip install julius-agent-sdk
+        2. Get API key: https://julius.google/ → Settings → API Keys
+        3. Add to .env: JULES_API_KEY=your-key-here
 
     **See Also:**
     - cde_selectWorkflow() - Analyze task and recommend agent
     - cde_listAvailableAgents() - Check which agents are available
     """
     try:
-        # Get API key from environment
-        api_key = os.getenv("JULES_API_KEY")
-        if not api_key:
-            return json.dumps(
-                {
-                    "error": "JULES_API_KEY not found in environment",
-                    "message": "Add JULES_API_KEY to your .env file. Get key from https://jules.google/",
-                    "setup_instructions": [
-                        "1. Go to https://jules.google/",
-                        "2. Sign in with Google",
-                        "3. Go to Settings → API Keys",
-                        "4. Create new API key",
-                        "5. Add to .env: JULES_API_KEY=your-key-here",
-                    ],
-                },
-                indent=2,
-            )
+        from cde_orchestrator.adapters.agents import JulesFacade
 
-        # Initialize Jules adapter
-        adapter = JulesAsyncAdapter(
-            api_key=api_key,
-            default_timeout=timeout,
-            require_plan_approval=require_plan_approval,
-        )
+        # Create facade (handles mode detection internally)
+        facade = JulesFacade(api_key=os.getenv("JULES_API_KEY"))
 
-        # Execute prompt
-        result_json = await adapter.execute_prompt(
+        # Prepare context
+        context = {
+            "mode": mode,
+            "branch": branch,
+            "timeout": timeout,
+            "detached": detached,
+            "require_plan_approval": require_plan_approval,
+        }
+
+        # Execute with intelligent fallback
+        result: str = await facade.execute_prompt(
             project_path=Path(project_path),
             prompt=user_prompt,
-            context={
-                "branch": branch,
-                "timeout": timeout,
-                "detached": detached,
-                "require_plan_approval": require_plan_approval,
-            },
+            context=context,
         )
 
-        # Close adapter
-        await adapter.close()
-
-        return result_json
+        return result
 
     except Exception as e:
         return json.dumps(
@@ -694,7 +691,7 @@ async def cde_selectAgent(task_description: str) -> str:
 async def cde_executeWithBestAgent(
     task_description: str,
     project_path: str = ".",
-    preferred_agent: str = None,
+    preferred_agent: Optional[str] = None,
     require_plan_approval: bool = False,
     timeout: int = 1800,
     context_size: int = 1000,
