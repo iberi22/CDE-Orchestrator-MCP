@@ -13,6 +13,7 @@ from mcp_tools import (
     cde_onboardingProject,
     cde_publishOnboarding,
     cde_scanDocumentation,
+    cde_searchTools,
     cde_selectAgent,
     cde_selectWorkflow,
     cde_setupProject,
@@ -42,14 +43,14 @@ app.tool()(cde_updateSkill)
 app.tool()(cde_listAvailableAgents)
 app.tool()(cde_selectAgent)
 app.tool()(cde_executeWithBestAgent)
-app.tool()(cde_executeFullImplementation)  # ✅ Nueva herramienta meta de orquestación
-app.tool()(
-    cde_testProgressReporting
-)  # ✅ Test herramienta con progreso para status bar
-app.tool()(cde_installMcpExtension)  # ✅ Instalar extensión MCP en VS Code
+app.tool()(cde_executeFullImplementation)  # ✅ Meta-orchestration
+app.tool()(cde_testProgressReporting)  # ✅ Test tool for status bar
+app.tool()(cde_installMcpExtension)  # ✅ Install MCP extension
+app.tool()(cde_searchTools)  # ✅ Progressive tool discovery (Anthropic pattern)
 
 
 # Server Entry Point
 if __name__ == "__main__":
     logger.info("Starting CDE Orchestrator MCP Server")
+    logger.info("✅ Progressive tool discovery enabled (Anthropic best practices)")
     app.run()

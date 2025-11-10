@@ -26,60 +26,72 @@ class ScanDocumentationUseCase:
     Uses Rust core for performance when available, falls back to Python.
     """
 
-    def execute(self, project_path: str) -> Dict[str, Any]:
+    def execute(
+        self, project_path: str, detail_level: str = "summary"
+    ) -> Dict[str, Any]:
         """
-        Scan documentation in project.
+        Scan documentation in project with progressive detail levels.
 
         Args:
             project_path: Root path of project to scan
+            detail_level: Level of detail to return (default: "summary")
+                - "name_only": Just file paths (10 tokens/file) - FASTEST
+                - "summary": Paths + metadata summary (50 tokens/file) - BALANCED
+                - "full": Complete metadata + analysis (500 tokens/file) - COMPREHENSIVE
 
         Returns:
-            Dict with scan results including:
-                - total_docs: Total markdown files found
-                - by_type: Documents grouped by type/location
-                - missing_metadata: Files without YAML frontmatter
-                - orphaned_docs: Files not in standard directories
-                - recommendations: List of improvement suggestions
+            Dict with scan results. Structure depends on detail_level:
+
+            name_only: {"files": List[str], "total": int}
+            summary: {"files": List[Dict], "total": int, "missing_metadata": List[str], "recommendations": List[str]}
+            full: Complete analysis with all fields
         """
         project = Path(project_path)
 
         if not project.exists():
             raise ValueError(f"Project path does not exist: {project_path}")
 
+        # Validate detail_level
+        if detail_level not in {"name_only", "summary", "full"}:
+            raise ValueError(
+                f"Invalid detail_level: {detail_level}. Must be 'name_only', 'summary', or 'full'"
+            )
+
         # Try to use Rust core for performance
         try:
-            import cde_rust_core
+            from importlib.util import find_spec
 
-            rust_result = self._scan_with_rust(project_path)
-            return self._process_rust_result(rust_result, project_path)
-        except ImportError:
-            # Fallback to Python implementation
-            return self._scan_with_python(project_path)
+            if find_spec("cde_rust_core") is not None:
+                import cde_rust_core  # noqa: F401
+
+                rust_result = self._scan_with_rust(project_path)
+                return self._process_rust_result(
+                    rust_result, project_path, detail_level
+                )
+        except (ImportError, AttributeError):
+            pass
+
+        # Fallback to Python implementation
+        return self._scan_with_python(project_path, detail_level)
 
     def _scan_with_rust(self, project_path: str) -> List[Dict[str, Any]]:
         """Use high-performance Rust core for scanning."""
-        try:
-            import cde_rust_core
+        import cde_rust_core
 
-            # Call the fast Rust scanning function
-            result_json = cde_rust_core.scan_documentation_py(project_path)
-            return json.loads(result_json)
-        except ImportError:
-            # Rust module not available, raise error to trigger fallback
-            raise ImportError("Rust core module not available")
-        except Exception as e:
-            # Rust module failed, log and fallback to Python
-            print(
-                f"Warning: Rust scanning failed ({e}), falling back to Python implementation"
-            )
-            raise ImportError("Rust scanning failed")
+        # Call the fast Rust scanning function
+        result_json = cde_rust_core.scan_documentation_py(project_path)
+        return json.loads(result_json)  # type: ignore[no-any-return]
 
     def _process_rust_result(
-        self, rust_result: List[Dict[str, Any]], project_path: str
+        self,
+        rust_result: List[Dict[str, Any]],
+        project_path: str,
+        detail_level: str = "summary",
     ) -> Dict[str, Any]:
         """Process and enhance Rust scan results with Python logic."""
         project = Path(project_path)
 
+        # Build complete results first
         results = {
             "total_docs": len(rust_result),
             "scanned_at": datetime.now().isoformat(),
@@ -91,7 +103,7 @@ class ScanDocumentationUseCase:
             "recommendations": [],
         }
 
-        standard_dirs = {
+        standard_dirs: Dict[str, List[Dict[str, Any]]] = {
             "specs/features": [],
             "specs/design": [],
             "specs/tasks": [],
@@ -145,7 +157,8 @@ class ScanDocumentationUseCase:
         }
         results["recommendations"] = self._generate_recommendations(results)
 
-        return results
+        # Filter based on detail_level
+        return self._filter_by_detail_level(results, detail_level)
 
     def _enhance_location_categorization(
         self, by_location: Dict[str, Any], project: Path
@@ -155,7 +168,9 @@ class ScanDocumentationUseCase:
         # Python can add more sophisticated analysis if needed
         return by_location
 
-    def _scan_with_python(self, project_path: str) -> Dict[str, Any]:
+    def _scan_with_python(
+        self, project_path: str, detail_level: str = "summary"
+    ) -> Dict[str, Any]:
         """Fallback Python implementation."""
         # Import here to avoid circular import
         from mcp_tools._progress_http import report_progress_http
@@ -193,7 +208,7 @@ class ScanDocumentationUseCase:
         }
 
         # Standard directories
-        standard_dirs = {
+        standard_dirs: Dict[str, List[Dict[str, Any]]] = {
             "specs/features": [],
             "specs/design": [],
             "specs/tasks": [],
@@ -273,7 +288,60 @@ class ScanDocumentationUseCase:
         # Report completion
         report_progress_http("scanDocumentation", 1.0, "Scan complete")
 
-        return results
+        # Filter based on detail_level
+        return self._filter_by_detail_level(results, detail_level)
+
+    def _filter_by_detail_level(
+        self, results: Dict[str, Any], detail_level: str
+    ) -> Dict[str, Any]:
+        """
+        Filter results based on requested detail level for token efficiency.
+
+        Args:
+            results: Complete scan results
+            detail_level: "name_only", "summary", or "full"
+
+        Returns:
+            Filtered results with appropriate level of detail
+        """
+        if detail_level == "name_only":
+            # Minimal: Just file paths (~10 tokens/file)
+            all_files = []
+            for location, files in results.get("by_location", {}).items():
+                all_files.extend([f["path"] for f in files])
+
+            return {
+                "files": sorted(all_files),
+                "total": results["total_docs"],
+                "detail_level": "name_only",
+            }
+
+        elif detail_level == "summary":
+            # Balanced: Paths + key metadata (~50 tokens/file)
+            all_files = []
+            for location, files in results.get("by_location", {}).items():
+                for f in files:
+                    all_files.append(
+                        {
+                            "path": f["path"],
+                            "has_metadata": f.get("has_metadata", False),
+                            "location": location,
+                        }
+                    )
+
+            return {
+                "files": sorted(all_files, key=lambda x: x["path"]),
+                "total": results["total_docs"],
+                "missing_metadata": results["missing_metadata"],
+                "orphaned_count": len(results.get("orphaned_docs", [])),
+                "recommendations": results["recommendations"],
+                "detail_level": "summary",
+            }
+
+        else:  # full
+            # Complete: All details (~500 tokens/file)
+            results["detail_level"] = "full"
+            return results
 
     def _has_yaml_frontmatter(self, file_path: Path) -> bool:
         """Check if file has valid YAML frontmatter."""

@@ -16,6 +16,7 @@ from .full_implementation import cde_executeFullImplementation
 from .onboarding import cde_onboardingProject, cde_publishOnboarding, cde_setupProject
 from .orchestration import cde_selectWorkflow, cde_sourceSkill, cde_updateSkill
 from .test_progress import cde_testProgressReporting
+from .tool_search import cde_searchTools
 
 __all__ = [
     # Onboarding
@@ -40,4 +41,6 @@ __all__ = [
     "cde_testProgressReporting",
     # Extensions
     "cde_installMcpExtension",
+    # Tool Discovery (Progressive Disclosure - Anthropic Pattern)
+    "cde_searchTools",
 ]

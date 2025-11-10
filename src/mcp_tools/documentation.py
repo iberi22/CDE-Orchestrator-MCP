@@ -17,7 +17,9 @@ from ._base import tool_handler
 
 
 @tool_handler
-def cde_scanDocumentation(project_path: str = ".") -> str:
+def cde_scanDocumentation(
+    project_path: str = ".", detail_level: str = "summary"
+) -> str:
     """
     Scan and analyze documentation structure in a project.
 
@@ -27,36 +29,69 @@ def cde_scanDocumentation(project_path: str = ".") -> str:
     - Identify orphaned documents
     - Get recommendations for improvement
 
+    **PROGRESSIVE DISCLOSURE** (Anthropic Best Practice):
+    Use `detail_level` to control token consumption:
+    - "name_only": Just file paths (~10 tokens/file) - FASTEST
+    - "summary": Paths + titles + types (~50 tokens/file) - BALANCED
+    - "full": Complete metadata + preview (~500 tokens/file) - COMPREHENSIVE
+
     Args:
         project_path: Path to project root (default: current directory)
+        detail_level: Level of detail to return (default: "summary")
+            Options: "name_only", "summary", "full"
 
     Returns:
-        JSON with:
-            - total_docs: Total markdown files found
-            - by_location: Documents grouped by directory
-            - missing_metadata: Files without YAML frontmatter
-            - orphaned_docs: Files not in standard directories
-            - large_files: Documents exceeding 1000 lines
-            - recommendations: Actionable improvement suggestions
+        JSON with structure based on detail_level:
+
+        **name_only**:
+            - files: List[str] - Just file paths
+            - total: int - Total count
+
+        **summary**:
+            - files: List[Dict] - Path, title, type, status
+            - total: int
+            - missing_metadata: List[str]
+            - recommendations: List[str]
+
+        **full**:
+            - files: List[Dict] - Complete metadata + first 100 lines
+            - total: int
+            - by_location: Dict[str, List]
+            - missing_metadata: List[str]
+            - orphaned_docs: List[str]
+            - large_files: List[str]
+            - recommendations: List[str]
 
     Examples:
-        >>> cde_scanDocumentation(".")
+        >>> cde_scanDocumentation(".", detail_level="name_only")
         {
-          "total_docs": 45,
-          "missing_metadata": ["docs/old-guide.md", "README-backup.md"],
-          "recommendations": [
-            "🔴 12 documents missing YAML frontmatter metadata",
-            "⚠️ 3 orphaned documents in root directory"
-          ]
+          "files": ["specs/features/auth.md", "specs/design/architecture.md"],
+          "total": 2
         }
 
-        >>> cde_scanDocumentation("E:\\my-project")
-        # Scan specific project
+        >>> cde_scanDocumentation(".", detail_level="summary")
+        {
+          "files": [
+            {"path": "specs/features/auth.md", "title": "Authentication", "type": "feature"},
+            {"path": "specs/design/architecture.md", "title": "Architecture", "type": "design"}
+          ],
+          "total": 2,
+          "missing_metadata": [],
+          "recommendations": ["✅ All files have metadata"]
+        }
+
+        >>> cde_scanDocumentation("E:\\my-project", detail_level="full")
+        # Complete scan with all details
+
+    **Token Impact**:
+    - 100 files × name_only = ~1,000 tokens (vs 50,000 with full)
+    - 100 files × summary = ~5,000 tokens (vs 50,000 with full)
+    - Reduction: 80-98% depending on detail level
 
     **Common Use Cases:**
-    1. Initial project audit: `cde_scanDocumentation(".")`
-    2. Before migration: Check what needs fixing
-    3. After cleanup: Verify improvements
+    1. Quick inventory: `cde_scanDocumentation(".", detail_level="name_only")`
+    2. Initial audit: `cde_scanDocumentation(".", detail_level="summary")`
+    3. Deep analysis: `cde_scanDocumentation(".", detail_level="full")`
     """
     use_case = ScanDocumentationUseCase()
 
@@ -64,7 +99,7 @@ def cde_scanDocumentation(project_path: str = ".") -> str:
     if project_path == ".":
         project_path = os.getcwd()
 
-    result = use_case.execute(project_path)
+    result = use_case.execute(project_path, detail_level=detail_level)
     return json.dumps(result, indent=2)
 
 
