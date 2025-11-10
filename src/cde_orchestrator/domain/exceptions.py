@@ -6,12 +6,19 @@ All exceptions in this module represent violations of business rules
 or invariants in the domain model. They should be caught and handled
 by the application layer, never in the domain itself.
 
+Phase 4 Enhancement:
+    - Numeric error codes (E001-E999)
+    - Recovery strategies (recoverable flag)
+    - Timestamps for audit trail
+    - Enhanced context capture
+
 Design for LLMs:
     - Clear error messages
     - Machine-readable error codes
     - Structured context data
 """
 
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 
@@ -24,19 +31,24 @@ class DomainError(Exception):
 
     Attributes:
         message: Human/LLM-readable error description
-        code: Machine-readable error identifier
+        code: Machine-readable error identifier (E001-E999)
         context: Additional structured data about the error
+        recoverable: Whether error allows retry
+        timestamp: When error occurred (ISO 8601 UTC)
     """
 
     def __init__(
         self,
         message: str,
-        code: str = "DOMAIN_ERROR",
+        code: str = "E000",
         context: Optional[Dict[str, Any]] = None,
+        recoverable: bool = False,
     ):
         self.message = message
         self.code = code
         self.context = context or {}
+        self.recoverable = recoverable
+        self.timestamp = datetime.now(timezone.utc)
         super().__init__(message)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -46,12 +58,17 @@ class DomainError(Exception):
             "code": self.code,
             "message": self.message,
             "context": self.context,
+            "recoverable": self.recoverable,
+            "timestamp": self.timestamp.isoformat(),
         }
 
 
 class ProjectNotFoundError(DomainError):
     """
     Raised when attempting to access a non-existent project.
+
+    Error Code: E001 (Project Errors)
+    Recoverable: False (project doesn't exist)
 
     Examples:
         >>> raise ProjectNotFoundError("proj-123")
@@ -61,14 +78,18 @@ class ProjectNotFoundError(DomainError):
     def __init__(self, project_id: str):
         super().__init__(
             message=f"Project '{project_id}' not found",
-            code="PROJECT_NOT_FOUND",
+            code="E001",
             context={"project_id": project_id},
+            recoverable=False,
         )
 
 
 class FeatureNotFoundError(DomainError):
     """
     Raised when attempting to access a non-existent feature.
+
+    Error Code: E102 (Feature Errors)
+    Recoverable: False (feature doesn't exist)
 
     Examples:
         >>> raise FeatureNotFoundError("feat-456", "proj-123")
@@ -78,14 +99,18 @@ class FeatureNotFoundError(DomainError):
     def __init__(self, feature_id: str, project_id: str):
         super().__init__(
             message=f"Feature '{feature_id}' not found in project '{project_id}'",
-            code="FEATURE_NOT_FOUND",
+            code="E102",
             context={"feature_id": feature_id, "project_id": project_id},
+            recoverable=False,
         )
 
 
 class InvalidStateTransitionError(DomainError):
     """
     Raised when attempting an invalid status transition.
+
+    Error Code: E101 (Feature Status Errors)
+    Recoverable: True (user can fix state first)
 
     Examples:
         >>> raise InvalidStateTransitionError(
@@ -97,18 +122,22 @@ class InvalidStateTransitionError(DomainError):
     def __init__(self, entity_type: str, from_status: str, to_status: str):
         super().__init__(
             message=f"Cannot transition {entity_type} from '{from_status}' to '{to_status}'",
-            code="INVALID_STATE_TRANSITION",
+            code="E101",
             context={
                 "entity_type": entity_type,
                 "from_status": from_status,
                 "to_status": to_status,
             },
+            recoverable=True,
         )
 
 
 class WorkflowValidationError(DomainError):
     """
     Raised when workflow definition or execution is invalid.
+
+    Error Code: E402 (Workflow Parse Errors)
+    Recoverable: False (workflow definition issue)
 
     Examples:
         >>> raise WorkflowValidationError(
@@ -119,14 +148,18 @@ class WorkflowValidationError(DomainError):
     def __init__(self, message: str, workflow_name: Optional[str] = None):
         super().__init__(
             message=message,
-            code="WORKFLOW_VALIDATION_ERROR",
+            code="E402",
             context={"workflow_name": workflow_name} if workflow_name else {},
+            recoverable=False,
         )
 
 
 class PhaseNotFoundError(DomainError):
     """
     Raised when referencing a non-existent workflow phase.
+
+    Error Code: E403 (Workflow Phase Errors)
+    Recoverable: False (phase doesn't exist)
 
     Examples:
         >>> raise PhaseNotFoundError("invalid_phase", "default")
@@ -136,14 +169,18 @@ class PhaseNotFoundError(DomainError):
     def __init__(self, phase_id: str, workflow_name: str):
         super().__init__(
             message=f"Phase '{phase_id}' not found in workflow '{workflow_name}'",
-            code="PHASE_NOT_FOUND",
+            code="E403",
             context={"phase_id": phase_id, "workflow_name": workflow_name},
+            recoverable=False,
         )
 
 
 class ArtifactValidationError(DomainError):
     """
     Raised when phase results don't meet requirements.
+
+    Error Code: E301 (Validation Errors)
+    Recoverable: True (user can provide correct artifacts)
 
     Examples:
         >>> raise ArtifactValidationError(
@@ -156,19 +193,23 @@ class ArtifactValidationError(DomainError):
         missing = set(required) - set(provided)
         super().__init__(
             message=f"Phase '{phase_id}' missing required artifacts: {list(missing)}",
-            code="ARTIFACT_VALIDATION_ERROR",
+            code="E301",
             context={
                 "phase_id": phase_id,
                 "required": required,
                 "provided": provided,
                 "missing": list(missing),
             },
+            recoverable=True,
         )
 
 
 class CodeExecutionError(DomainError):
     """
     Raised when code execution fails.
+
+    Error Code: E500 (Execution Errors)
+    Recoverable: True (might work on retry)
 
     Examples:
         >>> raise CodeExecutionError("Syntax error in generated code")
@@ -177,14 +218,18 @@ class CodeExecutionError(DomainError):
     def __init__(self, message: str, execution_log: Optional[str] = None):
         super().__init__(
             message=message,
-            code="CODE_EXECUTION_ERROR",
+            code="E500",
             context={"execution_log": execution_log} if execution_log else {},
+            recoverable=True,
         )
 
 
 class RepositoryError(DomainError):
     """
     Raised when repository operations fail.
+
+    Error Code: E201 (State Load Errors)
+    Recoverable: True (retry might work)
 
     This is a domain error because it represents a violation of
     our expectation that persistence should work. The application
@@ -194,6 +239,7 @@ class RepositoryError(DomainError):
     def __init__(self, operation: str, details: str):
         super().__init__(
             message=f"Repository operation '{operation}' failed: {details}",
-            code="REPOSITORY_ERROR",
+            code="E201",
             context={"operation": operation, "details": details},
+            recoverable=True,
         )
