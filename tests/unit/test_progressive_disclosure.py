@@ -165,7 +165,7 @@ class TestProgressiveDisclosure:
 class TestToolSearch:
     """Test suite for tool search functionality."""
 
-    def test_search_tools_name_only(self -> None:
+    def test_search_tools_name_only(self):  # type: ignore
         """Test searchTools with name_only detail level."""
         result_json = cde_searchTools("skill", detail_level="name_only")
         result = json.loads(result_json)
@@ -187,7 +187,7 @@ class TestToolSearch:
         # Should find skill-related tools
         assert result["total"] >= 2  # sourceSkill, updateSkill
 
-    def test_search_tools_name_and_description(self -> None:
+    def test_search_tools_name_and_description(self):  # type: ignore
         """Test searchTools with name_and_description detail level."""
         result_json = cde_searchTools("workflow", detail_level="name_and_description")
         result = json.loads(result_json)
@@ -203,7 +203,7 @@ class TestToolSearch:
             assert "description" in tool
             assert "tags" in tool
 
-    def test_search_tools_full_schema(self -> None:
+    def test_search_tools_full_schema(self):  # type: ignore
         """Test searchTools with full_schema detail level."""
         result_json = cde_searchTools("scan", detail_level="full_schema")
         result = json.loads(result_json)
@@ -221,7 +221,7 @@ class TestToolSearch:
             assert "parameters" in tool
             assert "tags" in tool
 
-    def test_search_tools_no_query(self -> None:
+    def test_search_tools_no_query(self):  # type: ignore
         """Test searchTools without query (list all)."""
         result_json = cde_searchTools(detail_level="name_only")
         result = json.loads(result_json)
@@ -230,7 +230,7 @@ class TestToolSearch:
         assert "tools" in result
         assert result["total"] > 10  # CDE has 40+ tools
 
-    def test_search_tools_invalid_detail_level(self -> None:
+    def test_search_tools_invalid_detail_level(self):  # type: ignore
         """Test searchTools with invalid detail level."""
         result_json = cde_searchTools("test", detail_level="invalid")
         result = json.loads(result_json)
@@ -243,7 +243,7 @@ class TestToolSearch:
 class TestMCPToolSearcher:
     """Test suite for MCPToolSearcher adapter."""
 
-    def test_searcher_initialization(self -> None:
+    def test_searcher_initialization(self):  # type: ignore
         """Test searcher can be initialized."""
         import mcp_tools
 
@@ -252,7 +252,7 @@ class TestMCPToolSearcher:
         assert searcher is not None
         assert searcher.mcp_tools_module == mcp_tools
 
-    def test_searcher_discover_tools(self -> None:
+    def test_searcher_discover_tools(self):  # type: ignore
         """Test tool discovery."""
         import mcp_tools
 
@@ -271,7 +271,7 @@ class TestMCPToolSearcher:
             assert "parameters" in tool
             assert "tags" in tool
 
-    def test_searcher_search_by_keyword(self -> None:
+    def test_searcher_search_by_keyword(self):  # type: ignore
         """Test keyword search."""
         import mcp_tools
 
@@ -286,7 +286,7 @@ class TestMCPToolSearcher:
             or "analyzeDocumentation" in result["tools"]
         )
 
-    def test_searcher_list_all(self -> None:
+    def test_searcher_list_all(self):  # type: ignore
         """Test listing all tools."""
         import mcp_tools
 
@@ -297,7 +297,7 @@ class TestMCPToolSearcher:
         assert result["total"] > 10
         assert len(result["tools"]) == result["total"]
 
-    def test_searcher_tag_extraction(self -> None:
+    def test_searcher_tag_extraction(self):  # type: ignore
         """Test automatic tag extraction."""
         import mcp_tools
 
@@ -319,7 +319,7 @@ class TestMCPToolSearcher:
 class TestTokenEfficiencyBenchmarks:
     """Benchmark tests for token efficiency (Anthropic's 98.7% goal)."""
 
-    def test_tool_discovery_token_reduction(self -> None:
+    def test_tool_discovery_token_reduction(self):  # type: ignore
         """Benchmark: Tool discovery should achieve 98%+ token reduction."""
         import mcp_tools
 
@@ -346,7 +346,7 @@ class TestTokenEfficiencyBenchmarks:
         # Should achieve Anthropic's 98.7% goal
         assert reduction > 95  # At least 95% reduction
 
-    def test_multi_project_token_efficiency(self -> None:
+    def test_multi_project_token_efficiency(self):  # type: ignore
         """Benchmark: Multi-project scenario should show massive savings."""
         import mcp_tools
 
@@ -379,5 +379,3 @@ class TestTokenEfficiencyBenchmarks:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s"])
-
-

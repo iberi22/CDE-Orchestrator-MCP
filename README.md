@@ -112,10 +112,14 @@ The following tools are currently implemented and available for use. For a detai
 
 **NEW (2025-11-09)**: CDE Orchestrator now implements Anthropic's progressive disclosure pattern, achieving **99% token reduction** for multi-project management.
 
+**Phase 1** (Completed): In-memory tool discovery via `cde_searchTools`
+**Phase 2** (Completed): Filesystem-based discovery via auto-generated `./servers/cde/` structure
+
 **Key Benefits**:
 - **99.0% reduction** in tool discovery overhead (39,568 → 377 bytes)
 - **99.7% reduction** for multi-project workflows (118,704 → 390 bytes for 3 projects)
 - **Scales to 1000+ projects** in the same token budget as 1 traditional project
+- **Auto-generated filesystem** for minimal overhead (one `.py` file per tool)
 
 **How It Works**:
 All documentation and discovery tools now support a `detail_level` parameter:
@@ -125,6 +129,12 @@ All documentation and discovery tools now support a `detail_level` parameter:
 | `name_only` | Quick overview, list items | **90-99%** |
 | `summary` | Moderate detail, filtering | **50-80%** |
 | `full` | Complete information | **0%** (baseline) |
+
+**Filesystem Discovery**:
+The server auto-generates `./servers/cde/` on startup with one Python file per tool:
+- **name_only**: List files = 377 bytes (99.0% reduction)
+- **summary**: Import metadata = ~3KB (92% reduction)
+- **full**: Load actual tool = ~40KB (baseline)
 
 **Example**:
 ```python

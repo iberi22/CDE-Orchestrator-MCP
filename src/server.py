@@ -1,6 +1,8 @@
 # src/server.py
 import logging
 import os
+import sys
+from pathlib import Path
 
 from dotenv import load_dotenv
 from fastmcp import FastMCP
@@ -28,8 +30,31 @@ load_dotenv()
 logging.basicConfig(level=os.environ.get("CDE_LOG_LEVEL", "INFO"))
 logger = logging.getLogger(__name__)
 
+
+# Auto-generate MCP tool filesystem structure (Anthropic best practice)
+def _generate_mcp_filesystem() -> None:
+    """Generate ./servers/cde/ filesystem on startup."""
+    try:
+        import mcp_tools
+        from cde_orchestrator.application.tools.generate_filesystem_use_case import (
+            GenerateFilesystemUseCase,
+        )
+
+        project_root = Path(__file__).parent.parent
+        use_case = GenerateFilesystemUseCase()
+        result = use_case.execute(mcp_tools_module=mcp_tools, output_dir=project_root)
+
+        logger.info(f"✅ Generated {result['total_tools']} MCP tool files")
+        logger.info(f"📁 Filesystem structure: {result['output_dir']}")
+    except Exception as e:
+        logger.warning(f"⚠️  Could not generate filesystem structure: {e}")
+        logger.warning("   Server will continue without filesystem-based discovery.")
+
 # FastMCP App Initialization
 app = FastMCP("CDE Orchestrator MCP")
+
+# Auto-generate filesystem structure on startup
+_generate_mcp_filesystem()
 
 # Tool Registration with Dependency Injection
 app.tool()(cde_onboardingProject)

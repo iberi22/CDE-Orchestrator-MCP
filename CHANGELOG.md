@@ -22,6 +22,39 @@ llm_summary: "Changelog for CDE Orchestrator MCP.\n
 
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Phase 2: Filesystem-Based Tool Discovery** (Anthropic best practice)
+  - `MCPToolFilesystemGenerator` adapter for auto-generating `./servers/cde/` structure
+  - One `.py` file per MCP tool with typed signatures and metadata
+  - `GenerateFilesystemUseCase` for orchestrating generation
+  - Auto-generation on server startup (see `src/server.py`)
+  - Script `scripts/generate_mcp_filesystem.py` for manual generation
+  - 11 comprehensive unit tests validating generation and token efficiency
+  - Filesystem structure enables:
+    - **name_only**: List files = 377 bytes (99.0% reduction)
+    - **summary**: Import metadata = ~3KB (92% reduction)
+    - **full**: Load actual tool = ~40KB (baseline)
+
+### Changed
+
+- Updated `src/server.py` to auto-generate filesystem on startup
+- Enhanced `MCPToolFilesystemGenerator` with clean type annotations
+- Fixed parameter ordering (required before optional) in generated files
+
+### Technical Details
+
+- Files Modified: `src/server.py`
+- Files Created:
+  - `src/cde_orchestrator/adapters/mcp_tool_filesystem_generator.py` (263 lines)
+  - `src/cde_orchestrator/application/tools/generate_filesystem_use_case.py` (41 lines)
+  - `src/cde_orchestrator/application/tools/__init__.py`
+  - `scripts/generate_mcp_filesystem.py` (40 lines)
+  - `tests/unit/test_filesystem_generator.py` (200 lines, 11 tests)
+  - `servers/cde/*.py` (16 tool files + __init__.py)
+
 ## [0.4.0] - 2025-11-09
 
 ### Added - Progressive Disclosure Pattern (Token Optimization)
