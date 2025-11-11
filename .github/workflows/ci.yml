@@ -22,8 +22,11 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -e ".[dev]"
-        pip install pytest-asyncio
+        # Install Python dependencies only (skip Rust extension build)
+        pip install fastmcp==2.13.0 pyyaml pydantic python-dotenv lxml pathspec
+        pip install pytest>=7.0 flake8>=6.0 black>=23.0 mypy>=1.0 isort>=5.0 types-PyYAML pytest-cov pytest-asyncio
+        # Install package in editable mode without building (Rust core is optional)
+        pip install --no-build-isolation --no-deps -e .
 
     - name: Run pre-commit hooks
       run: |
