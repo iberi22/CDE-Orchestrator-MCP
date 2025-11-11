@@ -12,7 +12,7 @@ from pathlib import Path
 import boto3
 
 
-def check_aws_credentials():
+def check_aws_credentials() -> bool:
     """Verificar si las credenciales AWS están configuradas"""
     try:
         session = boto3.Session()
@@ -30,7 +30,7 @@ def check_aws_credentials():
         return False
 
 
-def check_bedrock_access():
+def check_bedrock_access() -> bool:
     """Verificar acceso a Bedrock"""
     try:
         client = boto3.client("bedrock", region_name="us-east-1")
@@ -60,7 +60,7 @@ def check_bedrock_access():
         return False
 
 
-def generate_claude_code_config():
+def generate_claude_code_config() -> dict:
     """Generar configuración para Claude Code con Bedrock"""
     config = {
         "provider": "bedrock",
@@ -71,7 +71,7 @@ def generate_claude_code_config():
     return config
 
 
-def generate_aider_config():
+def generate_aider_config() -> dict:
     """Generar configuración para Aider con Bedrock"""
     config = {
         "model": "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0",
@@ -81,7 +81,7 @@ def generate_aider_config():
     return config
 
 
-def save_bedrock_config(config_dir: Path):
+def save_bedrock_config(config_dir: Path) -> tuple[Path, Path]:
     """Guardar configuraciones para Claude Code y Aider"""
     config_dir.mkdir(parents=True, exist_ok=True)
 
@@ -102,7 +102,7 @@ def save_bedrock_config(config_dir: Path):
     return claude_config_path, aider_config_path
 
 
-def create_env_file():
+def create_env_file() -> Path:
     """Crear archivo .env con variables de Bedrock"""
     env_path = Path(".env.bedrock")
 
@@ -134,7 +134,7 @@ AIDER_AWS_PROFILE=bedrock
     return env_path
 
 
-def main():
+def main() -> int:
     """Ejecutar setup completo de Bedrock"""
     print("=" * 70)
     print("🚀 BEDROCK SETUP FOR CLAUDE CODE & AIDER")

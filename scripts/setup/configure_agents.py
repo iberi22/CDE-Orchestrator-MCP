@@ -11,7 +11,7 @@ import subprocess
 from pathlib import Path
 
 
-def setup_bedrock_env():
+def setup_bedrock_env() -> None:
     """Configurar variables de entorno para Bedrock"""
     print("=" * 70)
     print("🔧 CONFIGURANDO BEDROCK VARIABLES DE ENTORNO")
@@ -38,7 +38,7 @@ def setup_bedrock_env():
     print("\n✅ Variables de entorno configuradas")
 
 
-def test_claude_code():
+def test_claude_code() -> bool:
     """Probar Claude Code con Bedrock"""
     print("\n" + "=" * 70)
     print("🧪 PROBANDO CLAUDE CODE CON BEDROCK")
@@ -75,7 +75,7 @@ claude-code run \\
     return True
 
 
-def test_aider():
+def test_aider() -> bool:
     """Probar Aider con Bedrock"""
     print("\n" + "=" * 70)
     print("🧪 PROBANDO AIDER CON BEDROCK")
@@ -110,7 +110,7 @@ aider --model bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0
     return True
 
 
-def generate_orchestration_config():
+def generate_orchestration_config() -> Path:
     """Generar configuración para orchestration con agentes"""
     config = {
         "agents": {
@@ -145,7 +145,7 @@ def generate_orchestration_config():
     return config_path
 
 
-def main():
+def main() -> int:
     """Ejecutar setup y pruebas"""
     print("\n")
     setup_bedrock_env()
@@ -165,7 +165,10 @@ def main():
     print("   1. Usa 'orchestrate.py' para ejecutar tareas con agentes")
     print("   2. Configura MCP server para integración completa")
     print("   3. Ejecuta: python orchestrate.py --phase phase1")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    sys.exit(main())
