@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-def run_command(cmd):
+def run_command(cmd: str) -> tuple[str, str]:
     """Run shell command and return output"""
     result = subprocess.run(
         cmd,
@@ -20,7 +20,7 @@ def run_command(cmd):
     return result.stdout.strip(), result.stderr.strip()
 
 
-def get_completion_status():
+def get_completion_status() -> dict[str, bool]:
     """Check completion status of key tasks from roadmap"""
 
     status = {
@@ -59,7 +59,7 @@ def get_completion_status():
 
     # Check performance improvements (look for caching, tiktoken)
     try:
-        stdout, _ = run_command('grep -r "diskcache\|tiktoken" src/ | wc -l')
+        stdout, _ = run_command('grep -r "diskcache\\|tiktoken" src/ | wc -l')
         perf_libs = int(stdout.strip()) if stdout.strip().isdigit() else 0
         status["performance_improvements"] = perf_libs > 0
     except (ValueError, AttributeError):
@@ -68,7 +68,7 @@ def get_completion_status():
     return status
 
 
-def create_progress_report():
+def create_progress_report() -> None:
     """Create a comprehensive progress report"""
 
     print("🚀 CDE Orchestrator MCP - Jules Parallel Development Progress")
