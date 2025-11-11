@@ -16,7 +16,7 @@ Design Principles:
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List, Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, Field, field_validator
@@ -272,64 +272,21 @@ class FeatureState(BaseModel):
             data["completed_at"] = self.completed_at.isoformat()  # type: ignore[attr-defined]
         return data
 
-    # ============================================================================
-    # VALUE OBJECTS
-    # ============================================================================
 
-    """Valid workflow phase identifiers."""
-
-    DEFINE = "define"
-    DECOMPOSE = "decompose"
-    DESIGN = "design"
-    IMPLEMENT = "implement"
-    TEST = "test"
-    REVIEW = "review"
+# ============================================================================
+# VALUE OBJECTS
+# ============================================================================
 
 
-class FeatureStatus(str, Enum):
-    """
-    Feature lifecycle states matching CDE workflow phases.
+class PhaseStatusValue:
+    """Valid workflow phase identifiers - moved to PhaseStatus enum above."""
 
-    Linear progression:
-        DEFINING → DECOMPOSING → DESIGNING →
-        IMPLEMENTING → TESTING → REVIEWING → COMPLETED
+    pass
 
-    Or can jump to FAILED from any state.
-    """
 
-    DEFINING = "defining"
-    DECOMPOSING = "decomposing"
-    DESIGNING = "designing"
-    IMPLEMENTING = "implementing"
-    TESTING = "testing"
-    REVIEWING = "reviewing"
-    COMPLETED = "completed"
-    FAILED = "failed"
-
-    @classmethod
-    def from_phase(cls, phase_id: str) -> "FeatureStatus":
-        """
-        Map workflow phase ID to feature status.
-
-        Args:
-            phase_id: Phase identifier (e.g., "define", "decompose")
-
-        Returns:
-            Corresponding FeatureStatus
-
-        Examples:
-            >>> FeatureStatus.from_phase("define")
-            FeatureStatus.DEFINING
-        """
-        mapping = {
-            "define": cls.DEFINING,
-            "decompose": cls.DECOMPOSING,
-            "design": cls.DESIGNING,
-            "implement": cls.IMPLEMENTING,
-            "test": cls.TESTING,
-            "review": cls.REVIEWING,
-        }
-        return mapping.get(phase_id, cls.FAILED)
+# ============================================================================
+# DOMAIN ENTITIES
+# ============================================================================
 
 
 # ============================================================================
@@ -337,6 +294,7 @@ class FeatureStatus(str, Enum):
 # ============================================================================
 
 
+@dataclass
 class Feature:
     """
     Aggregate: Represents a unit of work within a project.
