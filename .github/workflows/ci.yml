@@ -19,14 +19,20 @@ jobs:
       with:
         python-version: '3.13'
 
+    - name: Set up Rust
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        toolchain: stable
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        # Install Python dependencies only (skip Rust extension build)
+        pip install maturin
+        # Install Python dependencies
         pip install fastmcp==2.13.0 pyyaml pydantic python-dotenv lxml pathspec
         pip install pytest>=7.0 flake8>=6.0 black>=23.0 mypy>=1.0 isort>=5.0 types-PyYAML pytest-cov pytest-asyncio
-        # Install package in editable mode without building (Rust core is optional)
-        pip install --no-build-isolation --no-deps -e .
+        # Build and install with Rust extension (now using Python 3.13 which is supported by PyO3 0.24.1)
+        pip install -e ".[dev]"
 
     - name: Run pre-commit hooks
       run: |

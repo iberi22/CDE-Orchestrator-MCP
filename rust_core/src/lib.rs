@@ -1,6 +1,5 @@
 // src/lib.rs
 use pyo3::prelude::*;
-use pyo3::wrap_pyfunction;
 
 mod filesystem;
 mod documentation;
@@ -22,7 +21,7 @@ fn scan_documentation_py(root_path: String) -> PyResult<String> {
 
 /// A Python module implemented in Rust.
 #[pymodule]
-fn cde_rust_core(_py: Python, m: &PyModule) -> PyResult<()> {
+fn cde_rust_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(scan_documentation_py, m)?)?;
     Ok(())
 }
