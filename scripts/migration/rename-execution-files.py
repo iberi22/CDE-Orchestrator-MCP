@@ -72,7 +72,7 @@ def generate_new_filename(old_filename: str) -> str:
     return f"EXECUTIONS-{title}-{date}-{time}.md"
 
 
-def rename_execution_files(execution_dir: Path, dry_run: bool = False):
+def rename_execution_files(execution_dir: Path, dry_run: bool = False) -> None:
     """
     Rename all execution files to new standard.
 
@@ -138,7 +138,7 @@ def rename_execution_files(execution_dir: Path, dry_run: bool = False):
         print("\n💡 Run without --dry-run to apply changes")
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Rename execution files to standard format"
     )
@@ -152,10 +152,13 @@ def main():
     execution_dir = Path("agent-docs/execution")
     if not execution_dir.exists():
         print(f"❌ Directory not found: {execution_dir}")
-        return
+        return 1
 
     rename_execution_files(execution_dir, dry_run=args.dry_run)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    sys.exit(main())

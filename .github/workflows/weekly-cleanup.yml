@@ -29,12 +29,6 @@ jobs:
         run: |
           pip install requests python-dotenv pyyaml
 
-      - name: Run consolidation script
-        env:
-          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}  # Grok API key (free tier)
-        run: |
-          python scripts/consolidation/weekly-cleanup-with-grok.py
-
       - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"

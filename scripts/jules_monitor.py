@@ -9,13 +9,13 @@ from datetime import datetime
 from pathlib import Path
 
 
-def run_command(cmd):
+def run_command(cmd: str) -> str:
     """Run shell command and return output"""
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
     return result.stdout.strip()
 
 
-def get_sessions_status():
+def get_sessions_status() -> list[dict[str, str]]:
     """Get status of all Jules sessions"""
     output = run_command("jules remote list --session")
     if not output:
@@ -86,7 +86,7 @@ def get_sessions_status():
     return sessions
 
 
-def monitor_sessions():
+def monitor_sessions() -> None:
     """Monitor Jules sessions and report progress"""
     print("🚀 Jules Session Monitor - CDE Orchestrator MCP")
     print("=" * 60)
@@ -98,7 +98,12 @@ def monitor_sessions():
         return
 
     # Group sessions by phase
-    phases = {"PHASE 2": [], "PHASE 3": [], "PHASE 4": [], "PHASE 5": []}
+    phases: dict[str, list[dict[str, str]]] = {
+        "PHASE 2": [],
+        "PHASE 3": [],
+        "PHASE 4": [],
+        "PHASE 5": [],
+    }
 
     completed = 0
     in_progress = 0

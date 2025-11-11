@@ -256,7 +256,7 @@ def save_weekly_report(markdown: str, year: int, week: int) -> Path:
     return output_file
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Generate weekly summary from Git commits"
     )

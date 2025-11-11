@@ -10,7 +10,7 @@ import logging
 import os
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 # Configure logging
 logging.basicConfig(
@@ -192,7 +192,7 @@ class AiderBedrockAgent:
             logger.error(f"Task execution failed: {e}")
             return {"status": "error", "exit_code": -1, "error": str(e)}
 
-    def get_bedrock_models(self) -> Optional[list]:
+    def get_bedrock_models(self) -> Optional[list[Any]]:
         """
         List available Bedrock models.
 
@@ -220,7 +220,7 @@ class AiderBedrockAgent:
 
             if result.returncode == 0:
                 data = json.loads(result.stdout)
-                models = data.get("modelSummaries", [])
+                models = cast(list[Any], data.get("modelSummaries", []))
                 logger.info(f"Found {len(models)} models")
                 return models
             else:

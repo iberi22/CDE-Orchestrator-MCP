@@ -456,7 +456,11 @@ def print_report(errors: List[ValidationError], verbose: bool = False) -> bool:
         return False
 
     # Group by severity
-    by_severity: Dict[str, List[ValidationError]] = {"error": [], "warning": [], "info": []}
+    by_severity: Dict[str, List[ValidationError]] = {
+        "error": [],
+        "warning": [],
+        "info": [],
+    }
     for error in errors:
         by_severity[error.severity].append(error)
 

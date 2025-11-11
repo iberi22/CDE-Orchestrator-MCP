@@ -198,7 +198,7 @@ def main() -> int:
     else:
         fixed, total = fixer.fix_all(args.dry_run)
         print(f"Processed {total} files, fixed {fixed} files")
-    
+
     return 0
 
 
