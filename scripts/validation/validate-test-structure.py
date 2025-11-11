@@ -134,7 +134,7 @@ def find_misplaced_tests(repo_root: Path) -> List[Path]:
     return misplaced
 
 
-def main():
+def main() -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Validate test structure")
     parser.add_argument(

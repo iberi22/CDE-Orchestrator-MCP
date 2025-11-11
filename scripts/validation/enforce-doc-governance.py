@@ -235,7 +235,7 @@ def _iter_input_files(argv: list[str]) -> list[str]:
     return files
 
 
-def main():
+def main() -> int:
     """
     Entry point for pre-commit hook.
 

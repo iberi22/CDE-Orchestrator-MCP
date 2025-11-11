@@ -20,7 +20,7 @@ import re
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import yaml
 
@@ -135,7 +135,7 @@ class ValidationError:
         self.message = message
         self.severity = severity  # "error", "warning", "info"
 
-    def __str__(self):
+    def __str__(self) -> str:
         color = Colors.RED if self.severity == "error" else Colors.YELLOW
         emoji_map = {"error": "[ERR]", "warning": "[WRN]", "info": "[INF]"}
         emoji = emoji_map.get(self.severity, "[?]")
@@ -244,7 +244,7 @@ def validate_naming(file_path: str) -> Optional[ValidationError]:
 
 def validate_frontmatter(file_path: str) -> List[ValidationError]:
     """Validate YAML frontmatter in markdown file."""
-    errors = []
+    errors: List[ValidationError] = []
 
     # Skip .github/ (special case - no frontmatter required)
     if ".github" in file_path:
@@ -447,7 +447,7 @@ def find_all_md_files(root_dir: str = ".") -> List[str]:
     return sorted(md_files)
 
 
-def print_report(errors: List[ValidationError], verbose: bool = False):
+def print_report(errors: List[ValidationError], verbose: bool = False) -> bool:
     """Print professional validation report."""
     if not errors:
         print(
@@ -456,7 +456,7 @@ def print_report(errors: List[ValidationError], verbose: bool = False):
         return False
 
     # Group by severity
-    by_severity = {"error": [], "warning": [], "info": []}
+    by_severity: Dict[str, List[ValidationError]] = {"error": [], "warning": [], "info": []}
     for error in errors:
         by_severity[error.severity].append(error)
 
@@ -504,7 +504,7 @@ def print_report(errors: List[ValidationError], verbose: bool = False):
     return error_count > 0
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Validate documentation governance compliance",
         formatter_class=argparse.RawDescriptionHelpFormatter,

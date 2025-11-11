@@ -264,7 +264,7 @@ def get_staged_files(repo_root: Path) -> List[Path]:
         return []
 
 
-def main():
+def main() -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Validate markdown file metadata")
     parser.add_argument(
