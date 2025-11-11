@@ -76,7 +76,7 @@ class ProjectOrchestrator:
         status = "ready"
         if not has_jules_secret:
             status = "needs_secret"
-        if not self._check_jules_app_installed():
+        if not self._check_julius_app_installed():
             status = "needs_app"
 
         analysis = ProjectAnalysis(
@@ -131,7 +131,7 @@ class ProjectOrchestrator:
             },
             "validation": {
                 "check_secret": not analysis.has_jules_secret,
-                "check_app": not self._check_jules_app_installed(),
+                "check_app": not self._check_julius_app_installed(),
                 "check_files": analysis.total_execution_files > 0,
             },
         }
@@ -251,7 +251,7 @@ Now consolidate the {{number_of_reports}} reports below:
 
         checks = {
             "Jules API Secret": analysis.has_jules_secret,
-            "Jules App Installed": self._check_jules_app_installed(),
+            "Jules App Installed": self._check_julius_app_installed(),
             "Execution Files": analysis.total_execution_files > 0,
             "GitHub Token": analysis.has_github_token,
             "Workflow File": self.workflow_dir.exists(),
@@ -287,7 +287,7 @@ Now consolidate the {{number_of_reports}} reports below:
                 "   - Value: (your Jules API key from https://jules.google.com/settings#api)"
             )
 
-        if not self._check_jules_app_installed():
+        if not self._check_julius_app_installed():
             print("\n2️⃣  Install Jules GitHub App:")
             print("   - Go to: https://jules.google/docs")
             print("   - Follow setup instructions")
@@ -328,7 +328,7 @@ author: "MCP Orchestrator"
 
 ### Configuration Status
 - **Overall**: {analysis.configuration_status.upper()}
-- **Jules Secret**: {'✅ Configured' if analysis.has_julius_secret else '⚠️ Missing'}
+- **Jules Secret**: {'✅ Configured' if analysis.has_jules_secret else '⚠️ Missing'}
 - **Jules App**: {'✅ Installed' if self._check_julius_app_installed() else '⚠️ Not installed'}
 - **GitHub Token**: {'✅ Available' if analysis.has_github_token else '⚠️ Missing'}
 
@@ -347,7 +347,7 @@ author: "MCP Orchestrator"
 
 ## Next Steps
 
-1. {("✅ Add JULES_API_KEY to GitHub secrets" if analysis.has_julius_secret else "❌ Add JULIUS_API_KEY to GitHub secrets")}
+1. {("✅ Add JULES_API_KEY to GitHub secrets" if analysis.has_jules_secret else "❌ Add JULIUS_API_KEY to GitHub secrets")}
 2. {("✅ Install Jules GitHub app" if self._check_julius_app_installed() else "❌ Install Julius GitHub app from https://julius.google")}
 3. ✅ First consolidation will run automatically next Sunday 23:00 UTC
 4. 📝 Review and merge the auto-generated PR with consolidated summaries
@@ -462,7 +462,7 @@ Report generated: {datetime.now().isoformat()}
         return False
 
 
-def main():
+def main() -> int:
     """Main entry point."""
     import argparse
 
