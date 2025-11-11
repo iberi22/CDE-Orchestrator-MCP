@@ -739,7 +739,7 @@ async def main():
 
     # Ejecutar Fase 1
     logger.info("🚀 Iniciando Fase 1: Verificación y Compilación")
-    results = await orchestrator.orchestrate_phase1_verification()
+    await orchestrator.orchestrate_phase1_verification()
 
     # Mostrar resumen
     summary = orchestrator.get_execution_summary()
@@ -752,6 +752,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    import asyncio
-
     asyncio.run(main())

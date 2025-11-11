@@ -2,7 +2,6 @@
 Unit tests for the ScanDocumentationUseCase.
 """
 
-
 import pytest
 
 from cde_orchestrator.application.documentation import ScanDocumentationUseCase

@@ -1,15 +1,13 @@
 # tests/integration/test_fallback.py
 import json
 import os
-
-# Add src to path for imports
 import sys
 from unittest.mock import MagicMock, patch
 
-
+# Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
-from cde_orchestrator.application.documentation.scan_documentation_use_case import (
+from cde_orchestrator.application.documentation.scan_documentation_use_case import (  # noqa: E402
     ScanDocumentationUseCase,
 )
 

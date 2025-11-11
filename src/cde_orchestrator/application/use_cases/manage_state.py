@@ -1,5 +1,6 @@
 # src/cde_orchestrator/application/use_cases/manage_state.py
 import logging
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Tuple
 
 from pydantic import ValidationError
@@ -110,7 +111,7 @@ class ManageStateUseCase:
         new_features = {}
         for feature_id, feature_data in features.items():
             try:
-                feature_state = self._coerce_feature_state(feature_id, feature__data)
+                feature_state = self._coerce_feature_state(feature_id, feature_data)
                 new_features[feature_id] = feature_state.serialize()
             except ValidationError as exc:
                 logger.error("Feature %s could not be migrated: %s", feature_id, exc)

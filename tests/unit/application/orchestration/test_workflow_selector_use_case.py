@@ -86,7 +86,7 @@ class TestComplexityDetection:
         """Test that very long prompts increase complexity."""
         # Short prompt
         short = "Add endpoint"
-        short_complexity = use_case._detect_complexity(short)
+        use_case._detect_complexity(short)
 
         # Long detailed prompt (>300 chars)
         long = (

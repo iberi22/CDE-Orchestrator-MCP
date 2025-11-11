@@ -8,17 +8,15 @@ import json
 import sys
 from pathlib import Path
 
-import pytest
-
 # Add src to path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root / "src"))
 
-import mcp_tools
-from cde_orchestrator.adapters.mcp_tool_filesystem_generator import (
+import mcp_tools  # noqa: E402
+from cde_orchestrator.adapters.mcp_tool_filesystem_generator import (  # noqa: E402
     MCPToolFilesystemGenerator,
 )
-from cde_orchestrator.application.tools.generate_filesystem_use_case import (
+from cde_orchestrator.application.tools.generate_filesystem_use_case import (  # noqa: E402
     GenerateFilesystemUseCase,
 )
 
@@ -83,14 +81,14 @@ class TestFilesystemGenerator:
     def test_init_file_exports_all_tools(self, tmp_path):
         """Test that __init__.py exports all tools."""
         generator = MCPToolFilesystemGenerator()
-        result = generator.generate(mcp_tools_module=mcp_tools, output_dir=tmp_path)
+        generator.generate(mcp_tools_module=mcp_tools, output_dir=tmp_path)
 
         init_file = tmp_path / "servers" / "cde" / "__init__.py"
         assert init_file.exists()
 
         content = init_file.read_text()
         assert "TOOLS = [" in content
-        assert f"TOTAL_TOOLS = len(TOOLS)" in content
+        assert "TOTAL_TOOLS = len(TOOLS)" in content
 
         # Should list all tools
         for tool_name in [
@@ -175,7 +173,7 @@ class TestFilesystemTokenEfficiency:
                 start = content.find("TOOL_METADATA = {")
                 if start != -1:
                     end = content.find("\n}", start) + 2
-                    metadata_str = content[start + 16 : end]
+                    content[start + 16 : end]
                     summaries.append(
                         {
                             "name": py_file.stem,
@@ -195,10 +193,10 @@ class TestFilesystemTokenEfficiency:
         This is the traditional approach - no token savings.
         """
         # Import actual tool module
-        from mcp_tools import cde_scanDocumentation
-
         # Get full schema (signature + docstring)
         import inspect
+
+        from mcp_tools import cde_scanDocumentation
 
         sig = inspect.signature(cde_scanDocumentation)
         doc = inspect.getdoc(cde_scanDocumentation)

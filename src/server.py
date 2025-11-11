@@ -1,7 +1,6 @@
 # src/server.py
 import logging
 import os
-import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -49,6 +48,7 @@ def _generate_mcp_filesystem() -> None:
     except Exception as e:
         logger.warning(f"⚠️  Could not generate filesystem structure: {e}")
         logger.warning("   Server will continue without filesystem-based discovery.")
+
 
 # FastMCP App Initialization
 app = FastMCP("CDE Orchestrator MCP")

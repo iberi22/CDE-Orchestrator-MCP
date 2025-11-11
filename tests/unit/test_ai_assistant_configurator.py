@@ -115,12 +115,8 @@ class TestAIConfigUseCase:
         with patch.object(
             configurator, "detect_installed_agents", return_value=["copilot"]
         ):
-            with patch.object(
-                configurator, "_generate_root_instruction_file"
-            ) as mock_generate:
-                with patch.object(
-                    configurator, "_generate_copilot_config"
-                ) as mock_copilot:
+            with patch.object(configurator, "_generate_root_instruction_file"):
+                with patch.object(configurator, "_generate_copilot_config"):
                     results = configurator.generate_config_files()
 
                     assert "generated" in results
@@ -132,7 +128,7 @@ class TestAIConfigUseCase:
         with patch.object(
             configurator, "_generate_root_instruction_file"
         ) as mock_generate:
-            with patch.object(configurator, "_generate_copilot_config") as mock_copilot:
+            with patch.object(configurator, "_generate_copilot_config"):
                 results = configurator.generate_config_files(agents=["copilot"])
 
                 assert "generated" in results

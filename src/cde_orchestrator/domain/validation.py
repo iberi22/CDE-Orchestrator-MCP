@@ -7,7 +7,7 @@ import json
 from functools import wraps
 from typing import Any, Callable, Type
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ConfigDict, ValidationError
 
 
 def validate_input(model: Type[BaseModel]) -> Callable:
@@ -121,7 +121,6 @@ def validate_file_path(path: str, allowed_extensions: list = None) -> bool:
 
 
 # Common validation models for CDE tools
-from pydantic import ConfigDict
 
 
 class StartFeatureInput(BaseModel):

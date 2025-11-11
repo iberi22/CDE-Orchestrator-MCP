@@ -75,7 +75,7 @@ class ProgressReporter:
         if self.ws:
             try:
                 self.ws.close()
-            except:
+            except Exception:
                 pass
         self.connected = False
 

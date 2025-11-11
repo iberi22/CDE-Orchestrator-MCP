@@ -1,17 +1,16 @@
 # tests/unit/test_fallback_mechanism.py
 import os
-
-# Ensure src is in the path
 import sys
 import tempfile
 import unittest
 from unittest.mock import patch
 
+# Ensure src is in the path
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 )
 
-from cde_orchestrator.application.documentation.scan_documentation_use_case import (
+from cde_orchestrator.application.documentation.scan_documentation_use_case import (  # noqa: E402
     ScanDocumentationUseCase,
 )
 
@@ -93,8 +92,11 @@ class TestFallbackMechanism(unittest.TestCase):
         """
         # This test requires the actual cde_rust_core module to be compiled.
         try:
-            import cde_rust_core
-        except ImportError:
+            import importlib.util
+
+            if importlib.util.find_spec("cde_rust_core") is None:
+                raise ImportError("cde_rust_core not found")
+        except (ImportError, ValueError):
             self.skipTest("Rust module not compiled, skipping full integration test.")
 
         use_case = ScanDocumentationUseCase()

@@ -96,9 +96,7 @@ class TestCopilotCLIAdapter:
                 mock_process.returncode = 0
                 mock_subprocess.return_value = mock_process
 
-                result = await adapter.execute_prompt(
-                    tmp_path, "add print function", context
-                )
+                await adapter.execute_prompt(tmp_path, "add print function", context)
 
                 # Verify enhanced prompt was used
                 args, kwargs = mock_subprocess.call_args
@@ -256,7 +254,7 @@ class TestQwenCLIAdapter:
                 mock_process.returncode = 0
                 mock_subprocess.return_value = mock_process
 
-                result = await adapter.execute_prompt(
+                await adapter.execute_prompt(
                     tmp_path, "create multiply function", context
                 )
 

@@ -8,6 +8,12 @@ from fastmcp import Context
 from cde_orchestrator.application.onboarding.project_analysis_use_case import (
     ProjectAnalysisUseCase,
 )
+from cde_orchestrator.application.onboarding.project_setup_use_case import (
+    ProjectSetupUseCase,
+)
+from cde_orchestrator.application.onboarding.publishing_use_case import (
+    PublishingUseCase,
+)
 from cde_orchestrator.infrastructure.dependency_injection import container
 
 from ._base import tool_handler
@@ -34,14 +40,6 @@ async def cde_onboardingProject(ctx: Context, project_path: str = ".") -> str:
     container.manage_state_use_case.save(state)
 
     return json.dumps(analysis_result, indent=2)
-
-
-from cde_orchestrator.application.onboarding.project_setup_use_case import (
-    ProjectSetupUseCase,
-)
-from cde_orchestrator.application.onboarding.publishing_use_case import (
-    PublishingUseCase,
-)
 
 
 @tool_handler

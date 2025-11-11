@@ -31,7 +31,7 @@ def benchmark_scan_documentation(project_path: str, iterations: int = 3) -> dict
     for i in range(iterations):
         start_time = time.time()
         try:
-            result = use_case.execute(project_path)
+            use_case.execute(project_path)
             end_time = time.time()
             duration = end_time - start_time
             times.append(duration)
@@ -61,10 +61,10 @@ def benchmark_scan_documentation(project_path: str, iterations: int = 3) -> dict
 def _is_rust_available() -> bool:
     """Check if Rust acceleration is available."""
     try:
-        import cde_rust_core
+        import importlib.util
 
-        return True
-    except ImportError:
+        return importlib.util.find_spec("cde_rust_core") is not None
+    except (ImportError, ValueError):
         return False
 
 
