@@ -168,7 +168,7 @@ class TypeFixer:
         return fixed, total
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Fix document types in YAML frontmatter"
     )
@@ -198,7 +198,9 @@ def main():
     else:
         fixed, total = fixer.fix_all(args.dry_run)
         print(f"Processed {total} files, fixed {fixed} files")
+    
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

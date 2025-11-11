@@ -259,7 +259,7 @@ class MetadataGenerator:
         return True
 
 
-def main():
+def main() -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Add metadata to markdown files")
     parser.add_argument("--path", type=str, help="Add metadata to specific file")
