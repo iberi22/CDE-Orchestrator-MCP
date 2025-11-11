@@ -38,7 +38,7 @@ def get_completion_status():
         if "TOTAL" in stdout and "%" in stdout:
             coverage = float(stdout.split("%")[0].split()[-1])
             status["testing_coverage"] = coverage >= 80.0
-    except:
+    except (ValueError, IndexError):
         pass
 
     # Check async migration (look for async functions)
@@ -46,7 +46,7 @@ def get_completion_status():
         stdout, _ = run_command('grep -r "async def" src/ | wc -l')
         async_count = int(stdout.strip()) if stdout.strip().isdigit() else 0
         status["async_migration"] = async_count > 10  # Arbitrary threshold
-    except:
+    except (ValueError, AttributeError):
         pass
 
     # Check documentation restructure
@@ -62,7 +62,7 @@ def get_completion_status():
         stdout, _ = run_command('grep -r "diskcache\|tiktoken" src/ | wc -l')
         perf_libs = int(stdout.strip()) if stdout.strip().isdigit() else 0
         status["performance_improvements"] = perf_libs > 0
-    except:
+    except (ValueError, AttributeError):
         pass
 
     return status

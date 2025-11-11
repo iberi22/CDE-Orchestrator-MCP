@@ -225,10 +225,11 @@ llm_summary: "Weekly consolidation of all work from {date_range}"
 
 ---
 
-**Generated**: {datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")}
-**Script**: `scripts/consolidation/generate-weekly-summary.py`
-""".format(
-        total_count=total_count
+    **Generated**: {generated_time}
+    **Script**: `scripts/consolidation/generate-weekly-summary.py`
+    """.format(
+        total_count=total_count,
+        generated_time=datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC"),
     )
 
     return markdown
