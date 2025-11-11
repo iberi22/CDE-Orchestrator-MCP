@@ -9,9 +9,9 @@ from unittest.mock import MagicMock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from fastmcp import Context
+from fastmcp import Context  # noqa: E402
 
-from src.mcp_tools.onboarding import cde_onboardingProject, cde_publishOnboarding
+from src.mcp_tools.onboarding import cde_onboardingProject, cde_publishOnboarding  # noqa: E402
 
 
 class TestOnboardingTools(unittest.TestCase):

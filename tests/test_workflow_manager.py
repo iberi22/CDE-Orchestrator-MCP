@@ -3,11 +3,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import pytest
-import yaml
+import pytest  # noqa: E402
+import yaml  # noqa: E402
 
-from src.cde_orchestrator.adapters.serialization import Workflow
-from src.cde_orchestrator.adapters.workflow import WorkflowAdapter
+from src.cde_orchestrator.adapters.serialization import Workflow  # noqa: E402
+from src.cde_orchestrator.adapters.workflow import WorkflowAdapter  # noqa: E402
 
 
 @pytest.fixture

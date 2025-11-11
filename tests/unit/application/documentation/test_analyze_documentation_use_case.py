@@ -10,7 +10,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
-from src.cde_orchestrator.application.documentation.analyze_documentation_use_case import (
+from src.cde_orchestrator.application.documentation.analyze_documentation_use_case import (  # noqa: E402
     AnalyzeDocumentationUseCase,
 )
 

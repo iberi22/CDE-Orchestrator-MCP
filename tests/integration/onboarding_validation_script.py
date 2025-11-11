@@ -9,8 +9,8 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from cde_orchestrator.adapters.state import StateAdapter
-from cde_orchestrator.application.onboarding import OnboardingUseCase
+from cde_orchestrator.adapters.state import StateAdapter  # noqa: E402
+from cde_orchestrator.application.onboarding import OnboardingUseCase  # noqa: E402
 
 
 def test_onboarding():

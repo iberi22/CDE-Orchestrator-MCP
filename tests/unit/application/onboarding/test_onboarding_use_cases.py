@@ -7,15 +7,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock  # noqa: E402
 
-from src.cde_orchestrator.application.onboarding.project_analysis_use_case import (
+from src.cde_orchestrator.application.onboarding.project_analysis_use_case import (  # noqa: E402
     ProjectAnalysisUseCase,
 )
-from src.cde_orchestrator.application.onboarding.project_setup_use_case import (
+from src.cde_orchestrator.application.onboarding.project_setup_use_case import (  # noqa: E402
     ProjectSetupUseCase,
 )
-from src.cde_orchestrator.application.onboarding.publishing_use_case import (
+from src.cde_orchestrator.application.onboarding.publishing_use_case import (  # noqa: E402
     PublishingUseCase,
 )
 
