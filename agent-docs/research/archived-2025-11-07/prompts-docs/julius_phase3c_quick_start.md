@@ -13,8 +13,8 @@ llm_summary: |
 
 # ⚡ Jules Phase 3C - Quick Start (TL;DR)
 
-**Target**: You (Jules AI Agent)  
-**Current Time**: Estimated 6-8 hours of work  
+**Target**: You (Jules AI Agent)
+**Current Time**: Estimated 6-8 hours of work
 **Success Criteria**: All tests pass, 0 doc violations, full SDK working
 
 ---
@@ -63,7 +63,7 @@ llm_summary: |
 ✅ ALLOWED (root): README.md, CHANGELOG.md, CONTRIBUTING.md, LICENSE, AGENTS.md
 
 📁 specs/features/ - Features
-📁 specs/design/ - Architecture  
+📁 specs/design/ - Architecture
 📁 specs/tasks/ - Roadmap
 📁 specs/governance/ - Rules
 📁 docs/ - User guides
@@ -72,7 +72,7 @@ llm_summary: |
 
 **Step-by-Step**:
 1. **Find violations**: Run `cde_scanDocumentation(".")` to audit
-2. **Move files**: Use `git mv` to reorganize  
+2. **Move files**: Use `git mv` to reorganize
 3. **Add metadata**: Every .md file needs YAML frontmatter
 4. **Fix links**: Update all cross-references
 5. **Validate**: Run `python scripts/validation/validate-docs.py` - must show 0 violations
@@ -206,7 +206,7 @@ black src/ tests/ --check
 - [ ] **Phase 3C-2**: All docs reorganized, 0 governance violations, quality_score >=95
 - [ ] **Phase 3C-3**: pytest.ini + conftest.py + integration tests + GitHub Actions working
 - [ ] **Code Quality**: `mypy src/ --strict` ✅ passes
-- [ ] **Code Quality**: `ruff check src/` ✅ passes  
+- [ ] **Code Quality**: `ruff check src/` ✅ passes
 - [ ] **Code Quality**: `black src/ tests/` ✅ formatted
 - [ ] **All Tests**: `pytest tests/` ✅ 100% passing
 - [ ] **Git**: All changes staged and committed with detailed message
@@ -218,9 +218,8 @@ black src/ tests/ --check
 
 Full instructions in: `agent-docs/prompts/JULIUS_MASTER_PROMPT_PHASE3C.md`
 
-**Time**: 6-8 hours continuous work  
-**Outcome**: Production-ready multi-agent orchestrator with perfect documentation  
+**Time**: 6-8 hours continuous work
+**Outcome**: Production-ready multi-agent orchestrator with perfect documentation
 **Next**: Phase 3D+ from roadmap (if needed)
 
 Go build! 💪
-

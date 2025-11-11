@@ -21,8 +21,6 @@ Token Efficiency:
 - full: Actual implementation = ~40KB (baseline)
 """
 
-from pathlib import Path
-
 # Auto-discovered tools
 TOOLS = [
     "cde_analyzeDocumentation",  # servers/cde/analyzeDocumentation.py

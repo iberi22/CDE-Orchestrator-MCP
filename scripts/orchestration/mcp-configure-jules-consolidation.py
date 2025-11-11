@@ -23,7 +23,6 @@ from pathlib import Path
 from typing import Optional
 
 
-
 @dataclass
 class ProjectAnalysis:
     """Analysis results for project configuration."""
@@ -474,7 +473,7 @@ def main():
         help="Automatically commit configuration changes",
     )
 
-    args = parser.parse_args()
+    parser.parse_args()
 
     # Initialize orchestrator
     repo_root = Path(".")
