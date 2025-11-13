@@ -136,7 +136,7 @@ class IStateStore(ABC):
         pass
 
     @abstractmethod
-    def save_state(self, state: Dict[str, Any]):
+    def save_state(self, state: Dict[str, Any]) -> None:
         pass
 
 

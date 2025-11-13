@@ -11,7 +11,7 @@ Configuration via ENV:
 
 import os
 import time
-from typing import Optional
+from typing import Literal, Optional
 
 
 class SystemNotifier:
@@ -32,7 +32,7 @@ class SystemNotifier:
         notifier.notify_complete("Project Onboarding", 23.5)
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.enabled = os.getenv("CDE_NOTIFY_PROGRESS", "true").lower() == "true"
         self.milestones_only = (
             os.getenv("CDE_NOTIFY_MILESTONES_ONLY", "true").lower() == "true"
@@ -53,7 +53,7 @@ class SystemNotifier:
                     "⚠️  plyer not installed - notifications disabled. Install with: pip install plyer"
                 )
 
-    def notify_start(self, task_name: str):
+    def notify_start(self, task_name: str) -> None:
         """
         Notify task started.
 
@@ -74,7 +74,7 @@ class SystemNotifier:
             # Silently fail - don't crash MCP operation
             self._log_error(f"Failed to send start notification: {e}")
 
-    def notify_progress(self, task_name: str, percentage: int, message: str):
+    def notify_progress(self, task_name: str, percentage: int, message: str) -> None:
         """
         Notify progress milestone.
 
@@ -103,7 +103,7 @@ class SystemNotifier:
         except Exception as e:
             self._log_error(f"Failed to send progress notification: {e}")
 
-    def notify_complete(self, task_name: str, duration: float):
+    def notify_complete(self, task_name: str, duration: float) -> None:
         """
         Notify task completed.
 
@@ -124,7 +124,7 @@ class SystemNotifier:
         except Exception as e:
             self._log_error(f"Failed to send complete notification: {e}")
 
-    def notify_error(self, task_name: str, error: str):
+    def notify_error(self, task_name: str, error: str) -> None:
         """
         Notify task failed.
 
@@ -150,7 +150,7 @@ class SystemNotifier:
 
     def _should_notify(self) -> bool:
         """Check if notifications should be sent"""
-        return self.enabled and self.available
+        return bool(self.enabled and self.available)
 
     def _get_emoji(self, percentage: int) -> str:
         """Get emoji based on progress percentage"""
@@ -165,7 +165,7 @@ class SystemNotifier:
         else:
             return "✅"
 
-    def _log_error(self, message: str):
+    def _log_error(self, message: str) -> None:
         """Log error without crashing"""
         # Only log if debug mode
         if os.getenv("CDE_LOG_LEVEL", "INFO").upper() == "DEBUG":
@@ -205,12 +205,17 @@ class NotificationContext:
         self.notifier = get_notifier()
         self.start_time: float = 0
 
-    def __enter__(self):
+    def __enter__(self) -> "NotificationContext":
         self.start_time = time.time()
         self.notifier.notify_start(self.task_name)
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[object],
+    ) -> Literal[False]:
         if exc_type is None:
             # Success
             duration = time.time() - self.start_time
@@ -221,7 +226,7 @@ class NotificationContext:
             self.notifier.notify_error(self.task_name, error)
         return False  # Don't suppress exceptions
 
-    def update(self, percentage: int, message: str):
+    def update(self, percentage: int, message: str) -> None:
         """Update progress"""
         self.notifier.notify_progress(self.task_name, percentage, message)
 

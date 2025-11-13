@@ -98,7 +98,7 @@ class DocumentStatus(str, Enum):
 
     def can_transition_to(self, target: "DocumentStatus") -> bool:
         """Validate if transition to target status is allowed."""
-        allowed_transitions = {
+        allowed_transitions: dict[DocumentStatus, list[DocumentStatus]] = {
             DocumentStatus.DRAFT: [DocumentStatus.ACTIVE],
             DocumentStatus.ACTIVE: [
                 DocumentStatus.DEPRECATED,
@@ -150,7 +150,7 @@ class SemanticLink:
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate link on creation."""
         if not self.target_id:
             raise InvalidLinkError("", str(self.target_id), "Target ID cannot be empty")
