@@ -21,7 +21,6 @@ Token Efficiency:
 - full: Actual implementation = ~40KB (baseline)
 """
 
-
 # Auto-discovered tools
 TOOLS = [
     "cde_analyzeDocumentation",  # servers/cde/analyzeDocumentation.py
