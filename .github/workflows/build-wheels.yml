@@ -1,6 +1,17 @@
 name: Build and Publish Wheels
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'rust_core/**'
+      - 'pyproject.toml'
+      - '.github/workflows/build-wheels.yml'
+  pull_request:
+    paths:
+      - 'rust_core/**'
+      - 'pyproject.toml'
   release:
     types: [published]
   workflow_dispatch:
@@ -37,18 +48,21 @@ jobs:
 
       - name: Build wheels (Windows)
         if: matrix.os == 'windows-latest'
+        working-directory: ./rust_core
         run: |
-          maturin build --release --out dist --interpreter python${{ matrix.python-version }}
+          maturin build --release --out ../dist --interpreter python${{ matrix.python-version }}
 
       - name: Build wheels (Linux)
         if: matrix.os == 'ubuntu-latest'
+        working-directory: ./rust_core
         run: |
-          maturin build --release --out dist --interpreter python${{ matrix.python-version }}
+          maturin build --release --out ../dist --interpreter python${{ matrix.python-version }}
 
       - name: Build wheels (macOS)
         if: matrix.os == 'macos-latest'
+        working-directory: ./rust_core
         run: |
-          maturin build --release --out dist --interpreter python${{ matrix.python-version }}
+          maturin build --release --out ../dist --interpreter python${{ matrix.python-version }}
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -73,7 +87,8 @@ jobs:
         run: pip install maturin
 
       - name: Build sdist
-        run: maturin sdist --out dist
+        working-directory: ./rust_core
+        run: maturin sdist --out ../dist
 
       - name: Upload sdist
         uses: actions/upload-artifact@v4
