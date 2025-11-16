@@ -68,7 +68,7 @@ jobs:
 
       - name: 🤖 Consolidate execution/ with Jules
         id: consolidate_execution
-        if: steps.scan.outputs.execution_count > 0
+        if: steps.scan.outputs.execution_count != '0'
         env:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
         run: |
@@ -78,7 +78,7 @@ jobs:
 
       - name: 🤖 Consolidate sessions/ with Jules
         id: consolidate_sessions
-        if: steps.scan.outputs.sessions_count > 0
+        if: steps.scan.outputs.sessions_count != '0'
         env:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
         run: |
@@ -112,9 +112,10 @@ jobs:
 
       - name: 🧹 Cleanup consolidated files
         id: cleanup
-        if: |
+        if: >-
           github.event.inputs.skip_cleanup != 'true' &&
-          (steps.verify.outputs.execution_consolidated == 'true' || steps.verify.outputs.sessions_consolidated == 'true')
+          (steps.verify.outputs.execution_consolidated == 'true' ||
+          steps.verify.outputs.sessions_consolidated == 'true')
         run: |
           python scripts/consolidation/cleanup-after-consolidation.py \
             --execution-consolidated=${{ steps.verify.outputs.execution_consolidated }} \
