@@ -1,0 +1,17 @@
+{
+  "servers": {
+    "CDE_Orchestrator": {
+      "command": "python",
+      "args": [
+        "src/server.py",
+        "--scan-paths",
+        "E:\\scripts-python"
+      ],
+      "env": {
+        "PYTHONPATH": "src",
+        "CDE_AUTO_DISCOVER": "true",
+        "CDE_LOG_LEVEL": "INFO"
+      }
+    }
+  }
+}
