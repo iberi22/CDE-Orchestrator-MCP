@@ -161,7 +161,9 @@ jobs:
           cat /tmp/summary.md
 
       - name: 🔀 Create pull request
-        if: steps.verify.outputs.execution_consolidated == 'true' || steps.verify.outputs.sessions_consolidated == 'true'
+        if: >-
+          steps.verify.outputs.execution_consolidated == 'true' ||
+          steps.verify.outputs.sessions_consolidated == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
           commit-message: |
