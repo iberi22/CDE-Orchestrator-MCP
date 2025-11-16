@@ -49,18 +49,24 @@ jobs:
       - name: Build wheels (Windows)
         if: matrix.os == 'windows-latest'
         working-directory: ./rust_core
+        env:
+          PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
         run: |
           maturin build --release --out ../dist --interpreter python${{ matrix.python-version }}
 
       - name: Build wheels (Linux)
         if: matrix.os == 'ubuntu-latest'
         working-directory: ./rust_core
+        env:
+          PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
         run: |
           maturin build --release --out ../dist --interpreter python${{ matrix.python-version }}
 
       - name: Build wheels (macOS)
         if: matrix.os == 'macos-latest'
         working-directory: ./rust_core
+        env:
+          PYO3_USE_ABI3_FORWARD_COMPATIBILITY: 1
         run: |
           maturin build --release --out ../dist --interpreter python${{ matrix.python-version }}
 
@@ -87,8 +93,9 @@ jobs:
         run: pip install maturin
 
       - name: Build sdist
-        working-directory: ./rust_core
-        run: maturin sdist --out ../dist
+        run: |
+          cd rust_core
+          maturin sdist --out ../dist
 
       - name: Upload sdist
         uses: actions/upload-artifact@v4
