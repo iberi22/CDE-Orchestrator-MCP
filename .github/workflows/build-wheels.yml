@@ -94,8 +94,7 @@ jobs:
 
       - name: Build sdist
         run: |
-          cd rust_core
-          maturin sdist --out ../dist
+          maturin sdist --manifest-path rust_core/Cargo.toml --out dist
 
       - name: Upload sdist
         uses: actions/upload-artifact@v4
@@ -135,11 +134,11 @@ jobs:
 
       - name: Test Rust module import
         run: |
-          python -c "import cde_rust_core; print('✅ Rust module loaded successfully')"
+          python -c "import cde_rust_core; print('Rust module loaded successfully')"
 
       - name: Test scan_documentation function
         run: |
-          python -c "import cde_rust_core, json; result = cde_rust_core.scan_documentation_py('.'); data = json.loads(result); print(f'✅ Scanned {len(data)} files')"
+          python -c "import cde_rust_core, json; result = cde_rust_core.scan_documentation_py('.'); data = json.loads(result); print(f'Scanned {len(data)} files')"
 
   publish-to-pypi:
     name: Publish to PyPI
