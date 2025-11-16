@@ -38,6 +38,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: 🗓️ Determine ISO week label
+        run: |
+          WEEK=$(python -c "from datetime import datetime, timezone; w = datetime.now(timezone.utc).isocalendar(); print(f'{w[0]}-W{w[1]:02d}')")
+          echo "WEEK=$WEEK" >> $GITHUB_ENV
+          echo "Computed week label: $WEEK"
+
       - name: 🐍 Setup Python 3.11
         uses: actions/setup-python@v5
         with:
@@ -83,7 +89,7 @@ jobs:
       - name: ✅ Verify consolidations
         id: verify
         run: |
-          WEEK=$(python -c "from datetime import datetime; w=datetime.now().isocalendar(); print(f'{w[0]}-W{w[1]:02d}')")
+          WEEK=${{ env.WEEK }}
 
           EXEC_FILE="agent-docs/execution/WEEKLY-CONSOLIDATION-EXECUTION-${WEEK}.md"
           SESS_FILE="agent-docs/sessions/WEEKLY-CONSOLIDATION-SESSIONS-${WEEK}.md"
@@ -119,12 +125,10 @@ jobs:
       - name: 📊 Generate summary
         id: summary
         run: |
-          WEEK=$(python -c "from datetime import datetime; w=datetime.now().isocalendar(); print(f'{w[0]}-W{w[1]:02d}')")
-
           cat > /tmp/summary.md <<EOF
           # 📊 Weekly Consolidation Summary
 
-          **Week**: $WEEK
+          **Week**: ${{ env.WEEK }}
           **Date**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')
 
           ## Scanned Files
@@ -146,11 +150,11 @@ jobs:
           EOF
 
           if [ "${{ steps.verify.outputs.execution_consolidated }}" == "true" ]; then
-            echo "- ✅ \`agent-docs/execution/WEEKLY-CONSOLIDATION-EXECUTION-${WEEK}.md\`" >> /tmp/summary.md
+            echo "- ✅ `agent-docs/execution/WEEKLY-CONSOLIDATION-EXECUTION-${{ env.WEEK }}.md`" >> /tmp/summary.md
           fi
 
           if [ "${{ steps.verify.outputs.sessions_consolidated }}" == "true" ]; then
-            echo "- ✅ \`agent-docs/sessions/WEEKLY-CONSOLIDATION-SESSIONS-${WEEK}.md\`" >> /tmp/summary.md
+            echo "- ✅ `agent-docs/sessions/WEEKLY-CONSOLIDATION-SESSIONS-${{ env.WEEK }}.md`" >> /tmp/summary.md
           fi
 
           cat /tmp/summary.md
@@ -203,13 +207,11 @@ jobs:
 
       - name: 📬 Create workflow summary
         run: |
-          WEEK=$(python -c "from datetime import datetime; w=datetime.now().isocalendar(); print(f'{w[0]}-W{w[1]:02d}')")
-
           cat >> $GITHUB_STEP_SUMMARY <<'EOF'
           # 📊 Weekly Consolidation Complete
 
           ## Results
-          - **Week**: $WEEK
+          - **Week**: ${{ env.WEEK }}
           - **Execution Files**: ${{ steps.scan.outputs.execution_count }} scanned
           - **Session Files**: ${{ steps.scan.outputs.sessions_count }} scanned
           - **Status**: ${{ (steps.verify.outputs.execution_consolidated == 'true' || steps.verify.outputs.sessions_consolidated == 'true') && '✅ Success' || '⚠️ Partial' }}
