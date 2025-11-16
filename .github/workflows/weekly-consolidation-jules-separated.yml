@@ -220,8 +220,8 @@ jobs:
           - **Status**: ${{ (steps.verify.outputs.execution_consolidated == 'true' || steps.verify.outputs.sessions_consolidated == 'true') && '✅ Success' || '⚠️ Partial' }}
 
           ## Consolidations
-          ${{ steps.verify.outputs.execution_consolidated == 'true' && '- ✅ `execution/WEEKLY-CONSOLIDATION-EXECUTION-' + env.WEEK + '.md`' || '- ⏭️ No execution consolidation' }}
-          ${{ steps.verify.outputs.sessions_consolidated == 'true' && '- ✅ `sessions/WEEKLY-CONSOLIDATION-SESSIONS-' + env.WEEK + '.md`' || '- ⏭️ No sessions consolidation' }}
+          - ${{ steps.verify.outputs.execution_consolidated == 'true' && format('✅ `execution/WEEKLY-CONSOLIDATION-EXECUTION-{0}.md`', env.WEEK) || '⏭️ No execution consolidation' }}
+          - ${{ steps.verify.outputs.sessions_consolidated == 'true' && format('✅ `sessions/WEEKLY-CONSOLIDATION-SESSIONS-{0}.md`', env.WEEK) || '⏭️ No sessions consolidation' }}
 
           ## Cleanup
           - ${{ steps.cleanup.outputs.status == 'success' && '✅ Original files cleaned up' || '⚠️ Manual cleanup required' }}
