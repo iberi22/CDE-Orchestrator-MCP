@@ -28,7 +28,6 @@ num_cpus = "1.16"   # Para auto-detectar CPU cores
 criterion = { version = "0.5", features = ["html_reports"] }
 proptest = "1.5"  # Property-based testing
 
-# Uncomment when benchmarks are created
-# [[bench]]
-# name = "parallel_benchmarks"
-# harness = false
+[[bench]]
+name = "parallel_benchmarks"
+harness = false

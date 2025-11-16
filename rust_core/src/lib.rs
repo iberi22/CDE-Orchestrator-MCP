@@ -5,7 +5,7 @@ use std::sync::Once;
 
 mod filesystem;
 mod documentation;
-// No incluyo doc_validator ya que revertí esa funcionalidad
+mod workflow_validator;
 
 static INIT: Once = Once::new();
 
@@ -30,11 +30,42 @@ fn init_rayon() {
 }
 
 /// Scans a documentation project, finds all Markdown files, and returns their content.
+/// Extracts YAML frontmatter, links, headers, and word count in parallel.
 #[pyfunction]
 fn scan_documentation_py(root_path: String) -> PyResult<String> {
     match documentation::scan_documentation(&root_path) {
         Ok(documents) => {
             let json_result = serde_json::to_string(&documents).map_err(|e| {
+                PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to serialize result: {}", e))
+            })?;
+            Ok(json_result)
+        }
+        Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(e)),
+    }
+}
+
+/// Analyzes documentation quality in parallel.
+/// Returns quality score, broken links, missing metadata, and recommendations.
+#[pyfunction]
+fn analyze_documentation_quality_py(root_path: String) -> PyResult<String> {
+    match documentation::analyze_documentation_quality(&root_path) {
+        Ok(report) => {
+            let json_result = serde_json::to_string(&report).map_err(|e| {
+                PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to serialize result: {}", e))
+            })?;
+            Ok(json_result)
+        }
+        Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(e)),
+    }
+}
+
+/// Validates workflow YAML files in parallel.
+/// Returns validation report with issues, missing templates, and summary.
+#[pyfunction]
+fn validate_workflows_py(root_path: String) -> PyResult<String> {
+    match workflow_validator::validate_workflows(&root_path) {
+        Ok(report) => {
+            let json_result = serde_json::to_string(&report).map_err(|e| {
                 PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to serialize result: {}", e))
             })?;
             Ok(json_result)
@@ -50,5 +81,7 @@ fn cde_rust_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     init_rayon();
 
     m.add_function(wrap_pyfunction!(scan_documentation_py, m)?)?;
+    m.add_function(wrap_pyfunction!(analyze_documentation_quality_py, m)?)?;
+    m.add_function(wrap_pyfunction!(validate_workflows_py, m)?)?;
     Ok(())
 }
