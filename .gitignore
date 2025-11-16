@@ -81,8 +81,3 @@ target/
 *.bak
 *.tmp
 acli.exe
-
-# Documentation and specifications (to prevent plagiarism)
-*.md
-agent-docs/
-specs/

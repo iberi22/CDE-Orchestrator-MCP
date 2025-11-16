@@ -1,0 +1,121 @@
+name: MCP Server Automated Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  test-mcp-server:
+    name: Test MCP Server Tools
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12', '3.13', '3.14']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run MCP Server Tests
+        run: |
+          echo "Running automated MCP server tests..."
+          python test_mcp_server.py
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "### MCP Server Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Python Version: ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.python-version }}
+          path: |
+            test_results/
+            *.log
+          retention-days: 7
+
+  # Optional: Test with MCP Inspector (requires Node.js)
+  test-with-inspector:
+    name: Test with MCP Inspector
+    runs-on: ubuntu-latest
+    needs: test-mcp-server
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install MCP Inspector
+        run: |
+          npm install -g @modelcontextprotocol/inspector@latest
+
+      - name: Test with MCP Inspector - List Tools
+        run: |
+          npx @modelcontextprotocol/inspector \
+            --cli python src/server.py \
+            --method tools/list \
+            > inspector_tools.json
+
+          echo "### MCP Inspector Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+          cat inspector_tools.json | jq '.tools | length' >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Test Tool Call - cde_searchTools
+        run: |
+          npx @modelcontextprotocol/inspector \
+            --cli python src/server.py \
+            --method tools/call \
+            --tool-name cde_searchTools \
+            --tool-arg 'query=' \
+            --tool-arg 'detail_level=name_only'
+
+      - name: Upload Inspector results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: inspector-results
+          path: inspector_*.json
+          retention-days: 7
