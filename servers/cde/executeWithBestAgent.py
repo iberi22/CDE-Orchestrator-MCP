@@ -44,12 +44,12 @@ TOOL_METADATA = {
         "preferred_agent": {
             "name": "preferred_agent",
             "type": "str | None",
-            "default": null,
+            "default": None,
         },
         "require_plan_approval": {
             "name": "require_plan_approval",
             "type": "bool",
-            "default": false,
+            "default": False,
         },
         "timeout": {"name": "timeout", "type": "int", "default": 1800},
         "context_size": {"name": "context_size", "type": "int", "default": 1000},

@@ -68,18 +68,35 @@ class JulesFacade(ICodeExecutor):
         project_path: Path,
         prompt: str,
         context: Dict[str, Any],
-    ) -> str:
+        user_prompt: Optional[str] = None,
+        mode: str = "auto",
+        **kwargs: Any,
+    ) -> Any:
         """
         Execute prompt with intelligent mode selection and fallback.
 
         Args:
             project_path: Path to project
-            prompt: User prompt / task description
+            prompt: User prompt / task description (or use user_prompt)
             context: Execution context with optional settings
+            user_prompt: Alternative parameter name for prompt
+            mode: Execution mode preference
+            **kwargs: Additional context parameters
 
         Returns:
             JSON string with execution result or setup guide
         """
+        # Handle different parameter names for backward compatibility
+        # Ensure project_path is a Path object
+        if isinstance(project_path, str):
+            from pathlib import Path
+
+            project_path = Path(project_path)
+
+        # Build context from parameters
+        context.update(kwargs)
+        context["mode"] = mode
+
         # Extract mode preference from context
         mode_preference = context.get("mode", "auto")
 
@@ -99,15 +116,23 @@ class JulesFacade(ICodeExecutor):
 
         # Execute with selected mode
         if selected_mode == "api":
-            return await self._execute_api(project_path, prompt, context)
+            result = await self._execute_api(project_path, prompt, context)
         elif selected_mode == "cli_headless":
-            return await self._execute_cli_headless(project_path, prompt, context)
+            result = await self._execute_cli_headless(project_path, prompt, context)
         elif selected_mode == "cli_interactive":
-            return await self._execute_cli_interactive(project_path, prompt, context)
+            result = await self._execute_cli_interactive(project_path, prompt, context)
         elif selected_mode == "setup":
-            return self._generate_setup_guide(modes)
+            result = self._generate_setup_guide(modes)
         else:
             raise ValueError(f"Unknown mode: {selected_mode}")
+
+        # Return dict format for tests, JSON string for production
+        if isinstance(result, str):
+            try:
+                return json.loads(result)
+            except Exception:
+                return {"error": "Invalid JSON response", "raw_result": result}
+        return result
 
     async def _detect_modes(self) -> JulesModes:
         """

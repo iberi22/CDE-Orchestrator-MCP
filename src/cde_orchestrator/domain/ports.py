@@ -102,7 +102,7 @@ class ICodeExecutor(ABC):
     @abstractmethod
     async def execute_prompt(
         self, project_path: Path, prompt: str, context: Dict[str, Any]
-    ) -> str:
+    ) -> Any:
         pass
 
 

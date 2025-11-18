@@ -46,10 +46,10 @@ TOOL_METADATA = {
         "require_plan_approval": {
             "name": "require_plan_approval",
             "type": "bool",
-            "default": false,
+            "default": False,
         },
         "timeout": {"name": "timeout", "type": "int", "default": 1800},
-        "detached": {"name": "detached", "type": "bool", "default": false},
+        "detached": {"name": "detached", "type": "bool", "default": False},
         "mode": {"name": "mode", "type": "str", "default": "auto"},
     },
     "tags": [

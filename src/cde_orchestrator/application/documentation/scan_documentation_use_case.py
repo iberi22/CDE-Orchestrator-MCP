@@ -61,14 +61,19 @@ class ScanDocumentationUseCase:
         try:
             from importlib.util import find_spec
 
-            if find_spec("cde_rust_core") is not None:
+            rust_spec = find_spec("cde_rust_core")
+            if (
+                rust_spec is not None
+                and hasattr(rust_spec, "loader")
+                and rust_spec.loader is not None
+            ):
                 import cde_rust_core  # noqa: F401
 
                 rust_result = self._scan_with_rust(project_path)
                 return self._process_rust_result(
                     rust_result, project_path, detail_level
                 )
-        except (ImportError, AttributeError):
+        except (ImportError, AttributeError, ValueError):
             pass
 
         # Fallback to Python implementation
@@ -92,7 +97,7 @@ class ScanDocumentationUseCase:
         project = Path(project_path)
 
         # Build complete results first
-        results = {
+        results: Dict[str, Any] = {
             "total_docs": len(rust_result),
             "scanned_at": datetime.now().isoformat(),
             "project_path": str(project),
@@ -229,7 +234,7 @@ class ScanDocumentationUseCase:
 
         for idx, md_file in enumerate(md_files):
             relative = md_file.relative_to(project)
-            file_info = {
+            file_info: Dict[str, Any] = {
                 "path": str(relative),
                 "size": md_file.stat().st_size,
                 "lines": sum(
@@ -242,7 +247,7 @@ class ScanDocumentationUseCase:
             file_info["has_metadata"] = has_metadata
 
             if not has_metadata:
-                results["missing_metadata"].append(str(relative))
+                results["missing_metadata"].append(str(relative))  # type: ignore
 
             # Categorize by location
             location = self._categorize_file(relative)
@@ -250,7 +255,7 @@ class ScanDocumentationUseCase:
 
             # Check for large files
             if file_info["lines"] > 1000:
-                results["large_files"].append(
+                results["large_files"].append(  # type: ignore
                     {
                         "path": str(relative),
                         "lines": file_info["lines"],
@@ -267,7 +272,7 @@ class ScanDocumentationUseCase:
                 "AGENTS.md",
                 "GEMINI.md",
             }:
-                results["orphaned_docs"].append(str(relative))
+                results["orphaned_docs"].append(str(relative))  # type: ignore
 
             # Report progress after each file
             progress = (idx + 1) / len(md_files)
@@ -312,7 +317,7 @@ class ScanDocumentationUseCase:
 
             return {
                 "files": sorted(all_files),
-                "total": results["total_docs"],
+                "total_docs": results["total_docs"],
                 "detail_level": "name_only",
             }
 
@@ -331,7 +336,7 @@ class ScanDocumentationUseCase:
 
             return {
                 "files": sorted(all_files, key=lambda x: x["path"]),
-                "total": results["total_docs"],
+                "total_docs": results["total_docs"],
                 "missing_metadata": results["missing_metadata"],
                 "orphaned_count": len(results.get("orphaned_docs", [])),
                 "recommendations": results["recommendations"],

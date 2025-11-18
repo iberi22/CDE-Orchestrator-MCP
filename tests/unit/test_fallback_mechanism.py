@@ -50,19 +50,14 @@ class TestFallbackMechanism(unittest.TestCase):
         """Clean up the temporary directory."""
         self.temp_dir.cleanup()
 
-    @patch("builtins.__import__")
-    def test_scan_with_python_fallback(self, mock_import):
+    @patch("importlib.util.find_spec")
+    def test_scan_with_python_fallback(self, mock_find_spec):
         """
         Verify that the Python implementation is used when the Rust module is not available.
         """
 
-        # Simulate ImportError for cde_rust_core
-        def import_mock(name, *args, **kwargs):
-            if name == "cde_rust_core":
-                raise ImportError("No module named cde_rust_core")
-            return __builtins__.__import__(name, *args, **kwargs)
-
-        mock_import.side_effect = import_mock
+        # Simulate that cde_rust_core is not available
+        mock_find_spec.return_value = None
 
         use_case = ScanDocumentationUseCase()
 
@@ -73,15 +68,16 @@ class TestFallbackMechanism(unittest.TestCase):
             result = use_case.execute(self.project_path)
 
             # Verify that the Python method was called
-            spy_python_scan.assert_called_once_with(self.project_path)
+            spy_python_scan.assert_called_once_with(self.project_path, "summary")
 
             # Verify the results are from the Python implementation
             self.assertEqual(result["total_docs"], 3)
-            self.assertIn("README.md", result["by_location"]["root"][0]["path"])
-            self.assertIn("guide.md", result["by_location"]["docs"][0]["path"])
-            self.assertIn(
-                "feature.md", result["by_location"]["specs/features"][0]["path"]
-            )
+            # In summary mode, files are in a flat list with location info
+            file_paths = [f["path"] for f in result["files"]]
+            self.assertIn("README.md", file_paths)
+            # Handle Windows path separators
+            self.assertTrue(any("guide.md" in path for path in file_paths))
+            self.assertTrue(any("feature.md" in path for path in file_paths))
             self.assertIn(
                 "✅", result["recommendations"][0]
             )  # Should be a success message
@@ -106,10 +102,13 @@ class TestFallbackMechanism(unittest.TestCase):
 
         # Verify the structure of the result, confirming full processing
         self.assertEqual(result["total_docs"], 3)
-        self.assertIn("by_location", result)
-        self.assertIn("root", result["by_location"])
-        self.assertIn("docs", result["by_location"])
-        self.assertIn("specs/features", result["by_location"])
+        # Check that we have files in the result
+        self.assertIn("files", result)
+        file_paths = [f["path"] for f in result["files"]]
+        self.assertIn("README.md", file_paths)
+        # Handle Windows path separators
+        self.assertTrue(any("guide.md" in path for path in file_paths))
+        self.assertTrue(any("feature.md" in path for path in file_paths))
         self.assertIn("✅", result["recommendations"][0])
 
 

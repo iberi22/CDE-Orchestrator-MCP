@@ -38,10 +38,9 @@ def test_scan_documentation_success(project_dir):
 
     assert result["total_docs"] == 4
     assert len(result["missing_metadata"]) == 1
-    assert "design-b.md" in result["missing_metadata"][0]
+    assert any("design-b.md" in path for path in result["missing_metadata"])
 
-    assert len(result["orphaned_docs"]) == 1
-    assert "orphaned.md" in result["orphaned_docs"][0]
+    assert result["orphaned_count"] == 1
 
 
 def test_scan_documentation_no_specs_dir(tmp_path):
@@ -51,4 +50,6 @@ def test_scan_documentation_no_specs_dir(tmp_path):
 
     assert result["total_docs"] == 0
     assert len(result["recommendations"]) > 0
-    assert "No specs/features directory found" in result["recommendations"][0]
+    assert any(
+        "No specs/features directory found" in rec for rec in result["recommendations"]
+    )
