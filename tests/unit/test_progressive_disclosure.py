@@ -43,14 +43,14 @@ class TestProgressiveDisclosure:
 
         # Verify structure
         assert "files" in result
-        assert "total" in result
+        assert "total_docs" in result
         assert "detail_level" in result
         assert result["detail_level"] == "name_only"
 
         # Should only contain file paths (strings)
         assert isinstance(result["files"], list)
         assert all(isinstance(f, str) for f in result["files"])
-        assert result["total"] == 3
+        assert result["total_docs"] == 3
 
         # Should NOT contain detailed info
         assert "by_location" not in result
@@ -72,7 +72,7 @@ class TestProgressiveDisclosure:
 
         # Verify structure
         assert "files" in result
-        assert "total" in result
+        assert "total_docs" in result
         assert "missing_metadata" in result
         assert "recommendations" in result
         assert result["detail_level"] == "summary"

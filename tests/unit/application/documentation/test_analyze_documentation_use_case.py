@@ -1,5 +1,5 @@
 """
-Unit tests for the AnalyzeDocumentationUseCase using pyfakefs.
+Unit tests for the AnalyzeDocumentationUseCase.
 """
 
 # Add project root to path
@@ -21,29 +21,28 @@ def use_case():
     return AnalyzeDocumentationUseCase()
 
 
-def test_analyze_documentation_quality_score(fs, use_case):
-    """Tests the quality score calculation with a fake filesystem."""
-    # fs is the pyfakefs fixture
-    project_path = "/fake/project"
-    fs.create_dir(project_path)
+def test_analyze_documentation_quality_score(tmp_path: Path, use_case):
+    """Tests the quality score calculation with a temporary filesystem."""
+    project_path = tmp_path / "project"
+    project_path.mkdir()
+
+    docs_dir = project_path / "docs"
+    docs_dir.mkdir()
 
     # Create a valid file with a link to another valid file
-    fs.create_file(
-        f"{project_path}/docs/valid.md",
-        contents="---\ntitle: Valid\ndescription: d\ntype: guide\nstatus: active\ncreated: 2025-01-01\nupdated: 2025-01-01\nauthor: Test\n---\nContent",
+    (docs_dir / "valid.md").write_text(
+        "---\ntitle: Valid\ndescription: d\ntype: guide\nstatus: active\ncreated: 2025-01-01\nupdated: 2025-01-01\nauthor: Test\n---\nContent"
     )
-    fs.create_file(
-        f"{project_path}/docs/file1.md",
-        contents="---\ntitle: OK\ndescription: d\ntype: guide\nstatus: active\ncreated: 2025-01-01\nupdated: 2025-01-01\nauthor: Test\n---\n[link](valid.md)",
+    (docs_dir / "file1.md").write_text(
+        "---\ntitle: OK\ndescription: d\ntype: guide\nstatus: active\ncreated: 2025-01-01\nupdated: 2025-01-01\nauthor: Test\n---\n[link](valid.md)"
     )
 
     # Create a file with a broken link
-    fs.create_file(
-        f"{project_path}/docs/file2.md",
-        contents="---\ntitle: Broken\ndescription: d\ntype: guide\nstatus: active\ncreated: 2025-01-01\nupdated: 2025-01-01\nauthor: Test\n---\n[link](broken.md)",
+    (docs_dir / "file2.md").write_text(
+        "---\ntitle: Broken\ndescription: d\ntype: guide\nstatus: active\ncreated: 2025-01-01\nupdated: 2025-01-01\nauthor: Test\n---\n[link](broken.md)"
     )
 
-    result = use_case.execute(project_path)
+    result = use_case.execute(str(project_path))
 
     assert "quality_score" in result
     assert 0 < result["quality_score"] < 100
@@ -51,12 +50,12 @@ def test_analyze_documentation_quality_score(fs, use_case):
     assert result["link_analysis"]["broken_links"][0]["target"] == "broken.md"
 
 
-def test_analyze_documentation_no_docs(fs, use_case):
+def test_analyze_documentation_no_docs(tmp_path: Path, use_case):
     """Tests analysis of a project with no markdown files returns a perfect score."""
-    project_path = "/fake/project"
-    fs.create_dir(project_path)
+    project_path = tmp_path / "project"
+    project_path.mkdir()
 
-    result = use_case.execute(project_path)
+    result = use_case.execute(str(project_path))
 
     assert result["total_analyzed"] == 0
     assert result["quality_score"] == 100.0

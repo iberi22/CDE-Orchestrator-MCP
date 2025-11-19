@@ -5,7 +5,7 @@ from typing import Any, Dict
 
 import pytest
 
-from src.cde_orchestrator.adapters.state.filesystem_state_repository import (
+from cde_orchestrator.adapters.state.filesystem_state_repository import (
     FileSystemStateRepository,
 )
 
