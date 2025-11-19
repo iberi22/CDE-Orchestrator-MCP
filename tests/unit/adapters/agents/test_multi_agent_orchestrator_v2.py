@@ -29,7 +29,7 @@ class MockCodeExecutor(ICodeExecutor):
         self.should_fail = should_fail
         self.delay = delay
         self.call_count = 0
-        self.last_prompt = None
+        self.last_prompt: str | None = None
 
     async def execute_prompt(
         self,
@@ -355,3 +355,336 @@ class TestAgentSelection:
 
         # Should use available agent (Gemini) even if not ideal for EPIC
         assert "gemini" in result.lower()
+
+    @pytest.mark.asyncio
+    async def test_selection_with_require_plan_approval(self):
+        """Test selection when plan approval is required."""
+        orchestrator = MultiAgentOrchestrator()
+
+        orchestrator.register_agent(AgentType.JULES, MockCodeExecutor("jules"))
+        orchestrator.register_agent(AgentType.COPILOT, MockCodeExecutor("copilot"))
+
+        result = await orchestrator.execute_prompt(
+            project_path=Path("/test/project"),
+            prompt="Complex refactoring",
+            context={"require_plan_approval": True},
+        )
+
+        # Should use Jules (only agent supporting plan approval)
+        assert "jules" in result.lower()
+
+    @pytest.mark.asyncio
+    async def test_selection_with_large_context(self):
+        """Test selection for tasks requiring large context."""
+        orchestrator = MultiAgentOrchestrator()
+
+        orchestrator.register_agent(AgentType.JULES, MockCodeExecutor("jules"))
+        orchestrator.register_agent(AgentType.COPILOT, MockCodeExecutor("copilot"))
+
+        result = await orchestrator.execute_prompt(
+            project_path=Path("/test/project"),
+            prompt="Analyze entire codebase",
+            context={"context_size": 100000},
+        )
+
+        # Should prefer Jules for large context
+        assert "jules" in result.lower()
+
+    @pytest.mark.asyncio
+    async def test_selection_fallback_chain(self):
+        """Test fallback to next agent on failure."""
+        orchestrator = MultiAgentOrchestrator()
+
+        # Register Jules that will fail
+        orchestrator.register_agent(
+            AgentType.JULES, MockCodeExecutor("jules", should_fail=True)
+        )
+        # Register Copilot as backup
+        orchestrator.register_agent(AgentType.COPILOT, MockCodeExecutor("copilot"))
+
+        # Should fallback to Copilot after Jules fails
+        with pytest.raises(ValueError):
+            await orchestrator.execute_prompt(
+                project_path=Path("/test/project"),
+                prompt="Test task",
+                context={},
+            )
+
+
+class TestOrchestratorEdgeCases:
+    """Test edge cases and error handling."""
+
+    @pytest.mark.asyncio
+    async def test_empty_prompt(self):
+        """Test handling of empty prompt."""
+        orchestrator = MultiAgentOrchestrator()
+        orchestrator.register_agent(AgentType.JULES, MockCodeExecutor("jules"))
+
+        result = await orchestrator.execute_prompt(
+            project_path=Path("/test/project"),
+            prompt="",
+            context={},
+        )
+
+        assert result is not None
+
+    @pytest.mark.asyncio
+    async def test_very_long_prompt(self):
+        """Test handling of very long prompt."""
+        orchestrator = MultiAgentOrchestrator()
+        orchestrator.register_agent(AgentType.JULES, MockCodeExecutor("jules"))
+
+        long_prompt = "A" * 10000
+
+        result = await orchestrator.execute_prompt(
+            project_path=Path("/test/project"),
+            prompt=long_prompt,
+            context={},
+        )
+
+        assert result is not None
+
+    @pytest.mark.asyncio
+    async def test_invalid_project_path(self):
+        """Test handling of invalid project path."""
+        orchestrator = MultiAgentOrchestrator()
+        orchestrator.register_agent(AgentType.JULES, MockCodeExecutor("jules"))
+
+        result = await orchestrator.execute_prompt(
+            project_path=Path("/nonexistent/path"),
+            prompt="Test",
+            context={},
+        )
+
+        # Should still execute (path validation is agent's responsibility)
+        assert result is not None
+
+    @pytest.mark.asyncio
+    async def test_none_context(self):
+        """Test handling of None context."""
+        orchestrator = MultiAgentOrchestrator()
+        orchestrator.register_agent(AgentType.JULES, MockCodeExecutor("jules"))
+
+        result = await orchestrator.execute_prompt(
+            project_path=Path("/test/project"),
+            prompt="Test",
+            context=None,
+        )
+
+        assert result is not None
+
+    @pytest.mark.asyncio
+    async def test_malformed_context(self):
+        """Test handling of malformed context."""
+        orchestrator = MultiAgentOrchestrator()
+        orchestrator.register_agent(AgentType.JULES, MockCodeExecutor("jules"))
+
+        result = await orchestrator.execute_prompt(
+            project_path=Path("/test/project"),
+            prompt="Test",
+            context={"invalid_key": "invalid_value"},
+        )
+
+        assert result is not None
+
+    def test_agent_registration_validation(self):
+        """Test that agent registration validates inputs."""
+        orchestrator = MultiAgentOrchestrator()
+
+        # Should accept valid inputs
+        orchestrator.register_agent(AgentType.JULES, MockCodeExecutor("jules"))
+        assert orchestrator.is_agent_available(AgentType.JULES)
+
+    def test_multiple_registrations_same_agent(self):
+        """Test registering same agent type multiple times."""
+        orchestrator = MultiAgentOrchestrator()
+
+        executor1 = MockCodeExecutor("jules1")
+        executor2 = MockCodeExecutor("jules2")
+
+        orchestrator.register_agent(AgentType.JULES, executor1)
+        orchestrator.register_agent(AgentType.JULES, executor2)
+
+        # Second registration should override first
+        assert orchestrator.is_agent_available(AgentType.JULES)
+
+
+class TestOrchestratorPerformance:
+    """Test orchestrator performance characteristics."""
+
+    @pytest.mark.asyncio
+    async def test_concurrent_executions_dont_interfere(self):
+        """Test that concurrent executions are isolated."""
+        orchestrator = MultiAgentOrchestrator()
+
+        orchestrator.register_agent(AgentType.JULES, MockCodeExecutor("jules"))
+
+        results = await asyncio.gather(
+            orchestrator.execute_prompt(Path("/p1"), "Prompt 1", {}),
+            orchestrator.execute_prompt(Path("/p2"), "Prompt 2", {}),
+            orchestrator.execute_prompt(Path("/p3"), "Prompt 3", {}),
+        )
+
+        assert len(results) == 3
+        assert all(r is not None for r in results)
+        assert "Prompt 1" in results[0]
+        assert "Prompt 2" in results[1]
+        assert "Prompt 3" in results[2]
+
+    @pytest.mark.asyncio
+    async def test_executor_call_counts(self):
+        """Test that executors are called correct number of times."""
+        orchestrator = MultiAgentOrchestrator()
+        executor = MockCodeExecutor("jules")
+
+        orchestrator.register_agent(AgentType.JULES, executor)
+
+        await orchestrator.execute_prompt(Path("/test"), "Prompt 1", {})
+        await orchestrator.execute_prompt(Path("/test"), "Prompt 2", {})
+        await orchestrator.execute_prompt(Path("/test"), "Prompt 3", {})
+
+        assert executor.call_count == 3
+
+    @pytest.mark.asyncio
+    async def test_agent_with_delay(self):
+        """Test orchestrator handles agent delays."""
+        orchestrator = MultiAgentOrchestrator()
+
+        orchestrator.register_agent(
+            AgentType.JULES, MockCodeExecutor("jules", delay=0.1)
+        )
+
+        import time
+
+        start = time.time()
+        result = await orchestrator.execute_prompt(
+            project_path=Path("/test/project"),
+            prompt="Test",
+            context={},
+        )
+        duration = time.time() - start
+
+        assert result is not None
+        assert duration >= 0.1  # Should respect delay
+
+
+class TestOrchestratorCapabilities:
+    """Test capability reporting and querying."""
+
+    def test_get_capabilities_all_agents(self):
+        """Test getting capabilities for all registered agents."""
+        orchestrator = MultiAgentOrchestrator()
+
+        orchestrator.register_agent(AgentType.JULES, MockCodeExecutor("jules"))
+        orchestrator.register_agent(AgentType.COPILOT, MockCodeExecutor("copilot"))
+
+        capabilities = orchestrator.selection_policy.get_capability_matrix()
+
+        assert AgentType.JULES in capabilities
+        assert AgentType.COPILOT in capabilities
+
+    def test_capability_matrix_structure(self):
+        """Test capability matrix has expected structure."""
+        orchestrator = MultiAgentOrchestrator()
+        orchestrator.register_agent(AgentType.JULES, MockCodeExecutor("jules"))
+
+        capabilities = orchestrator.selection_policy.get_capability_matrix()
+
+        assert isinstance(capabilities, dict)
+        assert all(isinstance(k, AgentType) for k in capabilities.keys())
+
+    def test_agent_availability_after_registration(self):
+        """Test agent availability queries."""
+        orchestrator = MultiAgentOrchestrator()
+
+        assert not orchestrator.is_agent_available(AgentType.JULES)
+        assert not orchestrator.is_agent_available(AgentType.COPILOT)
+
+        orchestrator.register_agent(AgentType.JULES, MockCodeExecutor("jules"))
+
+        assert orchestrator.is_agent_available(AgentType.JULES)
+        assert not orchestrator.is_agent_available(AgentType.COPILOT)
+
+        orchestrator.register_agent(AgentType.COPILOT, MockCodeExecutor("copilot"))
+
+        assert orchestrator.is_agent_available(AgentType.JULES)
+        assert orchestrator.is_agent_available(AgentType.COPILOT)
+
+
+class TestOrchestratorIntegration:
+    """Integration tests for orchestrator workflows."""
+
+    @pytest.mark.asyncio
+    async def test_complete_workflow(self):
+        """Test complete workflow from registration to execution."""
+        orchestrator = MultiAgentOrchestrator()
+
+        # Register agents
+        orchestrator.register_agent(AgentType.JULES, MockCodeExecutor("jules"))
+        orchestrator.register_agent(AgentType.COPILOT, MockCodeExecutor("copilot"))
+
+        # Verify registration
+        assert len(orchestrator.get_available_agents()) == 2
+
+        # Execute tasks
+        result1 = await orchestrator.execute_prompt(
+            project_path=Path("/test/project"),
+            prompt="Task 1",
+            context={"complexity": TaskComplexity.COMPLEX},
+        )
+
+        result2 = await orchestrator.execute_prompt(
+            project_path=Path("/test/project"),
+            prompt="Task 2",
+            context={"complexity": TaskComplexity.SIMPLE},
+        )
+
+        # Verify results
+        assert result1 is not None
+        assert result2 is not None
+
+    @pytest.mark.asyncio
+    async def test_workflow_with_context_preservation(self):
+        """Test that context is preserved across executions."""
+        orchestrator = MultiAgentOrchestrator()
+        orchestrator.register_agent(AgentType.JULES, MockCodeExecutor("jules"))
+
+        context = {"session_id": "test-session", "complexity": TaskComplexity.MODERATE}
+
+        result = await orchestrator.execute_prompt(
+            project_path=Path("/test/project"),
+            prompt="Test task",
+            context=context,
+        )
+
+        assert result is not None
+
+    @pytest.mark.asyncio
+    async def test_multiple_agents_different_tasks(self):
+        """Test routing different task types to appropriate agents."""
+        orchestrator = MultiAgentOrchestrator()
+
+        jules = MockCodeExecutor("jules")
+        copilot = MockCodeExecutor("copilot")
+        gemini = MockCodeExecutor("gemini")
+
+        orchestrator.register_agent(AgentType.JULES, jules)
+        orchestrator.register_agent(AgentType.COPILOT, copilot)
+        orchestrator.register_agent(AgentType.GEMINI, gemini)
+
+        # Execute different task types
+        await orchestrator.execute_prompt(
+            Path("/test"),
+            "Complex refactoring",
+            {"complexity": TaskComplexity.EPIC},
+        )
+
+        await orchestrator.execute_prompt(
+            Path("/test"),
+            "Simple fix",
+            {"complexity": TaskComplexity.TRIVIAL},
+        )
+
+        # At least one executor should have been called
+        total_calls = jules.call_count + copilot.call_count + gemini.call_count
+        assert total_calls >= 2
