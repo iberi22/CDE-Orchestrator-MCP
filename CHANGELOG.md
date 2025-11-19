@@ -182,7 +182,7 @@ llm_summary: "Changelog for CDE Orchestrator MCP.\n
 
 - **99.7% reduction** for multi-project workflows
   - Example: 3 projects: 118,704 → 390 bytes
-  - Scales to **1000+ projects** in same token budget as 1 traditional project
+  - Deep **single-project focus** with professional management capabilities
   - Traditional: 1000 projects = 40 MB
   - Progressive: 1000 projects = 390 bytes (`name_only`) = **99.999% reduction**
 

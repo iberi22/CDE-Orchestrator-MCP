@@ -12,7 +12,7 @@ tags:
   - "navigation"
   - "hexagonal"
 llm_summary: |
-  Index for modular architecture documentation. Each component in separate file (500-1500 lines).
+  Index for modular architecture documentation. Each component in separate file (max 800 lines).
   Start here to navigate hexagonal architecture, domain model, ports, adapters, and patterns.
 ---
 
@@ -151,4 +151,4 @@ After reading architecture documentation:
 
 ---
 
-*This modular structure follows CDE governance guidelines (500-1500 lines per document) for optimal LLM comprehension and maintenance.*
+*This modular structure follows CDE governance guidelines (max 800 lines per document) for optimal LLM comprehension and maintenance.*

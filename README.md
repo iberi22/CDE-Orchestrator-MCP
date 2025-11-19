@@ -16,9 +16,8 @@ tags:
 - progressive-disclosure
 - token-optimization
 - multi-project
-llm_summary: "User guide for CDE Orchestrator MCP with progressive disclosure pattern (99% token reduction).\n
-  Implements Anthropic's token-efficient tool discovery achieving 99.0% reduction for tool schemas and 99.7% for multi-project management.\n
-  Supports 1000+ projects in same token budget as 1 traditional project.\n
+llm_summary: "User guide for CDE Orchestrator MCP focusing on professional single-project management.\n
+  Implements deep context awareness and robust workflow orchestration.\n
   Reference when working with guide documentation."
 ---
 
@@ -84,11 +83,11 @@ We offer **enterprise-grade services** while keeping the software 100% open sour
 
 📧 **Interested?** Contact us: [enterprise@cde-orchestrator.dev](mailto:enterprise@cde-orchestrator.dev)
 
-📄 **Learn more:** See [Enterprise Services Analysis](agent-docs/execution/enterprise-services-analysis-2025-11-05.md) for full details.
+📄 **Learn more:** Contact us for full details.
 
 ---
 
-> **📋 Project Status:** Currently in active improvement phase. See [Executive Summary](EXECUTIVE_SUMMARY.md) for roadmap and [Improvement Roadmap](specs/tasks/improvement-roadmap.md) for detailed tasks.
+> **📋 Project Status:** Currently in active improvement phase. See [Executive Summary](specs/design/executive_summary_v2.md) for roadmap and [Improvement Roadmap](specs/tasks/improvement-roadmap.md) for detailed tasks.
 
 ## Core Concepts
 
@@ -106,7 +105,7 @@ This MCP doesn't just provide tools; it manages the project's state and guides t
 
 ## Features (MCP Tools)
 
-The following tools are currently implemented and available for use. For a detailed guide, see [MCP Tools Manual](docs/mcp-tools-manual.md).
+The following tools are currently implemented and available for use. For a detailed guide, see [MCP Tools Manual](specs/api/mcp-tools.md).
 
 ### 🆕 Progressive Disclosure (Token Optimization)
 
@@ -286,21 +285,18 @@ The CDE Orchestrator supports seamless integration with external MCP servers:
 export GITHUB_TOKEN=your-token-here
 ```
 
-For detailed integration documentation, see [INTEGRATION.md](INTEGRATION.md). For Codex CLI usage, see [CODEX.md](CODEX.md).
+For detailed integration documentation, see [Agent Integration](specs/design/new-agent-integration.md).
 
 ## 📚 Documentation
 
 ### Core Documentation
-- **[Executive Summary](EXECUTIVE_SUMMARY.md)** - Project status, roadmap and metrics
+- **[Executive Summary](specs/design/executive_summary_v2.md)** - Project status, roadmap and metrics
 - **[Improvement Roadmap](specs/tasks/improvement-roadmap.md)** - Detailed task breakdown and tracking
-- **[Technical Review](INFORME_REVISION_PROFESIONAL.md)** - Comprehensive technical analysis
 - **[Agent Guide](AGENTS.md)** - Guide for AI agents using this MCP
 
 ### Feature Documentation
-- **[Onboarding System](ONBOARDING_FEATURE.md)** - Repository onboarding feature details
-- **[Integration Guide](INTEGRATION.md)** - External service integration
-- **[Codex Integration](CODEX.md)** - Using with Codex CLI
-- **[Planning Document](PLANNING.md)** - Original project vision and architecture
+- **[Onboarding System](specs/features/onboarding-system.md)** - Repository onboarding feature details
+- **[Planning Document](specs/tasks/planning-overview.md)** - Original project vision and architecture
 
 ### Specifications (Spec-Kit)
 - **[specs/](specs/)** - Feature specifications and designs

@@ -55,6 +55,8 @@ WEEK-*.md            Any other .md
 
 **If you can't answer → DON'T CREATE THE FILE. Ask clarifying questions first.**
 
+**Project Management Philosophy**: This MCP server focuses on **professional, robust management of a single project**. All architecture and workflows are optimized for depth over breadth.
+
 ### Rule 3: YAML FRONTMATTER IS MANDATORY
 
 Every .md file (except root exceptions) MUST start with:
@@ -97,7 +99,8 @@ Pattern: `<type>-<topic>-<YYYY-MM-DD>.md` or `EXECUTIONS-<topic>-<YYYY-MM-DD-HHm
 
 ### Rule 5: TOKEN OPTIMIZATION OVER VERBOSITY
 
-**From research (Brex, OpenAI 2025):**
+**Documentation Standards:**
+- Maximum 800 lines per document
 - Use Markdown (bold, lists, tables) over prose → 30% token saving
 - Include `llm_summary` in metadata → 40% faster LLM comprehension
 - Structure with headers → 40% less context scanning

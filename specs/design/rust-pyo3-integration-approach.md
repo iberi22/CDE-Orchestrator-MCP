@@ -1,8 +1,11 @@
 ---
 title: "Rust + PyO3 Integration Approach"
-status: "in-progress"
+description: "Architecture for integrating Rust core with Python application using PyO3"
+type: design
+status: in-progress
+created: "2025-11-05"
+updated: "2025-11-18"
 author: "Jules"
-date: "2025-11-05"
 ---
 
 # Arquitectura Híbrida Python + Rust

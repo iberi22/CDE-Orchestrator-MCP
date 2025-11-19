@@ -51,7 +51,7 @@ llm_summary: "User guide for CDE Orchestrator MCP - Gemini AI Studio Instruction
 **Purpose**: Model Context Protocol server for Context-Driven Engineering
 **Architecture**: Hexagonal (Ports & Adapters)
 **Language**: Python 3.14, FastMCP framework
-**Scale**: Manages 1000+ projects, orchestrates AI-powered development workflows
+**Focus**: Professional management of a single project with deep context awareness and robust workflows
 
 **🆕 NEW**: This MCP server now acts as your **intelligent orchestrator** - you interact with it via MCP tools, and it:
 1. Analyzes your requests and selects optimal workflows automatically

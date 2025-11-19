@@ -147,7 +147,7 @@ llm_summary: |
 
 | Governance Rule | Compliance |
 |----------------|------------|
-| Max 500-1500 lines per document | ✅ All files 150-300 lines |
+| Max 800 lines per document | ✅ All files 150-300 lines |
 | YAML frontmatter required | ✅ All files compliant |
 | Proper directory structure | ✅ specs/design/architecture/ |
 | Navigation/linking | ✅ README.md hub + cross-links |

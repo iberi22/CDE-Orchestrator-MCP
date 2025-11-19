@@ -1,6 +1,6 @@
 ---
 title: "CDE Orchestrator MCP - Multi-Project Management"
-description: "Stateless multi-project design for managing 1000+ projects without registries"
+description: "Project management architecture with stateless design and deep context awareness"
 type: "design"
 status: "active"
 created: "2025-11-18"

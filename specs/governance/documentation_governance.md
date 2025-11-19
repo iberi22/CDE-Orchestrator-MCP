@@ -83,7 +83,7 @@ Based on research from Brex, OpenAI, and Anthropic:
    - **Max nesting**: 3 levels (LLMs have trouble with deeper hierarchies)
 
 3. **Chunking Strategy** (Reduce context "bloat")
-   - Each document: 500-1500 lines (optimal for LLM scanning)
+   - Each document: max 800 lines (optimal for LLM scanning)
    - Longer docs: Split into multiple focused files + index
    - Related docs: Cross-link with `See also:` section
 
@@ -134,7 +134,7 @@ Based on research from Brex, OpenAI, and Anthropic:
 ---
 title: "Feature: Multi-Project Support"
 type: "feature"
-llm_summary: "Enable agents to work with 1000+ projects. Key pattern: Stateless resolver
+llm_summary: "Enable professional single-project management. Key pattern: Stateless resolver
 via project_path parameter. No registry needed. Reference: specs/design/multi-project.md"
 ---
 
@@ -416,7 +416,7 @@ Only these files can be modified by AI agents in root:
 - [ ] **Structure**: Clear hierarchy (H1, H2, H3 max)
 - [ ] **Efficiency**: Uses Markdown (bold, lists, tables, code) over prose
 - [ ] **Linking**: Cross-references with absolute paths
-- [ ] **Chunking**: 500-1500 lines per document (not monolithic)
+- [ ] **Chunking**: max 800 lines per document (not monolithic)
 - [ ] **No Duplication**: Content appears in only one place
 - [ ] **Location**: Placed in correct directory per rules above
 - [ ] **Pre-commit**: Passes all hooks without `--no-verify`

@@ -402,12 +402,12 @@ Reorganizar documentación siguiendo estructura Spec-Kit para mejor navegación.
 - [ ] DOC-01.5: Setup CI para auto-deploy de docs
 
 **Progreso - Refactorización architecture.md:**
-- Documento original: 1443 líneas (excede límite de 500-1500 del governance)
+- Documento original: 1443 líneas (excedía límite de gobernanza)
 - Archivos completados: 10/10 (100%) ✅
 - Líneas refactorizadas: ~2010/1443 (139% - contenido expandido con ejemplos)
-- Promedio por archivo: ~201 líneas (governance compliant)
+- Promedio por archivo: ~201 líneas (governance compliant - max 800 líneas)
 - Cumplimiento de governance: ✅ YAML frontmatter + proper structure
-- Todos los archivos <500 líneas ✅
+- Todos los archivos <800 líneas ✅
 
 **Nueva Estructura Completada:**
 ```
@@ -425,7 +425,7 @@ specs/design/architecture/
 ```
 
 **Criterios de Aceptación:**
-- ✅ Documentación arquitectura dividida en módulos <500 líneas
+- ✅ Documentación arquitectura dividida en módulos <800 líneas
 - ✅ Links funcionando entre documentos
 - ✅ YAML frontmatter en todos los archivos
 - ✅ Navigation hub con rutas de lectura (first-time, implementation, integration)
