@@ -46,10 +46,10 @@ Successfully refactored project governance and philosophy based on user request:
 - Maximum: 1500 lines
 - Rationale: "Avoid too fragmented (<500) or too large (>1500)"
 
-**NEW Standard**:
-- Maximum: **800 lines**
+**NEW Standard (Updated 2025-11-19)**:
+- Maximum: **1500 lines** (increased from 800)
 - No minimum
-- Rationale: "Optimal for LLM comprehension, focused single-responsibility documentation"
+- Rationale: "Balance between LLM comprehension and comprehensive documentation. 800 was too restrictive."
 
 **Files Updated**:
 - `specs/governance/DOCUMENTATION_GOVERNANCE.md`

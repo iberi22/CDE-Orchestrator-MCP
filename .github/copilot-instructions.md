@@ -100,7 +100,7 @@ Pattern: `<type>-<topic>-<YYYY-MM-DD>.md` or `EXECUTIONS-<topic>-<YYYY-MM-DD-HHm
 ### Rule 5: TOKEN OPTIMIZATION OVER VERBOSITY
 
 **Documentation Standards:**
-- Maximum 800 lines per document
+- Maximum 1500 lines per document
 - Use Markdown (bold, lists, tables) over prose → 30% token saving
 - Include `llm_summary` in metadata → 40% faster LLM comprehension
 - Structure with headers → 40% less context scanning
