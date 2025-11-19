@@ -344,7 +344,7 @@ Language: [Primary language and version]
 ## 📁 Quick Navigation
 
 ### Start Here (First-time agents)
-1. Read `specs/design/ARCHITECTURE.md` for system design (if exists)
+1. Read `specs/design/architecture/README.md` for system design (if exists)
 2. Check `specs/features/` for feature specifications
 3. Review `memory/constitution.md` for project principles
 
@@ -432,7 +432,7 @@ tests/
 ## Finding Information
 
 ### Key Documents
-- Architecture: `specs/design/ARCHITECTURE.md`
+- Architecture: `specs/design/architecture/README.md`
 ---
 ## When Stuck
 
@@ -671,7 +671,7 @@ description: GitHub Copilot custom instructions for {project_name}
 ## Resources
 
 - Full Guidelines: `AGENTS.md`
-- Architecture: `specs/design/ARCHITECTURE.md`
+- Architecture: `specs/design/architecture/README.md`
 - Constitution: `memory/constitution.md`
 """
 

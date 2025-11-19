@@ -501,7 +501,7 @@ Una vez completado:
 ## 📚 Referencias
 
 - **Spec-Kit Documentation**: `specs/governance/DOCUMENTATION_GOVERNANCE.md`
-- **Architecture Guide**: `specs/design/ARCHITECTURE.md`
+- **Architecture Guide**: `specs/design/architecture/README.md`
 - **Improvement Roadmap**: `specs/tasks/improvement-roadmap.md`
 - **FastMCP Docs**: https://github.com/jlowin/fastmcp
 - **Python Best Practices**: PEP 8, PEP 20

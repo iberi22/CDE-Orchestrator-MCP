@@ -1002,7 +1002,7 @@ Update `.vscode/mcp.json`:
 
 - `agent-docs/feedback/vscode-mcp-progress-limitations-2025-11-02.md` - Original problem analysis
 - `agent-docs/execution/mcp-progress-tracking-implementation-2025-11-02.md` - Current progress implementation
-- `specs/design/ARCHITECTURE.md` - MCP server architecture
+- `specs/design/architecture/README.md` - MCP server architecture
 
 ### Tools & Libraries
 

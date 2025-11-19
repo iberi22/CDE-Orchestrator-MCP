@@ -134,7 +134,7 @@ See also: `specs/tasks/improvement-roadmap.md`
 **How**: Manages 1000+ projects, orchestrates workflows, invokes Copilot CLI headless
 **New**: Dynamic Skill Management System (DSMS) - self-improving AI knowledge layer
 
-📖 **Deep Dive**: See `specs/design/ARCHITECTURE.md` for complete architecture
+📖 **Deep Dive**: See `specs/design/architecture/README.md` for complete architecture
 
 ## 🏗️ Architecture (Hexagonal/Clean)
 
@@ -144,7 +144,7 @@ See also: `specs/tasks/improvement-roadmap.md`
 - ✅ Adapters → Application → Domain
 - ❌ Domain NEVER imports Adapters or Infrastructure
 
-📖 **Full Diagram**: `specs/design/ARCHITECTURE.md`
+📖 **Full Diagram**: `specs/design/architecture/README.md`
 
 ## 📁 Key Directories
 
@@ -521,7 +521,7 @@ async def test_execute_code_use_case():
   - [x] Domain entities (Project, Feature, Workflow)
   - [x] Port interfaces (IProjectRepository, ICodeExecutor, etc.)
   - [x] Domain exceptions
-  - [x] specs/design/ARCHITECTURE.md documentation
+  - [x] specs/design/architecture/ modular documentation
 
 ### 🔄 In Progress (Phase 2)
 

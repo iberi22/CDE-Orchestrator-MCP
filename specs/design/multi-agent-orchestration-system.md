@@ -891,7 +891,7 @@ selection_policy:
 
 ### Related Specs
 
-- `specs/design/ARCHITECTURE.md` - Hexagonal architecture
+- `specs/design/architecture/README.md` - Hexagonal architecture
 - `specs/design/dynamic-skill-system.md` - Skill management
 - `specs/tasks/improvement-roadmap.md` - Overall roadmap
 

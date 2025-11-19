@@ -74,7 +74,7 @@ llm_summary: |
 
 | Field | Type | Description | Example |
 |-------|------|-------------|---------|
-| `related_docs` | list | Paths to related documents (relative to repo root) | `["specs/design/architecture.md"]` |
+| `related_docs` | list | Paths to related documents (relative to repo root) | `["specs/design/architecture/README.md"]` |
 | `tags` | list | Searchable keywords | `["python", "migration", "testing"]` |
 | `llm_summary` | string | Optimized summary for LLMs (2-3 sentences) | See example below |
 | `version` | string | Semantic version for versioned docs | `"2.1.0"` |

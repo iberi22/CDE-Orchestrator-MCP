@@ -95,7 +95,7 @@ Based on research from Brex, OpenAI, and Anthropic:
 
 5. **Strategic Link Placement** (Enable lazy-loading of context)
    - Put critical info early (LLMs read sequentially)
-   - Link to related docs: "See `specs/design/ARCHITECTURE.md` for details"
+   - Link to related docs: "See `specs/design/architecture/README.md` for details"
    - Use absolute paths for consistency
 
 #### ❌ DON'T (High-Cost Anti-Patterns)

@@ -76,7 +76,7 @@ llm_summary: |
 
 ### Example User Request### Start Here (First-time agents)
 
-1. Read `specs/design/ARCHITECTURE.md` for system design
+1. Read `specs/design/architecture/README.md` for system design
 
 ```plaintext2. Check `specs/tasks/improvement-roadmap.md` for current work
 
@@ -996,7 +996,7 @@ cde_selectWorkflow("Clean up documentation structure")
 
 ### Must-Read (First-time agents)
 
-1. **`specs/design/ARCHITECTURE.md`** - Complete system architecture (1400 lines)
+1. **`specs/design/architecture/README.md`** - Complete system architecture (modular structure)
 2. **`specs/tasks/improvement-roadmap.md`** - 63 prioritized tasks
 3. **`specs/governance/DOCUMENTATION_GOVERNANCE.md`** - File placement rules
 

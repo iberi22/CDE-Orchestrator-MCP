@@ -65,7 +65,7 @@ def cde_scanDocumentation(
     Examples:
         >>> cde_scanDocumentation(".", detail_level="name_only")
         {
-          "files": ["specs/features/auth.md", "specs/design/architecture.md"],
+          "files": ["specs/features/auth.md", "specs/design/architecture/README.md"],
           "total": 2
         }
 
@@ -73,7 +73,7 @@ def cde_scanDocumentation(
         {
           "files": [
             {"path": "specs/features/auth.md", "title": "Authentication", "type": "feature"},
-            {"path": "specs/design/architecture.md", "title": "Architecture", "type": "design"}
+            {"path": "specs/design/architecture/README.md", "title": "Architecture", "type": "design"}
           ],
           "total": 2,
           "missing_metadata": [],

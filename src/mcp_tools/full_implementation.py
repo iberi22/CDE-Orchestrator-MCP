@@ -154,7 +154,7 @@ Campos: type, description, created, updated, llm_summary
                 description="""
 Agregar llm_summary optimizado para LLM en:
 - docs/mcp-tools-manual.md
-- specs/design/ARCHITECTURE.md
+- specs/design/architecture/README.md
 - specs/tasks/improvement-roadmap.md
 - agent-docs/README.md
 

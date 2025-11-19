@@ -64,7 +64,7 @@ llm_summary: "User guide for CDE Orchestrator MCP - Gemini AI Studio Instruction
 ## 🚀 Quick Start for Gemini: Your First Request
 
 ### First-Time Setup
-1. **Read architecture**: `specs/design/ARCHITECTURE.md` (1400 lines - comprehensive system design)
+1. **Read architecture**: `specs/design/architecture/README.md` (modular structure - comprehensive system design)
 2. **Check roadmap**: `specs/tasks/improvement-roadmap.md` (63 prioritized tasks)
 3. **Review governance**: `specs/governance/DOCUMENTATION_GOVERNANCE.md` (file placement rules)
 
@@ -664,7 +664,7 @@ llm_summary: |
 
 ### Before Making Changes
 1. **Search existing specs**: `specs/features/*.md`
-2. **Read architecture**: `specs/design/ARCHITECTURE.md`
+2. **Read architecture**: `specs/design/architecture/README.md`
 3. **Check roadmap**: `specs/tasks/improvement-roadmap.md`
 4. **Understand context**: Read related files fully (not just snippets)
 
@@ -861,7 +861,7 @@ Self-improving knowledge layer:
 - **Adapters**: Infrastructure implementations
 - **Ports**: Interfaces connecting layers
 
-**See**: `specs/design/ARCHITECTURE.md` (1400 lines, detailed explanation)
+**See**: `specs/design/architecture/README.md` (1400 lines, detailed explanation)
 
 ---
 
@@ -873,7 +873,7 @@ Self-improving knowledge layer:
 3. **File navigation**: Follow directory structure (specs → src → tests)
 
 ### Key Documents (Priority Order)
-1. `specs/design/ARCHITECTURE.md` - System architecture (1400 lines)
+1. `specs/design/architecture/README.md` - System architecture (1400 lines)
 2. `specs/tasks/improvement-roadmap.md` - Current work (63 tasks)
 3. `specs/governance/DOCUMENTATION_GOVERNANCE.md` - File organization rules
 4. `specs/design/dynamic-skill-system.md` - DSMS design (44 pages)
@@ -926,7 +926,7 @@ See `specs/tasks/improvement-roadmap.md` for detailed breakdown (63 tasks total)
 
 1. **Check specs**: `specs/features/` or `specs/design/`
 2. **Search codebase**: `grep -r "pattern" src/`
-3. **Read architecture**: `specs/design/ARCHITECTURE.md`
+3. **Read architecture**: `specs/design/architecture/README.md`
 4. **Review roadmap**: `specs/tasks/improvement-roadmap.md`
 5. **Check governance**: If documentation-related
 6. **Ask Gemini**: Use your large context window - provide full files!

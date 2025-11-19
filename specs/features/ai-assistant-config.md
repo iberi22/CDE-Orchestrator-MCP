@@ -371,7 +371,7 @@ Templates are parameterized with project context:
 |----------|--------|---------------|
 | `{PROJECT_NAME}` | `Path.cwd().name` | "CDE Orchestrator MCP" |
 | `{PROJECT_PATH}` | `Path.cwd()` | "E:\\scripts-python\\CDE" |
-| `{ARCHITECTURE}` | `specs/design/ARCHITECTURE.md` | "Hexagonal Architecture" |
+| `{ARCHITECTURE}` | `specs/design/architecture/README.md` | "Hexagonal Architecture" |
 | `{TECH_STACK}` | Analysis of project files | "Python 3.12, FastMCP" |
 | `{CURRENT_DATE}` | `datetime.now()` | "2025-11-01" |
 
@@ -394,7 +394,7 @@ Templates are parameterized with project context:
 3. Add tests for all functionality
 
 ## Navigation
-- Architecture: specs/design/ARCHITECTURE.md
+- Architecture: specs/design/architecture/README.md
 - Features: specs/features/
 - Tasks: specs/tasks/improvement-roadmap.md
 
