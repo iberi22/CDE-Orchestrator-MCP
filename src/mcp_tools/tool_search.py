@@ -114,16 +114,15 @@ def cde_searchTools(query: str = "", detail_level: str = "name_and_description")
     full_details = cde_searchTools("selectWorkflow", detail_level="full_schema")
     ```
 
-    **Pattern 3: Multi-project workflow**
+    **Pattern 3: Tool discovery in workflow**
     ```python
-    # Discover tools ONCE (works for all 1000+ projects)
+    # Discover available documentation tools
     tools = cde_searchTools("scan", detail_level="name_only")
     # Returns: ["scanDocumentation", "analyzeDocumentation"]
 
-    # Use on multiple projects
+    # Use discovered tools
     from servers.cde import scanDocumentation
-    proj1 = scanDocumentation(project_path="E:\\\\app1")
-    proj2 = scanDocumentation(project_path="E:\\\\app2")
+    result = scanDocumentation(project_path=".")
     ```
 
     **Tags Available**:

@@ -1,23 +1,54 @@
 ---
-title: "CDE Orchestrator MCP - Hexagonal Architecture"
+title: "CDE Orchestrator MCP - Hexagonal Architecture [DEPRECATED]"
 description: "Complete architecture guide for hexagonal/clean architecture pattern in CDE Orchestrator"
 type: "design"
-status: "active"
+status: "deprecated"
 created: "2025-10-15"
-updated: "2025-11-01"
+updated: "2025-11-18"
+deprecated: "2025-11-18"
 author: "CDE Orchestrator Team"
 tags:
   - "architecture"
   - "hexagonal"
   - "ports-and-adapters"
   - "clean-architecture"
+  - "deprecated"
 llm_summary: |
-  Comprehensive architecture documentation for CDE Orchestrator MCP using hexagonal/clean architecture.
-  Covers domain entities, ports, adapters, dependency injection, and multi-project design.
-  Reference when designing new features or understanding system structure.
+  [DEPRECATED] This monolithic architecture document has been split into modular files.
+  See specs/design/architecture/ for current documentation (10 focused documents).
+  This file preserved for historical reference only.
 ---
 
-# CDE Orchestrator MCP - Hexagonal Architecture
+# ⚠️ DEPRECATED - See New Modular Architecture
+
+**This document is deprecated as of 2025-11-18.**
+
+**Reason**: Exceeded governance limit (1443 lines > 800 lines max) and violated single-responsibility principle.
+
+**Replacement**: See **[specs/design/architecture/](../architecture/README.md)** for current modular documentation:
+
+- [Architecture Overview](../architecture/architecture-overview.md) - Core principles
+- [Domain Layer](../architecture/architecture-domain-layer.md) - Business entities
+- [Ports](../architecture/architecture-ports.md) - Interface contracts
+- [Use Cases](../architecture/architecture-use-cases.md) - Application logic
+- [Adapters](../architecture/architecture-adapters.md) - Infrastructure
+- [Multi-Project Design](../architecture/architecture-multi-project.md) - Project management
+- [Copilot Integration](../architecture/architecture-copilot-integration.md) - CLI adapter
+- [DI Container](../architecture/architecture-di-container.md) - Dependency injection
+- [Testing & LLM Patterns](../architecture/architecture-testing-patterns.md) - Testing + optimization
+
+**Benefits of New Structure**:
+- ✅ Each file <800 lines (governance compliant)
+- ✅ Focused, single-responsibility documents
+- ✅ Easier to maintain and update
+- ✅ Better navigation with README hub
+- ✅ Optimized for LLM comprehension
+
+**DO NOT USE THIS FILE** - Refer to modular architecture above.
+
+---
+
+# CDE Orchestrator MCP - Hexagonal Architecture [ARCHIVED]
 
 > **Target Audience**: Large Language Models, AI Coding Agents
 > **Design Philosophy**: Stateless, Simple, LLM-Driven
