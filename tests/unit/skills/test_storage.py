@@ -63,6 +63,7 @@ def sample_ephemeral_skill():
         domain=SkillDomain.DATABASE,
         complexity="medium",
         content="# Task Context\n\nImplementing Redis...",
+        context={"task": "redis-implementation", "priority": "high"},
         created_at=datetime.now(timezone.utc),
         task_id="task-123",
         generated_from_base_skill="redis-caching",
@@ -83,8 +84,10 @@ class TestSkillStorageAdapter:
         assert storage.base_skills_dir.exists()
         assert storage.ephemeral_skills_dir.exists()
 
-    def test_index_file_created(self, storage):
-        """Test that index file is created."""
+    def test_index_file_created(self, storage, sample_base_skill):
+        """Test that index file is created when saving skills."""
+        # Index file is not created until first save
+        storage.save_base_skill(sample_base_skill)
         assert storage.index_file.exists()
 
     def test_find_cde_root_in_parent(self, tmp_path):
@@ -140,7 +143,7 @@ class TestSkillStorageAdapter:
 
         assert sample_base_skill.id in storage.index
         index_entry = storage.index[sample_base_skill.id]
-        assert index_entry.id == sample_base_skill.id
+        assert index_entry.skill_id == sample_base_skill.id
         assert index_entry.skill_type == SkillType.BASE
 
     # Base Skill Loading Tests
@@ -187,7 +190,8 @@ class TestSkillStorageAdapter:
             metadata = json.load(f)
 
         assert "expires_at" in metadata
-        assert metadata["type"] == SkillType.EPHEMERAL
+        # Type is stored in index, not in metadata.json
+        assert "task_id" in metadata
 
     def test_save_ephemeral_skill_includes_task_id(
         self, storage, sample_ephemeral_skill
@@ -219,15 +223,13 @@ class TestSkillStorageAdapter:
             title="Expired Skill",
             description="Test expired skill",
             domain=SkillDomain.DATABASE,
-            tags=["test"],
+            complexity="medium",
             content="# Expired\n\nExpired skill content",
-            version="1.0.0",
+            context={"task": "test"},
             created_at=datetime.now(timezone.utc) - timedelta(days=2),
-            updated_at=datetime.now(timezone.utc) - timedelta(days=2),
-            author="test-agent",
-            status=SkillStatus.ACTIVE,
             task_id="task-expired",
-            base_skills=[],
+            generated_from_base_skill="base-skill-id",
+            generation_time_seconds=1.0,
             expires_at=datetime.now(timezone.utc) - timedelta(hours=1),
         )
 
@@ -265,7 +267,7 @@ class TestSkillStorageAdapter:
         assert len(skills) > 0
         skill_meta = skills[0]
         assert hasattr(skill_meta, "id")
-        assert hasattr(skill_meta, "name")
+        assert hasattr(skill_meta, "title")
 
     # Skill Deletion Tests
 
@@ -306,22 +308,20 @@ class TestSkillStorageAdapter:
     # Cleanup Tests
 
     def test_cleanup_expired_ephemeral_skills(self, storage):
-        """Test cleanup of expired ephemeral skills."""
+        """Test cleanup removes only expired skills."""
         # Create expired skill
         expired_skill = EphemeralSkill(
             id="expired-skill",
             title="Expired Skill",
             description="Test expired skill",
             domain=SkillDomain.DATABASE,
-            tags=["test"],
-            content="# Expired",
-            version="1.0.0",
+            complexity="medium",
+            content="# Expired\n\nExpired skill content",
+            context={"task": "test"},
             created_at=datetime.now(timezone.utc) - timedelta(days=2),
-            updated_at=datetime.now(timezone.utc) - timedelta(days=2),
-            author="test-agent",
-            status=SkillStatus.ACTIVE,
             task_id="task-expired",
-            base_skills=[],
+            generated_from_base_skill="base-skill-id",
+            generation_time_seconds=1.0,
             expires_at=datetime.now(timezone.utc) - timedelta(hours=1),
         )
 
@@ -331,15 +331,13 @@ class TestSkillStorageAdapter:
             title="Active Skill",
             description="Test active skill",
             domain=SkillDomain.DATABASE,
-            tags=["test"],
+            complexity="medium",
             content="# Active",
-            version="1.0.0",
+            context={"task": "test"},
             created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc),
-            author="test-agent",
-            status=SkillStatus.ACTIVE,
             task_id="task-active",
-            base_skills=[],
+            generated_from_base_skill="base-skill-id",
+            generation_time_seconds=1.0,
             expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
         )
 
@@ -394,10 +392,10 @@ class TestSkillStorageAdapter:
 
         stats = storage.get_storage_stats()
 
-        assert "base_count" in stats
-        assert "ephemeral_count" in stats
-        assert stats["base_count"] >= 1
-        assert stats["ephemeral_count"] >= 1
+        assert "total_base_skills" in stats
+        assert "total_ephemeral_skills" in stats
+        assert stats["total_base_skills"] >= 1
+        assert stats["total_ephemeral_skills"] >= 1
 
     # Index Management Tests
 
@@ -451,6 +449,6 @@ class TestSkillStorageAdapter:
         metadata_file = path / "metadata.json"
         metadata_file.write_text("{ invalid json")
 
-        # Should handle gracefully (doesn't crash entire system)
-        # Depending on implementation, might return None or raise
-        _ = storage.load_base_skill(sample_base_skill.id)
+        # Should raise JSONDecodeError for corrupted metadata
+        with pytest.raises(json.JSONDecodeError):
+            storage.load_base_skill(sample_base_skill.id)
