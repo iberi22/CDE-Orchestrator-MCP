@@ -198,6 +198,10 @@ class MultiAgentOrchestrator(ICodeExecutor):
             ...     }
             ... )
         """
+        # Ensure context is not None (use empty dict as default)
+        if context is None:
+            context = {}
+
         # Extract task parameters
         complexity = context.get("complexity", TaskComplexity.MODERATE)
         require_approval = context.get("require_plan_approval", False)

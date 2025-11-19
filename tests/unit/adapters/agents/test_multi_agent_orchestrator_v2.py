@@ -399,11 +399,13 @@ class TestAgentSelection:
         orchestrator.register_agent(
             AgentType.JULES, MockCodeExecutor("jules", should_fail=True)
         )
-        # Register Copilot as backup
-        orchestrator.register_agent(AgentType.COPILOT, MockCodeExecutor("copilot"))
+        # Register Copilot as backup that will also fail
+        orchestrator.register_agent(
+            AgentType.COPILOT, MockCodeExecutor("copilot", should_fail=True)
+        )
 
-        # Should fallback to Copilot after Jules fails
-        with pytest.raises(ValueError):
+        # Both agents fail, should raise ValueError
+        with pytest.raises(ValueError, match="Execution failed with"):
             await orchestrator.execute_prompt(
                 project_path=Path("/test/project"),
                 prompt="Test task",
