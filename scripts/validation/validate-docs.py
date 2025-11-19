@@ -88,6 +88,10 @@ VALID_TYPES = {
 
 VALID_STATUSES = {"draft", "active", "deprecated", "archived"}
 
+# Line limit for documentation files (excluding root exceptions)
+MAX_LINES = 800
+MAX_LINES_EXCEPTIONS = ROOT_EXCEPTIONS | {"specs/design/archive/architecture.md.deprecated"}
+
 ALLOWED_DIRECTORIES = {
     "specs/features": "feature",
     "specs/design": "design",
@@ -405,6 +409,48 @@ def validate_agent_docs_structure(file_path: str) -> Optional[ValidationError]:
     return None
 
 
+def validate_line_count(file_path: str) -> Optional[ValidationError]:
+    """Validate that file does not exceed maximum line count (800 lines).
+    
+    Exceptions:
+    - Root-level exceptions (README.md, AGENTS.md, etc.)
+    - Archived files (specs/design/archive/*)
+    """
+    path = Path(file_path)
+    
+    # Check if file is in exceptions
+    if path.name in MAX_LINES_EXCEPTIONS:
+        return None
+    
+    if "archive" in path.parts:
+        return None
+    
+    try:
+        line_count = len(path.read_text(encoding="utf-8").splitlines())
+        
+        if line_count > MAX_LINES:
+            return ValidationError(
+                file_path=file_path,
+                error_type="line_count",
+                message=(
+                    f"Document exceeds maximum line count: {line_count} lines (max: {MAX_LINES}). "
+                    f"Consider splitting into multiple modular documents. "
+                    f"See specs/design/architecture/ for example. "
+                    f"Over by: {line_count - MAX_LINES} lines"
+                ),
+                severity="error"
+            )
+    except Exception as e:
+        return ValidationError(
+            file_path=file_path,
+            error_type="file_read",
+            message=f"Could not read file to count lines: {e}",
+            severity="warning"
+        )
+    
+    return None
+
+
 def validate_file(file_path: str) -> List[ValidationError]:
     """Validate a single markdown file."""
     errors = []
@@ -418,6 +464,11 @@ def validate_file(file_path: str) -> List[ValidationError]:
     naming_error = validate_naming(file_path)
     if naming_error:
         errors.append(naming_error)
+
+    # Validate line count (800-line limit)
+    line_count_error = validate_line_count(file_path)
+    if line_count_error:
+        errors.append(line_count_error)
 
     # Validate agent-docs structure
     agent_error = validate_agent_docs_structure(file_path)
