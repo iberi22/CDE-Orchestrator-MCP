@@ -6,13 +6,13 @@ import json
 import sys
 from pathlib import Path
 
+import cde_rust_core  # type: ignore
+
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-import cde_rust_core  # type: ignore
 
-
-def test_rust_venv_exclusion():
+def test_rust_venv_exclusion() -> None:
     """Test if Rust correctly excludes .venv directory."""
 
     project_path = str(Path(".").absolute())
@@ -25,7 +25,7 @@ def test_rust_venv_exclusion():
     print(f"Excluded dirs: {excluded_dirs}\n")
 
     # Call Rust
-    result_json = cde_rust_core.scan_project_py(
+    result_json = cde_rust_core.scan_project_py(  # type: ignore
         project_path,
         excluded_dirs,
         excluded_patterns,

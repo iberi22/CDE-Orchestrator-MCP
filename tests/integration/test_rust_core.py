@@ -34,14 +34,14 @@ class TestRustCoreIntegration(unittest.TestCase):
     def test_scan_documentation_py(self):
         """Test that the Rust scan_documentation_py function works correctly."""
         try:
-            from cde_rust_core import scan_documentation_py
+            from cde_rust_core import scan_documentation_py  # type: ignore
         except ImportError:
             self.fail(
                 "Failed to import cde_rust_core. Make sure it's compiled and installed."
             )
 
         # Execute the Rust function
-        json_result = scan_documentation_py(self.project_path)
+        json_result = scan_documentation_py(self.project_path)  # type: ignore
         self.assertIsInstance(json_result, str)
 
         # Parse and verify the result

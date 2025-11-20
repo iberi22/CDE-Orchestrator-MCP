@@ -52,7 +52,9 @@ print("=" * 60)
 print()
 
 start = time.time()
-result_json = cde_rust_core.scan_project_py(".", excluded_dirs, excluded_patterns)
+result_json = cde_rust_core.scan_project_py(  # type: ignore
+    ".", excluded_dirs, excluded_patterns
+)
 result = json.loads(result_json)
 total_time = (time.time() - start) * 1000  # Convert to ms
 

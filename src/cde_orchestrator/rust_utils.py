@@ -163,7 +163,7 @@ class RustDocumentationScanner:
         ...     print("Rust not available, using fallback")
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.is_available = RUST_AVAILABLE
 
     def scan_documentation(self, root_path: str | Path) -> List[Document]:
@@ -193,7 +193,7 @@ class RustDocumentationScanner:
         root_path = str(Path(root_path).resolve())
 
         try:
-            result_json = cde_rust_core.scan_documentation_py(root_path)
+            result_json = cde_rust_core.scan_documentation_py(root_path)  # type: ignore
             data = json.loads(result_json)
             return [Document.from_dict(doc) for doc in data]
         except Exception as e:
@@ -226,7 +226,7 @@ class RustDocumentationScanner:
         root_path = str(Path(root_path).resolve())
 
         try:
-            result_json = cde_rust_core.analyze_documentation_quality_py(root_path)
+            result_json = cde_rust_core.analyze_documentation_quality_py(root_path)  # type: ignore
             data = json.loads(result_json)
             return QualityReport.from_dict(data)
         except Exception as e:
@@ -259,7 +259,7 @@ class RustDocumentationScanner:
         root_path = str(Path(root_path).resolve())
 
         try:
-            result_json = cde_rust_core.validate_workflows_py(root_path)
+            result_json = cde_rust_core.validate_workflows_py(root_path)  # type: ignore
             data = json.loads(result_json)
             return WorkflowValidationReport.from_dict(data)
         except Exception as e:

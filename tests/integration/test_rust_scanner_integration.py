@@ -1,18 +1,16 @@
 # tests/integration/test_rust_scanner_integration.py
 import json
 import os
-
-# Add src to path
 import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
-
 from cde_orchestrator.application.onboarding.project_analysis_use_case import (
     ProjectAnalysisUseCase,
 )
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
 
 class TestRustScannerIntegration(unittest.TestCase):
@@ -47,7 +45,7 @@ class TestRustScannerIntegration(unittest.TestCase):
     def test_rust_scan_project_py(self):
         """Test that the Rust scan_project_py function works correctly."""
         try:
-            import cde_rust_core
+            import cde_rust_core  # type: ignore
 
         except ImportError:
             self.fail(
@@ -58,7 +56,7 @@ class TestRustScannerIntegration(unittest.TestCase):
         excluded_patterns = ["*.pyc"]
 
         # Execute Rust function
-        json_result = cde_rust_core.scan_project_py(
+        json_result = cde_rust_core.scan_project_py(  # type: ignore
             str(self.root), excluded_dirs, excluded_patterns
         )
 
@@ -89,7 +87,7 @@ class TestRustScannerIntegration(unittest.TestCase):
     def test_compare_rust_vs_python(self):
         """Compare Rust implementation results with Python implementation."""
         try:
-            import cde_rust_core
+            import cde_rust_core  # type: ignore  # noqa: F401
         except ImportError:
             self.skipTest("cde_rust_core not available")
 

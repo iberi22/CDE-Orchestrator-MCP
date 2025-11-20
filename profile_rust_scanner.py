@@ -6,10 +6,10 @@ import json
 import sys
 from pathlib import Path
 
+import cde_rust_core  # type: ignore
+
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
-
-import cde_rust_core  # type: ignore
 
 
 def profile_rust_scanner() -> None:
@@ -37,7 +37,7 @@ def profile_rust_scanner() -> None:
 
     # Run 1 iteration to get baseline
     print("Running analysis...")
-    result_json = cde_rust_core.scan_project_py(
+    result_json = cde_rust_core.scan_project_py(  # type: ignore
         project_path,
         excluded_dirs,
         excluded_patterns,

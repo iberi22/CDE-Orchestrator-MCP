@@ -44,13 +44,13 @@ class TestYamlFrontmatter:
         frontmatter = YamlFrontmatter.from_dict(data)
 
         assert frontmatter.title == "Test Doc"
-        assert frontmatter.description == "A test document"
-        assert frontmatter.doc_type == "feature"
-        assert frontmatter.status == "active"
-        assert frontmatter.created == "2025-01-01"
-        assert frontmatter.updated == "2025-01-02"
-        assert frontmatter.author == "Test Author"
-        assert frontmatter.llm_summary == "Brief summary"
+        assert frontmatter.description == "A test document"  # type: ignore
+        assert frontmatter.doc_type == "feature"  # type: ignore
+        assert frontmatter.status == "active"  # type: ignore
+        assert frontmatter.created == "2025-01-01"  # type: ignore
+        assert frontmatter.updated == "2025-01-02"  # type: ignore
+        assert frontmatter.author == "Test Author"  # type: ignore
+        assert frontmatter.llm_summary == "Brief summary"  # type: ignore
         assert frontmatter.extra == {"custom": "field"}
 
     def test_from_dict_with_partial_fields(self):
@@ -63,10 +63,10 @@ class TestYamlFrontmatter:
         frontmatter = YamlFrontmatter.from_dict(data)
 
         assert frontmatter.title == "Partial Doc"
-        assert frontmatter.doc_type == "design"
-        assert frontmatter.description is None
-        assert frontmatter.status is None
-        assert frontmatter.extra == {}
+        assert frontmatter.doc_type == "design"  # type: ignore
+        assert frontmatter.description is None  # type: ignore
+        assert frontmatter.status is None  # type: ignore
+        assert frontmatter.extra == {}  # type: ignore
 
     def test_from_dict_with_none_returns_none(self):
         """Test that None input returns None."""
