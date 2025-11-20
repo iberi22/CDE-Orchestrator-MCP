@@ -10,7 +10,7 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
-from cde_orchestrator.adapters.git import GitAdapter  # noqa: E402
+from cde_orchestrator.adapters.repository.git_adapter import GitAdapter  # noqa: E402
 from cde_orchestrator.application.onboarding import OnboardingUseCase  # noqa: E402
 
 
