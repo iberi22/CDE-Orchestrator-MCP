@@ -684,7 +684,11 @@ author: "Jules Consolidator (Fallback)"
             return {}
 
         # Filter out current week if requested
-        if skip_current_week and current_week_label in groups:
+        if (
+            skip_current_week
+            and current_week_label is not None
+            and current_week_label in groups
+        ):
             current_week_files = len(groups[current_week_label].files)
             del groups[current_week_label]
             print(

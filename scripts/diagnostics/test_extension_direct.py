@@ -5,6 +5,7 @@ This bypasses the proxy to isolate the issue.
 
 import json
 import time
+import urllib.error
 import urllib.request
 
 

@@ -367,7 +367,7 @@ class SkillStorageAdapter:
 
         return results
 
-    def get_storage_stats(self) -> Dict[str, int]:
+    def get_storage_stats(self) -> Dict[str, int | str]:
         """
         Get storage statistics.
 

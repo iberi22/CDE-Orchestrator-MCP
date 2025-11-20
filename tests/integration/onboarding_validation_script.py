@@ -3,26 +3,30 @@
 Test script to validate onboarding functionality directly
 without needing the full MCP server running.
 """
+import asyncio
 import sys
 from pathlib import Path
 
 # Add src to path
-sys.path.insert(0, str(Path(__file__).parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
-from cde_orchestrator.adapters.state import StateAdapter  # noqa: E402
+from cde_orchestrator.adapters.git import GitAdapter  # noqa: E402
 from cde_orchestrator.application.onboarding import OnboardingUseCase  # noqa: E402
 
 
-def test_onboarding():
+async def test_onboarding():
     """Test the onboarding process."""
     project_root = Path.cwd()
     print(f"Testing onboarding for: {project_root}")
     print("=" * 80)
 
+    # Initialize git adapter
+    git_adapter = GitAdapter(project_root)
+
     # Step 1: Analyze current state
     print("\n1. ANALYZING PROJECT STRUCTURE...")
-    analyzer = OnboardingUseCase(project_root)
-    analysis = analyzer.needs_onboarding()
+    analyzer = OnboardingUseCase(project_root, git_adapter)
+    analysis = await analyzer.needs_onboarding()
 
     print(f"   Needs onboarding: {analysis['needs_onboarding']}")
     print(f"   Missing structure: {len(analysis['missing_structure'])} items")
@@ -37,7 +41,7 @@ def test_onboarding():
 
     # Step 2: Generate onboarding plan
     print("\n2. GENERATING ONBOARDING PLAN...")
-    plan = analyzer.generate_onboarding_plan()
+    plan = await analyzer.generate_onboarding_plan()
 
     print(f"   Structure to create: {len(plan['structure_to_create'])} items")
     print(f"   Docs to generate: {len(plan['docs_to_generate'])} docs")
@@ -76,8 +80,10 @@ def test_onboarding():
     print("\n6. CHECKING STATE MANAGER...")
     state_file = project_root / ".cde" / "state.json"
     if state_file.exists():
-        state_mgr = StateAdapter(state_file)
-        state = state_mgr.load_state()
+        import json
+
+        with open(state_file) as f:
+            state = json.load(f)
         onboarding_data = state.get("onboarding", {})
 
         print("   ✅ State file exists")
@@ -128,7 +134,7 @@ def test_onboarding():
 
 if __name__ == "__main__":
     try:
-        test_onboarding()
+        asyncio.run(test_onboarding())
     except Exception as e:
         print(f"\n❌ ERROR: {e}")
         import traceback

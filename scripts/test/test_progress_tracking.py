@@ -35,8 +35,8 @@ class ProgressTracker:
     def __init__(self):
         self.events: List[Dict[str, Any]] = []
         self.call_count = 0
-        self.last_event_time = 0
-        self.blocked_duration = 0  # Time blocked waiting for HTTP
+        self.last_event_time: float = 0.0
+        self.blocked_duration: float = 0.0  # Time blocked waiting for HTTP
 
     def record_event(self, tool: str, percentage: float, message: str):
         """Record a progress event"""
@@ -81,12 +81,12 @@ class ProgressTracker:
 
         # Batching efficiency: 1000 items / N calls (100 items = perfect batching for 1000 file scan)
         # For reference: 1000 items with 10-20 calls = 90%+ efficiency
-        efficiency = 0
+        efficiency: float = 0.0
         if self.call_count > 0:
             # Assume 1000 items per typical scan
-            items_per_call = 1000 / self.call_count
+            items_per_call = 1000.0 / self.call_count
             efficiency = min(
-                100, (items_per_call / 100) * 100
+                100.0, (items_per_call / 100.0) * 100.0
             )  # 100 items/call = baseline 100%
 
         return {

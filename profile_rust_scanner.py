@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pyrefly: disable-error-code = "missing-attribute"
 """Analyze Rust performance bottlenecks by profiling component timing."""
 
 import json
@@ -8,7 +9,7 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-import cde_rust_core
+import cde_rust_core  # type: ignore
 
 
 def profile_rust_scanner() -> None:

@@ -889,7 +889,7 @@ async def cde_executeWithBestAgent(
             if preferred_agent.lower() in preferred_agent_map:
                 context["preferred_agent"] = preferred_agent_map[
                     preferred_agent.lower()
-                ]
+                ]  # type: ignore
 
         # Execute with orchestrator
         execution_result = await orchestrator.execute_prompt(
@@ -909,13 +909,18 @@ async def cde_executeWithBestAgent(
         except (json.JSONDecodeError, TypeError):
             success = True  # Assume success for non-JSON results
 
+        # Extract selected agent name
+        selected_agent_name = "auto-selected"
+        if "preferred_agent" in context:
+            pref_agent = context.get("preferred_agent")
+            if isinstance(pref_agent, AgentType):
+                selected_agent_name = pref_agent.value
+            else:
+                selected_agent_name = str(pref_agent)
+
         return json.dumps(
             {
-                "selected_agent": (
-                    context.get("preferred_agent", "auto-selected").value
-                    if "preferred_agent" in context
-                    else "auto-selected"
-                ),
+                "selected_agent": selected_agent_name,
                 "task_description": task_description,
                 "task_complexity": complexity.value,
                 "require_plan_approval": require_plan_approval,

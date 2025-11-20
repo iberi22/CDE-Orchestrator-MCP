@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pyrefly: ignore-errors = ["bad-assignment"]  # False positive: cyclic type checking in string operations
 """
 Weekly Summary Generator - CDE Orchestrator MCP
 
@@ -198,10 +199,10 @@ llm_summary: "Weekly consolidation of all work from {date_range}"
 
         markdown += f"### {emoji} {title}\n\n"
 
-        for sha, _, scope, message in commits:
-            scope_str = f"**{scope}**: " if scope else ""
-            commit_url = f"https://github.com/iberi22/CDE-Orchestrator-MCP/commit/{sha}"
-            markdown += f"- {scope_str}{message} ([{sha}]({commit_url}))\n"
+        for commit_item in commits:  # type: ignore
+            scope_str: str = f"**{commit_item[2]}**: " if commit_item[2] else ""
+            msg_line = f"- {scope_str}{commit_item[3]} ([{commit_item[0]}](https://github.com/iberi22/CDE-Orchestrator-MCP/commit/{commit_item[0]}))\n"
+            markdown += msg_line
 
         markdown += "\n"
 

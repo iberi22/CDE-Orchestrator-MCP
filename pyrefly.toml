@@ -41,3 +41,11 @@ infer-return-types = true
 
 # Performance settings
 parallel = true
+
+# Optional dependencies (gracefully handled with try/except)
+optional-imports = [
+    "plyer",           # System notifications (Windows/macOS/Linux)
+    "websocket",       # WebSocket client (optional for progress reporting)
+    "cde_rust_core",   # Rust accelerated scanning (compiled separately)
+    "pytest",          # Testing framework
+]

@@ -1,5 +1,6 @@
 ﻿"""Integration tests for Jules dual-mode architecture."""
 
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -23,7 +24,10 @@ class TestJulesDualModeIntegration:
             mock_detect.return_value = modes
 
             result = await facade.execute_prompt(
-                project_path="/test/project", user_prompt="Test", mode="auto"
+                project_path=Path("/test/project"),
+                prompt="Test",
+                context={},
+                mode="auto",
             )
 
             assert result["status"] == "setup_required"
@@ -51,7 +55,10 @@ class TestJulesDualModeIntegration:
                 mock_get_api.return_value = mock_adapter
 
                 result = await facade.execute_prompt(
-                    project_path="/test/project", user_prompt="Add auth", mode="auto"
+                    project_path=Path("/test/project"),
+                    prompt="Add auth",
+                    context={},
+                    mode="auto",
                 )
 
                 assert result["status"] == "success"
@@ -79,7 +86,10 @@ class TestJulesDualModeIntegration:
                 mock_get_cli.return_value = mock_adapter
 
                 result = await facade.execute_prompt(
-                    project_path="/test/project", user_prompt="Test", mode="auto"
+                    project_path=Path("/test/project"),
+                    prompt="Test",
+                    context={},
+                    mode="auto",
                 )
 
                 assert result["status"] == "success"
@@ -100,7 +110,10 @@ class TestJulesDualModeIntegration:
             mock_get_api.return_value = mock_adapter
 
             result = await facade.execute_prompt(
-                project_path="/test/project", user_prompt="Test", mode="api"
+                project_path=Path("/test/project"),
+                prompt="Test",
+                context={},
+                mode="api",
             )
 
             assert result["mode"] == "api"

@@ -41,10 +41,10 @@ async def cde_onboardingProject(ctx: Context, project_path: str = ".") -> str:
     analysis_result["status"] = "Analysis complete"
 
     try:
-        state = container.manage_state_use_case.load()
+        state = container.manage_state_use_case.load_and_validate_state()
         state["project_analysis"] = analysis_result
         state["onboarding_status"] = "analysis_completed"
-        container.manage_state_use_case.save(state)
+        container.manage_state_use_case.save_state(state)
     except Exception as e:
         logger.warning(f"Could not save state: {e}")
 
@@ -98,9 +98,9 @@ def cde_publishOnboarding(
     # Update state only if successful
     if result["status"] == "success":
         try:
-            state = container.manage_state_use_case.load()
+            state = container.manage_state_use_case.load_and_validate_state()
             state["published_documents"] = result["files_written"]
-            container.manage_state_use_case.save(state)
+            container.manage_state_use_case.save_state(state)
         except Exception as e:
             logger.warning(f"Could not save state: {e}")
 

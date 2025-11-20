@@ -154,6 +154,7 @@ class AiderBedrockAgent:
         logger.info(f"Command: {' '.join(cmd)}")
         logger.info(f"Input prompt: {prompt}")
 
+        process = None
         try:
             process = subprocess.Popen(
                 cmd,
@@ -182,7 +183,8 @@ class AiderBedrockAgent:
 
         except subprocess.TimeoutExpired:
             logger.error("Task execution timed out (5 minutes)")
-            process.kill()
+            if process is not None:
+                process.kill()
             return {
                 "status": "timeout",
                 "exit_code": -1,

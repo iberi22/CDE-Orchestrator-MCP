@@ -1,9 +1,10 @@
 #!/usr/bin/env python
+# pyrefly: disable-error-code = "missing-attribute"
 """Test Rust project scanner implementation."""
 import json
 import time
 
-import cde_rust_core
+import cde_rust_core  # type: ignore
 
 # Test Rust implementation
 excluded_dirs = [

@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from fastmcp import Context  # noqa: E402
 
-from src.mcp_tools.onboarding import (  # noqa: E402
+from mcp_tools.onboarding import (  # noqa: E402
     cde_onboardingProject,
     cde_publishOnboarding,
 )
@@ -92,7 +92,7 @@ class TestOnboardingTools(unittest.TestCase):
         import asyncio
         import tempfile
 
-        from src.mcp_tools.onboarding import cde_setupProject
+        from mcp_tools.onboarding import cde_setupProject
 
         with tempfile.TemporaryDirectory() as temp_dir:
             project_path = Path(temp_dir)

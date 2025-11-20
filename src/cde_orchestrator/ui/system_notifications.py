@@ -11,7 +11,15 @@ Configuration via ENV:
 
 import os
 import time
-from typing import Literal, Optional
+from typing import TYPE_CHECKING, Literal, Optional
+
+if TYPE_CHECKING:
+    try:
+        from plyer import notification as plyer_notification
+    except ImportError:
+        plyer_notification = None  # type: ignore
+else:
+    plyer_notification = None  # type: ignore
 
 
 class SystemNotifier:
@@ -41,7 +49,7 @@ class SystemNotifier:
 
         # Try to import plyer (graceful fallback if not installed)
         try:
-            from plyer import notification as plyer_notification
+            from plyer import notification as plyer_notification  # type: ignore
 
             self.notification = plyer_notification
             self.available = True

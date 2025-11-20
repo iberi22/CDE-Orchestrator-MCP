@@ -8,7 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from src.mcp_tools.documentation import cde_scanDocumentation  # noqa: E402
+from mcp_tools.documentation import cde_scanDocumentation  # noqa: E402
 
 
 class TestDocumentationTools(unittest.TestCase):
@@ -34,7 +34,7 @@ class TestDocumentationTools(unittest.TestCase):
         """
         Verify that cde_analyzeDocumentation runs and returns the expected JSON structure.
         """
-        from src.mcp_tools.documentation import cde_analyzeDocumentation
+        from mcp_tools.documentation import cde_analyzeDocumentation
 
         project_path = str(Path(__file__).resolve().parents[3])
         result_json = cde_analyzeDocumentation(project_path=project_path)
@@ -53,7 +53,7 @@ class TestDocumentationTools(unittest.TestCase):
         """
         import tempfile
 
-        from src.mcp_tools.documentation import cde_createSpecification
+        from mcp_tools.documentation import cde_createSpecification
 
         with tempfile.TemporaryDirectory() as temp_dir:
             project_path = Path(temp_dir)

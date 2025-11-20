@@ -9,7 +9,10 @@ import json
 import time
 from typing import Optional
 
-import websocket  # pip install websocket-client
+try:
+    import websocket  # pip install websocket-client
+except ImportError:
+    websocket = None  # type: ignore
 
 
 class ProgressReporter:
@@ -22,14 +25,17 @@ class ProgressReporter:
 
     def __init__(self, ws_url: str = "ws://localhost:8766"):
         self.ws_url = ws_url
-        self.ws: Optional[websocket.WebSocket] = None
+        self.ws: Optional[any] = None  # type: ignore  # websocket.WebSocket if available
         self.connected = False
         self.start_time: Optional[float] = None
 
     def connect(self) -> bool:
         """Connect to WebSocket server."""
         try:
-            self.ws = websocket.create_connection(self.ws_url, timeout=2)
+            if websocket is None:
+                print("⚠️ ProgressReporter: websocket module not installed")
+                return False
+            self.ws = websocket.create_connection(self.ws_url, timeout=2)  # type: ignore
             self.connected = True
             self.start_time = time.time()
             return True
@@ -65,7 +71,8 @@ class ProgressReporter:
         }
 
         try:
-            self.ws.send(json.dumps(event))
+            if self.ws is not None:
+                self.ws.send(json.dumps(event))  # type: ignore
         except Exception as e:
             print(f"⚠️ ProgressReporter: Failed to send progress: {e}")
             self.connected = False
@@ -74,7 +81,7 @@ class ProgressReporter:
         """Close WebSocket connection."""
         if self.ws:
             try:
-                self.ws.close()
+                self.ws.close()  # type: ignore
             except Exception:
                 pass
         self.connected = False
