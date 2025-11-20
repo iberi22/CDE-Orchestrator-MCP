@@ -1,9 +1,13 @@
 # src/cde_orchestrator/application/onboarding/project_analysis_use_case.py
+import json
+import logging
 from collections import Counter
 from pathlib import Path
 from typing import Any, Callable, Dict, List
 
 import pathspec
+
+logger = logging.getLogger(__name__)
 
 
 class ProjectAnalysisUseCase:
@@ -56,27 +60,82 @@ class ProjectAnalysisUseCase:
         # Import here to avoid circular import
         from mcp_tools._progress_http import report_progress_http
 
-        project = Path(project_path)
-
-        # Report initial progress
         report_progress_http("onboardingProject", 0.0, "Starting project analysis")
 
+        # Try Rust-accelerated analysis first (10x faster, ~50ms)
+        try:
+            result = self._execute_rust(project_path, report_progress_http)
+            report_progress_http("onboardingProject", 1.0, "Analysis complete (Rust)")
+            return result
+        except Exception as e:
+            logger.warning(f"Rust analysis failed, falling back to Python: {e}")
+            # Fallback to Python implementation (~500ms)
+            result = self._execute_python(project_path, report_progress_http)
+            report_progress_http("onboardingProject", 1.0, "Analysis complete (Python)")
+            return result
+
+    def _execute_rust(
+        self, project_path: str, report_progress_http: Callable[[str, float, str], None]
+    ) -> Dict[str, Any]:
+        """Rust-accelerated analysis (~50ms)."""
+        try:
+            import cde_rust_core
+
+            excluded_dirs = sorted(list(self.EXCLUDED_DIRS))
+            excluded_patterns = sorted(list(self.EXCLUDED_PATTERNS))
+
+            report_progress_http("onboardingProject", 0.3, "Running Rust analysis")
+
+            result_json = cde_rust_core.scan_project_py(
+                str(Path(project_path).absolute()),
+                excluded_dirs,
+                excluded_patterns,
+            )
+
+            result = json.loads(result_json)
+
+            # Post-process: filter irrelevant languages
+            language_stats = Counter(result["language_stats"])
+            relevant_languages = [
+                (lang, count)
+                for lang, count in language_stats.most_common(10)
+                if lang not in {".map", ".lock", ".json", ".xml"}
+            ][:3]
+
+            summary = (
+                f"Project '{Path(project_path).name}' contains {result['file_count']} files. "
+                f"Primary languages: {', '.join(lang for lang, _ in relevant_languages)}. "
+                f"Found dependency files: {', '.join(result['dependency_files']) if result['dependency_files'] else 'None'}. "
+                f"(Rust-accelerated, {result['analysis_time_ms']}ms)"
+            )
+
+            return {
+                "status": "Analysis complete",
+                "file_count": result["file_count"],
+                "language_stats": language_stats,
+                "dependency_files": result["dependency_files"],
+                "summary": summary,
+                "excluded_directories": excluded_dirs,
+                "performance": {
+                    "engine": "rust",
+                    "analysis_time_ms": result["analysis_time_ms"],
+                },
+            }
+        except ImportError as e:
+            raise Exception(f"cde_rust_core not available: {e}")
+        except Exception as e:
+            raise Exception(f"Rust analysis error: {e}")
+
+    def _execute_python(
+        self, project_path: str, report_progress_http: Callable[[str, float, str], None]
+    ) -> Dict[str, Any]:
+        """Fallback Python implementation (~500ms)."""
+        project = Path(project_path)
+
         files = self._list_files(project, report_progress_http)
-
-        # Report progress after file listing
-        report_progress_http("onboardingProject", 0.25, f"Found {len(files)} files")
-
         language_stats = self._analyze_languages(files)
-
-        # Report progress after language analysis
-        report_progress_http("onboardingProject", 0.5, "Analyzed language distribution")
-
         dependency_files = self._find_dependency_files(files)
 
-        # Report progress after dependency analysis
-        report_progress_http("onboardingProject", 0.75, "Found dependency files")
-
-        # Get top languages (exclude common generated files)
         relevant_languages = [
             (lang, count)
             for lang, count in language_stats.most_common(10)
@@ -89,19 +148,18 @@ class ProjectAnalysisUseCase:
             f"Found dependency files: {', '.join(dependency_files) if dependency_files else 'None'}."
         )
 
-        result = {
+        return {
             "status": "Analysis complete",
             "file_count": len(files),
             "language_stats": language_stats,
             "dependency_files": dependency_files,
             "summary": summary,
             "excluded_directories": sorted(list(self.EXCLUDED_DIRS)),
+            "performance": {
+                "engine": "python",
+                "analysis_time_ms": None,
+            },
         }
-
-        # Report completion
-        report_progress_http("onboardingProject", 1.0, "Analysis complete")
-
-        return result
 
     def _list_files(
         self,

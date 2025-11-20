@@ -6,6 +6,7 @@ use std::sync::Once;
 mod filesystem;
 mod documentation;
 mod workflow_validator;
+mod project_scanner;
 
 static INIT: Once = Once::new();
 
@@ -74,6 +75,26 @@ fn validate_workflows_py(root_path: String) -> PyResult<String> {
     }
 }
 
+/// Scans a project directory in parallel, analyzing file types and structure.
+/// Excludes common dependency directories and build artifacts.
+/// Returns file count, language statistics, and dependency files found.
+#[pyfunction]
+fn scan_project_py(
+    root_path: String,
+    excluded_dirs: Vec<String>,
+    excluded_patterns: Vec<String>,
+) -> PyResult<String> {
+    match project_scanner::scan_project(&root_path, excluded_dirs, excluded_patterns) {
+        Ok(result) => {
+            let json_result = serde_json::to_string(&result).map_err(|e| {
+                PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to serialize result: {}", e))
+            })?;
+            Ok(json_result)
+        }
+        Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(e)),
+    }
+}
+
 /// A Python module implemented in Rust.
 #[pymodule]
 fn cde_rust_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -83,5 +104,6 @@ fn cde_rust_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(scan_documentation_py, m)?)?;
     m.add_function(wrap_pyfunction!(analyze_documentation_quality_py, m)?)?;
     m.add_function(wrap_pyfunction!(validate_workflows_py, m)?)?;
+    m.add_function(wrap_pyfunction!(scan_project_py, m)?)?;
     Ok(())
 }
