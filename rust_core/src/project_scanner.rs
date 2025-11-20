@@ -1,5 +1,6 @@
 // rust_core/src/project_scanner.rs
 // Parallel project scanner with Rayon for CDE Orchestrator
+// Now with .gitignore support using the `ignore` crate
 
 use rayon::prelude::*;
 use regex::Regex;
@@ -8,6 +9,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 use walkdir::WalkDir;
+use ignore::gitignore::{Gitignore, GitignoreBuilder};
 
 /// Result of project analysis
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -37,6 +39,11 @@ pub fn scan_project(
 ) -> Result<ProjectAnalysisResult, String> {
     let start = Instant::now();
 
+    // Load .gitignore rules if they exist
+    let gitignore = load_gitignore(root_path).unwrap_or_else(|_| {
+        Gitignore::empty()
+    });
+
     // Compile regex patterns for efficient matching
     let patterns: Vec<Regex> = excluded_patterns
         .iter()
@@ -57,6 +64,8 @@ pub fn scan_project(
     let walker = WalkDir::new(root_path)
         .into_iter()
         .filter_map(|entry| entry.ok());
+
+    let root_path_buf = PathBuf::from(root_path);
 
     // Process files in parallel using collect
     let (file_paths, language_stats, excluded_count) = walker
@@ -79,6 +88,12 @@ pub fn scan_project(
 
                 // Check if matches excluded patterns
                 if is_matching_pattern(&path, &patterns) {
+                    excluded += 1;
+                    return (files, stats, excluded);
+                }
+
+                // Check if in .gitignore
+                if is_in_gitignore(&path, &root_path_buf, &gitignore) {
                     excluded += 1;
                     return (files, stats, excluded);
                 }
@@ -131,7 +146,36 @@ fn is_in_excluded_dir(path: &Path, excluded_dirs: &[String]) -> bool {
     })
 }
 
-/// Check if a file path matches any excluded pattern
+/// Load .gitignore rules from project root
+fn load_gitignore(root_path: &str) -> Result<Gitignore, Box<dyn std::error::Error>> {
+    let gitignore_path = PathBuf::from(root_path).join(".gitignore");
+
+    if !gitignore_path.exists() {
+        return Ok(Gitignore::empty());
+    }
+
+    let mut builder = GitignoreBuilder::new(root_path);
+    builder.add(&gitignore_path);
+
+    builder.build()
+        .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
+}
+
+/// Check if a file path matches .gitignore rules
+fn is_in_gitignore(path: &Path, root: &PathBuf, gitignore: &Gitignore) -> bool {
+    match path.strip_prefix(root) {
+        Ok(relative_path) => {
+            let match_result = gitignore.matched(relative_path, path.is_dir());
+            match match_result {
+                ignore::Match::None => false,
+                ignore::Match::Ignore(_) => true,
+                ignore::Match::Whitelist(_) => false,
+            }
+        }
+        Err(_) => false,
+    }
+}
+
 fn is_matching_pattern(path: &Path, patterns: &[Regex]) -> bool {
     let path_str = path.to_string_lossy();
     patterns.iter().any(|pattern| pattern.is_match(&path_str))
