@@ -13,12 +13,15 @@ from .agents import (
 from .documentation import cde_analyzeDocumentation, cde_scanDocumentation
 from .extensions import cde_installMcpExtension
 from .full_implementation import cde_executeFullImplementation
+from .health import cde_healthCheck
 from .onboarding import cde_onboardingProject, cde_publishOnboarding, cde_setupProject
 from .orchestration import cde_selectWorkflow, cde_sourceSkill, cde_updateSkill
 from .test_progress import cde_testProgressReporting
 from .tool_search import cde_searchTools
 
 __all__ = [
+    # Health
+    "cde_healthCheck",
     # Onboarding
     "cde_onboardingProject",
     "cde_publishOnboarding",

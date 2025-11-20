@@ -24,19 +24,27 @@ import asyncio
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-try:
+if TYPE_CHECKING:
+    # For type checking, assume jules_agent_sdk is available
     from jules_agent_sdk import AsyncJulesClient
     from jules_agent_sdk.models import Activity, Session, SessionState
 
     JULES_AVAILABLE = True
-except ImportError:
-    JULES_AVAILABLE = False
-    AsyncJulesClient = None
-    SessionState = None
-    Session = None
-    Activity = None
+else:
+    # At runtime, handle import gracefully
+    try:
+        from jules_agent_sdk import AsyncJulesClient
+        from jules_agent_sdk.models import Activity, Session, SessionState
+
+        JULES_AVAILABLE = True
+    except ImportError:
+        JULES_AVAILABLE = False
+        AsyncJulesClient = None  # type: ignore
+        SessionState = None  # type: ignore
+        Session = None  # type: ignore
+        Activity = None  # type: ignore
 
 from ...domain.exceptions import DomainError
 from ...domain.ports import ICodeExecutor

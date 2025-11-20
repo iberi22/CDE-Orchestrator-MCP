@@ -57,7 +57,7 @@ class YamlFrontmatter:
     updated: Optional[str] = None
     author: Optional[str] = None
     llm_summary: Optional[str] = None
-    extra: Dict[str, Any] = None
+    extra: Dict[str, Any] | None = None
 
     @classmethod
     def from_dict(cls, data: Optional[Dict[str, Any]]) -> Optional["YamlFrontmatter"]:

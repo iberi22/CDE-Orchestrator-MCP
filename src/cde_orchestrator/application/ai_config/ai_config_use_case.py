@@ -513,7 +513,7 @@ Use When:
 Example:
 ```
 Here is our architecture diagram [image]. Analyze how the current
-codebase matches this design and identify any discrepancies.
+codebase matches this design and identify Any discrepancies.
 ```
 
 ### 3. Function Calling and Structured Outputs

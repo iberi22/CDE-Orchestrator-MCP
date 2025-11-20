@@ -325,3 +325,42 @@ The project is undergoing professional hardening to reach production-ready statu
 - ⏳ Advanced features (streaming, webhooks)
 
 **Quick Wins Available:** 3 tasks totaling 5 hours can eliminate 70% of current errors. See [roadmap](specs/tasks/improvement-roadmap.md#-quick-wins---implementación-inmediata) for details.
+
+## 🔍 Type Checking with Pyrefly
+
+The project uses **[Pyrefly](https://github.com/facebook/pyrefly)**, a fast type checker by Meta/Facebook written in Rust:
+
+### Why Pyrefly?
+
+- ⚡ **6-8x faster** than mypy on multi-core systems
+- 🧠 **Flow-sensitive** type analysis (refines types based on control flow)
+- 🔍 **Type inference** for variables and return types
+- 🚀 **Parallel checking** using Rayon for maximum performance
+
+### Pyrefly Commands
+
+```bash
+# Check entire project
+pyrefly check src
+
+# Watch mode (recheck on file changes)
+python scripts/pyrefly_check.py --watch
+
+# Generate detailed report
+python scripts/pyrefly_check.py --report
+```
+
+### Auto-fix Common Issues
+
+```bash
+# Automatically fix common type errors
+python scripts/pyrefly_autofix.py
+```
+
+### Configuration
+
+- **`pyrefly.toml`** - Main Pyrefly configuration
+- **`pyproject.toml`** - Additional settings in `[tool.pyrefly]` section
+- **`.pre-commit-config.yaml`** - Pre-commit hook for automatic checking
+
+See generated reports in `agent-docs/execution/EXECUTIONS-pyrefly-*.md` for detailed analysis.

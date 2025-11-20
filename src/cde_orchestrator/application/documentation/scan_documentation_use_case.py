@@ -85,7 +85,7 @@ class ScanDocumentationUseCase:
 
         # Call the fast Rust scanning function
         result_json = cde_rust_core.scan_documentation_py(project_path)
-        return json.loads(result_json)  # type: ignore[no-any-return]
+        return json.loads(result_json)  # type: ignore[no-Any-return]
 
     def _process_rust_result(
         self,

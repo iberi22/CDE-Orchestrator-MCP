@@ -20,7 +20,8 @@ class IGitAdapter(ABC):
     """
 
     @abstractmethod
-    async def traverse_commits(self) -> AsyncGenerator[Commit, None]:
+    def traverse_commits(self) -> AsyncGenerator[Commit, None]:
+        """Async generator - use 'def' not 'async def' for abstract declaration"""
         pass
 
     @abstractmethod
@@ -50,9 +51,8 @@ class IProjectRepository(ABC):
         pass
 
     @abstractmethod
-    async def list_all_async(
-        self, limit: Optional[int] = None
-    ) -> AsyncIterator[Project]:
+    def list_all_async(self, limit: Optional[int] = None) -> AsyncIterator[Project]:
+        """Async generator - use 'def' not 'async def' for abstract declaration"""
         pass
 
     @abstractmethod

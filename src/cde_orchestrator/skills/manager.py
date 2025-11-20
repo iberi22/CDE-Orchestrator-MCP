@@ -199,7 +199,7 @@ class SkillManager:
             if not skill or skill.is_expired:
                 continue
 
-            # Check if skill is tagged with any of our gaps
+            # Check if skill is tagged with Any of our gaps
             for gap in knowledge_gaps:
                 if gap in skill.tags or gap in skill.id:
                     matching_skills.append(skill)

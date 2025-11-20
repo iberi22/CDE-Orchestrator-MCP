@@ -213,7 +213,7 @@ class CopilotCLIAdapter(CodeCLIAdapter, ICodeExecutor):
     def _extract_code_from_response(self, response: str) -> str:
         """Extract code from Copilot CLI response."""
         # Copilot CLI responses are typically just the suggestion
-        # Remove any prefixes or formatting
+        # Remove Any prefixes or formatting
         lines = response.strip().split("\n")
 
         # Remove common prefixes

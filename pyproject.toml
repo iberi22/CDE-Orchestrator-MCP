@@ -48,6 +48,7 @@ dev = [
     "flake8>=6.0",
     "black>=23.0",
     "mypy>=1.0",
+    "pyrefly>=0.42.0",
     "isort>=5.0",
     "types-PyYAML",
     "pytest-cov",
@@ -97,3 +98,23 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 pythonpaths = ["src"]
+
+[tool.pyrefly]
+# Configuración de Pyrefly para type checking
+python-version = "3.14"
+strict = true
+show-error-codes = true
+flow-types = true
+infer-return-types = true
+parallel = true
+exclude = [
+    ".venv",
+    "venv",
+    "__pycache__",
+    "*.egg-info",
+    "build",
+    "dist",
+    "rust_core",
+    "ci-wheels",
+    "temp-wheels",
+]

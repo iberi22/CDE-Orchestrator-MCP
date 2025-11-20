@@ -254,4 +254,63 @@ mod tests {
         ));
         assert!(!is_in_excluded_dir(Path::new("src/main.py"), &excluded));
     }
+
+    #[test]
+    fn test_find_dependency_files() {
+        let paths = vec![
+            PathBuf::from("src/main.rs"),
+            PathBuf::from("Cargo.toml"),
+            PathBuf::from("package.json"),
+            PathBuf::from("random.txt"),
+        ];
+        let deps = find_dependency_files(&paths);
+        assert!(deps.contains(&"Cargo.toml".to_string()));
+        assert!(deps.contains(&"package.json".to_string()));
+        assert!(!deps.contains(&"random.txt".to_string()));
+        assert_eq!(deps.len(), 2);
+    }
+
+    #[test]
+    fn test_scan_project_integration() {
+        use std::fs::{self, File};
+        use std::io::Write;
+        use tempfile::TempDir;
+
+        // Create a temp directory
+        let temp_dir = TempDir::new().unwrap();
+        let root = temp_dir.path();
+
+        // Create some files
+        File::create(root.join("main.py")).unwrap();
+        File::create(root.join("requirements.txt")).unwrap();
+
+        // Create excluded directory
+        let node_modules = root.join("node_modules");
+        fs::create_dir(&node_modules).unwrap();
+        File::create(node_modules.join("lib.js")).unwrap();
+
+        // Create excluded file by pattern
+        File::create(root.join("test.pyc")).unwrap();
+
+        // Create .gitignore
+        let mut gitignore = File::create(root.join(".gitignore")).unwrap();
+        writeln!(gitignore, "ignored.txt").unwrap();
+        File::create(root.join("ignored.txt")).unwrap();
+
+        // Run scan
+        let excluded_dirs = vec!["node_modules".to_string()];
+        let excluded_patterns = vec!["*.pyc".to_string()];
+
+        let result = scan_project(
+            root.to_str().unwrap(),
+            excluded_dirs,
+            excluded_patterns
+        ).unwrap();
+
+        // Verify results
+        assert_eq!(result.file_count, 3); // main.py, requirements.txt, .gitignore
+        assert!(result.dependency_files.contains(&"requirements.txt".to_string()));
+        assert_eq!(result.language_stats.get(".py"), Some(&1));
+        assert!(result.excluded_count >= 3); // lib.js (dir), test.pyc (pattern), ignored.txt (gitignore)
+    }
 }

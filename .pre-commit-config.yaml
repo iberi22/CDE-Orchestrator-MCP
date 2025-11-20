@@ -34,3 +34,16 @@ repos:
       - id: mypy
         args: [--ignore-missing-imports]
         additional_dependencies: [pydantic]
+
+  # Pyrefly: Fast type checker by Meta/Facebook (local hook)
+  # NOTE: Disabled for initial commit (78 errors remaining, down from 123)
+  # TODO: Fix remaining errors in follow-up PRs
+  # - repo: local
+  #   hooks:
+  #     - id: pyrefly
+  #       name: pyrefly type check
+  #       entry: pyrefly check
+  #       language: system
+  #       types: [python]
+  #       pass_filenames: false
+  #       args: ["src"]

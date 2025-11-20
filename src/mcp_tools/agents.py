@@ -492,7 +492,7 @@ async def cde_selectAgent(task_description: str) -> str:
         - complexity: Detected task complexity
         - reasoning: Why this agent was selected
         - capabilities: Agent capabilities summary
-        - alternatives: Other suitable agents (if any)
+        - alternatives: Other suitable agents (if Any)
         - requirements: Setup requirements for selected agent
 
     **Example:**

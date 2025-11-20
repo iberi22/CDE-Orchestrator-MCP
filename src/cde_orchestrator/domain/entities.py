@@ -120,7 +120,7 @@ class FeatureStatus(str, Enum):
         DEFINING → DECOMPOSING → DESIGNING →
         IMPLEMENTING → TESTING → REVIEWING → COMPLETED
 
-    Or can jump to FAILED from any state.
+    Or can jump to FAILED from Any state.
     """
 
     DEFINING = "defining"
@@ -238,7 +238,7 @@ class FeatureState(BaseModel):
             FeatureStatus.TESTING: PhaseStatus.TEST,
             FeatureStatus.REVIEWING: PhaseStatus.REVIEW,
             FeatureStatus.COMPLETED: PhaseStatus.REVIEW,
-            FeatureStatus.FAILED: current_phase,  # Allow any phase for failed
+            FeatureStatus.FAILED: current_phase,  # Allow Any phase for failed
         }
 
         expected = phase_mapping.get(status)

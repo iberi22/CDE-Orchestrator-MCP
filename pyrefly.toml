@@ -1,0 +1,43 @@
+# Pyrefly Configuration
+# Fast type checker for Python by Meta/Facebook
+
+[tool.pyrefly]
+# Python version to target
+python-version = "3.14"
+
+# Paths to include in type checking
+include = ["src", "tests"]
+
+# Paths to exclude from type checking
+exclude = [
+    ".venv",
+    "venv",
+    ".git",
+    "__pycache__",
+    "*.egg-info",
+    "build",
+    "dist",
+    "rust_core",
+    "ci-wheels",
+    "temp-wheels",
+    "htmlcov",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    "mcp-status-bar/node_modules"
+]
+
+# Type checking strictness
+strict = true
+
+# Report all type errors
+show-error-codes = true
+
+# Enable flow-sensitive type analysis
+flow-types = true
+
+# Inference settings
+infer-return-types = true
+
+# Performance settings
+parallel = true

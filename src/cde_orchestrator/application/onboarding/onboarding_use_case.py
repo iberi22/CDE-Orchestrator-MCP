@@ -1,12 +1,22 @@
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, TypedDict
 
 from cde_orchestrator.ai_assistant_configurator import AIAssistantConfigurator
 from cde_orchestrator.domain.ports import IGitAdapter
 
 logger = logging.getLogger(__name__)
+
+
+class OnboardingAnalysis(TypedDict):
+    """Type definition for onboarding analysis results."""
+
+    needs_onboarding: bool
+    missing_structure: List[str]
+    existing_structure: List[str]
+    recommendations: List[str]
+    project_info: Dict[str, Any]
 
 
 class OnboardingUseCase:
@@ -214,7 +224,7 @@ class OnboardingUseCase:
         dirs = [d.name for d in self.project_root.iterdir() if d.is_dir()]
         if any("src" in d.lower() for d in dirs):
             if "Python" not in tech_stack and "Node.js" not in tech_stack:
-                pass  # Could be any language
+                pass  # Could be Any language
 
         return tech_stack
 

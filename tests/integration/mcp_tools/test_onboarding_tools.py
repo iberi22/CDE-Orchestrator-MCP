@@ -30,10 +30,12 @@ class TestOnboardingTools(unittest.TestCase):
 
         # The tool is async
         import asyncio
+        from unittest.mock import patch
 
-        result_json = asyncio.run(
-            cde_onboardingProject(ctx=mock_ctx, manage_state_use_case=mock_use_case)
-        )
+        with patch("src.mcp_tools.onboarding.container") as mock_container:
+            mock_container.manage_state_use_case = mock_use_case
+
+            result_json = asyncio.run(cde_onboardingProject(ctx=mock_ctx))
 
         self.assertIsInstance(result_json, str)
         data = json.loads(result_json)
@@ -51,13 +53,30 @@ class TestOnboardingTools(unittest.TestCase):
         mock_use_case = MagicMock()
         mock_use_case.load.return_value = {}
 
-        result_json = cde_publishOnboarding(
-            documents={"doc1.md": "content"},
-            manage_state_use_case=mock_use_case,
-            approve=True,
-        )
+        from unittest.mock import patch
+
+        with (
+            patch("src.mcp_tools.onboarding.container") as mock_container,
+            patch(
+                "src.mcp_tools.onboarding.PublishingUseCase"
+            ) as MockPublishingUseCase,
+        ):
+
+            mock_container.manage_state_use_case = mock_use_case
+
+            mock_instance = MockPublishingUseCase.return_value
+            mock_instance.execute.return_value = {
+                "status": "success",
+                "files_written": ["doc1.md"],
+            }
+
+            result_json = cde_publishOnboarding(
+                documents={"doc1.md": "content"},
+                approve=True,
+            )
 
         self.assertIsInstance(result_json, str)
+
         data = json.loads(result_json)
 
         # Verify the new, real response

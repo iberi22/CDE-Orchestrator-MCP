@@ -182,7 +182,7 @@ class AgentSelectionPolicy:
         complexity: TaskComplexity,
         require_plan_approval: bool = False,
         context_size: int = 1000,
-        available_agents: List[AgentType] = None,
+        available_agents: List[AgentType] | None = None,
     ) -> AgentType:
         """
         Select best agent for task.

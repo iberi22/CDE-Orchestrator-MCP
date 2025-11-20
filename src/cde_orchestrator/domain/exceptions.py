@@ -22,12 +22,11 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 
-class DomainError(Exception):
+class CDEError(Exception):
     """
-    Base exception for all domain errors.
+    Base exception for all CDE Orchestrator errors.
 
-    All domain exceptions inherit from this base class, making them
-    easy to catch and distinguish from infrastructure errors.
+    All exceptions in the system should inherit from this class.
 
     Attributes:
         message: Human/LLM-readable error description
@@ -63,7 +62,49 @@ class DomainError(Exception):
         }
 
 
-class ProjectNotFoundError(DomainError):
+class DomainError(CDEError):
+    """Base class for business rule violations."""
+
+    pass
+
+
+class ProjectError(DomainError):
+    """Base class for project-related errors (E001-E099)."""
+
+    pass
+
+
+class FeatureError(DomainError):
+    """Base class for feature-related errors (E100-E199)."""
+
+    pass
+
+
+class StateError(DomainError):
+    """Base class for state management errors (E200-E299)."""
+
+    pass
+
+
+class ValidationError(DomainError):
+    """Base class for validation errors (E300-E399)."""
+
+    pass
+
+
+class WorkflowError(DomainError):
+    """Base class for workflow errors (E400-E499)."""
+
+    pass
+
+
+class SystemError(CDEError):
+    """Base class for system/infrastructure errors (E900-E999)."""
+
+    pass
+
+
+class ProjectNotFoundError(ProjectError):
     """
     Raised when attempting to access a non-existent project.
 
@@ -84,7 +125,7 @@ class ProjectNotFoundError(DomainError):
         )
 
 
-class FeatureNotFoundError(DomainError):
+class FeatureNotFoundError(FeatureError):
     """
     Raised when attempting to access a non-existent feature.
 
@@ -105,7 +146,7 @@ class FeatureNotFoundError(DomainError):
         )
 
 
-class InvalidStateTransitionError(DomainError):
+class InvalidStateTransitionError(FeatureError):
     """
     Raised when attempting an invalid status transition.
 
@@ -132,7 +173,7 @@ class InvalidStateTransitionError(DomainError):
         )
 
 
-class WorkflowValidationError(DomainError):
+class WorkflowValidationError(WorkflowError):
     """
     Raised when workflow definition or execution is invalid.
 
@@ -154,7 +195,7 @@ class WorkflowValidationError(DomainError):
         )
 
 
-class PhaseNotFoundError(DomainError):
+class PhaseNotFoundError(WorkflowError):
     """
     Raised when referencing a non-existent workflow phase.
 
@@ -175,7 +216,7 @@ class PhaseNotFoundError(DomainError):
         )
 
 
-class ArtifactValidationError(DomainError):
+class ArtifactValidationError(ValidationError):
     """
     Raised when phase results don't meet requirements.
 
@@ -204,7 +245,7 @@ class ArtifactValidationError(DomainError):
         )
 
 
-class CodeExecutionError(DomainError):
+class CodeExecutionError(SystemError):
     """
     Raised when code execution fails.
 
@@ -224,7 +265,7 @@ class CodeExecutionError(DomainError):
         )
 
 
-class RepositoryError(DomainError):
+class RepositoryError(StateError):
     """
     Raised when repository operations fail.
 

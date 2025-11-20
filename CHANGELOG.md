@@ -5,7 +5,7 @@ description: Changelog - Documentation for CDE Orchestrator MCP
 type: guide
 status: active
 created: '2025-11-02'
-updated: '2025-11-12'
+updated: '2025-11-20'
 author: CDE Team
 tags:
 
@@ -24,10 +24,75 @@ tags:
 - progressive-disclosure
 
 llm_summary: "Changelog for CDE Orchestrator MCP.\n
-  Latest: v0.2.0 - Professional Rust optimization with CI/CD automation\n
-  13x speedup with Rayon parallelism, automated wheel builds for all platforms.\n
+  Latest: v0.2.1 - Pyrefly type checking integration + Phase 4 production readiness\n
+  Added fast type checker, error handling framework, structured logging, health monitoring.\n
   Reference when working with guide documentation."
 ---
+
+## [0.2.1] - 2025-11-20
+
+### Added - Pyrefly Type Checking Integration
+
+- **Pyrefly Fast Type Checker**
+  - Integrated Meta/Facebook's Pyrefly (6-8x faster than mypy)
+  - Flow-sensitive type analysis for better precision
+  - Configuration in `pyrefly.toml` and `pyproject.toml`
+  - Pre-commit hook for automatic type checking
+  - **Scripts**:
+    - `scripts/pyrefly_check.py`: CLI utility (check, watch, report modes)
+    - `scripts/pyrefly_report.py`: Generates detailed markdown reports
+    - `scripts/pyrefly_autofix.py`: Auto-fixes common type errors
+  - **Initial Scan**: 123 type errors detected across project
+  - **Impact**: Catches type errors 6-8x faster with better inference
+
+- **Type Error Auto-Fix Capabilities**
+  - Automatic `Optional[]` wrapping for `None` defaults
+  - `Dict`/`List` to `Optional[Dict]`/`Optional[List]` conversion
+  - `any` → `Any` corrections
+  - Missing `typing` imports auto-added
+
+### Added - Phase 4: Production Readiness
+
+- **Centralized Error Handling Framework**
+  - `CDEError` base class with error codes (E001-E999)
+  - Hierarchical exceptions: `ProjectError`, `FeatureError`, `SystemError`
+  - `@handle_errors` decorator for standardized error reporting
+  - JSON-serializable error responses for LLM consumption
+  - Recoverable vs non-recoverable error distinction
+
+- **Structured Logging Infrastructure**
+  - `JsonFormatter` for production-grade logs (CloudWatch, Datadog compatible)
+  - `configure_logging()` with environment-based setup
+  - Machine-readable logs with context fields
+  - Integration with `server.py` startup
+
+- **Health Monitoring**
+  - `cde_healthCheck` MCP tool for system status
+  - Reports: Python version, Rust core availability, external tools (git, gh)
+  - Graceful degradation tracking (healthy/degraded states)
+
+- **Centralized Configuration**
+  - `Config` dataclass in `infrastructure/config.py`
+  - Environment variable management (`CDE_ENV`, `LOG_LEVEL`, etc.)
+  - Type-safe configuration with defaults
+
+### Changed
+
+- **MCP Tool Error Handling**
+  - All tools now use `@handle_errors` decorator via `@tool_handler`
+  - Async function support in error handling
+  - Consistent error response format across all tools
+
+### Fixed
+
+- Integration test compatibility with new error handling
+- Onboarding tool tests updated for container-based dependency injection
+
+### Documentation
+
+- **README.md**: Added Pyrefly section with usage examples
+- **Generated Reports**: `agent-docs/execution/EXECUTIONS-pyrefly-type-check-*.md`
+- **Type Error Analysis**: 112 errors categorized (52 missing-attribute, 34 other, 6 missing-import)
 
 ## [0.2.0] - 2025-11-12
 

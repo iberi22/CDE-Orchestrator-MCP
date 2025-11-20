@@ -36,7 +36,7 @@ class Phase:
     description: str
     tasks: List[TaskDefinition]
     estimated_hours: float
-    dependencies: List[str] = None
+    dependencies: List[str] | None = None
 
 
 class FullImplementationOrchestrator:

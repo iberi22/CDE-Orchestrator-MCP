@@ -139,7 +139,7 @@ class DependencyGraph:
                     dep_id in self._results for dep_id in task.dependencies
                 )
                 if all_deps_done:
-                    # Check if any dependency failed
+                    # Check if Any dependency failed
                     any_dep_failed = any(
                         self._results[dep_id].is_failed()
                         for dep_id in task.dependencies
@@ -179,7 +179,7 @@ class DependencyGraph:
         return len(self._results) == len(self._tasks)
 
     def has_failures(self) -> bool:
-        """Check if any task failed."""
+        """Check if Any task failed."""
         return any(r.is_failed() for r in self._results.values())
 
 
@@ -265,7 +265,7 @@ class ParallelExecutionUseCase:
             Dictionary mapping task_id to TaskResult
 
         Raises:
-            RuntimeError: If any task execution fails (unless continue_on_error=True)
+            RuntimeError: If Any task execution fails (unless continue_on_error=True)
         """
         logger.info(f"Starting parallel execution with {len(self.graph._tasks)} tasks")
 

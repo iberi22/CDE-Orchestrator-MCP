@@ -1,7 +1,7 @@
 # src/cde_orchestrator/adapters/workflow/workflow_adapter.py
 import re
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import yaml
 
@@ -121,7 +121,7 @@ class WorkflowAdapter:
         except ValueError:
             raise ValueError(f"Phase '{current_phase_id}' not found in workflow.")
 
-    def get_workflow_progress(self, current_phase_id: str) -> Dict[str, any]:
+    def get_workflow_progress(self, current_phase_id: str) -> Dict[str, Any]:
         """Returns workflow progress information."""
         phase_ids = [phase.id for phase in self.workflow.phases]
         try:

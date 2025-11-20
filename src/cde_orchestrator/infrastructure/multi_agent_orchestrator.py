@@ -729,7 +729,7 @@ Expected: Coverage >85%
 
 async def main():
     """Ejemplo de uso: Ejecutar Fase 1 con orquestación multi-agente."""
-    logger.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO)
 
     # Inicializar orquestador
     orchestrator = MultiAgentOrchestrator(".")

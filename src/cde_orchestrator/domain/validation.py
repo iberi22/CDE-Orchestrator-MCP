@@ -51,7 +51,7 @@ def validate_input(model: Type[BaseModel]) -> Callable:
                     indent=2,
                 )
             except Exception as e:
-                # Catch any other validation-related errors
+                # Catch Any other validation-related errors
                 return json.dumps(
                     {
                         "error": "validation_error",
@@ -91,7 +91,7 @@ def sanitize_string(value: str, max_length: int = 10000) -> str:
     return sanitized
 
 
-def validate_file_path(path: str, allowed_extensions: list = None) -> bool:
+def validate_file_path(path: str, allowed_extensions: list | None = None) -> bool:
     """
     Validate file path for safety.
 

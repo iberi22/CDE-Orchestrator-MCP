@@ -107,7 +107,7 @@ class ISpecificationRepository(ABC):
         pass
 
     @abstractmethod
-    async def list_all_async(
+    def list_all_async(
         self,
         doc_type: Optional[DocumentType] = None,
         status: Optional[DocumentStatus] = None,
@@ -115,6 +115,8 @@ class ISpecificationRepository(ABC):
     ) -> AsyncIterator[Specification]:
         """
         Stream specifications asynchronously.
+
+        Note: Abstract async generators should use 'def' not 'async def'.
 
         Args:
             doc_type: Filter by document type

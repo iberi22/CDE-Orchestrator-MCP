@@ -1,14 +1,15 @@
 # src/server.py
-import logging
-import os
 from pathlib import Path
 
 from dotenv import load_dotenv
 from fastmcp import FastMCP
 
+from cde_orchestrator.infrastructure.config import config
+from cde_orchestrator.infrastructure.logging import configure_logging, get_logger
 from mcp_tools import (
     cde_analyzeDocumentation,
     cde_executeWithBestAgent,
+    cde_healthCheck,
     cde_installMcpExtension,
     cde_listAvailableAgents,
     cde_onboardingProject,
@@ -26,8 +27,8 @@ from mcp_tools.test_progress import cde_testProgressReporting
 
 # Configuration
 load_dotenv()
-logging.basicConfig(level=os.environ.get("CDE_LOG_LEVEL", "INFO"))
-logger = logging.getLogger(__name__)
+configure_logging(level=config.LOG_LEVEL, json_format=config.LOG_FORMAT == "json")
+logger = get_logger(__name__)
 
 
 # Auto-generate MCP tool filesystem structure (Anthropic best practice)
@@ -72,6 +73,7 @@ app.tool()(cde_executeFullImplementation)  # ✅ Meta-orchestration
 app.tool()(cde_testProgressReporting)  # ✅ Test tool for status bar
 app.tool()(cde_installMcpExtension)  # ✅ Install MCP extension
 app.tool()(cde_searchTools)  # ✅ Progressive tool discovery (Anthropic pattern)
+app.tool()(cde_healthCheck)  # ✅ Health monitoring (PROD-03)
 
 
 # Server Entry Point
