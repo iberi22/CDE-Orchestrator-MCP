@@ -81,6 +81,50 @@ target/
 servers/cde/
 src/mcp_tools/servers/
 
+# Node.js / JavaScript / TypeScript
+node_modules/
+*.map
+dist/
+out/
+*.vsix
+.npm/
+.yarn/
+.pnpm-store/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build artifacts
+build/
+*.whl
+ci-wheels/
+temp-wheels/
+
+# Coverage reports
+htmlcov/
+coverage.json
+coverage.xml
+.coverage
+.coverage.*
+
+# Python cache
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# IDE specific
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
 # Misc
 *.bak
 *.tmp
