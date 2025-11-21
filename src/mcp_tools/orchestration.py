@@ -15,6 +15,7 @@ from cde_orchestrator.application.orchestration import (
 )
 
 from ._base import tool_handler
+from ._progress_reporter import get_progress_reporter
 
 
 @tool_handler
@@ -195,10 +196,18 @@ async def cde_sourceSkill(
     - Source attribution and import date
     - CDE-compatible formatting
     """
+    reporter = get_progress_reporter()
+    reporter.reset()
+    reporter.report_progress("CDE", "sourceSkill", 0.1, f"Searching for '{skill_query}'...")
+
     use_case = SkillSourcingUseCase()
+
+    reporter.report_progress("CDE", "sourceSkill", 0.4, "Downloading skills...")
     result = await use_case.execute(
         skill_query=skill_query, source=source, destination=destination
     )
+    reporter.report_progress("CDE", "sourceSkill", 1.0, "Skills ready")
+
     return json.dumps(result, indent=2)
 
 
@@ -291,15 +300,22 @@ async def cde_updateSkill(
     - Technical blogs (medium confidence)
     - Stack Overflow (for common problems)
     """
+    reporter = get_progress_reporter()
+    reporter.reset()
+    reporter.report_progress("CDE", "updateSkill", 0.1, f"Researching '{skill_name}'...")
+
     use_case = WebResearchUseCase()
 
     # Convert skill_name to file path
     skill_file = Path(f".copilot/skills/base/{skill_name}.md")
 
+    reporter.report_progress("CDE", "updateSkill", 0.5, f"Analyzing {len(topics)} topics...")
     result = await use_case.execute(
         skill_name=skill_name,
         topics=topics,
         max_sources=max_sources,
         skill_file_path=skill_file if skill_file.exists() else None,
     )
+    reporter.report_progress("CDE", "updateSkill", 1.0, "Skill updated")
+
     return json.dumps(result, indent=2)

@@ -1,3 +1,26 @@
+---
+title: CDE Orchestrator MCP - Product Overview
+description: 'The CDE Orchestrator is a smart MCP (Model Context Protocol) server
+  that implements Context-Driven Engineering (CDE) methodology. It guides AI coding '
+type: guide
+status: draft
+created: '2025-11-20'
+updated: '2025-11-20'
+author: Auto-Generated
+tags:
+- api
+- architecture
+- deployment
+- documentation
+- mcp
+- orchestration
+llm_summary: "User guide for CDE Orchestrator MCP - Product Overview.\n  The CDE Orchestrator\
+  \ is a smart MCP (Model Context Protocol) server that implements Context-Driven\
+  \ Engineering (CDE) methodology. It guides AI coding assistants through structured,\
+  \ phase-based software development workflows, transforming development into a series\
+  \ of well-defined state transitions.\n  Reference when working with guide documentation."
+---
+
 # CDE Orchestrator MCP - Product Overview
 
 ## Project Purpose

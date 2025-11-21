@@ -1,0 +1,805 @@
+# Link Validation Report
+Generated: 2025-11-20T19:57:13.832340
+
+## Statistics
+- Total markdown files: 756
+- Broken links: 462
+- Typos detected: 0
+- Orphaned files: 317
+
+## Broken Links
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 117: `specs/design/auth-architecture.md`
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 155: `specs/features/comprehensive-system.md`
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 167: `specs/features/feature-1.md`
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 168: `specs/features/feature-2.md`
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 169: `specs/features/feature-3.md`
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 183: `specs/features/auth.md`
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 186: `specs/design/auth-flow.md`
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 189: `agent-docs/execution/auth-impl-2025-11.md`
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 198: `specs/design/oauth2-architecture.md`
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 201: `specs/features/auth.md`
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 204: `agent-docs/execution/auth-impl-2025-11.md`
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 234: `specs/design/amazon-q-integration.md`
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 322: `agent-docs/sessions/session-auth-review-2025-11-04.md`
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 324: `agent-docs/feedback/feedback-auth-analysis-2025-11.md`
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 333: `specs/design/auth.md`
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 336: `specs/features/auth.md`
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 348: `specs/design/oauth2-architecture.md`
+- `.amazonq\rules\memory-bank\token-optimization.md` Line 351: `specs/features/auth.md`
+- `.amazonq\rules\rulegeneral.md` Line 378: `specs/features/multi-project-scan.md`
+- `.github\copilot-instructions.md` Line 40: `agent-docs/execution/EXECUTIONS-julius-implementation-summary-YYYY-MM-DD-HHmm.md`
+- `.github\copilot-instructions.md` Line 41: `agent-docs/execution/EXECUTIONS-julius-quick-start-YYYY-MM-DD-HHmm.md`
+- `.github\copilot-instructions.md` Line 42: `agent-docs/execution/EXECUTIONS-julius-activation-guide-YYYY-MM-DD-HHmm.md`
+- `.github\copilot-instructions.md` Line 364: `specs/features/multi-project-scan.md`
+- `.github\copilot-instructions.md` Line 972: `specs/features/my-feature.md`
+- `.github\HARCOS_ORGANIZATION_SETUP.md` Line 241: `mailto:enterprise@harcos.ai`
+- `.github\HARCOS_ORGANIZATION_SETUP.md` Line 359: `mailto:enterprise@harcos.ai`
+- `.github\HARCOS_ORGANIZATION_SETUP.md` Line 366: `CODE_OF_CONDUCT.md`
+- `.github\HARCOS_ORGANIZATION_SETUP.md` Line 469: `CODE_OF_CONDUCT.md`
+- `agent-docs\execution\execution-phase2-gitignore-integration-2025-11-20.md` Line 114: `specs/features/test.md`
+- `agent-docs\execution\EXECUTIONS-doc01-architecture-refactorization-2025-11-18.md` Line 180: `architecture-ports.md`
+- `agent-docs\execution\EXECUTIONS-doc01-architecture-refactorization-2025-11-18.md` Line 327: `specs/design/architecture/*.md`
+- `agent-docs\execution\EXECUTIONS-doc01-architecture-refactorization-2025-11-18.md` Line 339: `specs/design/architecture/*.md`
+- `agent-docs\readme.md` Line 185: `agent-docs/research/*.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 117: `specs/design/auth-architecture.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 155: `specs/features/comprehensive-system.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 167: `specs/features/feature-1.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 168: `specs/features/feature-2.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 169: `specs/features/feature-3.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 183: `specs/features/auth.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 186: `specs/design/auth-flow.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 189: `agent-docs/execution/auth-impl-2025-11.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 198: `specs/design/oauth2-architecture.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 201: `specs/features/auth.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 204: `agent-docs/execution/auth-impl-2025-11.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 234: `specs/design/amazon-q-integration.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 322: `agent-docs/sessions/session-auth-review-2025-11-04.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 324: `agent-docs/feedback/feedback-auth-analysis-2025-11.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 333: `specs/design/auth.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 336: `specs/features/auth.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 348: `specs/design/oauth2-architecture.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md` Line 351: `specs/features/auth.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\rulegeneral.md` Line 378: `specs/features/multi-project-scan.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\rulegeneral.md` Line 540: `specs/design/ARCHITECTURE.md`
+- `agent-docs\research\archived-2025-11-07\prompts-docs\jules_master_prompt_phase3c.md` Line 465: `link`
+- `agent-docs\research\archived-2025-11-07\prompts-docs\jules_master_prompt_phase3c.md` Line 322: `specs/governance/QUICK_REFERENCE.md`
+- `agent-docs\research\archived-2025-11-07\specs-api-docs\mcp-tools.md` Line 928: `../design/ARCHITECTURE.md`
+- `agent-docs\research\archived-2025-11-07\specs-api-docs\mcp-tools.md` Line 929: `../../.cde/recipes/README.md`
+- `agent-docs\research\archived-2025-11-07\specs-api-docs\mcp-tools.md` Line 930: `../features/onboarding-system.md`
+- `agent-docs\research\archived-2025-11-07\specs-api-docs\mcp-tools.md` Line 931: `../features/ai-assistant-config.md`
+- `agent-docs\research\archived-2025-11-07\specs-api-docs\mcp-tools.md` Line 466: `specs/features/auth.md`
+- `agent-docs\research\archived-2025-11-07\specs-api-docs\readme.md` Line 75: `../../.cde/workflow.yml`
+- `agent-docs\research\archived-2025-11-07\specs-api-docs\readme.md` Line 76: `../features/`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\document-metadata.md` Line 296: `specs/features/my-doc.md`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\execution-report.md` Line 114: `link`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\execution-report.md` Line 141: `path/to/execution.log`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\execution-report.md` Line 142: `path/to/error.log`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\execution-report.md` Line 146: `path/to/build/`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\execution-report.md` Line 147: `path/to/reports/`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\feedback-report.md` Line 158: `../specs/features/feature-name.md`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\feedback-report.md` Line 159: `../specs/design/design-name.md`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\feedback-report.md` Line 160: `../agent-docs/feedback/previous-analysis.md`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\feedback-report.md` Line 205: `link`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\feedback-report.md` Line 206: `link`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\session-summary.md` Line 99: `../specs/features/feature-name.md`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\session-summary.md` Line 100: `../specs/design/design-name.md`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\session-summary.md` Line 101: `../ARCHITECTURE.md`
+- `CONTRIBUTING.md` Line 138: `specs/features/my-feature.md`
+- `GEMINI.md` Line 754: `specs/features/my-feature.md`
+- `mcp-status-bar\node_modules\@azure\msal-browser\README.md` Line 181: `./docs/v1-migration.md`
+- `mcp-status-bar\node_modules\@azure\msal-browser\README.md` Line 196: `mailto:secure@microsoft.com`
+- `mcp-status-bar\node_modules\@azure\msal-browser\README.md` Line 204: `mailto:opencode@microsoft.com`
+- `mcp-status-bar\node_modules\@azure\msal-common\README.md` Line 64: `mailto:secure@microsoft.com`
+- `mcp-status-bar\node_modules\@azure\msal-common\README.md` Line 72: `mailto:opencode@microsoft.com`
+- `mcp-status-bar\node_modules\@azure\msal-node\README.md` Line 203: `mailto:secure@microsoft.com`
+- `mcp-status-bar\node_modules\@azure\msal-node\README.md` Line 211: `mailto:opencode@microsoft.com`
+- `mcp-status-bar\node_modules\@nodelib\fs.scandir\README.md` Line 98: `./src/types/index.ts`
+- `mcp-status-bar\node_modules\@nodelib\fs.scandir\README.md` Line 98: `./src/utils/fs.ts`
+- `mcp-status-bar\node_modules\@nodelib\fs.scandir\README.md` Line 145: `./src/adapters/fs.ts`
+- `mcp-status-bar\node_modules\@nodelib\fs.stat\README.md` Line 119: `./src/adapters/fs.ts`
+- `mcp-status-bar\node_modules\@nodelib\fs.walk\README.md` Line 111: `./src/types/index.ts`
+- `mcp-status-bar\node_modules\@nodelib\fs.walk\README.md` Line 141: `./src/settings.ts`
+- `mcp-status-bar\node_modules\@nodelib\fs.walk\README.md` Line 153: `./src/settings.ts`
+- `mcp-status-bar\node_modules\@nodelib\fs.walk\README.md` Line 165: `./src/settings.ts`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\consistent-type-exports.md` Line 12: `/blog/consistent-type-imports-and-exports-why-and-how`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\consistent-type-imports.md` Line 12: `/blog/consistent-type-imports-and-exports-why-and-how`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-extra-semi.md` Line 12: `/linting/troubleshooting/formatting`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-type-alias.md` Line 19: `/linting/troubleshooting#how-can-i-ban-specific-language-feature`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\README.md` Line 12: `/linting/configs`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\README.md` Line 27: `/linting/configs`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\README.md` Line 34: `/linting/typed-linting`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\README.md` Line 37: `/linting/troubleshooting/formatting`
+- `mcp-status-bar\node_modules\@ungap\structured-clone\README.md` Line 38: `./test/index.js`
+- `mcp-status-bar\node_modules\@vscode\vsce-sign\CODE_OF_CONDUCT.md` Line 25: `mailto:opencode@microsoft.com`
+- `mcp-status-bar\node_modules\ajv\README.md` Line 42: `./docs/strict-mode.md`
+- `mcp-status-bar\node_modules\ajv\README.md` Line 43: `./docs/codegen.md`
+- `mcp-status-bar\node_modules\argparse\CHANGELOG.md` Line 36: `./doc`
+- `mcp-status-bar\node_modules\argparse\README.md` Line 35: `./doc`
+- `mcp-status-bar\node_modules\argparse\README.md` Line 94: `./doc`
+- `mcp-status-bar\node_modules\asynckit\README.md` Line 96: `test/test-parallel-array.js`
+- `mcp-status-bar\node_modules\asynckit\README.md` Line 142: `test/test-parallel-object.js`
+- `mcp-status-bar\node_modules\asynckit\README.md` Line 182: `test/test-serial-array.js`
+- `mcp-status-bar\node_modules\asynckit\README.md` Line 224: `test/test-serial-object.js`
+- `mcp-status-bar\node_modules\asynckit\README.md` Line 234: `compare-property`
+- `mcp-status-bar\node_modules\asynckit\README.md` Line 242: `test/`
+- `mcp-status-bar\node_modules\azure-devops-node-api\README.md` Line 37: `./samples`
+- `mcp-status-bar\node_modules\azure-devops-node-api\README.md` Line 44: `docs/intellisense.png`
+- `mcp-status-bar\node_modules\azure-devops-node-api\README.md` Line 182: `mailto:opencode@microsoft.com`
+- `mcp-status-bar\node_modules\braces\README.md` Line 51: `www.gnu.org/software/bash/`
+- `mcp-status-bar\node_modules\braces\README.md` Line 512: `test/support/generate.js`
+- `mcp-status-bar\node_modules\braces\README.md` Line 560: `../../issues/new`
+- `mcp-status-bar\node_modules\braces\README.md` Line 578: `.verb.md`
+- `mcp-status-bar\node_modules\chalk\readme.md` Line 138: `string, [string...]`
+- `mcp-status-bar\node_modules\commander\CHANGELOG.md` Line 285: `./changelogs/CHANGELOG-3.md`
+- `mcp-status-bar\node_modules\commander\CHANGELOG.md` Line 286: `./changelogs/CHANGELOG-2.md`
+- `mcp-status-bar\node_modules\commander\CHANGELOG.md` Line 287: `./changelogs/CHANGELOG-1.md`
+- `mcp-status-bar\node_modules\commander\CHANGELOG.md` Line 288: `./changelogs/CHANGELOG-0.md`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 28: `./Readme_zh-CN.md`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 67: `./docs/terminology.md`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 111: `./examples/options-common.js`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 149: `./examples/options-defaults.js`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 175: `./examples/options-negatable.js`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 203: `./examples/options-boolean-or-value.js`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 225: `./docs/options-taking-varying-arguments.md`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 236: `./examples/options-custom-processing.js`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 290: `./examples/options-required.js`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 311: `./examples/options-variadic.js`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 336: `./docs/options-taking-varying-arguments.md`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 360: `./examples/nestedCommands.js`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 392: `./examples/defaultCommand.js`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 401: `./examples/env`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 484: `./examples/pm`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 504: `./examples/pizza`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 535: `./examples/custom-help`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 663: `./examples/storeOptionsAsProperties-action.js`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 708: `./examples/custom-command-class.js`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 708: `./examples/custom-command-function.js`
+- `mcp-status-bar\node_modules\commander\Readme.md` Line 757: `./examples/deploy`
+- `mcp-status-bar\node_modules\debug\README.md` Line 38: `./examples/node/app.js`
+- `mcp-status-bar\node_modules\debug\README.md` Line 61: `./examples/node/worker.js`
+- `mcp-status-bar\node_modules\debug\README.md` Line 270: `./examples/node/stdout.js`
+- `mcp-status-bar\node_modules\encoding-sniffer\README.md` Line 85: `/LICENSE`
+- `mcp-status-bar\node_modules\eslint\node_modules\chalk\readme.md` Line 175: `string, [string...]`
+- `mcp-status-bar\node_modules\fast-glob\README.md` Line 235: `./src/managers/tasks.ts`
+- `mcp-status-bar\node_modules\fill-range\README.md` Line 205: `../../issues/new`
+- `mcp-status-bar\node_modules\fill-range\README.md` Line 223: `.verb.md`
+- `mcp-status-bar\node_modules\flatted\README.md` Line 24: `./flatted.jpg`
+- `mcp-status-bar\node_modules\glob\README.md` Line 29: `logo/glob.png`
+- `mcp-status-bar\node_modules\http-proxy-agent\README.md` Line 28: `../https-proxy-agent`
+- `mcp-status-bar\node_modules\ignore\README.md` Line 417: `nodejs.org/api/events.html`
+- `mcp-status-bar\node_modules\is-extglob\README.md` Line 97: `../../issues/new`
+- `mcp-status-bar\node_modules\is-extglob\README.md` Line 101: `.verb.md`
+- `mcp-status-bar\node_modules\is-glob\README.md` Line 171: `../../issues/new`
+- `mcp-status-bar\node_modules\is-glob\README.md` Line 189: `.verb.md`
+- `mcp-status-bar\node_modules\is-number\README.md` Line 60: `./test.js`
+- `mcp-status-bar\node_modules\is-number\README.md` Line 125: `./benchmark/index.js`
+- `mcp-status-bar\node_modules\is-number\README.md` Line 152: `../../issues/new`
+- `mcp-status-bar\node_modules\is-number\README.md` Line 170: `.verb.md`
+- `mcp-status-bar\node_modules\jsonc-parser\SECURITY.md` Line 33: `mailto:secure@microsoft.com`
+- `mcp-status-bar\node_modules\micromatch\README.md` Line 135: `./test`
+- `mcp-status-bar\node_modules\micromatch\README.md` Line 939: `.github/contributing.md`
+- `mcp-status-bar\node_modules\micromatch\README.md` Line 945: `../../issues`
+- `mcp-status-bar\node_modules\micromatch\README.md` Line 959: `../../issues/new`
+- `mcp-status-bar\node_modules\micromatch\README.md` Line 961: `.github/contributing.md`
+- `mcp-status-bar\node_modules\micromatch\README.md` Line 979: `.verb.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 89: `CODE_OF_CONDUCT.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 109: `doc/setup.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 110: `doc/node-gyp.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 111: `doc/cmake-js.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 112: `doc/conversion-tool.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 113: `doc/checker-tool.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 114: `doc/generator.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 115: `doc/prebuild_tools.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 123: `doc/hierarchy.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 124: `doc/addon.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 126: `doc/env.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 127: `doc/callbackinfo.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 128: `doc/reference.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 129: `doc/value.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 130: `doc/name.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 131: `doc/symbol.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 132: `doc/string.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 133: `doc/number.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 134: `doc/date.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 135: `doc/bigint.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 136: `doc/boolean.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 137: `doc/external.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 138: `doc/object.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 139: `doc/array.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 140: `doc/object_reference.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 141: `doc/property_descriptor.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 142: `doc/function.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 143: `doc/function_reference.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 144: `doc/object_wrap.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 145: `doc/class_property_descriptor.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 146: `doc/buffer.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 147: `doc/array_buffer.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 148: `doc/typed_array.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 149: `doc/typed_array_of.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 150: `doc/dataview.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 151: `doc/error_handling.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 152: `doc/error.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 153: `doc/type_error.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 154: `doc/range_error.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 155: `doc/object_lifetime_management.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 156: `doc/handle_scope.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 157: `doc/escapable_handle_scope.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 158: `doc/memory_management.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 159: `doc/async_operations.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 160: `doc/async_worker.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 161: `doc/async_context.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 162: `doc/async_worker_variants.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 163: `doc/threadsafe.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 164: `doc/threadsafe_function.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 165: `doc/typed_threadsafe_function.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 166: `doc/promises.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 167: `doc/version_management.md`
+- `mcp-status-bar\node_modules\node-addon-api\README.md` Line 234: `benchmark/README.md`
+- `mcp-status-bar\node_modules\node-addon-api\tools\README.md` Line 60: `const Napi::CallbackInfo& info`
+- `mcp-status-bar\node_modules\node-addon-api\tools\README.md` Line 64: `const Napi::CallbackInfo& info`
+- `mcp-status-bar\node_modules\optionator\README.md` Line 4: `htt
+type: guide
+status: draft
+created: '2025-11-20'
+updated: '2025-11-20'
+author: Auto-Generated
+tags:
+- readme
+- testing
+llm_summary: "User guide for Optionator.\n  <a name=\"optionator\" /> Optionator is\
+  \ a JavaScript/Node.js option parsing and help generation library used by [eslint](http://eslint.org`
+- `mcp-status-bar\node_modules\picomatch\README.md` Line 687: `../../issues/new`
+- `mcp-status-bar\node_modules\picomatch\README.md` Line 689: `.github/contributing.md`
+- `mcp-status-bar\node_modules\picomatch\README.md` Line 707: `.verb.md`
+- `mcp-status-bar\node_modules\safer-buffer\Porting-Buffer.md` Line 3: `Slow`
+- `mcp-status-bar\node_modules\safer-buffer\Porting-Buffer.md` Line 33: `Slow`
+- `mcp-status-bar\node_modules\to-regex-range\README.md` Line 92: `./test/test.js`
+- `mcp-status-bar\node_modules\to-regex-range\README.md` Line 268: `../../issues/new`
+- `mcp-status-bar\node_modules\to-regex-range\README.md` Line 286: `.verb.md`
+- `mcp-status-bar\node_modules\ts-api-utils\README.md` Line 61: `./.github/CONTRIBUTING.md`
+- `mcp-status-bar\node_modules\tslib\SECURITY.md` Line 33: `mailto:secure@microsoft.com`
+- `mcp-status-bar\node_modules\type-check\README.md` Line 17: `htt\n  Reference\
+  \ when working with guide documentation."
+---
+
+# type-check [![Build Status](https://travis-ci.org/gkz/type-check.png?branch=master`
+- `mcp-status-bar\node_modules\type-fest\readme.md` Line 41: `.github/contributing.md`
+- `mcp-status-bar\node_modules\typed-rest-client\README.md` Line 38: `./docs/intellisense.png`
+- `mcp-status-bar\node_modules\typed-rest-client\README.md` Line 53: `./samples`
+- `mcp-status-bar\node_modules\typed-rest-client\README.md` Line 53: `./test/tests/resttests.ts`
+- `mcp-status-bar\node_modules\typed-rest-client\README.md` Line 53: `./test/tests/httptests.ts`
+- `mcp-status-bar\node_modules\typed-rest-client\README.md` Line 65: `./test/tests/httptests.ts`
+- `mcp-status-bar\node_modules\typed-rest-client\README.md` Line 76: `./test/tests/resttests.ts`
+- `mcp-status-bar\node_modules\typed-rest-client\README.md` Line 118: `mailto:opencode@microsoft.com`
+- `mcp-status-bar\node_modules\typescript\README.md` Line 58: `mailto:opencode@microsoft.com`
+- `mcp-status-bar\node_modules\typescript\SECURITY.md` Line 33: `mailto:secure@microsoft.com`
+- `mcp-status-bar\node_modules\underscore\README.md` Line 37: `SECURITY.md`
+- `mcp-status-bar\node_modules\underscore\README.md` Line 52: `CODE_OF_CONDUCT.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Agent.md` Line 37: `/docs/docs/api/Pool.md#parameter-pooloptions`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Agent.md` Line 46: `/docs/docs/api/Client.md#clientclosed`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Agent.md` Line 50: `/docs/docs/api/Client.md#clientdestroyed`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Agent.md` Line 64: `/docs/docs/api/Dispatcher.md#dispatcherdispatchoptions-handler`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Agent.md` Line 68: `/docs/docs/api/Dispatcher.md#parameter-dispatchoptions`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Agent.md` Line 80: `/docs/docs/api/Dispatcher.md#dispatcherdispatchoptions-handler`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Agent.md` Line 84: `/docs/docs/api/Dispatcher.md#dispatcherpipelineoptions-handler`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Agent.md` Line 102: `/docs/docs/api/PoolStats.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Agent.md` Line 102: `/docs/docs/api/ClientStats.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 3: `/docs/docs/api/Client.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 13: `/docs/docs/api/Client.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 22: `/docs/docs/api/Client.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 80: `/docs/docs/api/Client.md#clientdispatchoptions-handlers`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 80: `/docs/docs/api/Client.md#clientupgradeoptions-callback`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 80: `/docs/docs/api/Client.md#pending`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 80: `/docs/docs/api/Client.md#processing`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 82: `/docs/docs/api/Client.md#clientclosecallback`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 82: `/docs/docs/api/Client.md#destroyed`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 86: `/docs/docs/api/Client.md#event-connect`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 88: `/docs/docs/api/Client.md#clientclosecallback`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 88: `/docs/docs/api/Client.md#processing`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 88: `/docs/docs/api/Client.md#destroyed`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 90: `/docs/docs/api/Client.md#clientdestroyerror-callback`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 90: `/docs/docs/api/Client.md#destroyed`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 94: `/docs/docs/api/Client.md#running`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 94: `/docs/docs/api/Client.md#clientdispatchoptions-handlers`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 94: `/docs/docs/api/Client.md#closing`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 94: `/docs/docs/api/Client.md#destroyed`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 98: `/docs/docs/api/Client.md#busy`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 98: `/docs/docs/api/Client.md#closing`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 98: `/docs/docs/api/Client.md#clientclosecallback`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 98: `/docs/docs/api/Client.md#processing`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 98: `/docs/docs/api/Client.md#pending`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 98: `/docs/docs/api/Client.md#idle`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 102: `/docs/docs/api/Client.md#running`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 106: `/docs/docs/api/Client.md#clientclosecallback`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md` Line 106: `/docs/docs/api/Client.md#destroyed`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\BalancedPool.md` Line 3: `/docs/docs/api/Pool.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\BalancedPool.md` Line 14: `/docs/docs/api/Pool.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\BalancedPool.md` Line 24: `/docs/docs/api/Pool.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\BalancedPool.md` Line 37: `/docs/docs/api/Pool.md#parameter-pooloptions`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\BalancedPool.md` Line 50: `/docs/docs/api/Client.md#clientclosed`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\BalancedPool.md` Line 54: `/docs/docs/api/Client.md#clientdestroyed`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\BalancedPool.md` Line 58: `/docs/docs/api/PoolStats.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\BalancedPool.md` Line 88: `/docs/docs/api/Dispatcher.md#dispatcherdispatchoptions-handler`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\BalancedPool.md` Line 92: `/docs/docs/api/Dispatcher.md#dispatcherpipelineoptions-handler`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\BalancedPool.md` Line 110: `/docs/docs/api/Dispatcher.md#event-connect`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\BalancedPool.md` Line 114: `/docs/docs/api/Dispatcher.md#event-disconnect`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\BalancedPool.md` Line 118: `/docs/docs/api/Dispatcher.md#event-drain`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\CacheStore.md` Line 159: `/docs/docs/api/CacheStore.md#cachestorevalue`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Client.md` Line 131: `/docs/docs/api/Dispatcher.md#dispatcherdispatchoptions-handler`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Client.md` Line 135: `/docs/docs/api/Dispatcher.md#dispatcherpipelineoptions-handler`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Client.md` Line 173: `/docs/docs/api/Dispatcher.md#event-connect`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Client.md` Line 219: `/docs/docs/api/Dispatcher.md#event-disconnect`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Client.md` Line 264: `/docs/docs/api/Dispatcher.md#event-drain`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\ClientStats.md` Line 3: `/docs/docs/api/Client.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\ClientStats.md` Line 12: `/docs/docs/api/Client.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\ClientStats.md` Line 20: `/docs/docs/api/Client.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Dispatcher.md` Line 397: `/docs/docs/api/Dispatcher.md#parameter-requestoptions`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Dispatcher.md` Line 487: `/docs/docs/api/Dispatcher.md#parameter-dispatchoptions`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Dispatcher.md` Line 674: `/docs/docs/api/Dispatcher.md#example-1-basic-get-stream-request`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Dispatcher.md` Line 674: `/docs/docs/api/Dispatch.md#example-2-stream-to-fastify-response`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Dispatcher.md` Line 975: `/docs/docs/api/RedirectHandler.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Dispatcher.md` Line 993: `/docs/docs/api/RetryHandler.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Dispatcher.md` Line 1182: `/docs/docs/api/CacheStore.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Dispatcher.md` Line 1182: `/docs/docs/api/CacheStore.md#memorycachestore`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Dispatcher.md` Line 1233: `/docs/docs/api/Client.md#clientdispatchoptions-handlers`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Dispatcher.md` Line 1239: `/docs/docs/api/Client.md#class-client`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\EnvHttpProxyAgent.md` Line 40: `/docs/docs/api/Agent.md#parameter-agentoptions`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\EnvHttpProxyAgent.md` Line 146: `/docs/docs/api/Dispatcher.md#dispatcherdispatchoptions-handler`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\EnvHttpProxyAgent.md` Line 150: `/docs/docs/api/Dispatcher.md#parameter-dispatchoptions`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\EnvHttpProxyAgent.md` Line 162: `/docs/docs/api/Dispatcher.md#dispatcherdispatchoptions-handler`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\EnvHttpProxyAgent.md` Line 166: `/docs/docs/api/Dispatcher.md#dispatcherpipelineoptions-handler`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\H2CClient.md` Line 110: `/docs/docs/api/Dispatcher.md#dispatcherdispatchoptions-handler`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\H2CClient.md` Line 114: `/docs/docs/api/Dispatcher.md#dispatcherpipelineoptions-handler`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\H2CClient.md` Line 152: `/docs/docs/api/Dispatcher.md#event-connect`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\H2CClient.md` Line 198: `/docs/docs/api/Dispatcher.md#event-disconnect`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\H2CClient.md` Line 243: `/docs/docs/api/Dispatcher.md#event-drain`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockAgent.md` Line 37: `/docs/docs/api/Agent.md#parameter-agentoptions`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockAgent.md` Line 328: `/docs/docs/api/Agent.md#parameter-agentdispatchoptions`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockCallHistory.md` Line 93: `/docs/docs/api/MockCallHistory.md#filter-parameter`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockCallHistory.md` Line 104: `/docs/docs/api/MockCallHistory.md#filter-parameter`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockCallHistory.md` Line 115: `/docs/docs/api/MockCallHistory.md#filter-parameter`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockCallHistory.md` Line 127: `/docs/docs/api/MockCallHistory.md#filter-parameter`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockCallHistory.md` Line 138: `/docs/docs/api/MockCallHistory.md#filter-parameter`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockCallHistory.md` Line 149: `/docs/docs/api/MockCallHistory.md#filter-parameter`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockCallHistory.md` Line 160: `/docs/docs/api/MockCallHistory.md#filter-parameter`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockCallHistory.md` Line 171: `/docs/docs/api/MockCallHistory.md#filter-parameter`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockCallHistory.md` Line 187: `/docs/docs/api/MockCallHistory.md#filter-parameter`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockClient.md` Line 4: `/docs/docs/api/MockPool.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockClient.md` Line 14: `/docs/docs/api/MockPool.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockClient.md` Line 23: `/docs/docs/api/MockPool.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockClient.md` Line 57: `/docs/docs/api/MockPool.md#mockpoolinterceptoptions`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockClient.md` Line 61: `/docs/docs/api/MockPool.md#mockpoolcleanmocks`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockClient.md` Line 65: `/docs/docs/api/MockPool.md#mockpoolclose`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockClient.md` Line 69: `/docs/docs/api/Dispatcher.md#dispatcherdispatchoptions-handler`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockPool.md` Line 534: `/docs/docs/api/Dispatcher.md#dispatcherdispatchoptions-handler`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Pool.md` Line 3: `/docs/docs/api/Client.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Pool.md` Line 14: `/docs/docs/api/Client.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Pool.md` Line 23: `/docs/docs/api/Client.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Pool.md` Line 36: `/docs/docs/api/Client.md#parameter-clientoptions`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Pool.md` Line 46: `/docs/docs/api/Client.md#clientclosed`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Pool.md` Line 50: `/docs/docs/api/Client.md#clientdestroyed`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Pool.md` Line 72: `/docs/docs/api/Dispatcher.md#dispatcherdispatchoptions-handler`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Pool.md` Line 76: `/docs/docs/api/Dispatcher.md#dispatcherpipelineoptions-handler`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Pool.md` Line 94: `/docs/docs/api/Dispatcher.md#event-connect`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Pool.md` Line 98: `/docs/docs/api/Dispatcher.md#event-disconnect`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Pool.md` Line 102: `/docs/docs/api/Dispatcher.md#event-drain`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\PoolStats.md` Line 3: `/docs/docs/api/Pool.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\PoolStats.md` Line 3: `/docs/docs/api/BalancedPool.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\PoolStats.md` Line 12: `/docs/docs/api/Pool.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\PoolStats.md` Line 13: `/docs/docs/api/BalancedPool.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\PoolStats.md` Line 20: `/docs/docs/api/Pool.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\PoolStats.md` Line 20: `/docs/docs/api/BalancedPool.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\ProxyAgent.md` Line 36: `/docs/docs/api/Agent.md#parameter-agentoptions`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\ProxyAgent.md` Line 47: `/docs/docs/api/Client.md#parameter-connectoptions`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\ProxyAgent.md` Line 48: `/docs/docs/api/Client.md#parameter-connectoptions`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\ProxyAgent.md` Line 156: `/docs/docs/api/Agent.md#parameter-agentdispatchoptions`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\RetryHandler.md` Line 37: `/docs/docs/api/Dispatcher.md#parameter-dispatchoptions`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\RetryHandler.md` Line 67: `/docs/docs/api/Dispatcher.md#dispatcherdispatchoptions-handler`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\WebSocket.md` Line 29: `/docs/docs/api/Dispatcher.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\best-practices\mocking-request.md` Line 3: `/docs/docs/api/MockAgent.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\best-practices\mocking-request.md` Line 15: `/docs/docs/api/MockAgent.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\best-practices\mocking-request.md` Line 23: `/docs/docs/api/MockAgent.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\best-practices\mocking-request.md` Line 96: `/docs/docs/api/MockAgent.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\best-practices\mocking-request.md` Line 146: `/docs/docs/api/MockAgent.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\best-practices\mocking-request.md` Line 148: `/docs/docs/api/MockCallHistory.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\best-practices\mocking-request.md` Line 150: `/docs/docs/api/MockCallHistoryLog.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\best-practices\proxy.md` Line 15: `/docs/docs/api/ProxyAgent.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\best-practices\proxy.md` Line 25: `/docs/docs/api/ProxyAgent.md`
+- `mcp-status-bar\node_modules\undici\README.md` Line 285: `./docs/`
+- `mcp-status-bar\node_modules\undici\README.md` Line 300: `./docs/examples/README.md`
+- `mcp-status-bar\node_modules\uuid\README.md` Line 385: `./examples/node-esmodules/`
+- `mcp-status-bar\node_modules\uuid\README.md` Line 385: `./examples/browser-rollup/`
+- `mcp-status-bar\node_modules\uuid\README.md` Line 385: `./examples/browser-webpack/`
+- `mcp-status-bar\node_modules\uuid\README.md` Line 527: `README_js.md`
+- `mcp-status-bar\node_modules\word-wrap\README.md` Line 156: `../../issues/new`
+- `mcp-status-bar\node_modules\word-wrap\README.md` Line 174: `.verb.md`
+- `mcp-status-bar\node_modules\ws\README.md` Line 94: `./doc/ws.md#ws_no_buffer_util`
+- `mcp-status-bar\node_modules\ws\README.md` Line 111: `./doc/ws.md#ws_no_utf_8_validate`
+- `mcp-status-bar\node_modules\ws\README.md` Line 115: `./doc/ws.md`
+- `README.md` Line 84: `mailto:enterprise@cde-orchestrator.dev`
+- `README.md` Line 302: `specs/`
+- `scripts\readme.md` Line 95: `specs/features/my-doc.md`
+- `specs\api\mcp-tools.md` Line 928: `../design/ARCHITECTURE.md`
+- `specs\api\mcp-tools.md` Line 929: `../../.cde/recipes/README.md`
+- `specs\api\mcp-tools.md` Line 466: `specs/features/auth.md`
+- `specs\api\README.md` Line 75: `../../.cde/workflow.yml`
+- `specs\api\README.md` Line 76: `../features/`
+- `specs\design\architecture\architecture-domain-layer.md` Line 19: `../architecture.md`
+- `specs\design\architecture\architecture-domain-layer.md` Line 20: `architecture-application-layer.md`
+- `specs\design\architecture\architecture-domain-layer.md` Line 20: `architecture-ports-adapters.md`
+- `specs\design\architecture\architecture-domain-layer.md` Line 221: `../architecture.md`
+- `specs\design\architecture\architecture-domain-layer.md` Line 222: `architecture-application-layer.md`
+- `specs\design\architecture\architecture-domain-layer.md` Line 223: `architecture-ports-adapters.md`
+- `specs\design\architecture\architecture-domain-layer.md` Line 311: `../architecture.md#hexagonal-architecture`
+- `specs\design\architecture\architecture-domain-layer.md` Line 312: `../architecture.md#dependency-rule`
+- `specs\design\multi-agent-orchestration-system.md` Line 890: `./ARCHITECTURE.md`
+- `specs\features\advanced-research-features.md` Line 410: `agent-docs/research/latest.md`
+- `specs\features\advanced-research-features.md` Line 411: `agent-docs/analysis/vulnerabilities.md`
+- `specs\features\advanced-research-features.md` Line 412: `agent-docs/intelligence/opportunities.md`
+- `specs\features\integrated-management-system.md` Line 80: `specs/features/auth.md`
+- `specs\features\integrated-management-system.md` Line 81: `specs/features/auth.md`
+- `specs\features\onboarding-system.md` Line 325: `INTEGRATION.md`
+- `specs\governance\documentation-minimalism-2025-11.md` Line 448: `commit-link`
+- `specs\governance\documentation-minimalism-2025-11.md` Line 449: `commit-link`
+- `specs\governance\documentation-minimalism-2025-11.md` Line 450: `commit-link`
+- `specs\governance\documentation-minimalism-2025-11.md` Line 453: `commit-link`
+- `specs\governance\documentation-minimalism-2025-11.md` Line 454: `commit-link`
+- `specs\governance\documentation-minimalism-2025-11.md` Line 457: `commit-link`
+- `specs\governance\documentation-minimalism-2025-11.md` Line 458: `commit-link`
+- `specs\governance\documentation-minimalism-2025-11.md` Line 703: `commit-link`
+- `specs\governance\documentation-minimalism-2025-11.md` Line 704: `commit-link`
+- `specs\governance\documentation-minimalism-2025-11.md` Line 708: `commit-link`
+- `specs\governance\documentation-minimalism-2025-11.md` Line 712: `commit-link`
+- `specs\governance\documentation-minimalism-2025-11.md` Line 562: `agent-docs/execution/WEEK-{YYYY-WW}.md`
+- `specs\governance\documentation-minimalism-2025-11.md` Line 579: `agent-docs/execution/*.md`
+- `specs\governance\documentation_governance.md` Line 110: `specs/design/X.md`
+- `specs\governance\documentation_governance.md` Line 138: `specs/design/multi-project.md`
+- `specs\governance\documentation_governance.md` Line 375: `specs/features/feature-name.md`
+- `specs\governance\documentation_governance.md` Line 376: `specs/design/architecture-topic.md`
+- `specs\governance\documentation_governance.md` Line 377: `specs/tasks/roadmap-topic.md`
+- `specs\governance\documentation_governance.md` Line 378: `agent-docs/sessions/session-topic-YYYY-MM-DD.md`
+- `specs\governance\documentation_governance.md` Line 379: `agent-docs/execution/execution-topic-YYYY-MM-DD.md`
+- `specs\governance\documentation_governance.md` Line 380: `agent-docs/feedback/feedback-topic-YYYY-MM.md`
+- `specs\governance\documentation_governance.md` Line 381: `agent-docs/research/research-topic-YYYY-MM-DD.md`
+- `specs\tasks\documentation-migration-plan.md` Line 228: `.*\.md`
+- `specs\tasks\documentation-migration-plan.md` Line 108: `specs/design/ARCHITECTURE.md`
+- `specs\tasks\improvement-roadmap.md` Line 33: `../../EXECUTIVE_SUMMARY.md`
+- `specs\tasks\improvement-roadmap.md` Line 34: `../../TASK.md`
+- `specs\tasks\improvement-roadmap.md` Line 35: `../../INFORME_REVISION_PROFESIONAL.md`
+- `specs\tasks\phase4-production-readiness.md` Line 720: `../execution/execution-phase3-single-project-optimization-2025-11-10.md`
+- `specs\tasks\planning-overview.md` Line 8: `EXECUTIVE_SUMMARY.md`
+- `specs\tasks\planning-overview.md` Line 26: `EXECUTIVE_SUMMARY.md`
+- `specs\tasks\planning-overview.md` Line 28: `INFORME_REVISION_PROFESIONAL.md`
+- `specs\templates\document-metadata.md` Line 296: `specs/features/my-doc.md`
+- `specs\templates\execution-report.md` Line 114: `link`
+- `specs\templates\execution-report.md` Line 141: `path/to/execution.log`
+- `specs\templates\execution-report.md` Line 142: `path/to/error.log`
+- `specs\templates\execution-report.md` Line 146: `path/to/build/`
+- `specs\templates\execution-report.md` Line 147: `path/to/reports/`
+- `specs\templates\feedback-report.md` Line 158: `../specs/features/feature-name.md`
+- `specs\templates\feedback-report.md` Line 159: `../specs/design/design-name.md`
+- `specs\templates\feedback-report.md` Line 160: `../agent-docs/feedback/previous-analysis.md`
+- `specs\templates\feedback-report.md` Line 205: `link`
+- `specs\templates\feedback-report.md` Line 206: `link`
+- `specs\templates\session-summary.md` Line 98: `../specs/features/feature-name.md`
+- `specs\templates\session-summary.md` Line 99: `../specs/design/design-name.md`
+- `specs\templates\session-summary.md` Line 100: `../ARCHITECTURE.md`
+
+## Orphaned Files
+- `.amazonq\rules\memory-bank\guidelines.md`
+- `.amazonq\rules\memory-bank\product.md`
+- `.amazonq\rules\memory-bank\structure.md`
+- `.amazonq\rules\memory-bank\tech.md`
+- `.amazonq\rules\memory-bank\token-optimization.md`
+- `.amazonq\rules\rulegeneral.md`
+- `.cde\issues\local-20251110-092632.md`
+- `.cde\issues\local-20251111-004021.md`
+- `.cde\issues\local-20251118-072605.md`
+- `.cde\issues\local-20251118-074006.md`
+- `.cde\issues\local-20251119-004726.md`
+- `.cde\issues\local-20251119-145236.md`
+- `.cde\issues\local-20251119-145410.md`
+- `.cde\issues\local-20251119-145559.md`
+- `.cde\issues\local-20251119-151345.md`
+- `.cde\issues\local-20251119-223302.md`
+- `.cde\issues\local-20251119-225852.md`
+- `.cde\issues\local-20251119-230505.md`
+- `.cde\issues\local-20251119-231423.md`
+- `.cde\issues\local-20251119-231753.md`
+- `.cde\issues\local-20251119-231929.md`
+- `.cde\issues\local-20251119-232437.md`
+- `.cde\issues\local-20251120-005455.md`
+- `.cde\issues\local-20251120-005605.md`
+- `.cde\issues\local-20251120-005859.md`
+- `.cde\issues\local-20251120-010654.md`
+- `.cde\issues\local-20251120-010817.md`
+- `.copilot\skills\parallel-ai-research.md`
+- `.github\copilot-instructions.md`
+- `.github\HARCOS_BRANDING_GUIDELINES.md`
+- `.github\HARCOS_LANDING_PAGE_DEPLOYMENT.md`
+- `.github\HARCOS_ORGANIZATION_SETUP.md`
+- `.github\START_HERE.md`
+- `.venv\Lib\site-packages\docstring_parser-0.17.0.dist-info\licenses\LICENSE.md`
+- `.venv\Lib\site-packages\httpcore-1.0.9.dist-info\licenses\LICENSE.md`
+- `.venv\Lib\site-packages\httpx-0.28.1.dist-info\licenses\LICENSE.md`
+- `.venv\Lib\site-packages\idna-3.11.dist-info\licenses\LICENSE.md`
+- `.venv\Lib\site-packages\pip-25.2.dist-info\licenses\src\pip\_vendor\idna\LICENSE.md`
+- `.venv\Lib\site-packages\soupsieve-2.8.dist-info\licenses\LICENSE.md`
+- `.venv\Lib\site-packages\starlette-0.50.0.dist-info\licenses\LICENSE.md`
+- `.venv\Lib\site-packages\uvicorn-0.38.0.dist-info\licenses\LICENSE.md`
+- `.venv\Lib\site-packages\werkzeug\debug\shared\ICON_LICENSE.md`
+- `agent-docs\execution\execution-phase2-complete-2025-11-20.md`
+- `agent-docs\execution\execution-phase2-gitignore-integration-2025-11-20.md`
+- `agent-docs\execution\execution-phase3-testing-2025-11-20.md`
+- `agent-docs\execution\execution-quality-improvements-2025-11-20.md`
+- `agent-docs\execution\execution-type-error-resolution-2025-11-08.md`
+- `agent-docs\execution\execution-type-error-resolution-session2-2025-11-20.md`
+- `agent-docs\execution\EXECUTIONS-doc01-architecture-refactorization-2025-11-18.md`
+- `agent-docs\execution\EXECUTIONS-governance-refactor-2025-11-18.md`
+- `agent-docs\execution\EXECUTIONS-pyrefly-type-check-2025-11-20-1455.md`
+- `agent-docs\execution\EXECUTIONS-pyrefly-type-check-2025-11-20-1503.md`
+- `agent-docs\feedback\feedback-herramientas-mcp-analisis-2025-01.md`
+- `agent-docs\research\agent-skill-configuration-prompt-2025-11-05.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\guidelines.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\product.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\structure.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\tech.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\memory-bank\token-optimization.md`
+- `agent-docs\research\archived-2025-11-07\amazonq-rules\rulegeneral.md`
+- `agent-docs\research\archived-2025-11-07\aws-setup-readme-aider.md`
+- `agent-docs\research\archived-2025-11-07\aws-setup-readme-cloudcode.md`
+- `agent-docs\research\archived-2025-11-07\copilot-skills\parallel-ai-research.md`
+- `agent-docs\research\archived-2025-11-07\evaluation-docs\evaluation-pr4-jules-implementation-2025-01.md`
+- `agent-docs\research\archived-2025-11-07\mcp-status-bar-readme.md`
+- `agent-docs\research\archived-2025-11-07\prompts-docs\jules_master_prompt_phase3c.md`
+- `agent-docs\research\archived-2025-11-07\prompts-docs\julius_phase3c_quick_start.md`
+- `agent-docs\research\archived-2025-11-07\python_314_migration_summary.md`
+- `agent-docs\research\archived-2025-11-07\roadmap-docs\roadmap-100-functionality-post-pr4-2025-01.md`
+- `agent-docs\research\archived-2025-11-07\specs-api-docs\mcp-tools.md`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\document-metadata.md`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\execution-report.md`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\feedback-report.md`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\session-summary.md`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\skill.md`
+- `agent-docs\research\archived-2025-11-07\specs-templates-docs\skill_template.md`
+- `agent-docs\research\archived-2025-11-07\tasks-docs\amazon-q-integration-roadmap.md`
+- `agent-docs\research\cde-orchestrator-comparative-analysis-2025-11-04.md`
+- `agent-docs\research\documentation-architecture-llm-first-research.md`
+- `agent-docs\research\mcp-tool-consolidation-best-practices-2025-11-02.md`
+- `agent-docs\research\model-usage-rules-cli-vs-sdk-2025-11-05.md`
+- `agent-docs\research\research-anthropic-mcp-code-execution-2025-11-09.md`
+- `agent-docs\roadmap\roadmap-100-functionality-post-pr4-2025-01.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\array-type.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\await-thenable.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\ban-ts-comment.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\ban-tslint-comment.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\ban-types.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\block-spacing.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\brace-style.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\camelcase.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\class-literal-property-style.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\class-methods-use-this.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\comma-dangle.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\comma-spacing.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\consistent-generic-constructors.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\consistent-indexed-object-style.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\consistent-type-assertions.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\consistent-type-exports.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\default-param-last.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\dot-notation.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\explicit-member-accessibility.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\func-call-spacing.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\indent.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\init-declarations.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\key-spacing.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\keyword-spacing.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\lines-around-comment.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\lines-between-class-members.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\max-params.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\member-ordering.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\method-signature-style.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-array-constructor.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-array-delete.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-confusing-non-null-assertion.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-confusing-void-expression.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-dupe-class-members.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-duplicate-enum-values.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-duplicate-imports.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-duplicate-type-constituents.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-dynamic-delete.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-empty-function.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-empty-interface.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-extra-non-null-assertion.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-extra-parens.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-extra-semi.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-extraneous-class.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-for-in-array.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-implied-eval.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-inferrable-types.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-invalid-this.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-invalid-void-type.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-loop-func.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-loss-of-precision.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-magic-numbers.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-meaningless-void-operator.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-misused-new.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-mixed-enums.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-namespace.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-non-null-asserted-nullish-coalescing.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-non-null-asserted-optional-chain.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-non-null-assertion.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-parameter-properties.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-redundant-type-constituents.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-restricted-imports.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-shadow.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-this-alias.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-throw-literal.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-type-alias.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-unnecessary-boolean-literal-compare.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-unnecessary-qualifier.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-unnecessary-type-arguments.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-unnecessary-type-assertion.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-unnecessary-type-constraint.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-unsafe-declaration-merging.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-unsafe-enum-comparison.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-unsafe-unary-minus.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-unused-expressions.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-unused-vars.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-use-before-define.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-useless-constructor.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-useless-empty-export.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\no-useless-template-literals.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\non-nullable-type-assertion-style.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\object-curly-spacing.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\padding-line-between-statements.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\parameter-properties.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-as-const.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-destructuring.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-enum-initializers.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-find.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-for-of.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-function-type.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-includes.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-literal-enum-member.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-namespace-keyword.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-nullish-coalescing.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-optional-chain.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-promise-reject-errors.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-readonly-parameter-types.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-reduce-type-parameter.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-regexp-exec.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-return-this-type.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-string-starts-ends-with.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\prefer-ts-expect-error.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\promise-function-async.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\quotes.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\require-array-sort-compare.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\require-await.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\return-await.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\semi.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\sort-type-constituents.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\space-before-blocks.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\space-before-function-paren.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\space-infix-ops.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\switch-exhaustiveness-check.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\TEMPLATE.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\triple-slash-reference.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\type-annotation-spacing.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\typedef.md`
+- `mcp-status-bar\node_modules\@typescript-eslint\eslint-plugin\docs\rules\unbound-method.md`
+- `mcp-status-bar\node_modules\@vscode\vsce-sign\CODE_OF_CONDUCT.md`
+- `mcp-status-bar\node_modules\@vscode\vsce-sign\SUPPORT.md`
+- `mcp-status-bar\node_modules\balanced-match\LICENSE.md`
+- `mcp-status-bar\node_modules\bl\LICENSE.md`
+- `mcp-status-bar\node_modules\buffer\AUTHORS.md`
+- `mcp-status-bar\node_modules\cheerio\Readme.md`
+- `mcp-status-bar\node_modules\combined-stream\Readme.md`
+- `mcp-status-bar\node_modules\commander\Readme.md`
+- `mcp-status-bar\node_modules\delayed-stream\Readme.md`
+- `mcp-status-bar\node_modules\fast-levenshtein\LICENSE.md`
+- `mcp-status-bar\node_modules\fastq\SECURITY.md`
+- `mcp-status-bar\node_modules\file-entry-cache\changelog.md`
+- `mcp-status-bar\node_modules\flat-cache\changelog.md`
+- `mcp-status-bar\node_modules\function-bind\.github\SECURITY.md`
+- `mcp-status-bar\node_modules\iconv-lite\Changelog.md`
+- `mcp-status-bar\node_modules\jsonc-parser\LICENSE.md`
+- `mcp-status-bar\node_modules\jsonc-parser\SECURITY.md`
+- `mcp-status-bar\node_modules\keytar\LICENSE.md`
+- `mcp-status-bar\node_modules\mime-db\HISTORY.md`
+- `mcp-status-bar\node_modules\mime-types\HISTORY.md`
+- `mcp-status-bar\node_modules\ms\license.md`
+- `mcp-status-bar\node_modules\parse-semver\LICENSE.md`
+- `mcp-status-bar\node_modules\pump\SECURITY.md`
+- `mcp-status-bar\node_modules\qs\LICENSE.md`
+- `mcp-status-bar\node_modules\readable-stream\GOVERNANCE.md`
+- `mcp-status-bar\node_modules\reusify\SECURITY.md`
+- `mcp-status-bar\node_modules\safer-buffer\Porting-Buffer.md`
+- `mcp-status-bar\node_modules\safer-buffer\Readme.md`
+- `mcp-status-bar\node_modules\sax\LICENSE.md`
+- `mcp-status-bar\node_modules\ts-api-utils\LICENSE.md`
+- `mcp-status-bar\node_modules\tslib\SECURITY.md`
+- `mcp-status-bar\node_modules\typescript\SECURITY.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Agent.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\api-lifecycle.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\BalancedPool.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\CacheStorage.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\CacheStore.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\ClientStats.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Connector.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\ContentType.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Cookies.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Debug.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\DiagnosticsChannel.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\EnvHttpProxyAgent.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Errors.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\EventSource.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Fetch.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\GlobalInstallation.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\H2CClient.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockClient.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockErrors.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\MockPool.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Pool.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\ProxyAgent.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\RedirectHandler.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\RetryAgent.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\RetryHandler.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\SnapshotAgent.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\Util.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\api\WebSocket.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\best-practices\client-certificate.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\best-practices\mocking-request.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\best-practices\proxy.md`
+- `mcp-status-bar\node_modules\undici\docs\docs\best-practices\writing-tests.md`
+- `mcp-status-bar\node_modules\undici\lib\web\subresource-integrity\Readme.md`
+- `mcp-status-bar\node_modules\util-deprecate\History.md`
+- `mcp-status-bar\node_modules\uuid\LICENSE.md`
+- `scripts\aws-setup\README-AIDER.md`
+- `scripts\aws-setup\README-CLOUDCODE.md`
+- `specs\design\bedrock-agent-integration-strategy.md`
+- `specs\design\completion_report.md`
+- `specs\design\decision-aider-bedrock.md`
+- `specs\design\document_index_v2.md`
+- `specs\design\dynamic-skill-system-core.md`
+- `specs\design\dynamic-skill-system-implementation.md`
+- `specs\design\dynamic-skill-system.md`
+- `specs\design\executive_summary.md`
+- `specs\design\jules-api-integration.md`
+- `specs\design\jules-dual-mode-architecture.md`
+- `specs\design\jules-dual-mode-flow-diagram.md`
+- `specs\design\mcp-progress-feedback-ui-research.md`
+- `specs\design\mcp-status-bar-minimal-mvp.md`
+- `specs\design\mcp-tool-design-decision.md`
+- `specs\design\multi-agent-orchestration-system.md`
+- `specs\design\onboarding-implementation.md`
+- `specs\design\onboarding-system-redesign.md`
+- `specs\design\progress-api-vscode-extension.md`
+- `specs\design\python-314-migration-plan.md`
+- `specs\design\session_summary_v2_revision.md`
+- `specs\design\skill_lifecycle_revised.md`
+- `specs\design\smart_reuse_integration.md`
+- `specs\design\universal-mcp-monitor.md`
+- `specs\features\advanced-research-features.md`
+- `specs\features\ai-assistant-config.md`
+- `specs\features\amazon-q-integration.md`
+- `specs\features\integrated-management-system.md`
+- `specs\features\onboarding-performance-enhancement.md`
+- `specs\features\python-314-migration.md`
+- `specs\features\server-refactoring-modular.md`
+- `specs\governance\documentation-minimalism-2025-11.md`
+- `specs\governance\documentation-minimalism-summary.md`
+- `specs\governance\governance_implementation_summary.md`
+- `specs\governance\naming-convention-standard.md`
+- `specs\governance\session_completion_report.md`
+- `specs\PYTHON_314_MIGRATION_SUMMARY.md`
+- `specs\tasks\documentation-architecture-migration-plan.md`
+- `specs\tasks\documentation-migration-plan.md`
+- `specs\tasks\implement-anthropic-mcp-best-practices.md`
+- `specs\tasks\onboarding-enhancement-plan.md`
+- `specs\tasks\phase4-production-readiness.md`
+- `specs\templates\document-metadata.md`
+- `specs\templates\execution-report.md`
+- `specs\templates\feedback-report.md`
+- `specs\templates\session-summary.md`
+- `specs\templates\SKILL.md`
+- `specs\templates\SKILL_TEMPLATE.md`

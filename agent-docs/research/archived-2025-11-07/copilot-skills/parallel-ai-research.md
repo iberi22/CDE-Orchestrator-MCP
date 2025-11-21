@@ -1,3 +1,25 @@
+---
+title: 'Skill: Parallel AI Research Execution'
+description: '```powershell Start-Job -ScriptBlock { gemini --yolo "query" } -Name
+  "Research"'
+type: guide
+status: draft
+created: '2025-11-20'
+updated: '2025-11-20'
+author: Auto-Generated
+tags:
+- ai
+- api
+- architecture
+- authentication
+- mcp
+- parallel
+llm_summary: "User guide for Skill: Parallel AI Research Execution.\n  > **Capability**:\
+  \ Execute Gemini CLI and GitHub Copilot CLI in background for research > **Use Case**:\
+  \ Run AI-powered investigations while continuing other work > **Status**: ✅ ACTIVE\
+  \ > **Last Updated**: 2025-10-31\n  Reference when working with guide documentation."
+---
+
 # Skill: Parallel AI Research Execution
 
 > **Capability**: Execute Gemini CLI and GitHub Copilot CLI in background for research

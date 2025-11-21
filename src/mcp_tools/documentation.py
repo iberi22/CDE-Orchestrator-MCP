@@ -14,6 +14,7 @@ from cde_orchestrator.application.documentation import (
 )
 
 from ._base import tool_handler
+from ._progress_reporter import get_progress_reporter
 
 
 @tool_handler
@@ -93,13 +94,21 @@ def cde_scanDocumentation(
     2. Initial audit: `cde_scanDocumentation(".", detail_level="summary")`
     3. Deep analysis: `cde_scanDocumentation(".", detail_level="full")`
     """
+    reporter = get_progress_reporter()
+    reporter.reset()
+    reporter.report_progress("CDE", "scanDocumentation", 0.1, "Initializing scan...")
+
     use_case = ScanDocumentationUseCase()
 
     # Resolve project path
     if project_path == ".":
         project_path = os.getcwd()
 
+    reporter.report_progress("CDE", "scanDocumentation", 0.3, f"Scanning {project_path}...")
+
     result = use_case.execute(project_path, detail_level=detail_level)
+
+    reporter.report_progress("CDE", "scanDocumentation", 1.0, "Scan complete")
     return json.dumps(result, indent=2)
 
 
@@ -191,11 +200,19 @@ def cde_analyzeDocumentation(project_path: str = ".") -> str:
     2. Pre-migration assessment: See what needs fixing
     3. Post-cleanup validation: Verify improvements
     """
+    reporter = get_progress_reporter()
+    reporter.reset()
+    reporter.report_progress("CDE", "analyzeDocumentation", 0.1, "Initializing analysis...")
+
     use_case = AnalyzeDocumentationUseCase()
 
     # Resolve project path
     if project_path == ".":
         project_path = os.getcwd()
 
+    reporter.report_progress("CDE", "analyzeDocumentation", 0.3, "Analyzing structure...")
+
     result = use_case.execute(project_path)
+
+    reporter.report_progress("CDE", "analyzeDocumentation", 1.0, "Analysis complete")
     return json.dumps(result, indent=2)

@@ -1,3 +1,25 @@
+---
+title: MCP Status Bar
+description: Shows MCP (Model Context Protocol) server progress in VS Code status
+  bar.
+type: guide
+status: draft
+created: '2025-11-20'
+updated: '2025-11-20'
+author: Auto-Generated
+tags:
+- architecture
+- mcp
+- performance
+- python
+- readme
+llm_summary: "User guide for MCP Status Bar.\n  Shows MCP (Model Context Protocol)\
+  \ server progress in VS Code status bar. - **Real-time progress tracking**: Shows\
+  \ percentage and elapsed time for MCP tool executions - **Non-intrusive**: Status\
+  \ bar item only appears during active operations\n  Reference when working with\
+  \ guide documentation."
+---
+
 # MCP Status Bar
 
 Shows MCP (Model Context Protocol) server progress in VS Code status bar.

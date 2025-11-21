@@ -1,3 +1,25 @@
+---
+title: ✅ HARCOS DEPLOYMENT - 100% READY TO EXECUTE
+description: 'Tienes un **paquete completo de deployment automatizado** con:'
+type: guide
+status: draft
+created: '2025-11-20'
+updated: '2025-11-20'
+author: Auto-Generated
+tags:
+- api
+- deployment
+- documentation
+- mcp
+- python
+- start_here
+llm_summary: "User guide for ✅ HARCOS DEPLOYMENT - 100% READY TO EXECUTE.\n  Tienes\
+  \ un **paquete completo de deployment automatizado** con: - ✅ Script PowerShell\
+  \ automatizado (probado, funcional) - ✅ Estrategia de 30 días para $1k MRR (data-driven,\
+  \ 2025 best practices) - ✅ Documentación completa (9,500+ palabras de guías)\n \
+  \ Reference when working with guide documentation."
+---
+
 # ✅ HARCOS DEPLOYMENT - 100% READY TO EXECUTE
 
 ## 🎯 Estado Actual: TODO LISTO PARA DEPLOYMENT

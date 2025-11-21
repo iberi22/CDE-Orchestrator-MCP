@@ -1,3 +1,24 @@
+---
+title: CDE Orchestrator MCP - Jules Configuration
+description: This directory contains Jules-specific configuration files.
+type: guide
+status: draft
+created: '2025-11-20'
+updated: '2025-11-20'
+author: Auto-Generated
+tags:
+- api
+- mcp
+- python
+- readme
+- testing
+llm_summary: "User guide for CDE Orchestrator MCP - Jules Configuration.\n  This directory\
+  \ contains Jules-specific configuration files. - `setup.sh` - Jules VM environment\
+  \ setup script - `source_id` - Cached Jules source ID (auto-generated) The `setup.sh`\
+  \ script is executed by Jules when preparing the VM environment.\n  Reference when\
+  \ working with guide documentation."
+---
+
 # CDE Orchestrator MCP - Jules Configuration
 
 This directory contains Jules-specific configuration files.

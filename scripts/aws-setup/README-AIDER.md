@@ -1,3 +1,26 @@
+---
+title: AWS Bedrock + Aider CLI Agent Setup
+description: Comprehensive setup scripts for integrating Aider with AWS Bedrock (Claude
+  Sonnet 4.5) for the CDE-Orchestrator-MCP project.
+type: guide
+status: draft
+created: '2025-11-20'
+updated: '2025-11-20'
+author: Auto-Generated
+tags:
+- aider
+- api
+- architecture
+- authentication
+- documentation
+- mcp
+llm_summary: "User guide for AWS Bedrock + Aider CLI Agent Setup.\n  Comprehensive\
+  \ setup scripts for integrating Aider with AWS Bedrock (Claude Sonnet 4.5) for the\
+  \ CDE-Orchestrator-MCP project. - ✅ Aider CLI agent (latest version) - ✅ AWS CLI\
+  \ v2 (if not present) - ✅ Python dependencies (anthropic, boto3)\n  Reference when\
+  \ working with guide documentation."
+---
+
 # AWS Bedrock + Aider CLI Agent Setup
 
 Comprehensive setup scripts for integrating Aider with AWS Bedrock (Claude Sonnet 4.5) for the CDE-Orchestrator-MCP project.

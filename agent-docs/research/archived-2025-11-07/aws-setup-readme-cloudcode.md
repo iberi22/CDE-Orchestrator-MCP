@@ -1,3 +1,24 @@
+---
+title: CloudCode CLI + AWS Bedrock Setup Guide
+description: 'Este entorno proporciona: ```powershell .\setup-cloudcode-bedrock.ps1'
+type: guide
+status: draft
+created: '2025-11-20'
+updated: '2025-11-20'
+author: Auto-Generated
+tags:
+- api
+- aws
+- cloudcode
+- python
+- readme
+- setup
+llm_summary: "User guide for CloudCode CLI + AWS Bedrock Setup Guide.\n  Este entorno\
+  \ proporciona: - **CloudCode CLI** con soporte AWS Bedrock - **Oh My Posh** con\
+  \ información de AWS en el prompt - **IDE Integration** para VS Code y Zed - **Scripts\
+  \ de automatización** para agentes\n  Reference when working with guide documentation."
+---
+
 # CloudCode CLI + AWS Bedrock Setup Guide
 
 ## 🎯 Overview

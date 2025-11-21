@@ -1,3 +1,25 @@
+---
+title: Archive Directory - Design Documentation
+description: This directory contains deprecated design documents that are no longer
+  actively maintained but preserved for historical reference and migration contex
+type: guide
+status: draft
+created: '2025-11-20'
+updated: '2025-11-20'
+author: Auto-Generated
+tags:
+- architecture
+- documentation
+- migration
+- readme
+- testing
+llm_summary: "User guide for Archive Directory - Design Documentation.\n  This directory\
+  \ contains deprecated design documents that are no longer actively maintained but\
+  \ preserved for historical reference and migration context. **Date Deprecated**:\
+  \ 2025-11-18 **Reason**: - Exceeded governance limit (1443 lines > 800 lines max)\n\
+  \  Reference when working with guide documentation."
+---
+
 # Archive Directory - Design Documentation
 
 This directory contains deprecated design documents that are no longer actively maintained but preserved for historical reference and migration context.

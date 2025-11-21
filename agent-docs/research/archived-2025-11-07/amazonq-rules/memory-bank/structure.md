@@ -1,3 +1,24 @@
+---
+title: CDE Orchestrator MCP - Project Structure
+description: '``` src/ ├── cde_orchestrator/           # Main application package'
+type: guide
+status: draft
+created: '2025-11-20'
+updated: '2025-11-20'
+author: Auto-Generated
+tags:
+- api
+- architecture
+- documentation
+- mcp
+- orchestration
+- python
+llm_summary: "User guide for CDE Orchestrator MCP - Project Structure.\n  The project\
+  \ follows clean architecture principles with strict dependency rules: **Dependency\
+  \ Flow**: External → Adapters → Application → Domain - **Domain Layer**: Pure business\
+  \ logic, no external dependencies\n  Reference when working with guide documentation."
+---
+
 # CDE Orchestrator MCP - Project Structure
 
 ## Directory Organization

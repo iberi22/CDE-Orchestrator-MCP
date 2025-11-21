@@ -1,3 +1,22 @@
+---
+title: Archive Directory
+description: This directory contains deprecated code and documentation files that
+  are no longer actively maintained but preserved for historical reference.
+type: guide
+status: draft
+created: '2025-11-20'
+updated: '2025-11-20'
+author: Auto-Generated
+tags:
+- documentation
+- readme
+llm_summary: "User guide for Archive Directory.\n  This directory contains deprecated\
+  \ code and documentation files that are no longer actively maintained but preserved\
+  \ for historical reference. **Date Deprecated**: 2025-11-18 **Reason**: Project\
+  \ philosophy changed from managing 1000+ projects to professional single-project\
+  \ management\n  Reference when working with guide documentation."
+---
+
 # Archive Directory
 
 This directory contains deprecated code and documentation files that are no longer actively maintained but preserved for historical reference.

@@ -1,54 +1,33 @@
 """
 Progress reporter for MCP Status Bar.
 
-This module provides direct WebSocket communication for progress reporting,
+This module provides direct HTTP communication for progress reporting,
 bypassing the MCP protocol limitation where clients must send progressToken.
 """
 
 import json
 import time
+import urllib.request
 from typing import Optional
-
-try:
-    import websocket  # pip install websocket-client
-except ImportError:
-    websocket = None  # type: ignore
 
 
 class ProgressReporter:
     """
-    Direct progress reporter to WebSocket server for MCP Status Bar.
+    Direct progress reporter to HTTP server for MCP Status Bar.
 
     This bypasses MCP protocol limitations by sending progress directly
-    to the proxy's WebSocket server.
+    to the VS Code extension's HTTP server (port 8768).
     """
 
-    def __init__(self, ws_url: str = "ws://localhost:8766"):
-        self.ws_url = ws_url
-        self.ws: Optional[any] = None  # type: ignore  # websocket.WebSocket if available
-        self.connected = False
+    def __init__(self, url: str = "http://localhost:8768/progress"):
+        self.url = url
         self.start_time: Optional[float] = None
-
-    def connect(self) -> bool:
-        """Connect to WebSocket server."""
-        try:
-            if websocket is None:
-                print("⚠️ ProgressReporter: websocket module not installed")
-                return False
-            self.ws = websocket.create_connection(self.ws_url, timeout=2)  # type: ignore
-            self.connected = True
-            self.start_time = time.time()
-            return True
-        except Exception as e:
-            print(f"⚠️ ProgressReporter: Could not connect to {self.ws_url}: {e}")
-            self.connected = False
-            return False
 
     def report_progress(
         self, server: str, tool: str, percentage: float, message: str = ""
-    ):
+    ) -> None:
         """
-        Report progress to WebSocket server.
+        Report progress to HTTP server.
 
         Args:
             server: Server name (e.g., "CDE")
@@ -56,11 +35,10 @@ class ProgressReporter:
             percentage: Progress percentage (0.0 to 1.0)
             message: Status message
         """
-        if not self.connected:
-            if not self.connect():
-                return  # Silently fail if cannot connect
+        if self.start_time is None:
+            self.start_time = time.time()
 
-        elapsed = time.time() - self.start_time if self.start_time else 0
+        elapsed = time.time() - self.start_time
 
         event = {
             "server": server,
@@ -71,20 +49,25 @@ class ProgressReporter:
         }
 
         try:
-            if self.ws is not None:
-                self.ws.send(json.dumps(event))  # type: ignore
-        except Exception as e:
-            print(f"⚠️ ProgressReporter: Failed to send progress: {e}")
-            self.connected = False
+            data = json.dumps(event).encode("utf-8")
+            req = urllib.request.Request(
+                self.url,
+                data=data,
+                headers={"Content-Type": "application/json"},
+            )
 
-    def close(self):
-        """Close WebSocket connection."""
-        if self.ws:
-            try:
-                self.ws.close()  # type: ignore
-            except Exception:
-                pass
-        self.connected = False
+            # Send request with short timeout
+            with urllib.request.urlopen(req, timeout=0.5) as response:
+                response.read()
+
+        except Exception:
+            # Silently fail if extension is not listening or connection fails
+            # print(f"⚠️ ProgressReporter: Failed to send progress: {e}")
+            pass
+
+    def reset(self) -> None:
+        """Reset start time for new operation."""
+        self.start_time = None
 
 
 # Global singleton instance
@@ -101,7 +84,7 @@ def get_progress_reporter() -> ProgressReporter:
 
 def report_progress(
     tool_name: str, percentage: float, message: str = "", server_name: str = "CDE"
-):
+) -> None:
     """
     Convenience function to report progress.
 

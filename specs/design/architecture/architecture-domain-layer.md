@@ -16,8 +16,8 @@ llm_summary: |
 
 # Architecture: Domain Layer
 
-> **Part of**: [Architecture Overview](../architecture.md)
-> **Related**: [Application Layer](architecture-application-layer.md), [Ports & Adapters](architecture-ports-adapters.md)
+> **Part of**: [Architecture Overview](./architecture-overview.md)
+> **Related**: [Application Layer](././architecture-application-layer.md), [Ports & Adapters](./architecture-ports.md)
 
 ---
 
@@ -218,9 +218,9 @@ The domain layer imports only from Python's standard library and itself. No adap
 
 ## Related Documentation
 
-- **[Architecture Overview](../architecture.md)**: Complete hexagonal architecture guide
-- **[Application Layer](architecture-application-layer.md)**: Use cases that orchestrate domain entities
-- **[Ports & Adapters](architecture-ports-adapters.md)**: Interface definitions and implementations
+- **[Architecture Overview](./architecture-overview.md)**: Complete hexagonal architecture guide
+- **[Application Layer](./architecture-application-layer.md)**: Use cases that orchestrate domain entities
+- **[Ports & Adapters](./architecture-ports.md)**: Interface definitions and implementations
 - **[Project README](../../../README.md)**: Project overview and quick start
 
 ---
@@ -308,6 +308,6 @@ class Project:
 
 ## See Also
 
-- **[Hexagonal Architecture](../architecture.md#hexagonal-architecture)**: Full architecture overview
-- **[Dependency Rule](../architecture.md#dependency-rule)**: Why dependencies point inward
+- **[Hexagonal Architecture](./architecture-overview.md#hexagonal-architecture)**: Full architecture overview
+- **[Dependency Rule](./architecture-overview.md#dependency-rule)**: Why dependencies point inward
 - **[Domain-Driven Design](https://martinfowler.com/bliki/DomainDrivenDesign.html)**: External reference

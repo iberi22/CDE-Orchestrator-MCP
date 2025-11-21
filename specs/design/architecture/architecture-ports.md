@@ -510,9 +510,9 @@ def test_start_feature_use_case():
 
 ## Next Steps
 
-- **Implement Adapters**: See [Adapters Documentation](architecture-adapters.md)
+- **Implement Adapters**: See [Adapters Documentation](./architecture-adapters.md)
 - **Wire with DI**: See [DI Container](architecture-di-container.md)
-- **Use in Use Cases**: See [Use Cases](architecture-use-cases.md)
+- **Use in Use Cases**: See [Use Cases](./architecture-use-cases.md)
 
 ---
 

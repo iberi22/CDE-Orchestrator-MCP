@@ -13,6 +13,7 @@ from typing import Optional
 from cde_orchestrator.adapters.agents.agent_selection_policy import AgentSelectionPolicy
 
 from ._base import tool_handler
+from ._progress_reporter import get_progress_reporter
 
 
 def _calculate_task_complexity(task_description: str) -> str:
@@ -506,12 +507,18 @@ async def cde_selectAgent(task_description: str) -> str:
             "plan_approval": true,
             "max_context": 100000
           },
-          "requirements": ["JULES_API_KEY in .env", "jules-agent-sdk installed"]
+          "requirements": ["JULIUS_API_KEY in .env", "julius-agent-sdk installed"]
         }
     """
+    reporter = get_progress_reporter()
+    reporter.reset()
+    reporter.report_progress("CDE", "selectAgent", 0.1, "Analyzing task...")
+
     try:
         # Get available agents from existing logic
         agents_status = []
+
+        reporter.report_progress("CDE", "selectAgent", 0.3, "Checking available agents...")
 
         # Check Jules
         jules_available = bool(os.getenv("JULES_API_KEY"))
@@ -673,9 +680,11 @@ async def cde_selectAgent(task_description: str) -> str:
                 f"{complexity_reasons.get(complexity, 'Task')} - selected {actual_agent.value} based on capabilities and availability"
             )
 
+        reporter.report_progress("CDE", "selectAgent", 1.0, f"Selected {actual_agent.value}")
         return json.dumps(response, indent=2)
 
     except Exception as e:
+        reporter.report_progress("CDE", "selectAgent", 1.0, f"Selection failed: {str(e)[:30]}")
         return json.dumps(
             {
                 "error": "agent_selection_failed",
@@ -775,10 +784,16 @@ async def cde_executeWithBestAgent(
         ...     preferred_agent="gemini"
         ... )
     """
+    reporter = get_progress_reporter()
+    reporter.reset()
+    reporter.report_progress("CDE", "executeWithBestAgent", 0.1, "Initializing orchestrator...")
+
     try:
         import time
 
         start_time = time.time()
+
+        reporter.report_progress("CDE", "executeWithBestAgent", 0.2, "Registering available agents...")
 
         # Initialize MultiAgentOrchestrator
         from cde_orchestrator.adapters.agents.agent_selection_policy import (
@@ -918,6 +933,8 @@ async def cde_executeWithBestAgent(
             else:
                 selected_agent_name = str(pref_agent)
 
+        reporter.report_progress("CDE", "executeWithBestAgent", 1.0, f"✅ Completed with {selected_agent_name}")
+
         return json.dumps(
             {
                 "selected_agent": selected_agent_name,
@@ -933,6 +950,7 @@ async def cde_executeWithBestAgent(
         )
 
     except Exception as e:
+        reporter.report_progress("CDE", "executeWithBestAgent", 1.0, f"❌ Error: {str(e)[:30]}")
         return json.dumps(
             {
                 "error": "orchestration_failed",

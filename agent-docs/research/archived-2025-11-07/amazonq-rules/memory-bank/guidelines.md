@@ -1,3 +1,26 @@
+---
+title: CDE Orchestrator MCP - Development Guidelines
+description: '**Example Pattern**: ```python def cde_delegateToJules('
+type: guide
+status: draft
+created: '2025-11-20'
+updated: '2025-11-20'
+author: Auto-Generated
+tags:
+- api
+- architecture
+- documentation
+- guidelines
+- mcp
+- orchestration
+llm_summary: "User guide for CDE Orchestrator MCP - Development Guidelines.\n  - **Triple\
+  \ quotes**: Use `\"\"\"` for all docstrings (100% consistency across codebase) -\
+  \ **Comprehensive documentation**: Every function includes purpose, args, returns,\
+  \ and examples - **MCP tool documentation**: Extensive docstrings with emoji headers,\
+  \ usage examples, and workflow descriptions\n  Reference when working with guide\
+  \ documentation."
+---
+
 # CDE Orchestrator MCP - Development Guidelines
 
 ## Code Quality Standards

@@ -1,3 +1,24 @@
+---
+title: CDE Orchestrator MCP - Technology Stack
+description: '```toml [build-system] requires = ["setuptools>=61.0", "wheel"]'
+type: guide
+status: draft
+created: '2025-11-20'
+updated: '2025-11-20'
+author: Auto-Generated
+tags:
+- api
+- architecture
+- documentation
+- mcp
+- performance
+- python
+llm_summary: "User guide for CDE Orchestrator MCP - Technology Stack.\n  - **Python\
+  \ 3.11+** (minimum supported) - **Python 3.14+** (recommended for optimal performance)\
+  \ - 10-20% faster asyncio operations - Improved garbage collection for long-running\
+  \ servers - Enhanced type system features\n  Reference when working with guide documentation."
+---
+
 # CDE Orchestrator MCP - Technology Stack
 
 ## Programming Languages & Versions
