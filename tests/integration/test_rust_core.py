@@ -36,8 +36,8 @@ class TestRustCoreIntegration(unittest.TestCase):
         try:
             from cde_rust_core import scan_documentation_py  # type: ignore
         except ImportError:
-            self.fail(
-                "Failed to import cde_rust_core. Make sure it's compiled and installed."
+            self.skipTest(
+                "cde_rust_core not available. Compile with: cd rust_core && maturin develop --release"
             )
 
         # Execute the Rust function
