@@ -1,7 +1,7 @@
 ﻿"""Integration tests for Jules dual-mode architecture."""
 
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -17,10 +17,19 @@ class TestJulesDualModeIntegration:
         facade = JulesFacade()
 
         with patch.object(facade, "_detect_modes") as mock_detect:
-            modes = MagicMock()
-            modes.api.available = False
-            modes.cli.available = False
-            modes.preferred_mode = None
+            from cde_orchestrator.adapters.agents.jules_facade import (
+                JulesModes,
+                ModeInfo,
+            )
+
+            # Mock modes with proper types
+            api_mode = ModeInfo(
+                available=False, reason="JULIUS_API_KEY not set", details={}
+            )
+            cli_mode = ModeInfo(
+                available=False, reason="julius CLI not found", details={}
+            )
+            modes = JulesModes(api=api_mode, cli=cli_mode, preferred_mode="setup")
             mock_detect.return_value = modes
 
             result = await facade.execute_prompt(
@@ -31,7 +40,8 @@ class TestJulesDualModeIntegration:
             )
 
             assert result["status"] == "setup_required"
-            assert "steps" in result["data"]
+            assert "options" in result
+            assert len(result["options"]) > 0
 
     @pytest.mark.asyncio
     async def test_api_mode_execution(self) -> None:
@@ -39,20 +49,29 @@ class TestJulesDualModeIntegration:
         facade = JulesFacade()
 
         with patch.object(facade, "_detect_modes") as mock_detect:
-            with patch.object(facade, "_get_api_adapter") as mock_get_api:
-                modes = MagicMock()
-                modes.api.available = True
-                modes.cli.available = False
-                modes.preferred_mode = "api"
+            with patch.object(facade, "_execute_api") as mock_execute_api:
+                from cde_orchestrator.adapters.agents.jules_facade import (
+                    JulesModes,
+                    ModeInfo,
+                )
+
+                # Mock modes with proper types
+                api_mode = ModeInfo(
+                    available=True, reason="API key configured", details={}
+                )
+                cli_mode = ModeInfo(
+                    available=False, reason="CLI not available", details={}
+                )
+                modes = JulesModes(api=api_mode, cli=cli_mode, preferred_mode="api")
                 mock_detect.return_value = modes
 
-                mock_adapter = AsyncMock()
-                mock_adapter.execute_prompt.return_value = {
+                # Mock API execution
+                mock_execute_api.return_value = {
                     "status": "success",
+                    "mode": "api",
                     "session_id": "test-123",
                     "data": {"modified_files": ["src/auth.py"]},
                 }
-                mock_get_api.return_value = mock_adapter
 
                 result = await facade.execute_prompt(
                     project_path=Path("/test/project"),
@@ -70,20 +89,29 @@ class TestJulesDualModeIntegration:
         facade = JulesFacade()
 
         with patch.object(facade, "_detect_modes") as mock_detect:
-            with patch.object(facade, "_get_cli_adapter") as mock_get_cli:
-                modes = MagicMock()
-                modes.api.available = False
-                modes.cli.available = True
-                modes.preferred_mode = "cli"
+            with patch.object(facade, "_execute_cli_headless") as mock_execute_cli:
+                from cde_orchestrator.adapters.agents.jules_facade import (
+                    JulesModes,
+                    ModeInfo,
+                )
+
+                # Mock modes with proper types
+                api_mode = ModeInfo(
+                    available=False, reason="API key not set", details={}
+                )
+                cli_mode = ModeInfo(available=True, reason="CLI available", details={})
+                modes = JulesModes(
+                    api=api_mode, cli=cli_mode, preferred_mode="cli_headless"
+                )
                 mock_detect.return_value = modes
 
-                mock_adapter = AsyncMock()
-                mock_adapter.execute_prompt.return_value = {
+                # Mock CLI execution
+                mock_execute_cli.return_value = {
                     "status": "success",
+                    "mode": "cli",
                     "session_id": "cli-123",
                     "data": {},
                 }
-                mock_get_cli.return_value = mock_adapter
 
                 result = await facade.execute_prompt(
                     project_path=Path("/test/project"),
@@ -100,21 +128,35 @@ class TestJulesDualModeIntegration:
         """Test forcing a specific mode."""
         facade = JulesFacade()
 
-        with patch.object(facade, "_get_api_adapter") as mock_get_api:
-            mock_adapter = AsyncMock()
-            mock_adapter.execute_prompt.return_value = {
-                "status": "success",
-                "session_id": "forced-123",
-                "data": {},
-            }
-            mock_get_api.return_value = mock_adapter
+        with patch.object(facade, "_detect_modes") as mock_detect:
+            with patch.object(facade, "_execute_api") as mock_execute_api:
+                from cde_orchestrator.adapters.agents.jules_facade import (
+                    JulesModes,
+                    ModeInfo,
+                )
 
-            result = await facade.execute_prompt(
-                project_path=Path("/test/project"),
-                prompt="Test",
-                context={},
-                mode="api",
-            )
+                # Mock modes with proper types
+                api_mode = ModeInfo(
+                    available=True, reason="API key configured", details={}
+                )
+                cli_mode = ModeInfo(available=True, reason="CLI available", details={})
+                modes = JulesModes(api=api_mode, cli=cli_mode, preferred_mode="api")
+                mock_detect.return_value = modes
 
-            assert result["mode"] == "api"
-            assert result["status"] == "success"
+                # Mock API execution
+                mock_execute_api.return_value = {
+                    "status": "success",
+                    "mode": "api",
+                    "session_id": "forced-123",
+                    "data": {},
+                }
+
+                result = await facade.execute_prompt(
+                    project_path=Path("/test/project"),
+                    prompt="Test",
+                    context={},
+                    mode="api",
+                )
+
+                assert result["mode"] == "api"
+                assert result["status"] == "success"
