@@ -15,7 +15,7 @@ Example:
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -215,7 +215,7 @@ def get_project_locator() -> ProjectLocator:
     return _default_locator
 
 
-def configure_scan_roots(roots: list):
+def configure_scan_roots(roots: List[str]) -> None:
     """Configure scan roots globally."""
     global _default_locator
     _default_locator = ProjectLocator(roots)

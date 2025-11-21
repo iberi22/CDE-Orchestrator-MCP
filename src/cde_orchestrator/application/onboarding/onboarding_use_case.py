@@ -40,7 +40,7 @@ class OnboardingUseCase:
         Returns:
             Dict with analysis results including what's missing
         """
-        analysis = {
+        analysis: Dict[str, Any] = {
             "needs_onboarding": False,
             "missing_structure": [],
             "existing_structure": [],
@@ -371,7 +371,7 @@ class SpecKitStructureGenerator:
         Returns:
             Dict with creation results
         """
-        results = {
+        results: Dict[str, Any] = {
             "created": [],
             "failed": [],
             "skipped": [],

@@ -47,7 +47,7 @@ class AIAssistantConfigurator:
         Returns:
             Dict with analysis of existing configuration
         """
-        analysis = {
+        analysis: Dict[str, Any] = {
             "has_agents_md": self.config_files["agents_md"].exists(),
             "has_gemini_md": self.config_files["gemini_md"].exists(),
             "has_copilot_instructions": self.config_files[
@@ -203,7 +203,7 @@ All project documentation is in:
         Returns:
             Dict with results of file creation
         """
-        results = {
+        results: Dict[str, Any] = {
             "created": [],
             "skipped": [],
             "errors": [],
@@ -250,7 +250,7 @@ All project documentation is in:
         Returns:
             Dict with update results
         """
-        results = {
+        results: Dict[str, Any] = {
             "updated": [],
             "unchanged": [],
             "errors": [],

@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 
-from ..serialization import Workflow
+from ..serialization import Phase, Workflow
 
 
 class WorkflowAdapter:
@@ -93,18 +93,18 @@ class WorkflowAdapter:
 
         # Return the workflow type with the highest score
         if scores and max(scores.values()) > 0:
-            return max(scores, key=scores.get)
+            return max(scores, key=lambda k: scores[k])
 
         return "default"
 
-    def get_phase(self, phase_id: str):
+    def get_phase(self, phase_id: str) -> Phase:
         """Retrieves a specific phase by its ID."""
         for phase in self.workflow.phases:
             if phase.id == phase_id:
                 return phase
         raise ValueError(f"Phase with ID '{phase_id}' not found in workflow.")
 
-    def get_initial_phase(self):
+    def get_initial_phase(self) -> Phase:
         """Gets the very first phase of the workflow."""
         if not self.workflow.phases:
             raise ValueError("Workflow has no phases defined.")

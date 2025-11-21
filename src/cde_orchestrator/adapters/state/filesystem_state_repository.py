@@ -4,7 +4,7 @@ import logging
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Union, cast
 
 from ...domain.ports import IStateStore
 
@@ -21,7 +21,9 @@ class FileSystemStateRepository(IStateStore):
     - Rotating old backups to save space.
     """
 
-    def __init__(self, state_file_path, max_backups: int = 10):
+    def __init__(
+        self, state_file_path: Union[str, Path], max_backups: int = 10
+    ) -> None:
         # Ensure state_file_path is a Path object
         if isinstance(state_file_path, str):
             state_file_path = Path(state_file_path)
@@ -37,12 +39,12 @@ class FileSystemStateRepository(IStateStore):
             return {}
         try:
             with open(self.state_file_path, "r", encoding="utf-8") as f:
-                return json.load(f)
+                return cast(Dict[str, Any], json.load(f))
         except (json.JSONDecodeError, IOError) as e:
             logger.error(f"Failed to load state from {self.state_file_path}: {e}")
             return {}
 
-    def save_state(self, state: Dict[str, Any]):
+    def save_state(self, state: Dict[str, Any]) -> None:
         """Saves the given state to the JSON file."""
         if self.state_file_path.exists():
             self._create_backup()
@@ -64,7 +66,7 @@ class FileSystemStateRepository(IStateStore):
         self._rotate_backups()
         return backup_path
 
-    def _rotate_backups(self):
+    def _rotate_backups(self) -> None:
         """Keep only the latest N backups."""
         backups = sorted(self.backup_dir.glob("state_*.json"), reverse=True)
         for stale_backup in backups[self.max_backups :]:

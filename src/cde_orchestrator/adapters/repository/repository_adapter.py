@@ -13,11 +13,6 @@ from typing import AsyncGenerator, List
 from cde_orchestrator.domain.git import Commit, Modification
 from cde_orchestrator.domain.ports import IGitAdapter
 
-try:
-    from pathspec import PathSpec
-except ImportError:  # pragma: no cover
-    PathSpec = None
-
 logger = logging.getLogger(__name__)
 
 
@@ -40,6 +35,9 @@ class GitAdapter(IGitAdapter):
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
+
+        assert process.stdout is not None
+        assert process.stderr is not None
 
         while True:
             line = await process.stdout.readline()

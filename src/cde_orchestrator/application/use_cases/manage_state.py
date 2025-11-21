@@ -27,7 +27,7 @@ class ManageStateUseCase:
         self._last_state_snapshot = migrated_state
         return migrated_state
 
-    def save_state(self, state: Dict[str, Any]):
+    def save_state(self, state: Dict[str, Any]) -> None:
         """Validates and saves the application state."""
         validated_state = self._validate_state(state)
         self._state_store.save_state(validated_state)
@@ -87,18 +87,18 @@ class ManageStateUseCase:
 
         return FeatureState(
             status=status,
-            current_phase=current_phase,
+            current_phase=current_phase,  # type: ignore[arg-type]
             workflow_type=feature_data.get("workflow_type", "default"),
             prompt=prompt,
-            created_at=created_at,
-            updated_at=updated_at,
+            created_at=created_at,  # type: ignore[arg-type]
+            updated_at=updated_at,  # type: ignore[arg-type]
             branch=feature_data.get("branch"),
             issues=issues,
             progress=progress,
             recipe_id=feature_data.get("recipe_id"),
             recipe_name=feature_data.get("recipe_name"),
             commits=commits,
-            completed_at=completed_at,
+            completed_at=completed_at,  # type: ignore[arg-type]
         )
 
     def _migrate_state(self, state: Dict[str, Any]) -> Dict[str, Any]:
@@ -118,7 +118,7 @@ class ManageStateUseCase:
         migrated["features"] = new_features
         return migrated
 
-    def _log_state_changes(self, new_state: Dict[str, Any]):
+    def _log_state_changes(self, new_state: Dict[str, Any]) -> None:
         """Log high-level state changes for observability."""
         old_features = self._last_state_snapshot.get("features", {})
         new_features = new_state.get("features", {})

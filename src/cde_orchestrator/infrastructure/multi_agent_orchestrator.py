@@ -552,7 +552,7 @@ Comienza la implementación:
 
     def _find_relevant_files(self, task: TaskDefinition) -> List[str]:
         """Encuentra archivos relevantes para una tarea."""
-        relevant = []
+        relevant: List[Path] = []
 
         # Basado en la fase de la tarea
         if task.phase == "implement":
@@ -727,7 +727,7 @@ Expected: Coverage >85%
         }
 
 
-async def main():
+async def main() -> Dict[str, Any]:
     """Ejemplo de uso: Ejecutar Fase 1 con orquestación multi-agente."""
     logging.basicConfig(level=logging.INFO)
 

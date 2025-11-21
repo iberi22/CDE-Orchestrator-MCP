@@ -3,7 +3,7 @@ from pathlib import Path
 
 import yaml
 
-from ...domain.entities import Workflow
+from ...domain.entities import Workflow, WorkflowPhase
 from ...domain.ports import IWorkflowRepository
 from ..serialization import Workflow as WorkflowModel
 
@@ -30,5 +30,5 @@ class YAMLWorkflowRepository(IWorkflowRepository):
         return Workflow(
             name=workflow_model.name,
             version=workflow_model.version,
-            phases=[p.dict() for p in workflow_model.phases],
+            phases=[WorkflowPhase(**p.dict()) for p in workflow_model.phases],
         )

@@ -16,7 +16,7 @@ Design Principles:
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 from uuid import uuid4
 
 from pydantic import BaseModel, Field, field_validator
@@ -50,7 +50,7 @@ class ProjectId:
 
     value: str
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not isinstance(self.value, str) or len(self.value) < 3:
             raise ValueError(
                 f"Invalid project ID: '{self.value}'. "
@@ -92,7 +92,7 @@ class ProjectStatus(str, Enum):
 
     def can_transition_to(self, target: "ProjectStatus") -> bool:
         """Check if transition to target status is valid."""
-        transitions = {
+        transitions: Dict[ProjectStatus, Set[ProjectStatus]] = {
             ProjectStatus.ONBOARDING: {ProjectStatus.ACTIVE, ProjectStatus.ERROR},
             ProjectStatus.ACTIVE: {ProjectStatus.ARCHIVED, ProjectStatus.ERROR},
             ProjectStatus.ARCHIVED: {ProjectStatus.ACTIVE},  # Can reactivate
@@ -202,7 +202,7 @@ class FeatureState(BaseModel):
 
     @field_validator("created_at", "updated_at", mode="before")
     @classmethod
-    def ensure_datetime(cls, value):
+    def ensure_datetime(cls, value: Any) -> Optional[datetime]:
         """Parse datetime strings into datetime objects."""
         if value in (None, "", 0):
             return None
@@ -223,7 +223,9 @@ class FeatureState(BaseModel):
 
     @field_validator("current_phase", mode="after")
     @classmethod
-    def validate_phase_matches_status(cls, current_phase, info):
+    def validate_phase_matches_status(
+        cls, current_phase: PhaseStatus, info: Any
+    ) -> PhaseStatus:
         """Ensure phase is consistent with status."""
         values = info.data
         if "status" not in values:
@@ -266,10 +268,10 @@ class FeatureState(BaseModel):
         data["status"] = self.status.value
         data["current_phase"] = self.current_phase.value
         data["created_at"] = self.created_at.isoformat()
-        if data.get("updated_at"):
-            data["updated_at"] = self.updated_at.isoformat()  # type: ignore[attr-defined]
-        if data.get("completed_at"):
-            data["completed_at"] = self.completed_at.isoformat()  # type: ignore[attr-defined]
+        if self.updated_at:
+            data["updated_at"] = self.updated_at.isoformat()
+        if self.completed_at:
+            data["completed_at"] = self.completed_at.isoformat()
         return data
 
 

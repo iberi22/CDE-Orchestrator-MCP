@@ -10,7 +10,7 @@ Coordinates:
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from .detector import SkillRequirementDetector
 from .models import BaseSkill, EphemeralSkill, SkillDomain, SkillRequirement
@@ -82,10 +82,10 @@ class SkillManager:
                 del self._ephemeral_cache[skill_id]
 
         # Load from storage
-        skill = self.storage.load_ephemeral_skill(skill_id)
-        if skill and not skill.is_expired:
-            self._ephemeral_cache[skill_id] = skill
-            return skill
+        loaded_skill = self.storage.load_ephemeral_skill(skill_id)
+        if loaded_skill and not loaded_skill.is_expired:
+            self._ephemeral_cache[skill_id] = loaded_skill
+            return loaded_skill
 
         return None
 
@@ -229,7 +229,7 @@ class SkillManager:
 
         return list(covered)
 
-    def cleanup_expired_skills(self) -> Dict[str, int]:
+    def cleanup_expired_skills(self) -> Dict[str, Any]:
         """
         Clean up expired ephemeral skills.
 

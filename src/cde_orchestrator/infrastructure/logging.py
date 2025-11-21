@@ -37,7 +37,7 @@ class JsonFormatter(logging.Formatter):
         return json.dumps(log_record)
 
 
-def configure_logging(level: str = "INFO", json_format: bool = True):
+def configure_logging(level: str = "INFO", json_format: bool = True) -> None:
     """
     Configure root logger.
 
@@ -48,7 +48,7 @@ def configure_logging(level: str = "INFO", json_format: bool = True):
     root_logger = logging.getLogger()
     root_logger.setLevel(level)
 
-    handler = logging.StreamHandler(sys.stdout)
+    handler = logging.StreamHandler(sys.stderr)
 
     if json_format:
         handler.setFormatter(JsonFormatter())

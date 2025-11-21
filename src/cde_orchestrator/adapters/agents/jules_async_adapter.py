@@ -24,7 +24,7 @@ import asyncio
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 
 if TYPE_CHECKING:
     # For type checking, assume jules_agent_sdk is available
@@ -305,7 +305,7 @@ class JulesAsyncAdapter(ICodeExecutor):
                         # Cache for future
                         cache_file.parent.mkdir(exist_ok=True)
                         cache_file.write_text(source.name)
-                        return source.name
+                        return str(source.name)
 
         # Match by project name
         project_name = project_path.name
@@ -313,7 +313,7 @@ class JulesAsyncAdapter(ICodeExecutor):
             if source.github_repo and source.github_repo.repo == project_name:
                 cache_file.parent.mkdir(exist_ok=True)
                 cache_file.write_text(source.name)
-                return source.name
+                return str(source.name)
 
         raise JulesSourceNotFoundError(
             f"No Jules source found for project: {project_path}. "
@@ -383,10 +383,10 @@ class JulesAsyncAdapter(ICodeExecutor):
         """
         files = []
         for activity in activities:
-            if activity.code_change_made:
-                change = activity.code_change_made
-                if "files" in change:
-                    files.extend(change["files"])
+            code_change = cast(Any, activity).code_change_made
+            if code_change:
+                if "files" in code_change:
+                    files.extend(code_change["files"])
         return list(set(files))
 
     def _activity_to_dict(self, activity: Activity) -> Dict[str, Any]:
@@ -405,7 +405,7 @@ class JulesAsyncAdapter(ICodeExecutor):
             "originator": activity.originator,
             "create_time": str(activity.create_time),
             "agent_messaged": activity.agent_messaged,
-            "code_change_made": activity.code_change_made,
+            "code_change_made": cast(Any, activity).code_change_made,
             "plan_generated": activity.plan_generated,
         }
 
@@ -430,14 +430,16 @@ class JulesAsyncAdapter(ICodeExecutor):
                 if msg:
                     lines.append(f"   Message: {msg[:100]}...")
 
-            if activity.code_change_made:
-                change = activity.code_change_made
-                if "files" in change:
-                    lines.append(f"   Files changed: {', '.join(change['files'][:5])}")
+            code_change = cast(Any, activity).code_change_made
+            if code_change:
+                if "files" in code_change:
+                    lines.append(
+                        f"   Files changed: {', '.join(code_change['files'][:5])}"
+                    )
 
         return "\n".join(lines)
 
-    async def close(self):
+    async def close(self) -> None:
         """Close Jules client connection."""
         if self._client:
             await self._client.close()

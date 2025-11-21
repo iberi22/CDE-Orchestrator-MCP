@@ -93,7 +93,7 @@ class WebResearchUseCase:
         "github": "https://api.github.com/search/repositories?q={query}",
     }
 
-    def __init__(self, llm_cli_adapter=None):
+    def __init__(self, llm_cli_adapter: Optional[Any] = None) -> None:
         """
         Initialize web research use case.
 
@@ -246,7 +246,7 @@ class WebResearchUseCase:
 
                     # Extract title
                     title = soup.find("title")
-                    title_text = title.string if title else "Unknown"
+                    title_text = title.get_text() if title else "Unknown"
 
                     # Extract main content (heuristic)
                     content_blocks = []
@@ -475,7 +475,7 @@ class WebResearchUseCase:
         note += f"### Research Summary for '{skill_name}'\n\n"
 
         # Group by category
-        by_category = {}
+        by_category: Dict[str, List[ResearchInsight]] = {}
         for insight in insights:
             by_category.setdefault(insight.category, []).append(insight)
 

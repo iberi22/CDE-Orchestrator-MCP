@@ -286,7 +286,7 @@ class SkillRequirementDetector:
                 domain_scores[domain] += count
 
         # Return domain with highest score, default to BACKEND
-        best_domain = max(domain_scores, key=domain_scores.get)
+        best_domain = max(domain_scores, key=lambda k: domain_scores[k])
         return best_domain if domain_scores[best_domain] > 0 else SkillDomain.BACKEND
 
     def _detect_complexity(self, text_lower: str) -> ComplexityLevel:

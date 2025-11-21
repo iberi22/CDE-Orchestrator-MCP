@@ -5,7 +5,7 @@ Shared error handling and tool decoration for all CDE Orchestrator tools.
 """
 
 import logging
-from typing import Callable
+from typing import Any, Callable, cast
 
 from cde_orchestrator.infrastructure.error_handling import handle_errors
 
@@ -18,4 +18,4 @@ def tool_handler(func: Callable) -> Callable:
 
     Delegates to the centralized handle_errors decorator.
     """
-    return handle_errors(func)
+    return cast(Callable[..., Any], handle_errors(func))

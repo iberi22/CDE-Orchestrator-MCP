@@ -9,7 +9,7 @@ import json
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, cast
 
 
 class ScanDocumentationUseCase:
@@ -85,7 +85,7 @@ class ScanDocumentationUseCase:
 
         # Call the fast Rust scanning function
         result_json = cde_rust_core.scan_documentation_py(project_path)
-        return json.loads(result_json)  # type: ignore[no-Any-return]
+        return cast(List[Dict[str, Any]], json.loads(result_json))
 
     def _process_rust_result(
         self,

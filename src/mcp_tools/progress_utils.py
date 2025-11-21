@@ -13,7 +13,6 @@ Example usage:
     await reporter.complete("Skills downloaded successfully")
 """
 
-import asyncio
 import json
 import time
 import urllib.request
@@ -58,7 +57,9 @@ class ProgressReporter:
         self.current_step = step
         elapsed = time.time() - self.start_time
 
-        await self.ctx.info(f"📊 [{self.tool_name}] {message} ({step}/{self.total_steps})")
+        await self.ctx.info(
+            f"📊 [{self.tool_name}] {message} ({step}/{self.total_steps})"
+        )
 
         # Send to VS Code extension
         await self._send_progress_event(

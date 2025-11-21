@@ -184,7 +184,7 @@ class AIConfigUseCase:
         Returns:
             Dictionary with generation results
         """
-        results = {
+        results: Dict[str, Any] = {
             "generated": [],
             "skipped": [],
             "errors": [],
@@ -682,7 +682,7 @@ description: GitHub Copilot custom instructions for {project_name}
         Returns:
             Dictionary with configuration summary
         """
-        summary = {
+        summary: Dict[str, Any] = {
             "total_agents": len(self.AGENT_CONFIG),
             "detected_agents": self.detected_agents,
             "configured_agents": [],

@@ -104,7 +104,9 @@ def cde_scanDocumentation(
     if project_path == ".":
         project_path = os.getcwd()
 
-    reporter.report_progress("CDE", "scanDocumentation", 0.3, f"Scanning {project_path}...")
+    reporter.report_progress(
+        "CDE", "scanDocumentation", 0.3, f"Scanning {project_path}..."
+    )
 
     result = use_case.execute(project_path, detail_level=detail_level)
 
@@ -202,7 +204,9 @@ def cde_analyzeDocumentation(project_path: str = ".") -> str:
     """
     reporter = get_progress_reporter()
     reporter.reset()
-    reporter.report_progress("CDE", "analyzeDocumentation", 0.1, "Initializing analysis...")
+    reporter.report_progress(
+        "CDE", "analyzeDocumentation", 0.1, "Initializing analysis..."
+    )
 
     use_case = AnalyzeDocumentationUseCase()
 
@@ -210,7 +214,9 @@ def cde_analyzeDocumentation(project_path: str = ".") -> str:
     if project_path == ".":
         project_path = os.getcwd()
 
-    reporter.report_progress("CDE", "analyzeDocumentation", 0.3, "Analyzing structure...")
+    reporter.report_progress(
+        "CDE", "analyzeDocumentation", 0.3, "Analyzing structure..."
+    )
 
     result = use_case.execute(project_path)
 

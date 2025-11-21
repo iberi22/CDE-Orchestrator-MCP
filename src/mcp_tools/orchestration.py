@@ -198,7 +198,9 @@ async def cde_sourceSkill(
     """
     reporter = get_progress_reporter()
     reporter.reset()
-    reporter.report_progress("CDE", "sourceSkill", 0.1, f"Searching for '{skill_query}'...")
+    reporter.report_progress(
+        "CDE", "sourceSkill", 0.1, f"Searching for '{skill_query}'..."
+    )
 
     use_case = SkillSourcingUseCase()
 
@@ -302,14 +304,18 @@ async def cde_updateSkill(
     """
     reporter = get_progress_reporter()
     reporter.reset()
-    reporter.report_progress("CDE", "updateSkill", 0.1, f"Researching '{skill_name}'...")
+    reporter.report_progress(
+        "CDE", "updateSkill", 0.1, f"Researching '{skill_name}'..."
+    )
 
     use_case = WebResearchUseCase()
 
     # Convert skill_name to file path
     skill_file = Path(f".copilot/skills/base/{skill_name}.md")
 
-    reporter.report_progress("CDE", "updateSkill", 0.5, f"Analyzing {len(topics)} topics...")
+    reporter.report_progress(
+        "CDE", "updateSkill", 0.5, f"Analyzing {len(topics)} topics..."
+    )
     result = await use_case.execute(
         skill_name=skill_name,
         topics=topics,

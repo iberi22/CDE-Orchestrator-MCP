@@ -50,7 +50,7 @@ class FullImplementationOrchestrator:
         self.project_path = Path(project_path)
         self.multi_agent = MultiAgentOrchestrator(project_path)
         self.phases = self._define_phases()
-        self.phase_results = {}
+        self.phase_results: Dict[str, Any] = {}
 
     def _define_phases(self) -> Dict[str, Phase]:
         """Define todas las fases de implementación."""

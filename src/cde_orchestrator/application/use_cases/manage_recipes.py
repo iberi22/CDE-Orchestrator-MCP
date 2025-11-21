@@ -18,16 +18,18 @@ class ManageRecipesUseCase:
         self._recipe_service = recipe_service
         self._recipes: Optional[List[Recipe]] = None
 
-    def _load_recipes_if_needed(self):
+    def _load_recipes_if_needed(self) -> None:
         if self._recipes is None:
             self._recipes = self._recipe_repository.list_all()
 
     def list_all_recipes(self) -> List[Recipe]:
         self._load_recipes_if_needed()
+        assert self._recipes is not None
         return self._recipes
 
     def suggest_recipe(
         self, user_prompt: str, phase_id: str
     ) -> Optional[RecipeSuggestion]:
         self._load_recipes_if_needed()
+        assert self._recipes is not None
         return self._recipe_service.suggest_recipe(user_prompt, phase_id, self._recipes)

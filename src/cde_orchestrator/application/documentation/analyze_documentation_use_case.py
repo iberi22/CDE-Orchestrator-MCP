@@ -8,7 +8,7 @@ Uses Rust-accelerated scanning when available for 6-8x performance improvement.
 import re
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List
 
 # Try to import Rust-accelerated scanner
 try:
@@ -31,7 +31,7 @@ class AnalyzeDocumentationUseCase:
     Uses Rust-accelerated scanning when available (6-8x faster).
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.rust_scanner = RustDocumentationScanner() if RUST_AVAILABLE else None
 
     def execute(self, project_path: str) -> Dict[str, Any]:
@@ -158,7 +158,10 @@ class AnalyzeDocumentationUseCase:
         return results
 
     def _analyze_links(
-        self, md_files: List[Path], project: Path, report_progress_http
+        self,
+        md_files: List[Path],
+        project: Path,
+        report_progress_http: Callable[[str, float, str], None],
     ) -> Dict[str, Any]:
         """Analyze internal links between documents."""
         link_pattern = r"\[([^\]]+)\]\(([^\)]+)\)"
@@ -220,7 +223,7 @@ class AnalyzeDocumentationUseCase:
 
     def _analyze_metadata(self, md_files: List[Path]) -> Dict[str, Any]:
         """Analyze metadata consistency across documents."""
-        metadata_fields = defaultdict(int)
+        metadata_fields: Dict[str, int] = defaultdict(int)
         files_with_metadata = 0
         files_without_metadata = 0
 

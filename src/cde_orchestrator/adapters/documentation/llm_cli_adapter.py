@@ -46,7 +46,7 @@ class LLMCLIExecutionError(LLMCLIError):
     pass
 
 
-class BaseLLMCLIAdapter(ABC):
+class BaseLLMCLIAdapter(ILLMSummaryGenerator, ABC):
     """
     Abstract base for LLM CLI adapters.
 
@@ -457,7 +457,7 @@ class MultiProviderLLMCLIAdapter(ILLMSummaryGenerator):
     Provides robust summary generation with automatic failover.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize with all provider adapters."""
         self.providers = {
             LLMProvider.GEMINI: GeminiCLIAdapter(),

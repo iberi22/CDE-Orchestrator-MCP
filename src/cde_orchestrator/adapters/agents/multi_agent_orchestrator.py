@@ -34,7 +34,7 @@ class AgentRegistry:
     Allows dynamic registration and retrieval of agent adapters.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize empty agent registry."""
         self._adapters: Dict[AgentType, ICodeExecutor] = {}
 
@@ -248,7 +248,7 @@ class MultiAgentOrchestrator(ICodeExecutor):
             logger.info(f"Executing with {selected_agent.value}: {prompt[:50]}...")
             result = await adapter.execute_prompt(project_path, prompt, context)
             logger.info(f"{selected_agent.value} execution completed successfully")
-            return result
+            return str(result)
 
         except Exception as e:
             logger.error(
@@ -268,11 +268,17 @@ class MultiAgentOrchestrator(ICodeExecutor):
                 try:
                     logger.info(f"Trying fallback agent: {fallback_agent.value}")
                     fallback_adapter = self.registry.get(fallback_agent)
+                    if fallback_adapter is None:
+                        logger.warning(
+                            f"Fallback agent {fallback_agent.value} not found in registry"
+                        )
+                        continue
+
                     result = await fallback_adapter.execute_prompt(
                         project_path, prompt, context
                     )
                     logger.info(f"Fallback succeeded with {fallback_agent.value}")
-                    return result
+                    return str(result)
 
                 except Exception as fallback_error:
                     logger.warning(

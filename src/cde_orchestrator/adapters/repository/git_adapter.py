@@ -29,6 +29,9 @@ class GitAdapter(IGitAdapter):
             stderr=asyncio.subprocess.PIPE,
         )
 
+        assert process.stdout is not None
+        assert process.stderr is not None
+
         while True:
             line = await process.stdout.readline()
             if not line:

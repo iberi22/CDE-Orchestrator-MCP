@@ -112,7 +112,12 @@ class MCPToolFilesystemGenerator:
                 metadata = self._extract_metadata(name, tool_func)
                 tools.append(metadata)
             except Exception as e:
-                print(f"Warning: Could not extract metadata for {name}: {e}")
+                import sys
+
+                print(
+                    f"Warning: Could not extract metadata for {name}: {e}",
+                    file=sys.stderr,
+                )
                 continue
 
         return tools

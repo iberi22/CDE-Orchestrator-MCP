@@ -90,7 +90,7 @@ class DependencyGraph:
     Manages task dependencies and ensures tasks execute in correct order.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize empty dependency graph."""
         self._tasks: Dict[str, Task] = {}
         self._results: Dict[str, TaskResult] = {}

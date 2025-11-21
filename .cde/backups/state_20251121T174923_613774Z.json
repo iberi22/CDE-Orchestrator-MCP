@@ -1,12 +1,12 @@
 {
     "project_analysis": {
         "status": "Analysis complete",
-        "file_count": 412,
+        "file_count": 429,
         "language_stats": {
             ".yaml": 1,
-            ".md": 141,
-            ".py": 195,
-            ".json": 11,
+            ".md": 153,
+            ".py": 199,
+            ".json": 12,
             ".0": 1,
             ".toml": 4,
             ".ini": 1,
@@ -28,7 +28,7 @@
             "package.json",
             "pyproject.toml"
         ],
-        "summary": "Project 'CDE Orchestrator MCP' contains 412 files. Primary languages: .py, .md, .ps1. Found dependency files: Cargo.toml, package.json, pyproject.toml.",
+        "summary": "Project 'CDE Orchestrator MCP' contains 429 files. Primary languages: .py, .md, .ps1. Found dependency files: Cargo.toml, package.json, pyproject.toml.",
         "excluded_directories": [
             ".cargo",
             ".git",

@@ -10,7 +10,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from .models import BaseSkill, EphemeralSkill, SkillIndexEntry, SkillMetadata, SkillType
+from .models import (
+    BaseSkill,
+    EphemeralSkill,
+    SkillIndexEntry,
+    SkillMetadata,
+    SkillStatus,
+    SkillType,
+)
 
 
 class SkillStorageAdapter:
@@ -76,11 +83,9 @@ class SkillStorageAdapter:
         """Load the skill index from disk."""
         if self.index_file.exists():
             with open(self.index_file, "r") as f:
-                self.index: Dict[str, SkillIndexEntry] = {
-                    k: SkillIndexEntry(**v) for k, v in json.load(f).items()
-                }
+                self.index = {k: SkillIndexEntry(**v) for k, v in json.load(f).items()}
         else:
-            self.index: Dict[str, SkillIndexEntry] = {}
+            self.index = {}
 
     def _save_index(self) -> None:
         """Save the skill index to disk."""
@@ -164,7 +169,7 @@ class SkillStorageAdapter:
             file_path=skill_file,
             last_indexed=datetime.now(timezone.utc),
             size_bytes=skill_file.stat().st_size,
-            status="active",
+            status=SkillStatus.ACTIVE,
         )
         self._save_index()
 
@@ -304,7 +309,11 @@ class SkillStorageAdapter:
                                 domain=skill.domain,
                                 complexity=skill.complexity,
                                 tags=skill.tags,
-                                status="active" if not skill.is_expired else "archived",
+                                status=(
+                                    SkillStatus.ACTIVE
+                                    if not skill.is_expired
+                                    else SkillStatus.ARCHIVED
+                                ),
                                 updated_at=skill.created_at,
                                 size_tokens=skill.size_tokens,
                                 confidence_score=skill.confidence_score,

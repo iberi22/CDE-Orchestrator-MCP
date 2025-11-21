@@ -3,7 +3,7 @@ import functools
 import inspect
 import logging
 import traceback
-from typing import Any, Callable, Dict, Union
+from typing import Any, Callable, Dict, Union, cast
 
 from cde_orchestrator.domain.exceptions import CDEError
 
@@ -21,9 +21,11 @@ def handle_errors(func: Callable[..., Any]) -> Callable[..., Any]:
     if inspect.iscoroutinefunction(func):
 
         @functools.wraps(func)
-        async def async_wrapper(*args, **kwargs) -> Union[Dict[str, Any], str]:
+        async def async_wrapper(
+            *args: Any, **kwargs: Any
+        ) -> Union[Dict[str, Any], str]:
             try:
-                return await func(*args, **kwargs)
+                return cast(Union[Dict[str, Any], str], await func(*args, **kwargs))
             except CDEError as e:
                 # Domain error - expected business logic failure
                 logger.error(
@@ -56,9 +58,9 @@ def handle_errors(func: Callable[..., Any]) -> Callable[..., Any]:
         return async_wrapper
 
     @functools.wraps(func)
-    def wrapper(*args, **kwargs) -> Union[Dict[str, Any], str]:
+    def wrapper(*args: Any, **kwargs: Any) -> Union[Dict[str, Any], str]:
         try:
-            return func(*args, **kwargs)
+            return cast(Union[Dict[str, Any], str], func(*args, **kwargs))
         except CDEError as e:
             # Domain error - expected business logic failure
             logger.error(

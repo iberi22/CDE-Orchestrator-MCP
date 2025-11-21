@@ -33,7 +33,7 @@ def validate_input(model: Type[BaseModel]) -> Callable:
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(*args, **kwargs) -> Any:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             try:
                 # Validate kwargs against model
                 validated = model(**kwargs)

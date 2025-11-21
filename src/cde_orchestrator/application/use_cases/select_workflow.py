@@ -27,6 +27,6 @@ class SelectWorkflowUseCase:
             scores[workflow_type] = score
 
         if scores and max(scores.values()) > 0:
-            return max(scores, key=scores.get)
+            return max(scores, key=lambda k: scores[k])
 
         return "default"

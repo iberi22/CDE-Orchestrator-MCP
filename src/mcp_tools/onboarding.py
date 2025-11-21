@@ -33,14 +33,18 @@ async def cde_onboardingProject(ctx: Context, project_path: str = ".") -> str:
     """
     reporter = get_progress_reporter()
     reporter.reset()
-    reporter.report_progress("CDE", "onboardingProject", 0.1, "Initializing onboarding...")
+    reporter.report_progress(
+        "CDE", "onboardingProject", 0.1, "Initializing onboarding..."
+    )
 
     analysis_use_case = ProjectAnalysisUseCase()
 
     if project_path == ".":
         project_path = os.getcwd()
 
-    reporter.report_progress("CDE", "onboardingProject", 0.3, f"Analyzing {project_path}...")
+    reporter.report_progress(
+        "CDE", "onboardingProject", 0.3, f"Analyzing {project_path}..."
+    )
 
     analysis_result = analysis_use_case.execute(project_path)
 
@@ -55,7 +59,9 @@ async def cde_onboardingProject(ctx: Context, project_path: str = ".") -> str:
     except Exception as e:
         logger.warning(f"Could not save state: {e}")
 
-    reporter.report_progress("CDE", "onboardingProject", 1.0, "Onboarding analysis complete")
+    reporter.report_progress(
+        "CDE", "onboardingProject", 1.0, "Onboarding analysis complete"
+    )
     return json.dumps(analysis_result, indent=2)
 
 

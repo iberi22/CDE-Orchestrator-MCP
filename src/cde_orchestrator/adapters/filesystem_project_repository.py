@@ -59,7 +59,7 @@ class FileSystemProjectRepository(IProjectRepository):
         >>> assert loaded.name == "My Project"
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize repository (stateless, no configuration needed)."""
         self._logger = logger
 

@@ -18,7 +18,7 @@ import os
 import subprocess
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from tenacity import (
     Retrying,
@@ -60,9 +60,9 @@ class MCPDetector:
             with open(config_path, "r") as f:
                 config = json.load(f)
 
-            return config.get("mcpServers", {})
+            return cast(Dict[str, Dict[str, Any]], config.get("mcpServers", {}))
         except Exception as e:
-            print(f"Error loading MCP config: {e}")
+            logger.error(f"Error loading MCP config: {e}")
             return {}
 
     @staticmethod
@@ -278,7 +278,7 @@ class GitHubConnector:
             "Authorization": f"Bearer {self.token}",
             "Accept": "application/vnd.github.v3+json",
         }
-        data = {"title": title, "body": body}
+        data: Dict[str, Any] = {"title": title, "body": body}
 
         if labels:
             data["labels"] = labels
@@ -307,7 +307,7 @@ class GitHubConnector:
 
             assert response is not None
             self._record_success()
-            return response.json()
+            return cast(Dict[str, Any], response.json())
         except requests.exceptions.Timeout as exc:
             logger.warning("GitHub API timeout (%ss): %s", timeout_value, exc)
             self._record_failure()
@@ -381,7 +381,7 @@ class GitConnector:
     Uses git commands via subprocess for direct git operations.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.repo_path = Path.cwd()
 
     def create_branch(
@@ -506,7 +506,7 @@ class ServiceConnectorFactory:
     Provides a unified interface for accessing different service connectors.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._connectors: Dict[str, Any] = {}
         self._circuit_breakers: Dict[str, CircuitBreaker] = {}
         self.default_timeout = int(os.getenv("CDE_SERVICE_TIMEOUT", "10"))
@@ -523,7 +523,7 @@ class ServiceConnectorFactory:
             )
         return self._circuit_breakers[service_type]
 
-    def get_connector(self, service_type: str):
+    def get_connector(self, service_type: str) -> Any:
         """
         Get or create a connector for the specified service type.
 
@@ -536,6 +536,7 @@ class ServiceConnectorFactory:
         if service_type in self._connectors:
             return self._connectors[service_type]
 
+        connector: Any
         if service_type == "github":
             connector = GitHubConnector(
                 circuit_breaker=self._get_breaker("github"),
@@ -559,7 +560,7 @@ class ServiceConnectorFactory:
                 breaker_state = status.get("circuit_breaker", {}).get("state", "closed")
                 if breaker_state == "open":
                     return False
-                return status["mcp_available"] or status["api_available"]
+                return bool(status["mcp_available"] or status["api_available"])
             elif service_type == "git":
                 return True  # Git is always available (local)
             return False

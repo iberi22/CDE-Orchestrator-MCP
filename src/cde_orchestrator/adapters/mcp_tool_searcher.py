@@ -5,7 +5,7 @@ Provides progressive tool discovery following Anthropic's best practices.
 """
 
 import inspect
-from typing import Any, Dict, List, Literal
+from typing import Any, Dict, List, Literal, Optional
 
 DetailLevel = Literal["name_only", "name_and_description", "full_schema"]
 
@@ -33,7 +33,7 @@ class MCPToolSearcher:
             mcp_tools_module: The mcp_tools module containing all tools
         """
         self.mcp_tools_module = mcp_tools_module
-        self._tools_cache = None
+        self._tools_cache: Optional[List[Dict[str, Any]]] = None
 
     def search(
         self, query: str, detail_level: DetailLevel = "name_and_description"

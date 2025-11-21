@@ -14,7 +14,7 @@ class RecipeAdapter:
         self.recipes: Dict[str, Recipe] = {}
         self._load_recipes()
 
-    def _load_recipes(self):
+    def _load_recipes(self) -> None:
         """Load all POML recipes from the recipes directory."""
         if not self.recipes_dir.exists():
             return
@@ -156,7 +156,7 @@ class RecipeAdapter:
 
     def list_recipes(self) -> Dict[str, List[str]]:
         """List all available recipes grouped by category."""
-        result = {}
+        result: Dict[str, List[str]] = {}
         for recipe in self.recipes.values():
             if recipe.category not in result:
                 result[recipe.category] = []

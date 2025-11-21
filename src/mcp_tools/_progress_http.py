@@ -22,7 +22,7 @@ def report_progress_http(
     message: str = "",
     server_name: str = "CDE",
     endpoint: str = "http://localhost:8767/progress",
-):
+) -> None:
     """
     Report progress via HTTP POST to proxy endpoint.
 
