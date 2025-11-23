@@ -1,0 +1,169 @@
+# ═══════════════════════════════════════════════════════════
+# Nexus AI - Docker Compose Configuration
+# ═══════════════════════════════════════════════════════════
+# Services:
+#   - nexus-core: Main CEO orchestration system
+#   - redis: Task queue and caching
+#   - postgres: Persistent state storage
+# ═══════════════════════════════════════════════════════════
+
+version: '3.8'
+
+services:
+  # ═══════════════════════════════════════════════════════════
+  # Nexus AI Core (CEO System)
+  # ═══════════════════════════════════════════════════════════
+  nexus-core:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nexus-ai-ceo
+    hostname: nexus-core
+    
+    # Port mapping
+    ports:
+      - "8000:8000"  # FastMCP server
+    
+    # Volume mounts
+    volumes:
+      # Project workspaces (read-write)
+      - ./workspaces:/app/workspaces
+      
+      # Persistent state
+      - nexus-state:/app/.cde
+      
+      # GitHub CLI authentication (read-only)
+      # Mount your local GitHub config for CLI access
+      - ~/.config/gh:/home/nexus/.config/gh:ro
+      
+      # Logs
+      - nexus-logs:/app/logs
+    
+    # Environment variables
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DB_URL=postgresql://nexus:${DB_PASSWORD:-nexusdev}@postgres:5432/nexus
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - WORKER_POOL_SIZE=${WORKER_POOL_SIZE:-3}
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+    
+    # Dependencies
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    # Networks
+    networks:
+      - nexus-network
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import cde_rust_core; print('OK')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ═══════════════════════════════════════════════════════════
+  # Redis (Task Queue & Caching)
+  # ═══════════════════════════════════════════════════════════
+  redis:
+    image: redis:7-alpine
+    container_name: nexus-redis
+    hostname: redis
+    
+    ports:
+      - "6379:6379"
+    
+    volumes:
+      - redis-data:/data
+    
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    
+    restart: unless-stopped
+    
+    networks:
+      - nexus-network
+    
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # ═══════════════════════════════════════════════════════════
+  # PostgreSQL (Persistent State)
+  # ═══════════════════════════════════════════════════════════
+  postgres:
+    image: postgres:16-alpine
+    container_name: nexus-postgres
+    hostname: postgres
+    
+    ports:
+      - "5432:5432"
+    
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    
+    environment:
+      POSTGRES_DB: nexus
+      POSTGRES_USER: nexus
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-nexusdev}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+    
+    restart: unless-stopped
+    
+    networks:
+      - nexus-network
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexus"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+# ═══════════════════════════════════════════════════════════
+# Volumes (Persistent Data)
+# ═══════════════════════════════════════════════════════════
+volumes:
+  nexus-state:
+    driver: local
+    name: nexus-state
+  
+  nexus-logs:
+    driver: local
+    name: nexus-logs
+  
+  redis-data:
+    driver: local
+    name: nexus-redis-data
+  
+  postgres-data:
+    driver: local
+    name: nexus-postgres-data
+
+# ═══════════════════════════════════════════════════════════
+# Networks (Service Isolation)
+# ═══════════════════════════════════════════════════════════
+networks:
+  nexus-network:
+    driver: bridge
+    name: nexus-network
