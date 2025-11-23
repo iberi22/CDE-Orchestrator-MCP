@@ -166,7 +166,12 @@ class IRecipeDownloader(ABC):
     """
 
     @abstractmethod
-    async def download_file(self, repo_url: str, branch: str, file_path: str) -> str:
+    async def download_file(
+        self,
+        repo_url: str,
+        branch: str,
+        file_path: str
+    ) -> str:
         """
         Download a single file from a repository.
 
@@ -185,7 +190,10 @@ class IRecipeDownloader(ABC):
 
     @abstractmethod
     async def download_directory(
-        self, repo_url: str, branch: str, dir_path: str
+        self,
+        repo_url: str,
+        branch: str,
+        dir_path: str
     ) -> Dict[str, str]:
         """
         Download all files from a directory.

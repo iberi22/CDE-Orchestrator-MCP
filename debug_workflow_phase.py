@@ -7,7 +7,7 @@ try:
         prompt_recipe="test.poml",
         handler="agent",
         inputs=[],
-        outputs=[],
+        outputs=[]
     )
     print("Successfully created WorkflowPhase")
     print(wp)

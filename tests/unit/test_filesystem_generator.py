@@ -8,8 +8,6 @@ import json
 import sys
 from pathlib import Path
 
-import pytest
-
 # Add src to path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root / "src"))
@@ -23,28 +21,23 @@ from cde_orchestrator.application.tools.generate_filesystem_use_case import (  #
 )
 
 
-@pytest.mark.asyncio
 class TestFilesystemGenerator:
     """Test MCP tool filesystem generation."""
 
-    async def test_generator_creates_output_dir(self, tmp_path):
+    def test_generator_creates_output_dir(self, tmp_path):
         """Test that generator creates ./servers/cde/ directory."""
         generator = MCPToolFilesystemGenerator()
 
-        result = await generator.generate(
-            mcp_tools_module=mcp_tools, output_dir=tmp_path
-        )
+        result = generator.generate(mcp_tools_module=mcp_tools, output_dir=tmp_path)
 
         assert (tmp_path / "servers" / "cde").exists()
         assert result["status"] == "success"
 
-    async def test_generator_creates_one_file_per_tool(self, tmp_path):
+    def test_generator_creates_one_file_per_tool(self, tmp_path):
         """Test that one .py file is created per MCP tool."""
         generator = MCPToolFilesystemGenerator()
 
-        result = await generator.generate(
-            mcp_tools_module=mcp_tools, output_dir=tmp_path
-        )
+        result = generator.generate(mcp_tools_module=mcp_tools, output_dir=tmp_path)
 
         # Should have at least 15 tools (current count)
         assert result["total_tools"] >= 15
@@ -54,10 +47,10 @@ class TestFilesystemGenerator:
         py_files = list(servers_dir.glob("*.py"))
         assert len(py_files) >= 16  # 15 tools + __init__.py
 
-    async def test_generated_files_have_valid_python_syntax(self, tmp_path):
+    def test_generated_files_have_valid_python_syntax(self, tmp_path):
         """Test that generated files are valid Python."""
         generator = MCPToolFilesystemGenerator()
-        await generator.generate(mcp_tools_module=mcp_tools, output_dir=tmp_path)
+        generator.generate(mcp_tools_module=mcp_tools, output_dir=tmp_path)
 
         servers_dir = tmp_path / "servers" / "cde"
 
@@ -69,10 +62,10 @@ class TestFilesystemGenerator:
             code = py_file.read_text(encoding="utf-8")
             compile(code, str(py_file), "exec")  # Raises SyntaxError if invalid
 
-    async def test_generated_files_have_tool_metadata(self, tmp_path):
+    def test_generated_files_have_tool_metadata(self, tmp_path):
         """Test that each tool file has TOOL_METADATA."""
         generator = MCPToolFilesystemGenerator()
-        await generator.generate(mcp_tools_module=mcp_tools, output_dir=tmp_path)
+        generator.generate(mcp_tools_module=mcp_tools, output_dir=tmp_path)
 
         servers_dir = tmp_path / "servers" / "cde"
         scan_doc_file = servers_dir / "scanDocumentation.py"
@@ -85,10 +78,10 @@ class TestFilesystemGenerator:
         assert '"description"' in content
         assert '"parameters"' in content
 
-    async def test_init_file_exports_all_tools(self, tmp_path):
+    def test_init_file_exports_all_tools(self, tmp_path):
         """Test that __init__.py exports all tools."""
         generator = MCPToolFilesystemGenerator()
-        await generator.generate(mcp_tools_module=mcp_tools, output_dir=tmp_path)
+        generator.generate(mcp_tools_module=mcp_tools, output_dir=tmp_path)
 
         init_file = tmp_path / "servers" / "cde" / "__init__.py"
         assert init_file.exists()
@@ -106,25 +99,24 @@ class TestFilesystemGenerator:
             assert tool_name in content
 
 
-@pytest.mark.asyncio
 class TestGenerateFilesystemUseCase:
     """Test use case for filesystem generation."""
 
-    async def test_use_case_executes_successfully(self, tmp_path):
+    def test_use_case_executes_successfully(self, tmp_path):
         """Test that use case executes without errors."""
         use_case = GenerateFilesystemUseCase()
 
-        result = await use_case.execute(mcp_tools_module=mcp_tools, output_dir=tmp_path)
+        result = use_case.execute(mcp_tools_module=mcp_tools, output_dir=tmp_path)
 
         assert result["status"] == "success"
         assert result["total_tools"] >= 15
         assert len(result["generated_files"]) >= 16
 
-    async def test_use_case_returns_file_list(self, tmp_path):
+    def test_use_case_returns_file_list(self, tmp_path):
         """Test that use case returns list of generated files."""
         use_case = GenerateFilesystemUseCase()
 
-        result = await use_case.execute(mcp_tools_module=mcp_tools, output_dir=tmp_path)
+        result = use_case.execute(mcp_tools_module=mcp_tools, output_dir=tmp_path)
 
         # Check file paths (normalize for cross-platform)
         generated_paths = [Path(f).as_posix() for f in result["generated_files"]]
@@ -132,11 +124,10 @@ class TestGenerateFilesystemUseCase:
         assert any("scanDocumentation.py" in f for f in generated_paths)
 
 
-@pytest.mark.asyncio
 class TestFilesystemTokenEfficiency:
     """Test token efficiency of filesystem-based discovery."""
 
-    async def test_name_only_discovery_minimal_tokens(self, tmp_path):
+    def test_name_only_discovery_minimal_tokens(self, tmp_path):
         """
         Test name_only discovery uses minimal tokens.
 
@@ -144,7 +135,7 @@ class TestFilesystemTokenEfficiency:
         Filesystem: List files only = 377 bytes (99.0% reduction)
         """
         generator = MCPToolFilesystemGenerator()
-        await generator.generate(mcp_tools_module=mcp_tools, output_dir=tmp_path)
+        generator.generate(mcp_tools_module=mcp_tools, output_dir=tmp_path)
 
         servers_dir = tmp_path / "servers" / "cde"
 
@@ -157,7 +148,7 @@ class TestFilesystemTokenEfficiency:
         # Should be minimal
         assert len(response.encode()) < 500  # ~377 bytes for 16 tools
 
-    async def test_summary_discovery_moderate_tokens(self, tmp_path):
+    def test_summary_discovery_moderate_tokens(self, tmp_path):
         """
         Test summary discovery (name + description) uses moderate tokens.
 
@@ -165,7 +156,7 @@ class TestFilesystemTokenEfficiency:
         Summary: ~3KB (92% reduction)
         """
         generator = MCPToolFilesystemGenerator()
-        await generator.generate(mcp_tools_module=mcp_tools, output_dir=tmp_path)
+        generator.generate(mcp_tools_module=mcp_tools, output_dir=tmp_path)
 
         servers_dir = tmp_path / "servers" / "cde"
 
@@ -195,7 +186,7 @@ class TestFilesystemTokenEfficiency:
         # Should be moderate
         assert len(response.encode()) < 5000  # ~3KB for 16 tools
 
-    async def test_full_discovery_baseline_tokens(self, tmp_path):
+    def test_full_discovery_baseline_tokens(self, tmp_path):
         """
         Test full discovery (import actual tool) uses baseline tokens.
 
@@ -217,11 +208,10 @@ class TestFilesystemTokenEfficiency:
         assert len(response.encode()) > 1000  # Full schema is larger
 
 
-@pytest.mark.asyncio
 class TestFilesystemIntegration:
     """Integration tests for filesystem discovery."""
 
-    async def test_filesystem_discovery_workflow(self, tmp_path):
+    def test_filesystem_discovery_workflow(self, tmp_path):
         """
         Test complete workflow:
         1. Generate filesystem
@@ -231,7 +221,7 @@ class TestFilesystemIntegration:
         """
         # Step 1: Generate
         use_case = GenerateFilesystemUseCase()
-        result = await use_case.execute(mcp_tools_module=mcp_tools, output_dir=tmp_path)
+        result = use_case.execute(mcp_tools_module=mcp_tools, output_dir=tmp_path)
         assert result["status"] == "success"
 
         servers_dir = tmp_path / "servers" / "cde"

@@ -16,11 +16,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import aiofiles
 import aiohttp
+import aiofiles
 from bs4 import BeautifulSoup
-
-from cde_orchestrator.infrastructure.circuit_breaker import circuit_breaker
 
 
 @dataclass(frozen=True)
@@ -225,12 +223,6 @@ class WebResearchUseCase:
 
         return None
 
-    @circuit_breaker(
-        name="web_research_fetch",
-        failure_threshold=5,
-        timeout=60.0,
-        expected_exception=aiohttp.ClientError,
-    )
     async def _fetch_source(self, url: str, topic: str) -> Optional[ResearchSource]:
         """
         Fetch content from URL and extract relevant information.
@@ -316,12 +308,6 @@ class WebResearchUseCase:
         else:
             return "blog"
 
-    @circuit_breaker(
-        name="github_search_api",
-        failure_threshold=3,
-        timeout=120.0,
-        expected_exception=aiohttp.ClientError,
-    )
     async def _search_github(
         self, topic: str, max_results: int = 3
     ) -> List[ResearchSource]:
@@ -352,12 +338,6 @@ class WebResearchUseCase:
 
         return sources
 
-    @circuit_breaker(
-        name="duckduckgo_api",
-        failure_threshold=3,
-        timeout=90.0,
-        expected_exception=aiohttp.ClientError,
-    )
     async def _web_search(
         self, topic: str, max_results: int = 5
     ) -> List[ResearchSource]:

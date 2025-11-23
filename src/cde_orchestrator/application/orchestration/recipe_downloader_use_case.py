@@ -5,8 +5,9 @@ Downloads workflow recipes (POML files, prompts, and workflow.yml)
 from the agents-flows-recipes GitHub repository.
 """
 
+import json
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from cde_orchestrator.domain.ports import IRecipeDownloader
 
@@ -38,7 +39,7 @@ class RecipeDownloaderUseCase:
         project_path: str = ".",
         repo_url: str = "https://github.com/iberi22/agents-flows-recipes",
         branch: str = "main",
-        force: bool = False,
+        force: bool = False
     ) -> Dict[str, Any]:
         """
         Download recipes to project .cde/ directory.
@@ -66,7 +67,7 @@ class RecipeDownloaderUseCase:
                 "status": "skipped",
                 "message": f".cde/ directory already exists at {cde_dir}. Use force=True to overwrite.",
                 "files_downloaded": [],
-                "destination": str(cde_dir),
+                "destination": str(cde_dir)
             }
 
         # Create .cde/ structure if needed
@@ -83,7 +84,9 @@ class RecipeDownloaderUseCase:
             try:
                 # Download file from GitHub
                 content = await self.downloader.download_file(
-                    repo_url=repo_url, branch=branch, file_path=file_info["source"]
+                    repo_url=repo_url,
+                    branch=branch,
+                    file_path=file_info["source"]
                 )
 
                 # Save to local .cde/ directory
@@ -107,14 +110,14 @@ class RecipeDownloaderUseCase:
                 "message": f"Downloaded {len(downloaded_files)} files with {len(errors)} errors",
                 "files_downloaded": downloaded_files,
                 "destination": str(cde_dir),
-                "errors": errors,
+                "errors": errors
             }
 
         return {
             "status": "success",
             "message": f"Successfully downloaded {len(downloaded_files)} recipe files",
             "files_downloaded": downloaded_files,
-            "destination": str(cde_dir),
+            "destination": str(cde_dir)
         }
 
     def _get_recipe_file_list(self) -> List[Dict[str, str]]:
@@ -127,44 +130,53 @@ class RecipeDownloaderUseCase:
         return [
             # Workflow definition (if exists in repo)
             # NOTE: Your repo uses POML recipes, so we'll create a minimal workflow.yml
+
             # Download key POML recipes from poml/engineering/
             {
                 "source": "poml/engineering/ai-engineer.poml",
-                "destination": "recipes/engineering/ai-engineer.poml",
+                "destination": "recipes/engineering/ai-engineer.poml"
             },
             {
                 "source": "poml/engineering/backend-architect.poml",
-                "destination": "recipes/engineering/backend-architect.poml",
+                "destination": "recipes/engineering/backend-architect.poml"
             },
             {
                 "source": "poml/engineering/test-writer-fixer.poml",
-                "destination": "recipes/engineering/test-writer-fixer.poml",
+                "destination": "recipes/engineering/test-writer-fixer.poml"
             },
+
             # Documentation writers
             {
                 "source": "poml/design/brand-guardian.poml",
-                "destination": "recipes/design/brand-guardian.poml",
+                "destination": "recipes/design/brand-guardian.poml"
             },
+
             # Product management
             {
                 "source": "poml/product/sprint-prioritizer.poml",
-                "destination": "recipes/product/sprint-prioritizer.poml",
+                "destination": "recipes/product/sprint-prioritizer.poml"
             },
+
             # Testing
             {
                 "source": "poml/testing/workflow-optimizer.poml",
-                "destination": "recipes/testing/workflow-optimizer.poml",
+                "destination": "recipes/testing/workflow-optimizer.poml"
             },
+
             # Bonus agents
             {
                 "source": "poml/bonus/studio-coach.poml",
-                "destination": "recipes/bonus/studio-coach.poml",
+                "destination": "recipes/bonus/studio-coach.poml"
             },
+
             # Documentation helpers
-            {"source": "docs/qwen-rules.md", "destination": "docs/qwen-rules.md"},
+            {
+                "source": "docs/qwen-rules.md",
+                "destination": "docs/qwen-rules.md"
+            },
             {
                 "source": "docs/advanced-techniques.md",
-                "destination": "docs/advanced-techniques.md",
+                "destination": "docs/advanced-techniques.md"
             },
         ]
 
@@ -201,7 +213,7 @@ class RecipeDownloaderUseCase:
             return {
                 "status": "exists",
                 "message": "workflow.yml already exists",
-                "path": str(workflow_file),
+                "path": str(workflow_file)
             }
 
         # Create minimal workflow.yml
@@ -307,5 +319,5 @@ workflow_types:
         return {
             "status": "created",
             "message": "Created minimal workflow.yml",
-            "path": str(workflow_file),
+            "path": str(workflow_file)
         }

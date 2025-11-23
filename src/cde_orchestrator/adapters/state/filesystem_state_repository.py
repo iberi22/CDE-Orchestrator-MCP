@@ -1,13 +1,12 @@
 # src/cde_orchestrator/adapters/state/filesystem_state_repository.py
-import asyncio
 import json
 import logging
 import shutil
+import asyncio
+import aiofiles
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Union, cast
-
-import aiofiles
 
 from ...domain.ports import IStateStore
 
@@ -68,9 +67,7 @@ class FileSystemStateRepository(IStateStore):
         backup_path = self.backup_dir / f"state_{timestamp}.json"
 
         loop = asyncio.get_running_loop()
-        await loop.run_in_executor(
-            None, shutil.copy2, self.state_file_path, backup_path
-        )
+        await loop.run_in_executor(None, shutil.copy2, self.state_file_path, backup_path)
 
         await self._rotate_backups()
         return backup_path

@@ -260,3 +260,34 @@ def circuit_breaker(
         return wrapper
 
     return decorator
+
+
+class CircuitBreakerRegistry:
+    """Registry to track all circuit breakers for monitoring."""
+
+    def __init__(self) -> None:
+        self._breakers: Dict[str, CircuitBreaker] = {}
+
+    def register(self, breaker: CircuitBreaker) -> None:
+        """Register a circuit breaker."""
+        self._breakers[breaker.name] = breaker
+
+    def get(self, name: str) -> Optional[CircuitBreaker]:
+        """Get a circuit breaker by name."""
+        return self._breakers.get(name)
+
+    def get_all_metrics(self) -> Dict[str, dict]:
+        """Get metrics for all registered circuit breakers."""
+        return {name: breaker.get_stats() for name, breaker in self._breakers.items()}
+
+
+# Global registry instance
+_global_registry: Optional[CircuitBreakerRegistry] = None
+
+
+def get_circuit_breaker_registry() -> CircuitBreakerRegistry:
+    """Get global circuit breaker registry (lazy initialization)."""
+    global _global_registry
+    if _global_registry is None:
+        _global_registry = CircuitBreakerRegistry()
+    return _global_registry

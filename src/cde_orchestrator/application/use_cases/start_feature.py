@@ -1,13 +1,13 @@
+from typing import Any, Dict, Optional, Callable
 from pathlib import Path
-from typing import Any, Callable, Dict
 
 from pydantic import BaseModel, Field, field_validator
 
-from cde_orchestrator.domain.entities import ProjectStatus
+from cde_orchestrator.domain.entities import Project, Feature, ProjectStatus
 from cde_orchestrator.domain.ports import (
     IProjectRepository,
-    IPromptRenderer,
     IWorkflowRepository,
+    IPromptRenderer,
 )
 from cde_orchestrator.domain.validation import sanitize_string
 
@@ -99,7 +99,7 @@ class StartFeatureUseCase:
 
         # 2. Ensure project is active
         if project.status != ProjectStatus.ACTIVE:
-            project.activate()
+             project.activate()
 
         # 3. Start feature
         feature = project.start_feature(user_prompt, workflow_type)
@@ -112,11 +112,9 @@ class StartFeatureUseCase:
         # For now, we assume the factory or repo handles it (e.g. raises FileNotFoundError)
         # or we should check here.
         if not workflow_path.exists():
-            # Fallback to default workflow or raise error
-            # Ideally, cde_setupProject should have been run.
-            raise FileNotFoundError(
-                f"Workflow file not found at {workflow_path}. Please run cde_setupProject first."
-            )
+             # Fallback to default workflow or raise error
+             # Ideally, cde_setupProject should have been run.
+             raise FileNotFoundError(f"Workflow file not found at {workflow_path}. Please run cde_setupProject first.")
 
         workflow_repo = self.workflow_repo_factory(workflow_path)
         workflow = await workflow_repo.load_workflow()

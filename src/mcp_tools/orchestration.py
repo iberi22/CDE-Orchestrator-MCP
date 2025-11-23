@@ -357,7 +357,7 @@ async def cde_startFeature(
         project_path=project_path,
         user_prompt=user_prompt,
         workflow_type=workflow_type,
-        recipe_id=recipe_id,
+        recipe_id=recipe_id
     )
     return json.dumps(result, indent=2)
 
@@ -389,6 +389,6 @@ async def cde_submitWork(
         project_path=project_path,
         feature_id=feature_id,
         phase_id=phase_id,
-        results=results,
+        results=results
     )
     return json.dumps(result, indent=2)

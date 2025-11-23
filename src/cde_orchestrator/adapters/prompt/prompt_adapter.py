@@ -3,8 +3,8 @@ import json
 import re
 from pathlib import Path
 from typing import Any, Dict, Iterable, Optional, Set
-
 import aiofiles
+
 from markupsafe import escape
 
 from ...domain.ports import IPromptRenderer

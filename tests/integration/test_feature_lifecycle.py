@@ -5,13 +5,11 @@ Integration tests for the complete Feature Lifecycle (Start -> Submit -> Complet
 import shutil
 import tempfile
 from pathlib import Path
-
 import pytest
 import yaml
 
-from cde_orchestrator.domain.entities import FeatureStatus, ProjectStatus
 from cde_orchestrator.infrastructure.dependency_injection import DIContainer
-
+from cde_orchestrator.domain.entities import FeatureStatus, ProjectStatus
 
 @pytest.fixture
 def temp_project_env():
@@ -40,23 +38,23 @@ def temp_project_env():
                 "description": "Define phase",
                 "handler": "human_input",
                 "prompt_recipe": ".cde/prompts/define.poml",
-                "outputs": [{"type": "markdown", "path": "specs/features/feature.md"}],
+                "outputs": [{"type": "markdown", "path": "specs/features/feature.md"}]
             },
             {
                 "id": "implement",
                 "description": "Implement phase",
                 "handler": "agent",
                 "prompt_recipe": ".cde/prompts/define.poml",
-                "outputs": [{"type": "code", "path": "src/"}],
+                "outputs": [{"type": "code", "path": "src/"}]
             },
             {
                 "id": "review",
                 "description": "Review phase",
                 "handler": "human_input",
                 "prompt_recipe": ".cde/prompts/define.poml",
-                "outputs": [{"type": "report", "path": "reports/review.md"}],
-            },
-        ],
+                "outputs": [{"type": "report", "path": "reports/review.md"}]
+            }
+        ]
     }
 
     with open(cde_path / "workflow.yml", "w") as f:
@@ -66,7 +64,6 @@ def temp_project_env():
 
     # Cleanup
     shutil.rmtree(temp_dir)
-
 
 @pytest.mark.asyncio
 async def test_feature_lifecycle_start_to_submit(temp_project_env):
@@ -84,7 +81,7 @@ async def test_feature_lifecycle_start_to_submit(temp_project_env):
     container = DIContainer(
         state_file_path=str(cde_path / "state.json"),
         workflow_file_path=str(cde_path / "workflow.yml"),
-        recipe_dir=str(cde_path / "recipes"),
+        recipe_dir=str(cde_path / "recipes")
     )
 
     # 1. Start Feature
@@ -95,7 +92,7 @@ async def test_feature_lifecycle_start_to_submit(temp_project_env):
         project_path=str(project_path),
         user_prompt=user_prompt,
         workflow_type="standard",
-        recipe_id="ai-engineer",
+        recipe_id="ai-engineer"
     )
 
     assert start_result["status"] == "success"
@@ -124,9 +121,9 @@ async def test_feature_lifecycle_start_to_submit(temp_project_env):
         phase_id="define",
         results={
             "specification": "Spec content",
-            "files_created": ["specs/features/feature.md"],
+            "files_created": ["specs/features/feature.md"]
         },
-        project_path=str(project_path),
+        project_path=str(project_path)
     )
 
     assert submit_result["status"] == "ok"
@@ -141,8 +138,11 @@ async def test_feature_lifecycle_start_to_submit(temp_project_env):
     submit_result_impl = await submit_use_case.execute(
         feature_id=feature_id,
         phase_id="implement",
-        results={"code": "print('hello')", "files_created": ["src/main.py"]},
-        project_path=str(project_path),
+        results={
+            "code": "print('hello')",
+            "files_created": ["src/main.py"]
+        },
+        project_path=str(project_path)
     )
 
     assert submit_result_impl["status"] == "ok"
@@ -158,8 +158,11 @@ async def test_feature_lifecycle_start_to_submit(temp_project_env):
     submit_result_final = await submit_use_case.execute(
         feature_id=feature_id,
         phase_id="review",
-        results={"approved": True, "comments": "LGTM"},
-        project_path=str(project_path),
+        results={
+            "approved": True,
+            "comments": "LGTM"
+        },
+        project_path=str(project_path)
     )
 
     assert submit_result_final["status"] == "completed"

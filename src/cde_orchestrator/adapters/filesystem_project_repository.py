@@ -23,14 +23,13 @@ For LLMs:
     - Examples in docstrings
 """
 
-import asyncio
 import json
 import logging
+import asyncio
+import aiofiles
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import AsyncIterator, List, Optional
-
-import aiofiles
 
 from ..domain.entities import Feature, FeatureStatus, Project, ProjectId, ProjectStatus
 from ..domain.exceptions import DomainError, ProjectNotFoundError
@@ -175,7 +174,9 @@ class FileSystemProjectRepository(IProjectRepository):
         )
         return []
 
-    def list_all_async(self, limit: Optional[int] = None) -> AsyncIterator[Project]:
+    def list_all_async(
+        self, limit: Optional[int] = None
+    ) -> AsyncIterator[Project]:
         """
         Stream all projects asynchronously.
 
@@ -185,13 +186,11 @@ class FileSystemProjectRepository(IProjectRepository):
         Yields:
             Nothing (no registry)
         """
-
         # Empty async generator - must yield something to be valid generator
         # but loop never executes
         async def _gen():
             for _ in []:  # pragma: no cover
                 yield  # type: ignore
-
         return _gen()
 
     async def save(self, project: Project) -> None:

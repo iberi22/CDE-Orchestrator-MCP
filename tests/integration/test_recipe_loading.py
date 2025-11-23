@@ -5,10 +5,7 @@ from typing import Generator
 
 import pytest
 
-from cde_orchestrator.adapters.prompt.prompt_adapter import (
-    PromptAdapter,
-    PromptValidationError,
-)
+from cde_orchestrator.adapters.prompt.prompt_adapter import PromptAdapter, PromptValidationError
 
 
 @pytest.fixture
@@ -27,7 +24,9 @@ def temp_cde_env() -> Generator[Path, None, None]:
     )
 
     # Create an invalid test POML (bad placeholder)
-    (prompts_path / "invalid.poml").write_text("This has a bad key: {{BAD_KEY}}")
+    (prompts_path / "invalid.poml").write_text(
+        "This has a bad key: {{BAD_KEY}}"
+    )
 
     yield Path(temp_dir)
 
@@ -42,7 +41,10 @@ async def test_prompt_adapter_rendering(temp_cde_env: Path):
     adapter = PromptAdapter(prompt_dir=temp_cde_env / ".cde" / "prompts")
     poml_path = temp_cde_env / ".cde" / "prompts" / "test.poml"
 
-    context = {"PROJECT_NAME": "Test Project", "USER_PROMPT": "Do something cool"}
+    context = {
+        "PROJECT_NAME": "Test Project",
+        "USER_PROMPT": "Do something cool"
+    }
 
     result = await adapter.load_and_prepare(poml_path, context)
 
@@ -75,7 +77,9 @@ async def test_prompt_adapter_missing_context(temp_cde_env: Path):
     poml_path = temp_cde_env / ".cde" / "prompts" / "test.poml"
 
     # Missing USER_PROMPT
-    context = {"PROJECT_NAME": "Test Project"}
+    context = {
+        "PROJECT_NAME": "Test Project"
+    }
 
     with pytest.raises(PromptValidationError) as excinfo:
         await adapter.load_and_prepare(poml_path, context)

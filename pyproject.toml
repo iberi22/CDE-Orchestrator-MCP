@@ -36,7 +36,6 @@ dependencies = [
     "pathspec",
     "aiohttp",
     "aiofiles",
-    "psutil",  # System resource monitoring for health checks
 ]
 
 [project.urls]

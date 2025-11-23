@@ -2,12 +2,10 @@
 import re
 from pathlib import Path
 from typing import List
-
 import aiofiles
 
 from ...domain.entities import Recipe
 from ...domain.ports import IRecipeRepository
-from ...infrastructure.cache import cached
 
 
 class FileSystemRecipeRepository(IRecipeRepository):
@@ -34,12 +32,8 @@ class FileSystemRecipeRepository(IRecipeRepository):
                 print(f"Warning: Failed to load recipe {poml_file}: {e}")
         return recipes
 
-    @cached(ttl=300, file_path=None)  # 5 minutes TTL, file_path set dynamically
     async def _parse_recipe(self, poml_file: Path) -> Recipe:
-        """Parse a POML file and extract recipe metadata.
-
-        Cached for 5 minutes with automatic invalidation when file changes.
-        """
+        """Parse a POML file and extract recipe metadata."""
         async with aiofiles.open(poml_file, "r", encoding="utf-8") as f:
             content = await f.read()
 

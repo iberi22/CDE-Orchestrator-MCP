@@ -3,8 +3,8 @@ import json
 from pathlib import Path
 from typing import Any, Dict
 
-import aiofiles
 import pytest
+import aiofiles
 
 from cde_orchestrator.adapters.state.filesystem_state_repository import (
     FileSystemStateRepository,
@@ -24,9 +24,7 @@ def state_repository(temp_state_file: Path) -> FileSystemStateRepository:
 
 
 @pytest.mark.asyncio
-async def test_load_state_non_existent_file(
-    state_repository: FileSystemStateRepository,
-):
+async def test_load_state_non_existent_file(state_repository: FileSystemStateRepository):
     """Should return an empty dict if the state file does not exist."""
     state = await state_repository.load_state()
     assert state == {}
