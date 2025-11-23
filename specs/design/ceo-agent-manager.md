@@ -69,7 +69,7 @@ class AgentManager:
         self.task_queue: asyncio.Queue = asyncio.Queue()
         self.workers: List[AgentWorker] = []
         self.active_tasks: Dict[str, TaskStatus] = {}
-        
+
     async def delegate_task(self, task: AgentTask) -> str:
         """
         Delegate task to next available worker.
@@ -77,10 +77,10 @@ class AgentManager:
         """
         task_id = str(uuid.uuid4())
         await self.task_queue.put((task_id, task))
-        
+
         self.active_tasks[task_id] = TaskStatus.QUEUED
         return task_id
-    
+
     async def get_task_status(self, task_id: str) -> Dict[str, Any]:
         """Poll task status."""
         return {
@@ -101,12 +101,12 @@ class AgentManager:
 class ContextStore:
     def __init__(self):
         self._store: Dict[str, Any] = {}
-        
+
     def set_context(self, key: str, value: Any):
         """Serialize with Rust (faster than pickle)."""
         serialized = rust_utils.serialize_json(value)
         self._store[key] = serialized
-    
+
     def get_context(self, key: str) -> Any:
         """Deserialize with Rust."""
         return rust_utils.deserialize_json(self._store[key])
@@ -213,15 +213,15 @@ async fn spawn_agent(cmd: &[String]) -> AgentProcess {
 async def cde_delegateTaskToCEO(task_description: str) -> str:
     """Delegate task to CEO Agent Manager."""
     manager = get_agent_manager()
-    
+
     task = AgentTask(
         type="code_generation",
         description=task_description,
         context={"project_path": "."}
     )
-    
+
     task_id = await manager.delegate_task(task)
-    
+
     return json.dumps({
         "task_id": task_id,
         "status": "queued",
