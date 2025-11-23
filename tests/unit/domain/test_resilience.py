@@ -4,15 +4,14 @@ Unit tests for domain resilience module.
 Tests retry decorators and error recovery logic.
 """
 
+
 import pytest
-from unittest.mock import Mock, patch
-from tenacity import RetryError
 
 from cde_orchestrator.domain.resilience import (
-    retry_operation,
     retry_async_operation,
     retry_fs_operation,
     retry_network_operation,
+    retry_operation,
 )
 
 

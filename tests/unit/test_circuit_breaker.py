@@ -1,5 +1,7 @@
 import asyncio
+
 import pytest
+
 from cde_orchestrator.infrastructure.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerError,

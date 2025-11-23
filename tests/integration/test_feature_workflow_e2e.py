@@ -4,21 +4,17 @@ End-to-End integration tests for the complete feature workflow.
 Tests the full cycle: start_feature -> submit_work -> completion.
 """
 
-import pytest
-import tempfile
-import shutil
 from pathlib import Path
-from unittest.mock import Mock, AsyncMock
+
+import pytest
 
 from cde_orchestrator.application.use_cases.start_feature import (
     StartFeatureUseCase,
-    StartFeatureInput,
 )
 from cde_orchestrator.application.use_cases.submit_work import (
     SubmitWorkUseCase,
-    SubmitWorkInput,
 )
-from cde_orchestrator.domain.entities import Project, ProjectStatus, FeatureStatus
+from cde_orchestrator.domain.entities import FeatureStatus, Project
 
 
 class MockProjectRepository:

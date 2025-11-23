@@ -1,17 +1,15 @@
-import asyncio
 import os
 import shutil
+import stat
 import tempfile
 from pathlib import Path
-from typing import AsyncGenerator, Generator
+from typing import Generator
 
 import pytest
 
 from cde_orchestrator.adapters.repository.git_adapter import GitAdapter
-from cde_orchestrator.domain.git import Commit, Modification
+from cde_orchestrator.domain.git import Commit
 
-
-import stat
 
 @pytest.fixture
 def temp_git_repo() -> Generator[Path, None, None]:
@@ -26,7 +24,9 @@ def temp_git_repo() -> Generator[Path, None, None]:
         # Initialize Git repo
         subprocess_run(["git", "init"], cwd=repo_path)
         subprocess_run(["git", "config", "user.name", "Test User"], cwd=repo_path)
-        subprocess_run(["git", "config", "user.email", "test@example.com"], cwd=repo_path)
+        subprocess_run(
+            ["git", "config", "user.email", "test@example.com"], cwd=repo_path
+        )
 
         # Commit 1: Add file1.txt
         (repo_path / "file1.txt").write_text("Content 1")
@@ -92,7 +92,7 @@ async def test_git_adapter_get_modifications(temp_git_repo: Path):
         commits.append(commit)
 
     latest_commit = commits[0]  # Second commit
-    initial_commit = commits[1] # Initial commit
+    initial_commit = commits[1]  # Initial commit
 
     # Check modifications for second commit
     mods_latest = await adapter.get_modifications(latest_commit.hash)

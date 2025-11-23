@@ -189,7 +189,9 @@ class TestToolSearch:
 
     async def test_search_tools_name_and_description(self):  # type: ignore
         """Test searchTools with name_and_description detail level."""
-        result_json = await cde_searchTools("workflow", detail_level="name_and_description")
+        result_json = await cde_searchTools(
+            "workflow", detail_level="name_and_description"
+        )
         result = json.loads(result_json)
 
         # Verify structure

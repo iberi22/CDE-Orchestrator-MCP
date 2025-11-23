@@ -16,8 +16,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import aiohttp
 import aiofiles
+import aiohttp
 from bs4 import BeautifulSoup
 
 from cde_orchestrator.infrastructure.circuit_breaker import circuit_breaker

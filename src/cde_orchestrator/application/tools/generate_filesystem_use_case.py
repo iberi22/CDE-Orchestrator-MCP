@@ -23,7 +23,6 @@ class GenerateFilesystemUseCase:
         """Initialize use case with filesystem generator."""
         self.generator = MCPToolFilesystemGenerator()
 
-
     @trace_execution
     async def execute(self, mcp_tools_module: Any, output_dir: Path) -> Dict[str, Any]:
         """

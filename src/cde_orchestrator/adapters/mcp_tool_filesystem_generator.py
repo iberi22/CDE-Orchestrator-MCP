@@ -305,7 +305,9 @@ TOOL_METADATA = {{
             await f.write(content)
         return file_path
 
-    async def _generate_init_file(self, tools: List[ToolMetadata], output_dir: Path) -> Path:
+    async def _generate_init_file(
+        self, tools: List[ToolMetadata], output_dir: Path
+    ) -> Path:
         """
         Generate __init__.py with all tool exports.
 

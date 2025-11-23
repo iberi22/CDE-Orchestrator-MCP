@@ -14,8 +14,8 @@ Created: 2025-11-23
 
 import asyncio
 import signal
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
 
 from cde_orchestrator.infrastructure.graceful_shutdown import (
     ShutdownConfig,
@@ -287,6 +287,7 @@ class TestGlobalShutdownManager:
         """Test get_shutdown_manager returns singleton."""
         # Reset global
         import cde_orchestrator.infrastructure.graceful_shutdown as module
+
         module._shutdown_manager = None
 
         manager1 = get_shutdown_manager()
@@ -298,6 +299,7 @@ class TestGlobalShutdownManager:
         """Test get_shutdown_manager with config on first call."""
         # Reset global
         import cde_orchestrator.infrastructure.graceful_shutdown as module
+
         module._shutdown_manager = None
 
         config = ShutdownConfig(request_timeout=60.0)
@@ -314,6 +316,7 @@ class TestTrackRequestDecorator:
         """Test decorator tracks request."""
         # Reset global
         import cde_orchestrator.infrastructure.graceful_shutdown as module
+
         module._shutdown_manager = None
 
         @track_request
@@ -331,6 +334,7 @@ class TestTrackRequestDecorator:
         """Test decorator rejects requests during shutdown."""
         # Reset global
         import cde_orchestrator.infrastructure.graceful_shutdown as module
+
         module._shutdown_manager = None
 
         manager = get_shutdown_manager()
@@ -407,8 +411,10 @@ class TestShutdownSequence:
 
         # Register multiple cleanups (create proper async wrappers)
         for i in range(3):
+
             async def cleanup_wrapper(idx=i):
                 await mock_cleanup(idx)
+
             manager.register_cleanup(cleanup_wrapper)
 
         # Execute shutdown
@@ -419,4 +425,3 @@ class TestShutdownSequence:
 
         # All cleanups should execute
         assert len(completed_cleanups) == 3
-

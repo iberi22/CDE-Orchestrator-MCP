@@ -40,6 +40,7 @@ from collections import OrderedDict
 from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional, TypeVar, Union
+
 from cde_orchestrator.infrastructure.telemetry import log_metric
 
 logger = logging.getLogger(__name__)
@@ -97,7 +98,6 @@ class CacheEntry:
         self.access_count += 1
         self.last_accessed = time.time()
         return self.value
-
 
 
 class CacheMetrics:

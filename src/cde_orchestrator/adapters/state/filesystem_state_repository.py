@@ -1,12 +1,13 @@
 # src/cde_orchestrator/adapters/state/filesystem_state_repository.py
+import asyncio
 import json
 import logging
 import shutil
-import asyncio
-import aiofiles
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Union, cast
+
+import aiofiles
 
 from ...domain.ports import IStateStore
 
@@ -65,17 +66,19 @@ class FileSystemStateRepository(IStateStore):
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
         self.backup_dir.mkdir(parents=True, exist_ok=True)
         backup_path = self.backup_dir / f"state_{timestamp}.json"
-        
+
         loop = asyncio.get_running_loop()
-        await loop.run_in_executor(None, shutil.copy2, self.state_file_path, backup_path)
-        
+        await loop.run_in_executor(
+            None, shutil.copy2, self.state_file_path, backup_path
+        )
+
         await self._rotate_backups()
         return backup_path
 
     async def _rotate_backups(self) -> None:
         """Keep only the latest N backups."""
         loop = asyncio.get_running_loop()
-        
+
         def _rotate():
             backups = sorted(self.backup_dir.glob("state_*.json"), reverse=True)
             for stale_backup in backups[self.max_backups :]:
@@ -83,5 +86,5 @@ class FileSystemStateRepository(IStateStore):
                     stale_backup.unlink()
                 except OSError as exc:
                     logger.warning(f"Failed to remove old backup {stale_backup}: {exc}")
-        
+
         await loop.run_in_executor(None, _rotate)

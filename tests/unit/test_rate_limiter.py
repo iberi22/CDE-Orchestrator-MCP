@@ -13,15 +13,15 @@ Author: CDE Orchestrator Team
 Created: 2025-11-22
 """
 
-import pytest
 import asyncio
 import time
-from unittest.mock import patch
+
+import pytest
 
 from src.cde_orchestrator.infrastructure.rate_limiter import (
     RateLimitConfig,
-    TokenBucket,
     RateLimiter,
+    TokenBucket,
     get_rate_limiter,
     rate_limited,
 )
@@ -175,7 +175,7 @@ class TestTokenBucket:
         metrics = bucket.get_metrics()
         assert metrics["total_requests"] == 3
         assert metrics["rejected_requests"] == 1
-        assert metrics["rejection_rate"] == 1/3
+        assert metrics["rejection_rate"] == 1 / 3
 
     @pytest.mark.asyncio
     async def test_concurrent_access(self):
@@ -288,6 +288,7 @@ class TestRateLimitedDecorator:
     @pytest.mark.asyncio
     async def test_decorator_with_args(self):
         """Test decorator with function arguments."""
+
         @rate_limited("filesystem")
         async def test_func(x: int, y: int) -> int:
             return x + y

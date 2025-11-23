@@ -18,7 +18,7 @@ def cde_downloadRecipes(
     project_path: str = ".",
     repo_url: str = "https://github.com/iberi22/agents-flows-recipes",
     branch: str = "main",
-    force: bool = False
+    force: bool = False,
 ) -> str:
     """
     📦 **Download Workflow Recipes** - Download POML recipes from GitHub repository.
@@ -131,10 +131,7 @@ def cde_downloadRecipes(
 
     # Execute download
     result = use_case.execute(
-        project_path=project_path,
-        repo_url=repo_url,
-        branch=branch,
-        force=force
+        project_path=project_path, repo_url=repo_url, branch=branch, force=force
     )
 
     # Also ensure workflow.yml exists
@@ -143,7 +140,7 @@ def cde_downloadRecipes(
     # Add workflow creation info to result
     if workflow_result["status"] == "created":
         result["files_downloaded"].append(".cde/workflow.yml")
-        result["message"] += f" + created workflow.yml"
+        result["message"] += " + created workflow.yml"
 
     return json.dumps(result, indent=2, ensure_ascii=False)
 
@@ -197,8 +194,12 @@ def cde_checkRecipes(project_path: str = ".") -> str:
     result = {
         "exists": exists,
         "path": str(cde_dir),
-        "message": ".cde/ directory exists" if exists else ".cde/ directory not found. Use cde_downloadRecipes() to download recipes.",
-        "needs_download": not exists
+        "message": (
+            ".cde/ directory exists"
+            if exists
+            else ".cde/ directory not found. Use cde_downloadRecipes() to download recipes."
+        ),
+        "needs_download": not exists,
     }
 
     return json.dumps(result, indent=2, ensure_ascii=False)

@@ -13,12 +13,11 @@ Created: 2025-11-23
 
 import asyncio
 import signal
-import sys
 import time
-from typing import Callable, List, Optional, Set
 from dataclasses import dataclass, field
+from typing import Callable, List, Optional, Set
 
-from cde_orchestrator.infrastructure.logging import get_logger, get_correlation_id
+from cde_orchestrator.infrastructure.logging import get_correlation_id, get_logger
 
 logger = get_logger(__name__)
 
@@ -37,10 +36,12 @@ class ShutdownConfig:
     force_after_timeout: bool = True
 
     # Signals to handle
-    signals: List[signal.Signals] = field(default_factory=lambda: [
-        signal.SIGTERM,  # Graceful shutdown (Docker, Kubernetes)
-        signal.SIGINT,   # Ctrl+C
-    ])
+    signals: List[signal.Signals] = field(
+        default_factory=lambda: [
+            signal.SIGTERM,  # Graceful shutdown (Docker, Kubernetes)
+            signal.SIGINT,  # Ctrl+C
+        ]
+    )
 
 
 class ShutdownManager:
@@ -87,7 +88,7 @@ class ShutdownManager:
                 "correlation_id": get_correlation_id(),
                 "request_timeout": self.config.request_timeout,
                 "cleanup_timeout": self.config.cleanup_timeout,
-            }
+            },
         )
 
     def install_signal_handlers(self) -> None:
@@ -103,13 +104,13 @@ class ShutdownManager:
                 signal.signal(sig, self._signal_handler)
                 logger.info(
                     f"Installed signal handler for {sig.name}",
-                    extra={"correlation_id": get_correlation_id()}
+                    extra={"correlation_id": get_correlation_id()},
                 )
             except (OSError, ValueError) as e:
                 # Some signals may not be available on all platforms
                 logger.warning(
                     f"Could not install handler for {sig.name}: {e}",
-                    extra={"correlation_id": get_correlation_id()}
+                    extra={"correlation_id": get_correlation_id()},
                 )
 
     def _signal_handler(self, signum: int, frame) -> None:
@@ -127,7 +128,7 @@ class ShutdownManager:
                 "correlation_id": get_correlation_id(),
                 "signal": sig_name,
                 "signal_number": signum,
-            }
+            },
         )
 
         # Set shutdown event (will be picked up by wait_for_shutdown)
@@ -149,7 +150,7 @@ class ShutdownManager:
         self._cleanup_tasks.append(cleanup_func)
         logger.debug(
             f"Registered cleanup task: {cleanup_func.__name__}",
-            extra={"correlation_id": get_correlation_id()}
+            extra={"correlation_id": get_correlation_id()},
         )
 
     def track_request(self, task: asyncio.Task) -> None:
@@ -185,8 +186,7 @@ class ShutdownManager:
         """
         await self._shutdown_event.wait()
         logger.info(
-            "Shutdown signal received",
-            extra={"correlation_id": get_correlation_id()}
+            "Shutdown signal received", extra={"correlation_id": get_correlation_id()}
         )
 
     async def shutdown(self) -> None:
@@ -204,7 +204,7 @@ class ShutdownManager:
         if self._shutdown_initiated:
             logger.warning(
                 "Shutdown already initiated, ignoring duplicate call",
-                extra={"correlation_id": get_correlation_id()}
+                extra={"correlation_id": get_correlation_id()},
             )
             return
 
@@ -217,7 +217,7 @@ class ShutdownManager:
                 "correlation_id": get_correlation_id(),
                 "active_requests": len(self._active_requests),
                 "cleanup_tasks": len(self._cleanup_tasks),
-            }
+            },
         )
 
         # Step 1: Stop accepting new requests (handled by caller)
@@ -236,7 +236,7 @@ class ShutdownManager:
             extra={
                 "correlation_id": get_correlation_id(),
                 "shutdown_duration_seconds": shutdown_duration,
-            }
+            },
         )
 
     async def _wait_for_active_requests(self) -> None:
@@ -250,14 +250,14 @@ class ShutdownManager:
             extra={
                 "correlation_id": get_correlation_id(),
                 "timeout": self.config.request_timeout,
-            }
+            },
         )
 
         try:
             # Wait for all active requests with timeout
             await asyncio.wait_for(
                 asyncio.gather(*self._active_requests, return_exceptions=True),
-                timeout=self.config.request_timeout
+                timeout=self.config.request_timeout,
             )
             logger.info("All active requests completed successfully")
         except asyncio.TimeoutError:
@@ -267,7 +267,7 @@ class ShutdownManager:
                 extra={
                     "correlation_id": get_correlation_id(),
                     "remaining_requests": remaining,
-                }
+                },
             )
 
             if self.config.force_after_timeout:
@@ -285,7 +285,7 @@ class ShutdownManager:
 
         logger.info(
             f"Running {len(self._cleanup_tasks)} cleanup tasks",
-            extra={"correlation_id": get_correlation_id()}
+            extra={"correlation_id": get_correlation_id()},
         )
 
         for i, cleanup_func in enumerate(self._cleanup_tasks, 1):
@@ -297,8 +297,7 @@ class ShutdownManager:
                 # Run cleanup (handle both sync and async)
                 if asyncio.iscoroutinefunction(cleanup_func):
                     await asyncio.wait_for(
-                        cleanup_func(),
-                        timeout=self.config.cleanup_timeout
+                        cleanup_func(), timeout=self.config.cleanup_timeout
                     )
                 else:
                     cleanup_func()
@@ -307,13 +306,13 @@ class ShutdownManager:
             except asyncio.TimeoutError:
                 logger.error(
                     f"Cleanup task {cleanup_func.__name__} timed out",
-                    extra={"correlation_id": get_correlation_id()}
+                    extra={"correlation_id": get_correlation_id()},
                 )
             except Exception as e:
                 logger.error(
                     f"Error in cleanup task {cleanup_func.__name__}: {e}",
                     exc_info=True,
-                    extra={"correlation_id": get_correlation_id()}
+                    extra={"correlation_id": get_correlation_id()},
                 )
 
         logger.info("All cleanup tasks completed")
@@ -377,6 +376,7 @@ def track_request(func):
             # Request is automatically tracked
             pass
     """
+
     async def wrapper(*args, **kwargs):
         shutdown_manager = get_shutdown_manager()
 

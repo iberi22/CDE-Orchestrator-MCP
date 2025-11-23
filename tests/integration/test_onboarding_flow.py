@@ -5,9 +5,15 @@ from typing import Generator
 
 import pytest
 
-from cde_orchestrator.application.onboarding.project_analysis_use_case import ProjectAnalysisUseCase
-from cde_orchestrator.application.onboarding.publishing_use_case import PublishingUseCase
-from cde_orchestrator.application.onboarding.project_setup_use_case import ProjectSetupUseCase
+from cde_orchestrator.application.onboarding.project_analysis_use_case import (
+    ProjectAnalysisUseCase,
+)
+from cde_orchestrator.application.onboarding.project_setup_use_case import (
+    ProjectSetupUseCase,
+)
+from cde_orchestrator.application.onboarding.publishing_use_case import (
+    PublishingUseCase,
+)
 
 
 @pytest.fixture
@@ -20,7 +26,9 @@ def temp_project_for_onboarding() -> Generator[Path, None, None]:
 
     # Simulate a Python project
     (project_path / "pyproject.toml").write_text("[tool.poetry]")
-    (project_path / "package.json").write_text("{}") # Add package.json to test Node logic
+    (project_path / "package.json").write_text(
+        "{}"
+    )  # Add package.json to test Node logic
     (project_path / "src").mkdir()
     (project_path / "src" / "main.py").write_text("print('hello')")
 
@@ -53,7 +61,7 @@ def test_onboarding_publishing(temp_project_for_onboarding: Path):
 
     documents = {
         "AGENTS.md": "# Agents Guide",
-        "specs/features/test-feature.md": "# Test Feature"
+        "specs/features/test-feature.md": "# Test Feature",
     }
 
     result = publisher.execute(str(temp_project_for_onboarding), documents)
@@ -69,9 +77,7 @@ def test_onboarding_governance_violation(temp_project_for_onboarding: Path):
     """
     publisher = PublishingUseCase()
 
-    documents = {
-        "REPORT_2025.md": "# Bad Report"
-    }
+    documents = {"REPORT_2025.md": "# Bad Report"}
 
     # Depending on implementation, it might raise error or return partial success
     # Let's check the implementation behavior via test
@@ -102,5 +108,5 @@ def test_project_setup(temp_project_for_onboarding: Path):
 
     # Verify content
     gitignore_content = (temp_project_for_onboarding / ".gitignore").read_text()
-    assert "node_modules/" in gitignore_content # Because we added package.json
-    assert ".pytest_cache/" in gitignore_content # Because we have .py files (main.py)
+    assert "node_modules/" in gitignore_content  # Because we added package.json
+    assert ".pytest_cache/" in gitignore_content  # Because we have .py files (main.py)

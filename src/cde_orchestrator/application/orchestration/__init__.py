@@ -8,6 +8,7 @@ High-level use cases for intelligent workflow orchestration:
 - Recipe downloading (download workflow recipes from GitHub)
 """
 
+from .recipe_downloader_use_case import RecipeDownloaderUseCase
 from .skill_sourcing_use_case import (
     ExternalSkill,
     SkillAdaptation,
@@ -26,7 +27,6 @@ from .workflow_selector_use_case import (
     WorkflowSelectorUseCase,
     WorkflowType,
 )
-from .recipe_downloader_use_case import RecipeDownloaderUseCase
 
 __all__ = [
     # Workflow Selection

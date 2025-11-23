@@ -16,8 +16,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import aiohttp
 import aiofiles
+import aiohttp
 
 
 @dataclass
@@ -161,21 +161,15 @@ class SkillSourcingUseCase:
         """
         if source == "awesome-claude-skills":
             return await self._search_repo_readme(
-                query,
-                self.AWESOME_CLAUDE_SKILLS_RAW,
-                "awesome_claude_skills"
+                query, self.AWESOME_CLAUDE_SKILLS_RAW, "awesome_claude_skills"
             )
         elif source == "anthropics-skills":
             return await self._search_repo_readme(
-                query,
-                self.ANTHROPICS_SKILLS_RAW,
-                "anthropics_skills"
+                query, self.ANTHROPICS_SKILLS_RAW, "anthropics_skills"
             )
         elif source == "obra-superpowers":
             return await self._search_repo_readme(
-                query,
-                self.OBRA_SUPERPOWERS_RAW,
-                "obra_superpowers"
+                query, self.OBRA_SUPERPOWERS_RAW, "obra_superpowers"
             )
         else:
             # Support for custom sources in future
@@ -184,7 +178,9 @@ class SkillSourcingUseCase:
     CACHE_DIR = Path(".cde/cache")
     CACHE_TTL_SECONDS = 3600 * 24  # 24 hours
 
-    async def _get_cached_index(self, repo_name: str, ignore_ttl: bool = False) -> Optional[str]:
+    async def _get_cached_index(
+        self, repo_name: str, ignore_ttl: bool = False
+    ) -> Optional[str]:
         cache_file = self.CACHE_DIR / f"{repo_name}_index.json"
         if not cache_file.exists():
             return None
@@ -194,7 +190,9 @@ class SkillSourcingUseCase:
                 content = await f.read()
             data = json.loads(content)
             timestamp = data.get("timestamp", 0)
-            if not ignore_ttl and (datetime.now().timestamp() - timestamp > self.CACHE_TTL_SECONDS):
+            if not ignore_ttl and (
+                datetime.now().timestamp() - timestamp > self.CACHE_TTL_SECONDS
+            ):
                 return None
             return data.get("content")
         except Exception:
@@ -203,14 +201,13 @@ class SkillSourcingUseCase:
     async def _save_cached_index(self, repo_name: str, content: str):
         self.CACHE_DIR.mkdir(parents=True, exist_ok=True)
         cache_file = self.CACHE_DIR / f"{repo_name}_index.json"
-        data = {
-            "timestamp": datetime.now().timestamp(),
-            "content": content
-        }
+        data = {"timestamp": datetime.now().timestamp(), "content": content}
         async with aiofiles.open(cache_file, "w", encoding="utf-8") as f:
             await f.write(json.dumps(data))
 
-    async def _search_repo_readme(self, query: str, raw_base_url: str, repo_name: str) -> List[ExternalSkill]:
+    async def _search_repo_readme(
+        self, query: str, raw_base_url: str, repo_name: str
+    ) -> List[ExternalSkill]:
         """
         Generic search for GitHub repositories via README parsing.
         """
@@ -228,7 +225,9 @@ class SkillSourcingUseCase:
                             await self._save_cached_index(repo_name, readme_content)
             except Exception:
                 # Network error, try stale cache
-                readme_content = await self._get_cached_index(repo_name, ignore_ttl=True)
+                readme_content = await self._get_cached_index(
+                    repo_name, ignore_ttl=True
+                )
 
         if not readme_content:
             return []
@@ -287,7 +286,9 @@ class SkillSourcingUseCase:
                                             description=skill_desc,
                                             source_url=skill_url,
                                             content=content,
-                                            tags=self._extract_tags(skill_name, skill_desc),
+                                            tags=self._extract_tags(
+                                                skill_name, skill_desc
+                                            ),
                                             category=self._infer_category(
                                                 skill_name, skill_desc
                                             ),

@@ -10,14 +10,13 @@ Provides decorators and utilities for handling transient failures in:
 
 import logging
 from functools import wraps
-from typing import Any, Callable, Optional, Type, Tuple
+from typing import Any, Callable, Optional, Tuple, Type
 
 from tenacity import (
     Retrying,
     retry_if_exception_type,
     stop_after_attempt,
     wait_exponential,
-    RetryError,
 )
 
 logger = logging.getLogger(__name__)

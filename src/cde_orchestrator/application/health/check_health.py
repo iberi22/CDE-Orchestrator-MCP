@@ -1,14 +1,15 @@
+import asyncio
 import shutil
 import sys
-import asyncio
-import psutil
 from pathlib import Path
 from typing import Any, Dict
 
-from cde_orchestrator.rust_utils import RUST_AVAILABLE
+import psutil
+
 from cde_orchestrator.infrastructure.cache import get_cache
 from cde_orchestrator.infrastructure.circuit_breaker import get_circuit_breaker_registry
 from cde_orchestrator.infrastructure.rate_limiter import get_rate_limiter
+from cde_orchestrator.rust_utils import RUST_AVAILABLE
 
 
 class CheckHealthUseCase:
@@ -167,7 +168,7 @@ class CheckHealthUseCase:
             disk = psutil.disk_usage(str(self.project_root))
 
             # Thresholds
-            free_gb = disk.free / (1024 ** 3)
+            free_gb = disk.free / (1024**3)
             percent_free = (disk.free / disk.total) * 100
 
             status = "ok"
@@ -178,9 +179,9 @@ class CheckHealthUseCase:
 
             return {
                 "status": status,
-                "total_gb": disk.total / (1024 ** 3),
+                "total_gb": disk.total / (1024**3),
                 "free_gb": free_gb,
-                "used_gb": disk.used / (1024 ** 3),
+                "used_gb": disk.used / (1024**3),
                 "percent_free": percent_free,
             }
         except Exception as e:
@@ -195,7 +196,7 @@ class CheckHealthUseCase:
             memory = psutil.virtual_memory()
 
             # Thresholds
-            available_gb = memory.available / (1024 ** 3)
+            available_gb = memory.available / (1024**3)
             percent_available = memory.available / memory.total * 100
 
             status = "ok"
@@ -206,9 +207,9 @@ class CheckHealthUseCase:
 
             return {
                 "status": status,
-                "total_gb": memory.total / (1024 ** 3),
+                "total_gb": memory.total / (1024**3),
                 "available_gb": available_gb,
-                "used_gb": memory.used / (1024 ** 3),
+                "used_gb": memory.used / (1024**3),
                 "percent_available": percent_available,
                 "percent_used": memory.percent,
             }
@@ -226,12 +227,10 @@ class CheckHealthUseCase:
 
             # Count states
             open_count = sum(
-                1 for m in all_metrics.values()
-                if m.get("state") == "OPEN"
+                1 for m in all_metrics.values() if m.get("state") == "OPEN"
             )
             half_open_count = sum(
-                1 for m in all_metrics.values()
-                if m.get("state") == "HALF_OPEN"
+                1 for m in all_metrics.values() if m.get("state") == "HALF_OPEN"
             )
 
             status = "ok"
@@ -254,6 +253,7 @@ class CheckHealthUseCase:
 
     def _check_rate_limiters(self) -> Dict[str, Any]:
         """Check rate limiter metrics."""
+
         async def _async_check():
             try:
                 limiter = get_rate_limiter()
@@ -261,8 +261,7 @@ class CheckHealthUseCase:
 
                 # Check for high rejection rates
                 high_rejection = any(
-                    m.get("rejection_rate", 0) > 0.5
-                    for m in all_metrics.values()
+                    m.get("rejection_rate", 0) > 0.5 for m in all_metrics.values()
                 )
 
                 status = "ok"

@@ -26,7 +26,9 @@ def log_metric(
     if tags:
         metric_data.update(tags)
 
-    logger.info(f"Metric: {name}={value}{unit}", extra={"context": {"metric": metric_data}})
+    logger.info(
+        f"Metric: {name}={value}{unit}", extra={"context": {"metric": metric_data}}
+    )
 
 
 def trace_execution(func: Callable[..., T]) -> Callable[..., T]:

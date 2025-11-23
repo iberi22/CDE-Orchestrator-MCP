@@ -6,7 +6,7 @@ Provides progressive tool discovery following Anthropic's best practices.
 
 import asyncio
 import inspect
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal
 
 from ..infrastructure.cache import cached
 

@@ -122,8 +122,7 @@ class TestStartFeatureInputValidation:
 
         errors = exc_info.value.errors()
         assert any(
-            error["loc"] == ("project_path",)
-            and "at most 500 characters" in str(error)
+            error["loc"] == ("project_path",) and "at most 500 characters" in str(error)
             for error in errors
         )
 

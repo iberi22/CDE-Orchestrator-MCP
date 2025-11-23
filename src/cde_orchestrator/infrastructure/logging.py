@@ -7,7 +7,9 @@ from datetime import datetime, timezone
 from typing import Optional
 
 # Context variable to store correlation ID
-correlation_id_ctx: ContextVar[Optional[str]] = ContextVar("correlation_id", default=None)
+correlation_id_ctx: ContextVar[Optional[str]] = ContextVar(
+    "correlation_id", default=None
+)
 
 
 def get_correlation_id() -> Optional[str]:

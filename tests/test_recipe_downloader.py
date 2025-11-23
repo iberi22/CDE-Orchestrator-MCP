@@ -6,9 +6,9 @@ Tests downloading recipes from GitHub to .cde/ directory.
 
 import json
 import sys
-import pytest
-import asyncio
 from pathlib import Path
+
+import pytest
 
 # Add src to path
 src_path = Path(__file__).parent.parent / "src"
@@ -45,7 +45,7 @@ async def test_download_recipes():
         project_path=str(test_dir),
         repo_url="https://github.com/iberi22/agents-flows-recipes",
         branch="main",
-        force=True  # Force to allow re-download for testing
+        force=True,  # Force to allow re-download for testing
     )
 
     print(f"   Status: {result['status']}")
@@ -53,9 +53,9 @@ async def test_download_recipes():
     print(f"   Destination: {result['destination']}")
     print(f"   Files downloaded: {len(result['files_downloaded'])}")
 
-    if result.get('errors'):
-        print(f"\n⚠️  Errors encountered:")
-        for error in result['errors']:
+    if result.get("errors"):
+        print("\n⚠️  Errors encountered:")
+        for error in result["errors"]:
             print(f"   - {error}")
 
     # Test 3: Verify files
@@ -118,5 +118,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

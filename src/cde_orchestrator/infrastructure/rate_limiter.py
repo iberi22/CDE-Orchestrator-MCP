@@ -13,11 +13,11 @@ Created: 2025-11-22
 
 import asyncio
 import time
-from dataclasses import dataclass, field
-from typing import Dict, Optional
 from contextlib import asynccontextmanager
+from dataclasses import dataclass
+from typing import Dict, Optional
 
-from cde_orchestrator.infrastructure.logging import get_logger, get_correlation_id
+from cde_orchestrator.infrastructure.logging import get_correlation_id, get_logger
 
 logger = get_logger(__name__)
 
@@ -72,7 +72,7 @@ class TokenBucket:
                 "max_tokens": config.max_tokens,
                 "refill_rate": config.refill_rate,
                 "burst_allowance": config.burst_allowance,
-            }
+            },
         )
 
     async def _refill(self) -> None:
@@ -123,7 +123,7 @@ class TokenBucket:
                             "tokens_requested": tokens,
                             "tokens_remaining": self._tokens,
                             "wait_time_ms": wait_time * 1000,
-                        }
+                        },
                     )
                     return True
 
@@ -136,8 +136,9 @@ class TokenBucket:
                             "correlation_id": get_correlation_id(),
                             "tokens_requested": tokens,
                             "tokens_available": self._tokens,
-                            "rejection_rate": self._rejected_requests / self._total_requests,
-                        }
+                            "rejection_rate": self._rejected_requests
+                            / self._total_requests,
+                        },
                     )
                     return False
 
@@ -198,28 +199,24 @@ class RateLimiter:
             refill_rate=1.0,  # 1 per second = 60/min
             burst_allowance=10,  # Allow bursts of 70
         ),
-
         # GitHub API - Conservative (5000/hour = ~83/min)
         "github_api": RateLimitConfig(
             max_tokens=80,
             refill_rate=1.33,  # ~80/min
             burst_allowance=20,
         ),
-
         # Web Research - Moderate
         "web_research": RateLimitConfig(
             max_tokens=30,
             refill_rate=0.5,  # 30/min
             burst_allowance=10,
         ),
-
         # Skill Operations - Generous
         "skill_operations": RateLimitConfig(
             max_tokens=100,
             refill_rate=2.0,  # 120/min
             burst_allowance=20,
         ),
-
         # File System - Very generous (local operations)
         "filesystem": RateLimitConfig(
             max_tokens=200,
@@ -238,7 +235,7 @@ class RateLimiter:
             extra={
                 "correlation_id": get_correlation_id(),
                 "available_limiters": list(self.CONFIGS.keys()),
-            }
+            },
         )
 
     async def get_limiter(self, service: str) -> TokenBucket:
@@ -269,8 +266,8 @@ class RateLimiter:
                         "config": {
                             "max_tokens": config.max_tokens,
                             "refill_rate": config.refill_rate,
-                        }
-                    }
+                        },
+                    },
                 )
 
             return self._limiters[service]
@@ -350,10 +347,13 @@ def rate_limited(service: str, tokens: int = 1):
         service: Service name for rate limiting
         tokens: Number of tokens to acquire
     """
+
     def decorator(func):
         async def wrapper(*args, **kwargs):
             limiter = get_rate_limiter()
             async with limiter.limit(service, tokens):
                 return await func(*args, **kwargs)
+
         return wrapper
+
     return decorator

@@ -1,10 +1,15 @@
 import asyncio
 import json
 import logging
-import pytest
 from io import StringIO
-from cde_orchestrator.infrastructure.logging import configure_logging, get_correlation_id
+
+import pytest
+
+from cde_orchestrator.infrastructure.logging import (
+    get_correlation_id,
+)
 from cde_orchestrator.infrastructure.telemetry import trace_execution
+
 
 @pytest.mark.asyncio
 async def test_trace_execution_async():
@@ -33,6 +38,7 @@ async def test_trace_execution_async():
     # Verify correlation ID was set (we can't easily check the value in the log string with simple formatter,
     # but we can check if get_correlation_id returns something inside the function if we modified the test)
 
+
 @pytest.mark.asyncio
 async def test_correlation_id_propagation():
     # We need to use the JsonFormatter to see the correlation ID in the output
@@ -42,7 +48,7 @@ async def test_correlation_id_propagation():
     handler = logging.StreamHandler(stream)
     handler.setFormatter(JsonFormatter())
     root = logging.getLogger()
-    root.handlers = [] # Clear existing
+    root.handlers = []  # Clear existing
     root.addHandler(handler)
     root.setLevel(logging.INFO)
 
@@ -56,23 +62,24 @@ async def test_correlation_id_propagation():
     assert cid is not None
 
     logs = stream.getvalue()
-    log_lines = [json.loads(line) for line in logs.strip().split('\n')]
+    log_lines = [json.loads(line) for line in logs.strip().split("\n")]
 
     # Check start log
-    assert log_lines[0]['message'] == "Starting execution of traced_func"
-    assert log_lines[0]['correlation_id'] == cid
+    assert log_lines[0]["message"] == "Starting execution of traced_func"
+    assert log_lines[0]["correlation_id"] == cid
 
     # Check inside log
-    assert log_lines[1]['message'] == "Inside function"
-    assert log_lines[1]['correlation_id'] == cid
+    assert log_lines[1]["message"] == "Inside function"
+    assert log_lines[1]["correlation_id"] == cid
 
     # Check metric log (added by trace_execution)
-    assert log_lines[2]['message'].startswith("Metric: execution_time=")
-    assert log_lines[2]['correlation_id'] == cid
+    assert log_lines[2]["message"].startswith("Metric: execution_time=")
+    assert log_lines[2]["correlation_id"] == cid
 
     # Check end log
-    assert log_lines[3]['message'] == "Finished execution of traced_func"
-    assert log_lines[3]['correlation_id'] == cid
+    assert log_lines[3]["message"] == "Finished execution of traced_func"
+    assert log_lines[3]["correlation_id"] == cid
+
 
 def test_trace_execution_sync():
     stream = StringIO()

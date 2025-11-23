@@ -12,22 +12,23 @@ Created: 2025-11-23
 """
 
 import asyncio
+import json
 import logging
+from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Generic
-import json
-from collections import deque
+from typing import Any, Callable, Dict, List, Optional, TypeVar
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class RecoveryStrategy(Enum):
     """Recovery strategies for failed operations."""
+
     RETRY = "retry"
     DLQ = "dead_letter_queue"
     COMPENSATE = "compensate"
@@ -36,6 +37,7 @@ class RecoveryStrategy(Enum):
 
 class OperationStatus(Enum):
     """Status of an operation."""
+
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -48,6 +50,7 @@ class OperationStatus(Enum):
 @dataclass
 class FailedOperation:
     """Represents a failed operation in the DLQ."""
+
     operation_id: str
     operation_type: str
     timestamp: datetime
@@ -82,6 +85,7 @@ class FailedOperation:
 @dataclass
 class CompensatingTransaction:
     """Represents a compensating transaction for rollback."""
+
     transaction_id: str
     operation_id: str
     compensation_func: Callable
@@ -96,8 +100,7 @@ class CompensatingTransaction:
         """Execute the compensating transaction."""
         if self.executed:
             logger.warning(
-                f"Compensating transaction {self.transaction_id} "
-                f"already executed"
+                f"Compensating transaction {self.transaction_id} " f"already executed"
             )
             return self.success
 
@@ -109,13 +112,11 @@ class CompensatingTransaction:
 
             if asyncio.iscoroutinefunction(self.compensation_func):
                 await self.compensation_func(
-                    *self.compensation_args,
-                    **self.compensation_kwargs
+                    *self.compensation_args, **self.compensation_kwargs
                 )
             else:
                 self.compensation_func(
-                    *self.compensation_args,
-                    **self.compensation_kwargs
+                    *self.compensation_args, **self.compensation_kwargs
                 )
 
             self.executed = True
@@ -132,7 +133,7 @@ class CompensatingTransaction:
             self.error = str(e)
             logger.error(
                 f"Compensating transaction {self.transaction_id} failed: {e}",
-                exc_info=True
+                exc_info=True,
             )
             return False
 
@@ -150,7 +151,7 @@ class DeadLetterQueue:
         max_size: int = 1000,
         persistence_path: Optional[Path] = None,
         auto_retry: bool = True,
-        retry_interval: int = 60
+        retry_interval: int = 60,
     ):
         """
         Initialize Dead Letter Queue.
@@ -173,7 +174,7 @@ class DeadLetterQueue:
             "total_failed": 0,
             "total_retried": 0,
             "total_recovered": 0,
-            "total_dlq": 0
+            "total_dlq": 0,
         }
 
         # Load persisted operations if path provided
@@ -186,7 +187,7 @@ class DeadLetterQueue:
         operation_type: str,
         error: Exception,
         context: Dict[str, Any],
-        max_retries: int = 3
+        max_retries: int = 3,
     ) -> FailedOperation:
         """
         Add a failed operation to the DLQ.
@@ -208,7 +209,7 @@ class DeadLetterQueue:
             error=str(error),
             error_type=type(error).__name__,
             context=context,
-            max_retries=max_retries
+            max_retries=max_retries,
         )
 
         self._queue.append(failed_op)
@@ -221,8 +222,8 @@ class DeadLetterQueue:
                 "operation_id": operation_id,
                 "operation_type": operation_type,
                 "error_type": type(error).__name__,
-                "context": context
-            }
+                "context": context,
+            },
         )
 
         # Persist to disk if configured
@@ -242,7 +243,7 @@ class DeadLetterQueue:
             "current_size": len(self._queue),
             "retryable_count": len(self.get_retryable_operations()),
             "by_type": self._get_operations_by_type(),
-            "by_status": self._get_operations_by_status()
+            "by_status": self._get_operations_by_status(),
         }
 
     def _get_operations_by_type(self) -> Dict[str, int]:
@@ -329,12 +330,14 @@ class DeadLetterQueue:
                         "context": op.context,
                         "retry_count": op.retry_count,
                         "max_retries": op.max_retries,
-                        "next_retry": op.next_retry.isoformat() if op.next_retry else None,
-                        "status": op.status.value
+                        "next_retry": (
+                            op.next_retry.isoformat() if op.next_retry else None
+                        ),
+                        "status": op.status.value,
                     }
                     for op in self._queue
                 ],
-                "stats": self._stats
+                "stats": self._stats,
             }
 
             self._persistence_path.parent.mkdir(parents=True, exist_ok=True)
@@ -361,8 +364,12 @@ class DeadLetterQueue:
                     context=op_data["context"],
                     retry_count=op_data["retry_count"],
                     max_retries=op_data["max_retries"],
-                    next_retry=datetime.fromisoformat(op_data["next_retry"]) if op_data["next_retry"] else None,
-                    status=OperationStatus(op_data["status"])
+                    next_retry=(
+                        datetime.fromisoformat(op_data["next_retry"])
+                        if op_data["next_retry"]
+                        else None
+                    ),
+                    status=OperationStatus(op_data["status"]),
                 )
                 self._queue.append(op)
 
@@ -387,15 +394,11 @@ class CompensationManager:
             "total_registered": 0,
             "total_executed": 0,
             "total_successful": 0,
-            "total_failed": 0
+            "total_failed": 0,
         }
 
     def register(
-        self,
-        operation_id: str,
-        compensation_func: Callable,
-        *args,
-        **kwargs
+        self, operation_id: str, compensation_func: Callable, *args, **kwargs
     ) -> str:
         """
         Register a compensating transaction.
@@ -416,7 +419,7 @@ class CompensationManager:
             operation_id=operation_id,
             compensation_func=compensation_func,
             compensation_args=args,
-            compensation_kwargs=kwargs
+            compensation_kwargs=kwargs,
         )
 
         if operation_id not in self._transactions:
@@ -478,7 +481,9 @@ class CompensationManager:
         return {
             **self._stats,
             "pending_operations": len(self._transactions),
-            "pending_transactions": sum(len(txs) for txs in self._transactions.values())
+            "pending_transactions": sum(
+                len(txs) for txs in self._transactions.values()
+            ),
         }
 
 

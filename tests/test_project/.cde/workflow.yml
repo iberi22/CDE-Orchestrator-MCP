@@ -14,7 +14,7 @@ phases:
     outputs:
       - specification
       - acceptance_criteria
-  
+
   - id: decompose
     name: Decompose
     description: Break feature into tasks
@@ -25,7 +25,7 @@ phases:
     outputs:
       - tasks
       - dependencies
-  
+
   - id: design
     name: Design
     description: Create technical design
@@ -37,7 +37,7 @@ phases:
     outputs:
       - technical_design
       - file_changes
-  
+
   - id: implement
     name: Implement
     description: Write code
@@ -48,7 +48,7 @@ phases:
     outputs:
       - code_changes
       - files_modified
-  
+
   - id: test
     name: Test
     description: Create and run tests
@@ -59,7 +59,7 @@ phases:
     outputs:
       - test_files
       - test_results
-  
+
   - id: review
     name: Review
     description: Code review and QA
@@ -76,19 +76,19 @@ phases:
 workflow_types:
   standard:
     phases: [define, decompose, design, implement, test, review]
-  
+
   quick-fix:
     phases: [implement, test]
     skip: [define, decompose, design, review]
-  
+
   research:
     phases: [define, decompose, design]
     skip: [implement, test, review]
-  
+
   documentation:
     phases: [define, design]
     skip: [decompose, implement, test, review]
-  
+
   hotfix:
     phases: [implement]
     skip: [define, decompose, design, test, review]

@@ -18,9 +18,9 @@ from .onboarding import cde_onboardingProject, cde_publishOnboarding, cde_setupP
 from .orchestration import (
     cde_selectWorkflow,
     cde_sourceSkill,
-    cde_updateSkill,
     cde_startFeature,
     cde_submitWork,
+    cde_updateSkill,
 )
 from .recipes import cde_checkRecipes, cde_downloadRecipes
 from .test_progress import cde_testProgressReporting

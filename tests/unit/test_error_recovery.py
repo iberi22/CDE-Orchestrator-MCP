@@ -9,21 +9,21 @@ Tests:
 """
 
 import asyncio
-import pytest
+import json
+import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
-import tempfile
-import json
+
+import pytest
 
 from cde_orchestrator.infrastructure.error_recovery import (
-    DeadLetterQueue,
-    CompensationManager,
-    FailedOperation,
     CompensatingTransaction,
+    CompensationManager,
+    DeadLetterQueue,
+    FailedOperation,
     OperationStatus,
-    RecoveryStrategy,
+    get_compensation_manager,
     get_dlq,
-    get_compensation_manager
 )
 
 
@@ -39,7 +39,7 @@ class TestFailedOperation:
             error="Test error",
             error_type="TestError",
             context={},
-            max_retries=3
+            max_retries=3,
         )
 
         assert op.can_retry()
@@ -55,7 +55,7 @@ class TestFailedOperation:
             error_type="TestError",
             context={},
             max_retries=3,
-            retry_count=3
+            retry_count=3,
         )
 
         assert not op.can_retry()
@@ -70,7 +70,7 @@ class TestFailedOperation:
             error_type="TestError",
             context={},
             max_retries=3,
-            next_retry=datetime.now() + timedelta(hours=1)
+            next_retry=datetime.now() + timedelta(hours=1),
         )
 
         assert not op.can_retry()
@@ -84,7 +84,7 @@ class TestFailedOperation:
             error="Test error",
             error_type="TestError",
             context={},
-            max_retries=3
+            max_retries=3,
         )
 
         # First retry: 60 seconds
@@ -115,7 +115,7 @@ class TestDeadLetterQueue:
             operation_type="skill_sourcing",
             error=error,
             context={"skill": "test-skill"},
-            max_retries=3
+            max_retries=3,
         )
 
         assert op.operation_id == "test-1"
@@ -140,7 +140,7 @@ class TestDeadLetterQueue:
                 operation_id=f"test-{i}",
                 operation_type="test",
                 error=ValueError(f"Error {i}"),
-                context={}
+                context={},
             )
 
         # Only last 3 should remain
@@ -158,7 +158,7 @@ class TestDeadLetterQueue:
             operation_type="test",
             error=ValueError("Error 1"),
             context={},
-            max_retries=3
+            max_retries=3,
         )
 
         # Add operation that cannot be retried (max retries reached)
@@ -167,7 +167,7 @@ class TestDeadLetterQueue:
             operation_type="test",
             error=ValueError("Error 2"),
             context={},
-            max_retries=1
+            max_retries=1,
         )
         op2.retry_count = 1
 
@@ -223,7 +223,7 @@ class TestDeadLetterQueue:
             operation_type="test",
             error=ValueError("Error"),
             context={},
-            max_retries=3
+            max_retries=3,
         )
 
         await dlq.start_auto_retry()
@@ -287,7 +287,7 @@ class TestCompensatingTransaction:
             transaction_id="tx-1",
             operation_id="op-1",
             compensation_func=compensation_func,
-            compensation_args=("test",)
+            compensation_args=("test",),
         )
 
         success = await transaction.execute()
@@ -309,7 +309,7 @@ class TestCompensatingTransaction:
             transaction_id="tx-1",
             operation_id="op-1",
             compensation_func=compensation_func,
-            compensation_args=("test",)
+            compensation_args=("test",),
         )
 
         success = await transaction.execute()
@@ -322,13 +322,14 @@ class TestCompensatingTransaction:
     @pytest.mark.asyncio
     async def test_execute_with_error(self):
         """Test compensation function that raises error."""
+
         def compensation_func():
             raise ValueError("Compensation failed")
 
         transaction = CompensatingTransaction(
             transaction_id="tx-1",
             operation_id="op-1",
-            compensation_func=compensation_func
+            compensation_func=compensation_func,
         )
 
         success = await transaction.execute()
@@ -349,7 +350,7 @@ class TestCompensatingTransaction:
         transaction = CompensatingTransaction(
             transaction_id="tx-1",
             operation_id="op-1",
-            compensation_func=compensation_func
+            compensation_func=compensation_func,
         )
 
         # Execute twice
@@ -532,13 +533,7 @@ class TestIntegrationScenarios:
         dlq = DeadLetterQueue()
 
         # Add operation with max_retries=3
-        op = dlq.add(
-            "op-1",
-            "test",
-            ValueError("Temporary error"),
-            {},
-            max_retries=3
-        )
+        op = dlq.add("op-1", "test", ValueError("Temporary error"), {}, max_retries=3)
 
         # Verify initial state
         assert op.retry_count == 0

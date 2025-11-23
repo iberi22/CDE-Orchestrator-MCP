@@ -274,7 +274,6 @@ class SkillStorageAdapter:
 
         return True
 
-
     @trace_execution
     async def list_base_skills(self) -> List[SkillMetadata]:
         """

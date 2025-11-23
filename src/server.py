@@ -40,6 +40,7 @@ def _generate_mcp_filesystem() -> None:
     """Generate ./servers/cde/ filesystem on startup."""
     try:
         import asyncio
+
         import mcp_tools
         from cde_orchestrator.application.tools.generate_filesystem_use_case import (
             GenerateFilesystemUseCase,
@@ -49,7 +50,9 @@ def _generate_mcp_filesystem() -> None:
         use_case = GenerateFilesystemUseCase()
 
         # Run async generation in event loop
-        result = asyncio.run(use_case.execute(mcp_tools_module=mcp_tools, output_dir=project_root))
+        result = asyncio.run(
+            use_case.execute(mcp_tools_module=mcp_tools, output_dir=project_root)
+        )
 
         logger.info(f"✅ Generated {result['total_tools']} MCP tool files")
         logger.info(f"📁 Filesystem structure: {result['output_dir']}")
@@ -78,14 +81,16 @@ app.tool()(trace_execution(cde_updateSkill))
 app.tool()(trace_execution(cde_startFeature))
 app.tool()(trace_execution(cde_submitWork))
 app.tool()(trace_execution(cde_downloadRecipes))  # ✅ Download recipes from GitHub
-app.tool()(trace_execution(cde_checkRecipes))     # ✅ Check recipe status
+app.tool()(trace_execution(cde_checkRecipes))  # ✅ Check recipe status
 app.tool()(trace_execution(cde_listAvailableAgents))
 app.tool()(trace_execution(cde_selectAgent))
 app.tool()(trace_execution(cde_executeWithBestAgent))
 app.tool()(trace_execution(cde_executeFullImplementation))  # ✅ Meta-orchestration
 app.tool()(trace_execution(cde_testProgressReporting))  # ✅ Test tool for status bar
 app.tool()(trace_execution(cde_installMcpExtension))  # ✅ Install MCP extension
-app.tool()(trace_execution(cde_searchTools))  # ✅ Progressive tool discovery (Anthropic pattern)
+app.tool()(
+    trace_execution(cde_searchTools)
+)  # ✅ Progressive tool discovery (Anthropic pattern)
 app.tool()(trace_execution(cde_healthCheck))  # ✅ Health monitoring (PROD-03)
 
 

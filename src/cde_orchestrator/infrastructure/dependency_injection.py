@@ -2,16 +2,16 @@
 import logging
 from typing import Optional
 
+from ..adapters.filesystem_project_repository import FileSystemProjectRepository
+from ..adapters.prompt.prompt_adapter import PromptAdapter
 from ..adapters.recipe.filesystem_recipe_repository import FileSystemRecipeRepository
 from ..adapters.state.filesystem_state_repository import FileSystemStateRepository
 from ..adapters.workflow.yaml_workflow_repository import YAMLWorkflowRepository
-from ..adapters.filesystem_project_repository import FileSystemProjectRepository
-from ..adapters.prompt.prompt_adapter import PromptAdapter
+from ..application.orchestration.skill_sourcing_use_case import SkillSourcingUseCase
 from ..application.use_cases.manage_state import ManageStateUseCase
 from ..application.use_cases.select_workflow import SelectWorkflowUseCase
 from ..application.use_cases.start_feature import StartFeatureUseCase
 from ..application.use_cases.submit_work import SubmitWorkUseCase
-from ..application.orchestration.skill_sourcing_use_case import SkillSourcingUseCase
 from ..domain.services.recipe_service import RecipeService
 
 logger = logging.getLogger(__name__)
@@ -73,13 +73,13 @@ class DIContainer:
         self.start_feature_use_case = StartFeatureUseCase(
             self.project_repository,
             lambda path: YAMLWorkflowRepository(path),
-            self.prompt_adapter
+            self.prompt_adapter,
         )
 
         self.submit_work_use_case = SubmitWorkUseCase(
             self.project_repository,
             lambda path: YAMLWorkflowRepository(path),
-            self.prompt_adapter
+            self.prompt_adapter,
         )
 
         self.skill_sourcing_use_case = SkillSourcingUseCase()
@@ -131,42 +131,55 @@ Please provide a detailed specification including:
                             "description": "Define the feature specification",
                             "handler": "human_input",
                             "prompt_recipe": "prompts/define.poml",
-                            "outputs": [{"type": "markdown", "path": "specs/features/feature.md"}]
+                            "outputs": [
+                                {
+                                    "type": "markdown",
+                                    "path": "specs/features/feature.md",
+                                }
+                            ],
                         },
                         {
                             "id": "decompose",
                             "description": "Break down into tasks",
                             "handler": "agent",
-                            "prompt_recipe": "prompts/define.poml", # Reusing for demo
-                            "outputs": [{"type": "markdown", "path": "specs/tasks/tasks.md"}]
+                            "prompt_recipe": "prompts/define.poml",  # Reusing for demo
+                            "outputs": [
+                                {"type": "markdown", "path": "specs/tasks/tasks.md"}
+                            ],
                         },
                         {
                             "id": "design",
                             "description": "Technical design",
                             "handler": "agent",
                             "prompt_recipe": "prompts/define.poml",
-                            "outputs": [{"type": "markdown", "path": "specs/design/design.md"}]
+                            "outputs": [
+                                {"type": "markdown", "path": "specs/design/design.md"}
+                            ],
                         },
                         {
                             "id": "implement",
                             "description": "Implement code",
                             "handler": "agent",
                             "prompt_recipe": "prompts/define.poml",
-                            "outputs": [{"type": "code", "path": "src/"}]
+                            "outputs": [{"type": "code", "path": "src/"}],
                         },
                         {
                             "id": "test",
                             "description": "Run tests",
                             "handler": "agent",
                             "prompt_recipe": "prompts/define.poml",
-                            "outputs": [{"type": "report", "path": "reports/test_results.json"}]
+                            "outputs": [
+                                {"type": "report", "path": "reports/test_results.json"}
+                            ],
                         },
                         {
                             "id": "review",
                             "description": "Review changes",
                             "handler": "human_input",
                             "prompt_recipe": "prompts/define.poml",
-                            "outputs": [{"type": "report", "path": "reports/review.md"}]
+                            "outputs": [
+                                {"type": "report", "path": "reports/review.md"}
+                            ],
                         },
                     ],
                 }

@@ -12,7 +12,9 @@ from ._base import tool_handler
 
 
 @tool_handler
-async def cde_searchTools(query: str = "", detail_level: str = "name_and_description") -> str:
+async def cde_searchTools(
+    query: str = "", detail_level: str = "name_and_description"
+) -> str:
     """
     Search available CDE tools by keyword with progressive detail levels.
 

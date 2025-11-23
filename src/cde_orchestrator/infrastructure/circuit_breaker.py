@@ -115,7 +115,9 @@ class CircuitBreaker:
             # Check if we should transition from OPEN to HALF_OPEN
             if self._state == CircuitState.OPEN:
                 if self._should_attempt_reset():
-                    logger.info(f"Circuit breaker '{self.name}' entering HALF_OPEN state")
+                    logger.info(
+                        f"Circuit breaker '{self.name}' entering HALF_OPEN state"
+                    )
                     self._state = CircuitState.HALF_OPEN
                     self._half_open_calls = 0
                 else:
@@ -150,7 +152,7 @@ class CircuitBreaker:
             result = await func(*args, **kwargs)
             await self._on_success()
             return result
-        except self.expected_exception as e:
+        except self.expected_exception:
             await self._on_failure()
             raise
         finally:
@@ -171,7 +173,9 @@ class CircuitBreaker:
             self._success_count += 1
 
             if self._state == CircuitState.HALF_OPEN:
-                logger.info(f"Circuit breaker '{self.name}' closing (service recovered)")
+                logger.info(
+                    f"Circuit breaker '{self.name}' closing (service recovered)"
+                )
                 self._state = CircuitState.CLOSED
                 log_metric(
                     "circuit_breaker_closed",

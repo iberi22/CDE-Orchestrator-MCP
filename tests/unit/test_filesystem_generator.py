@@ -31,7 +31,9 @@ class TestFilesystemGenerator:
         """Test that generator creates ./servers/cde/ directory."""
         generator = MCPToolFilesystemGenerator()
 
-        result = await generator.generate(mcp_tools_module=mcp_tools, output_dir=tmp_path)
+        result = await generator.generate(
+            mcp_tools_module=mcp_tools, output_dir=tmp_path
+        )
 
         assert (tmp_path / "servers" / "cde").exists()
         assert result["status"] == "success"
@@ -40,7 +42,9 @@ class TestFilesystemGenerator:
         """Test that one .py file is created per MCP tool."""
         generator = MCPToolFilesystemGenerator()
 
-        result = await generator.generate(mcp_tools_module=mcp_tools, output_dir=tmp_path)
+        result = await generator.generate(
+            mcp_tools_module=mcp_tools, output_dir=tmp_path
+        )
 
         # Should have at least 15 tools (current count)
         assert result["total_tools"] >= 15
