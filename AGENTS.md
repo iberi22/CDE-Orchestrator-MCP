@@ -1,24 +1,25 @@
 ---
-title: "CDE Orchestrator MCP - AI Agent Instructions"
-description: "Instructions for AI coding agents working with CDE Orchestrator MCP server"
+title: "Nexus AI - AI Agent Instructions"
+description: "Instructions for AI coding agents working with Nexus AI (formerly CDE Orchestrator)"
 type: guide
 status: active
 created: "2025-11-02"
-updated: "2025-11-09"
-author: "CDE Team"
+updated: "2025-11-23"
+author: "Nexus AI Team"
 tags:
   - agents
   - api
   - mcp-tools
   - orchestration
-  - dual-mode-julius
+  - nexus-ai
+  - ceo-agent
   - progressive-disclosure
   - multi-project
   - token-optimization
 llm_summary: |
-  Instructions for AI agents using CDE Orchestrator MCP.
-  Explains MCP-first workflow, tool contracts, dual-mode Jules (API + CLI), progressive disclosure (99.7% token reduction), and governance rules.
-  Reference for GitHub Copilot, Cursor, Windsurf, and other AI assistants. Focus on professional single-project management.
+  Instructions for AI agents using Nexus AI (formerly CDE Orchestrator).
+  Explains the AI CEO workflow, tool contracts, and governance.
+  Reference for GitHub Copilot, Cursor, Windsurf, and other AI assistants.
 ---
 
 ## 🚨 CRITICAL DOCUMENTATION RULE (2025-11-09)
@@ -36,39 +37,30 @@ llm_summary: |
 
 ---
 
-# CDE Orchestrator MCP - AI Agent Instructions# CDE Orchestrator MCP - Agent Instructions
+# Nexus AI - Agent Instructions
 
-> **Format**: AGENTS.md (OpenAI Standard)  > **Format**: AGENTS.md (OpenAI Standard)
+> **Format**: AGENTS.md (OpenAI Standard)
+> **Target**: AI Coding Agents (Cursor, Windsurf, Aider, Claude Desktop, Gemini, etc.)
+> **Last Updated**: 2025-11-23
+> **Priority**: AI CEO Orchestration
 
-> **Target**: AI Coding Agents (Cursor, Windsurf, Aider, Claude Desktop, Gemini, etc.)  > **Target**: AI Coding Agents (Cursor, Windsurf, Aider, Bolt, etc.)
+---
 
-> **Last Updated**: 2025-11-02  > **Last Updated**: 2025-11-02
+## 🎯 Project Overview
 
-> **Priority**: MCP-First Workflow Orchestration> **Priority**: High-level guidelines & MCP-first workflows
+**What**: Nexus AI (formerly CDE Orchestrator) is an **AI CEO** system that manages software development.
+**Role**: It acts as your manager. You are the "Employee" agent.
+**Architecture**: Hexagonal (Ports & Adapters) / Clean Architecture + LLM-First Documentation
+**Language**: Python 3.14, FastMCP framework
 
-------
+**🆕 NEW**: Nexus AI now acts as your **intelligent orchestrator** - you interact with it via MCP tools, and it:
+1.  Analyzes your requests and selects optimal workflows automatically
+2.  Downloads and updates skills from external repositories
+3.  Performs web research to keep knowledge current
+4.  Manages documentation following Spec-Kit governance
 
-## 🎯 Core Philosophy: MCP-First Development## 🎯 Project Overview
-
-**CRITICAL**: You are an AI agent working with the **CDE Orchestrator MCP server**. Instead of making direct file changes or running commands immediately, you **converse with the MCP** to:**What**: MCP server implementing Context-Driven Engineering for AI-powered development
-
-**Scale**: Manages 1000+ projects, orchestrates workflows, invokes Copilot CLI headless
-
-1. **Analyze user requests** → MCP selects optimal workflow + recipe + skills**Architecture**: Hexagonal (Ports & Adapters) / Clean Architecture + LLM-First Documentation
-
-2. **Execute workflows** → MCP orchestrates phases (define → decompose → design → implement → test → review)**Language**: Python 3.14, FastMCP framework
-
-3. **Source knowledge** → MCP downloads skills from external repos + performs web research
-
-4. **Manage documentation** → MCP enforces Spec-Kit governance (metadata, structure, linking)**🆕 NEW**: This MCP server now acts as your **intelligent orchestrator** - you interact with it via MCP tools, and it:
-
-1. Analyzes your requests and selects optimal workflows automatically
-
-**Your Role**: Interpret user intent, invoke MCP tools, execute recommended workflows, report results.2. Downloads and updates skills from external repositories
-
-3. Performs web research to keep knowledge current
-
-**MCP's Role**: Intelligent orchestration, skill management, workflow routing, documentation governance.4. Manages documentation following Spec-Kit governance
+**Your Role**: Interpret user intent, invoke MCP tools, execute recommended workflows, report results.
+**Nexus AI's Role**: Intelligent orchestration, skill management, workflow routing, documentation governance.
 
 ------
 

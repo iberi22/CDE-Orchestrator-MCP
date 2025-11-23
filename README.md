@@ -1,34 +1,42 @@
 ---
-title: CDE Orchestrator MCP
+title: Nexus AI (formerly CDE Orchestrator)
 description: '[![CI](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/workflows/ci.yml/badge.svg)](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/wo'
 type: guide
 status: active
 created: '2025-11-02'
-updated: '2025-11-09'
-author: CDE Team
+updated: '2025-11-23'
+author: Nexus AI Team
 tags:
 - api
 - architecture
 - documentation
 - mcp
-- migration
 - orchestration
-- progressive-disclosure
-- token-optimization
-- multi-project
-llm_summary: "User guide for CDE Orchestrator MCP focusing on professional single-project management.\n
-  Implements deep context awareness and robust workflow orchestration.\n
-  Reference when working with guide documentation."
+- nexus-ai
+- ceo-agent
+- multi-agent
+llm_summary: "User guide for Nexus AI (formerly CDE Orchestrator).
+  The AI CEO that manages software development like a company.
+  Orchestrates agents, manages high-availability tools, and runs in Docker."
 ---
 
-# CDE Orchestrator MCP
+# Nexus AI (formerly CDE Orchestrator)
 
 [![CI](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/workflows/ci.yml/badge.svg)](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/iberi22/CDE-Orchestrator-MCP/branch/main/graph/badge.svg)](https://codecov.io/gh/iberi22/CDE-Orchestrator-MCP)
 [![Python Versions](https://img.shields.io/badge/python-3.14+-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-AGPL3-red)](LICENSE-DUAL.md)
 
-The CDE Orchestrator is the reference implementation of the **Context-Driven Engineering (CDE)** methodology for AI-assisted software development with continuous research and improvement. It is a smart MCP (Model Context Protocol) server designed to guide AI coding assistants through a structured, phase-based software development lifecycle with built-in research, dependency analysis, and project intelligence gathering.
+**Nexus AI** is the evolution of the CDE Orchestrator into a comprehensive **AI CEO** system. It is designed to manage software development projects like a company, orchestrating multiple specialized agents, managing high-availability tools, and running securely within a containerized environment.
+
+## 🧠 The Vision: AI CEO
+
+Nexus AI goes beyond simple tool execution. It acts as the **Chief Executive Officer** of your AI workforce:
+
+*   **Orchestration:** Breaks down complex features into tasks and delegates them to specialized "Employee" agents (Coder, QA, DevOps).
+*   **High Availability:** Ensures tools (web scrapers, linters, test runners) are always available via a scalable worker queue system.
+*   **Internal Runtime:** Runs CLI-based agents (like GitHub Copilot CLI) securely within its own environment (Docker/VPS).
+*   **Context-Driven:** Maintains deep project context and enforces governance across all activities.
 
 ## ⚖️ License - Fair & Ethical
 
@@ -81,13 +89,13 @@ We offer **enterprise-grade services** while keeping the software 100% open sour
 - 🎓 Research institutions managing 100+ projects
 - 💼 Consulting firms needing white-label solutions
 
-📧 **Interested?** Contact us: [enterprise@cde-orchestrator.dev](mailto:enterprise@cde-orchestrator.dev)
+📧 **Interested?** Contact us: [enterprise@nexus-ai.dev](mailto:enterprise@nexus-ai.dev)
 
 📄 **Learn more:** Contact us for full details.
 
 ---
 
-> **📋 Project Status:** Currently in active improvement phase. See [Executive Summary](specs/design/executive_summary_v2.md) for roadmap and [Improvement Roadmap](specs/tasks/improvement-roadmap.md) for detailed tasks.
+> **📋 Project Status:** Transitioning to Nexus AI architecture. See [Roadmap](specs/tasks/roadmap-ceo.md) for the implementation plan.
 
 ## Core Concepts
 
