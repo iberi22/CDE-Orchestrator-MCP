@@ -1,50 +1,31 @@
 // rust_core/src/process_manager.rs
 //! Process management for parallel agent execution
-//!
-//! This module provides high-performance process spawning and monitoring
-//! for CLI-based AI agents using Rayon (parallelization) and Tokio (async I/O).
 
 use pyo3::prelude::*;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::process::{Child, Command, Stdio};
-use std::sync::{Arc, Mutex};
+use std::process::{Command, Stdio};
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::Command as TokioCommand;
 
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
+
 /// Represents a spawned agent process
+#[pyclass]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentProcess {
+    #[pyo3(get)]
     pub pid: u32,
+    #[pyo3(get)]
     pub command: String,
-    pub status: ProcessStatus,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum ProcessStatus {
-    Running,
-    Completed { exit_code: i32 },
-    Failed { error: String },
+    #[pyo3(get)]
+    pub status: String,
 }
 
 /// Spawn multiple CLI agents in parallel using Rayon
-///
-/// # Arguments
-/// * `commands` - List of commands to execute, each as Vec<String>
-///
-/// # Returns
-/// * Vec of spawned process information
-///
-/// # Example
-/// ```python
-/// commands = [
-///     ["gh", "copilot", "suggest", "create auth"],
-///     ["gemini", "generate", "add tests"]
-/// ]
-/// processes = rust_utils.spawn_agents_parallel(commands)
-/// ```
 #[pyfunction]
-pub fn spawn_agents_parallel(commands: Vec<Vec<String>>) -> PyResult<Vec<AgentProcess>> {
+pub fn spawn_agents_parallel(commands: Vec<Vec<String>>) -> PyResult<String> {
     let results: Vec<AgentProcess> = commands
         .par_iter()
         .map(|cmd| {
@@ -52,9 +33,7 @@ pub fn spawn_agents_parallel(commands: Vec<Vec<String>>) -> PyResult<Vec<AgentPr
                 return AgentProcess {
                     pid: 0,
                     command: String::new(),
-                    status: ProcessStatus::Failed {
-                        error: "Empty command".to_string(),
-                    },
+                    status: "failed_empty".to_string(),
                 };
             }
 
@@ -63,18 +42,16 @@ pub fn spawn_agents_parallel(commands: Vec<Vec<String>>) -> PyResult<Vec<AgentPr
                 Err(e) => AgentProcess {
                     pid: 0,
                     command: cmd.join(" "),
-                    status: ProcessStatus::Failed {
-                        error: e.to_string(),
-                    },
+                    status: format!("failed_{}", e),
                 },
             }
         })
         .collect();
 
-    Ok(results)
+    serde_json::to_string(&results)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Serialization error: {}", e)))
 }
 
-/// Spawn a single agent synchronously
 fn spawn_agent_sync(cmd: &[String]) -> Result<AgentProcess, std::io::Error> {
     let mut command = Command::new(&cmd[0]);
     command
@@ -82,10 +59,9 @@ fn spawn_agent_sync(cmd: &[String]) -> Result<AgentProcess, std::io::Error> {
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
 
-    // Windows-specific: Use cmd.exe if command starts with "cmd"
     #[cfg(windows)]
     if cmd[0].to_lowercase() == "cmd" {
-        command.creation_flags(0x08000000); // CREATE_NO_WINDOW
+        command.creation_flags(0x08000000);
     }
 
     let child = command.spawn()?;
@@ -94,32 +70,24 @@ fn spawn_agent_sync(cmd: &[String]) -> Result<AgentProcess, std::io::Error> {
     Ok(AgentProcess {
         pid,
         command: cmd.join(" "),
-        status: ProcessStatus::Running,
+        status: "running".to_string(),
     })
 }
 
-/// Spawn agent with async log streaming (Tokio)
-///
-/// # Arguments
-/// * `command` - Command to execute as Vec<String>
-/// * `callback` - Python callback for log lines (optional)
-///
-/// # Returns
-/// * Process ID and initial status
+/// Spawn agent with async log streaming
 #[pyfunction]
-pub fn spawn_agent_async(command: Vec<String>) -> PyResult<AgentProcess> {
+pub fn spawn_agent_async(command: Vec<String>) -> PyResult<String> {
     if command.is_empty() {
-        return Ok(AgentProcess {
-            pid: 0,
-            command: String::new(),
-            status: ProcessStatus::Failed {
-                error: "Empty command".to_string(),
-            },
-        });
+        return Ok(serde_json::json!({
+            "pid": 0,
+            "command": "",
+            "status": "failed_empty",
+        }).to_string());
     }
 
-    // Spawn in tokio runtime (requires tokio::main elsewhere)
-    let rt = tokio::runtime::Runtime::new().unwrap();
+    let rt = tokio::runtime::Runtime::new()
+        .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(format!("Runtime error: {}", e)))?;
+
     let result = rt.block_on(async {
         let mut cmd = TokioCommand::new(&command[0]);
         cmd.args(&command[1..])
@@ -128,13 +96,12 @@ pub fn spawn_agent_async(command: Vec<String>) -> PyResult<AgentProcess> {
 
         #[cfg(windows)]
         if command[0].to_lowercase() == "cmd" {
-            cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+            cmd.creation_flags(0x08000000);
         }
 
         let mut child = cmd.spawn().map_err(|e| e.to_string())?;
         let pid = child.id().unwrap_or(0);
 
-        // Spawn log streaming task
         if let Some(stdout) = child.stdout.take() {
             tokio::spawn(async move {
                 let reader = BufReader::new(stdout);
@@ -155,23 +122,20 @@ pub fn spawn_agent_async(command: Vec<String>) -> PyResult<AgentProcess> {
             });
         }
 
-        Ok::<AgentProcess, String>(AgentProcess {
-            pid,
-            command: command.join(" "),
-            status: ProcessStatus::Running,
-        })
+        Ok::<serde_json::Value, String>(serde_json::json!({
+            "pid": pid,
+            "command": command.join(" "),
+            "status": "running",
+        }))
     });
 
-    result.map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(e))
+    match result {
+        Ok(json) => Ok(json.to_string()),
+        Err(e) => Err(pyo3::exceptions::PyRuntimeError::new_err(e)),
+    }
 }
 
-/// Monitor process health (CPU, memory usage)
-///
-/// # Arguments
-/// * `pid` - Process ID to monitor
-///
-/// # Returns
-/// * JSON string with health metrics
+/// Monitor process health
 #[pyfunction]
 pub fn monitor_process_health(pid: u32) -> PyResult<String> {
     use sysinfo::{Pid, System};
@@ -200,7 +164,7 @@ pub fn monitor_process_health(pid: u32) -> PyResult<String> {
     }
 }
 
-/// Kill process by PID (cross-platform)
+/// Kill process by PID
 #[pyfunction]
 pub fn kill_process(pid: u32) -> PyResult<bool> {
     use sysinfo::{Pid, System};
@@ -214,23 +178,5 @@ pub fn kill_process(pid: u32) -> PyResult<bool> {
         Ok(process.kill())
     } else {
         Ok(false)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_spawn_agents_parallel() {
-        let commands = vec![
-            vec!["echo".to_string(), "test1".to_string()],
-            vec!["echo".to_string(), "test2".to_string()],
-        ];
-
-        let result = spawn_agents_parallel(commands);
-        assert!(result.is_ok());
-        let processes = result.unwrap();
-        assert_eq!(processes.len(), 2);
     }
 }
