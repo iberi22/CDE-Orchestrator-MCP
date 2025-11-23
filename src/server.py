@@ -10,6 +10,7 @@ from cde_orchestrator.infrastructure.telemetry import trace_execution
 from mcp_tools import (
     cde_analyzeDocumentation,
     cde_checkRecipes,
+    cde_delegateToJules,
     cde_downloadRecipes,
     cde_executeWithBestAgent,
     cde_healthCheck,
@@ -90,6 +91,7 @@ app.tool()(trace_execution(cde_downloadRecipes))  # ✅ Download recipes from Gi
 app.tool()(trace_execution(cde_checkRecipes))  # ✅ Check recipe status
 app.tool()(trace_execution(cde_listAvailableAgents))
 app.tool()(trace_execution(cde_selectAgent))
+app.tool()(trace_execution(cde_delegateToJules))  # ✅ Jules AI agent delegation
 app.tool()(trace_execution(cde_executeWithBestAgent))
 app.tool()(trace_execution(cde_executeFullImplementation))  # ✅ Meta-orchestration
 app.tool()(trace_execution(cde_testProgressReporting))  # ✅ Test tool for status bar

@@ -14,7 +14,7 @@ from ._base import tool_handler
 
 
 @tool_handler
-def cde_downloadRecipes(
+async def cde_downloadRecipes(
     project_path: str = ".",
     repo_url: str = "https://github.com/iberi22/agents-flows-recipes",
     branch: str = "main",
@@ -129,8 +129,8 @@ def cde_downloadRecipes(
     # Create use case
     use_case = RecipeDownloaderUseCase(downloader=downloader)
 
-    # Execute download
-    result = use_case.execute(
+    # Execute download (async call)
+    result = await use_case.execute(
         project_path=project_path, repo_url=repo_url, branch=branch, force=force
     )
 

@@ -57,7 +57,7 @@ llm_summary: |
 
 ### Validation Results ✅
 
-**Date:** 2025-11-23  
+**Date:** 2025-11-23
 **Script:** `scripts/validate_phase1.py`
 
 ```text
@@ -87,8 +87,8 @@ llm_summary: |
 
 **Goal:** Deploy Nexus AI as a portable, self-contained service.
 
-**Status:** Ready to start - Phase 1 validated  
-**Estimated Duration:** 4-6 hours  
+**Status:** Ready to start - Phase 1 validated
+**Estimated Duration:** 4-6 hours
 **Priority:** HIGH (natural next step)
 
 ### Tasks Breakdown
@@ -107,7 +107,7 @@ llm_summary: |
   - [ ] Copy application code: `COPY src/ ./src/`
   - [ ] Expose port 8000 for FastMCP server
   - [ ] Set entrypoint: `CMD ["python", "src/server.py"]`
-  
+
 - [ ] **Multi-stage Build (Optimization):**
   ```dockerfile
   # Stage 1: Rust builder
@@ -115,7 +115,7 @@ llm_summary: |
   WORKDIR /build
   COPY rust_core/ ./
   RUN cargo build --release
-  
+
   # Stage 2: Python runtime
   FROM python:3.14-slim
   COPY --from=rust-builder /build/target/release/*.so /app/
@@ -148,7 +148,7 @@ llm_summary: |
         - redis
         - postgres
       restart: unless-stopped
-      
+
     redis:
       image: redis:7-alpine
       container_name: nexus-redis
@@ -157,7 +157,7 @@ llm_summary: |
       volumes:
         - redis-data:/data
       restart: unless-stopped
-      
+
     postgres:
       image: postgres:16-alpine
       container_name: nexus-postgres
@@ -170,7 +170,7 @@ llm_summary: |
       volumes:
         - postgres-data:/var/lib/postgresql/data
       restart: unless-stopped
-  
+
   volumes:
     nexus-state:
     redis-data:
@@ -182,12 +182,12 @@ llm_summary: |
 - [ ] **Project Workspace Mounts:**
   - [ ] Document how to mount external projects: `-v /path/to/projects:/app/workspaces`
   - [ ] Configure read/write permissions (avoid root user issues)
-  
+
 - [ ] **Authentication Mounts:**
   - [ ] GitHub CLI: `~/.config/gh:/root/.config/gh:ro`
   - [ ] Environment variables: Create `.env.docker` template
   - [ ] Secrets management: Document secure practices
-  
+
 - [ ] **State Persistence:**
   - [ ] `.cde/state.json` → Named volume `nexus-state`
   - [ ] Logs → Volume or stdout/stderr (container logs)
@@ -199,7 +199,7 @@ llm_summary: |
   - [ ] Create custom bridge network for service communication
   - [ ] Isolate services (CEO, Redis, Postgres)
   - [ ] Expose only necessary ports to host
-  
+
 - [ ] **Security Hardening:**
   - [ ] Run as non-root user in container
   - [ ] Set resource limits (CPU, memory)
@@ -214,7 +214,7 @@ llm_summary: |
   docker-compose up -d
   docker-compose logs -f nexus-core
   ```
-  
+
 - [ ] **Validation Checklist:**
   - [ ] Container starts without errors
   - [ ] FastMCP server responds on port 8000
@@ -224,7 +224,7 @@ llm_summary: |
   - [ ] AgentManager initializes with 3 workers
   - [ ] MCP tools callable from external client
   - [ ] Task delegation works across container restart
-  
+
 - [ ] **Integration Tests:**
   - [ ] Run `scripts/validate_phase1.py` inside container
   - [ ] Test volume persistence (create task, restart container, verify state)
@@ -237,20 +237,20 @@ llm_summary: |
   - [ ] Environment variable reference
   - [ ] Volume mounting examples
   - [ ] Troubleshooting common issues
-  
+
 - [ ] **Update `README.md`:**
   - [ ] Add Docker installation instructions
   - [ ] Add docker-compose usage examples
-  
+
 - [ ] **Create `docker/.env.example`:**
   ```bash
   # Database
   DB_PASSWORD=your_secure_password_here
-  
+
   # MCP Server
   LOG_LEVEL=INFO
   WORKER_POOL_SIZE=3
-  
+
   # GitHub CLI (if not using volume mount)
   GITHUB_TOKEN=ghp_xxxxxxxxxxxxx
   ```

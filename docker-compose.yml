@@ -19,26 +19,26 @@ services:
       dockerfile: Dockerfile
     container_name: nexus-ai-ceo
     hostname: nexus-core
-    
+
     # Port mapping
     ports:
       - "8000:8000"  # FastMCP server
-    
+
     # Volume mounts
     volumes:
       # Project workspaces (read-write)
       - ./workspaces:/app/workspaces
-      
+
       # Persistent state
       - nexus-state:/app/.cde
-      
+
       # GitHub CLI authentication (read-only)
       # Mount your local GitHub config for CLI access
       - ~/.config/gh:/home/nexus/.config/gh:ro
-      
+
       # Logs
       - nexus-logs:/app/logs
-    
+
     # Environment variables
     environment:
       - REDIS_URL=redis://redis:6379
@@ -47,17 +47,17 @@ services:
       - WORKER_POOL_SIZE=${WORKER_POOL_SIZE:-3}
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
-    
+
     # Dependencies
     depends_on:
       redis:
         condition: service_healthy
       postgres:
         condition: service_healthy
-    
+
     # Restart policy
     restart: unless-stopped
-    
+
     # Resource limits
     deploy:
       resources:
@@ -67,11 +67,11 @@ services:
         reservations:
           cpus: '0.5'
           memory: 512M
-    
+
     # Networks
     networks:
       - nexus-network
-    
+
     # Health check
     healthcheck:
       test: ["CMD", "python", "-c", "import cde_rust_core; print('OK')"]
@@ -87,20 +87,20 @@ services:
     image: redis:7-alpine
     container_name: nexus-redis
     hostname: redis
-    
+
     ports:
       - "6379:6379"
-    
+
     volumes:
       - redis-data:/data
-    
+
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
-    
+
     restart: unless-stopped
-    
+
     networks:
       - nexus-network
-    
+
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -115,24 +115,24 @@ services:
     image: postgres:16-alpine
     container_name: nexus-postgres
     hostname: postgres
-    
+
     ports:
       - "5432:5432"
-    
+
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    
+
     environment:
       POSTGRES_DB: nexus
       POSTGRES_USER: nexus
       POSTGRES_PASSWORD: ${DB_PASSWORD:-nexusdev}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
-    
+
     restart: unless-stopped
-    
+
     networks:
       - nexus-network
-    
+
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U nexus"]
       interval: 10s
@@ -147,15 +147,15 @@ volumes:
   nexus-state:
     driver: local
     name: nexus-state
-  
+
   nexus-logs:
     driver: local
     name: nexus-logs
-  
+
   redis-data:
     driver: local
     name: nexus-redis-data
-  
+
   postgres-data:
     driver: local
     name: nexus-postgres-data
