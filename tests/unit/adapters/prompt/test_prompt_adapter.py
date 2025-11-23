@@ -19,7 +19,8 @@ def prompt_dir(tmp_path):
     return tmp_path / "prompts"
 
 
-def test_load_and_prepare_success(prompt_dir):
+@pytest.mark.asyncio
+async def test_load_and_prepare_success(prompt_dir):
     """Tests successful loading and preparation of a simple prompt."""
     poml_content = "Hello, {{USER_PROMPT}}!"
     poml_path = prompt_dir / "hello.poml"
@@ -28,11 +29,12 @@ def test_load_and_prepare_success(prompt_dir):
     adapter = PromptAdapter(prompt_dir=prompt_dir)
     context = {"USER_PROMPT": "World"}
 
-    result = adapter.load_and_prepare(poml_path, context)
+    result = await adapter.load_and_prepare(poml_path, context)
     assert result == "Hello, World!"
 
 
-def test_sanitize_value(prompt_dir):
+@pytest.mark.asyncio
+async def test_sanitize_value(prompt_dir):
     """Tests that context values are properly sanitized."""
     poml_content = "Data: {{USER_PROMPT}}"
     poml_path = prompt_dir / "sanitize.poml"
@@ -41,12 +43,13 @@ def test_sanitize_value(prompt_dir):
     adapter = PromptAdapter(prompt_dir=prompt_dir)
     context = {"USER_PROMPT": "<script>alert('xss')</script>"}
 
-    result = adapter.load_and_prepare(poml_path, context)
+    result = await adapter.load_and_prepare(poml_path, context)
     assert "<script>" not in result
     assert "&lt;script&gt;" in result
 
 
-def test_disallowed_placeholder_raises_error(prompt_dir):
+@pytest.mark.asyncio
+async def test_disallowed_placeholder_raises_error(prompt_dir):
     """Tests that a prompt with a disallowed placeholder raises an error."""
     poml_content = "Secret: {{SECRET_KEY}}"
     poml_path = prompt_dir / "disallowed.poml"
@@ -58,10 +61,11 @@ def test_disallowed_placeholder_raises_error(prompt_dir):
     with pytest.raises(
         PromptValidationError, match="Found placeholders not in whitelist"
     ):
-        adapter.load_and_prepare(poml_path, context)
+        await adapter.load_and_prepare(poml_path, context)
 
 
-def test_missing_context_key_raises_error(prompt_dir):
+@pytest.mark.asyncio
+async def test_missing_context_key_raises_error(prompt_dir):
     """Tests that a missing context key raises an error."""
     poml_content = "Hello, {{USER_PROMPT}}!"
     poml_path = prompt_dir / "missing.poml"
@@ -71,11 +75,12 @@ def test_missing_context_key_raises_error(prompt_dir):
     context = {"WRONG_KEY": "World"}
 
     with pytest.raises(PromptValidationError, match="requires context keys"):
-        adapter.load_and_prepare(poml_path, context)
+        await adapter.load_and_prepare(poml_path, context)
 
 
-def test_prompt_file_not_found_raises_error(prompt_dir):
+@pytest.mark.asyncio
+async def test_prompt_file_not_found_raises_error(prompt_dir):
     """Tests that a non-existent prompt file raises an error."""
     adapter = PromptAdapter(prompt_dir=prompt_dir)
     with pytest.raises(FileNotFoundError):
-        adapter.load_and_prepare(Path("nonexistent.poml"), {})
+        await adapter.load_and_prepare(Path("nonexistent.poml"), {})

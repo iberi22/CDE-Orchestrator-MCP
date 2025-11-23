@@ -9,6 +9,7 @@ Downloads and adapts skills from external repositories:
 Transforms external formats to CDE-compatible skill markdown.
 """
 
+import json
 import re
 from dataclasses import dataclass
 from datetime import datetime
@@ -16,6 +17,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import aiohttp
+import aiofiles
 
 
 @dataclass
@@ -58,6 +60,8 @@ class SkillSourcingUseCase:
     AWESOME_CLAUDE_SKILLS_RAW = (
         "https://raw.githubusercontent.com/travisvn/awesome-claude-skills/main"
     )
+    ANTHROPICS_SKILLS_RAW = "https://raw.githubusercontent.com/anthropics/skills/main"
+    OBRA_SUPERPOWERS_RAW = "https://raw.githubusercontent.com/obra/superpowers/main"
 
     # Category mappings from external format to CDE format
     CATEGORY_MAPPING = {
@@ -124,7 +128,8 @@ class SkillSourcingUseCase:
         saved_files = []
         for adaptation in adapted_skills:
             file_path = destination_path / f"{adaptation.skill_name}.md"
-            file_path.write_text(adaptation.content, encoding="utf-8")
+            async with aiofiles.open(file_path, "w", encoding="utf-8") as f:
+                await f.write(adaptation.content)
             saved_files.append(str(file_path))
 
         return {
@@ -155,87 +160,144 @@ class SkillSourcingUseCase:
             List of matching external skills
         """
         if source == "awesome-claude-skills":
-            return await self._search_awesome_claude_skills(query)
+            return await self._search_repo_readme(
+                query,
+                self.AWESOME_CLAUDE_SKILLS_RAW,
+                "awesome_claude_skills"
+            )
+        elif source == "anthropics-skills":
+            return await self._search_repo_readme(
+                query,
+                self.ANTHROPICS_SKILLS_RAW,
+                "anthropics_skills"
+            )
+        elif source == "obra-superpowers":
+            return await self._search_repo_readme(
+                query,
+                self.OBRA_SUPERPOWERS_RAW,
+                "obra_superpowers"
+            )
         else:
             # Support for custom sources in future
             return []
 
-    async def _search_awesome_claude_skills(self, query: str) -> List[ExternalSkill]:
-        """
-        Search awesome-claude-skills repository.
+    CACHE_DIR = Path(".cde/cache")
+    CACHE_TTL_SECONDS = 3600 * 24  # 24 hours
 
-        Strategy:
-        1. Fetch README.md from repo
-        2. Parse skill links and descriptions
-        3. Score skills by relevance to query
-        4. Download top matches
-        """
-        external_skills = []
+    async def _get_cached_index(self, repo_name: str, ignore_ttl: bool = False) -> Optional[str]:
+        cache_file = self.CACHE_DIR / f"{repo_name}_index.json"
+        if not cache_file.exists():
+            return None
 
         try:
-            async with aiohttp.ClientSession() as session:
-                # 1. Fetch README
-                readme_url = f"{self.AWESOME_CLAUDE_SKILLS_RAW}/README.md"
-                async with session.get(readme_url) as response:
-                    if response.status != 200:
-                        return []
+            async with aiofiles.open(cache_file, "r", encoding="utf-8") as f:
+                content = await f.read()
+            data = json.loads(content)
+            timestamp = data.get("timestamp", 0)
+            if not ignore_ttl and (datetime.now().timestamp() - timestamp > self.CACHE_TTL_SECONDS):
+                return None
+            return data.get("content")
+        except Exception:
+            return None
 
-                    readme_content = await response.text()
+    async def _save_cached_index(self, repo_name: str, content: str):
+        self.CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        cache_file = self.CACHE_DIR / f"{repo_name}_index.json"
+        data = {
+            "timestamp": datetime.now().timestamp(),
+            "content": content
+        }
+        async with aiofiles.open(cache_file, "w", encoding="utf-8") as f:
+            await f.write(json.dumps(data))
 
-                # 2. Parse skill entries
-                # Pattern: [Skill Name](path/to/skill.md) - Description
-                pattern = r"\[([^\]]+)\]\(([^\)]+\.md)\)\s*-?\s*(.+)?"
-                matches = re.finditer(pattern, readme_content, re.MULTILINE)
+    async def _search_repo_readme(self, query: str, raw_base_url: str, repo_name: str) -> List[ExternalSkill]:
+        """
+        Generic search for GitHub repositories via README parsing.
+        """
+        external_skills = []
+        readme_content = await self._get_cached_index(repo_name)
 
-                # 3. Score and filter by relevance
-                query_lower = query.lower()
-                for match in matches:
-                    skill_name = match.group(1).strip()
-                    skill_path = match.group(2).strip()
-                    skill_desc = match.group(3).strip() if match.group(3) else ""
+        if not readme_content:
+            try:
+                async with aiohttp.ClientSession() as session:
+                    # 1. Fetch README
+                    readme_url = f"{raw_base_url}/README.md"
+                    async with session.get(readme_url) as response:
+                        if response.status == 200:
+                            readme_content = await response.text()
+                            await self._save_cached_index(repo_name, readme_content)
+            except Exception:
+                # Network error, try stale cache
+                readme_content = await self._get_cached_index(repo_name, ignore_ttl=True)
 
-                    # Simple relevance scoring
-                    relevance = 0
-                    if query_lower in skill_name.lower():
-                        relevance += 10
-                    if query_lower in skill_desc.lower():
-                        relevance += 5
-
-                    # Token overlap
-                    query_tokens = set(query_lower.split())
-                    name_tokens = set(skill_name.lower().split())
-                    desc_tokens = set(skill_desc.lower().split())
-
-                    overlap = len(query_tokens & (name_tokens | desc_tokens))
-                    relevance += overlap * 2
-
-                    if relevance > 3:  # Threshold
-                        # 4. Download skill content
-                        skill_url = f"{self.AWESOME_CLAUDE_SKILLS_RAW}/{skill_path}"
-                        async with session.get(skill_url) as skill_response:
-                            if skill_response.status == 200:
-                                content = await skill_response.text()
-
-                                external_skills.append(
-                                    ExternalSkill(
-                                        name=skill_name,
-                                        description=skill_desc,
-                                        source_url=skill_url,
-                                        content=content,
-                                        tags=self._extract_tags(skill_name, skill_desc),
-                                        category=self._infer_category(
-                                            skill_name, skill_desc
-                                        ),
-                                        rating=relevance / 20.0,  # Normalize to 0-1
-                                    )
-                                )
-
-                # Sort by rating
-                external_skills.sort(key=lambda s: s.rating or 0, reverse=True)
-
-        except Exception as e:
-            print(f"Error searching awesome-claude-skills: {e}")
+        if not readme_content:
             return []
+
+        # 2. Parse skill entries
+        # Pattern: [Skill Name](path/to/skill.md) - Description
+        pattern = r"\[([^\]]+)\]\(([^\)]+\.md)\)\s*-?\s*(.+)?"
+        matches = list(re.finditer(pattern, readme_content, re.MULTILINE))
+
+        # 3. Score and filter by relevance
+        query_lower = query.lower()
+        scored_matches = []
+
+        for match in matches:
+            skill_name = match.group(1).strip()
+            skill_path = match.group(2).strip()
+            skill_desc = match.group(3).strip() if match.group(3) else ""
+
+            # Simple relevance scoring
+            relevance = 0
+            if query_lower in skill_name.lower():
+                relevance += 10
+            if query_lower in skill_desc.lower():
+                relevance += 5
+
+            # Token overlap
+            query_tokens = set(query_lower.split())
+            name_tokens = set(skill_name.lower().split())
+            desc_tokens = set(skill_desc.lower().split())
+
+            overlap = len(query_tokens & (name_tokens | desc_tokens))
+            relevance += overlap * 2
+
+            if relevance > 3:  # Threshold
+                scored_matches.append((relevance, skill_name, skill_path, skill_desc))
+
+        # Sort by rating
+        scored_matches.sort(key=lambda x: x[0], reverse=True)
+
+        # 4. Download skill content for top matches
+        top_matches = scored_matches[:5]
+
+        if top_matches:
+            try:
+                async with aiohttp.ClientSession() as session:
+                    for relevance, skill_name, skill_path, skill_desc in top_matches:
+                        skill_url = f"{raw_base_url}/{skill_path}"
+                        try:
+                            async with session.get(skill_url) as skill_response:
+                                if skill_response.status == 200:
+                                    content = await skill_response.text()
+
+                                    external_skills.append(
+                                        ExternalSkill(
+                                            name=skill_name,
+                                            description=skill_desc,
+                                            source_url=skill_url,
+                                            content=content,
+                                            tags=self._extract_tags(skill_name, skill_desc),
+                                            category=self._infer_category(
+                                                skill_name, skill_desc
+                                            ),
+                                            rating=relevance / 20.0,  # Normalize to 0-1
+                                        )
+                                    )
+                        except Exception as e:
+                            print(f"Error fetching skill {skill_name}: {e}")
+            except Exception as e:
+                print(f"Error in session: {e}")
 
         return external_skills
 

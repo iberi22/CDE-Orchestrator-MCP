@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from ...adapters.mcp_tool_filesystem_generator import MCPToolFilesystemGenerator
+from ...infrastructure.telemetry import trace_execution
 
 
 class GenerateFilesystemUseCase:
@@ -22,7 +23,9 @@ class GenerateFilesystemUseCase:
         """Initialize use case with filesystem generator."""
         self.generator = MCPToolFilesystemGenerator()
 
-    def execute(self, mcp_tools_module: Any, output_dir: Path) -> Dict[str, Any]:
+
+    @trace_execution
+    async def execute(self, mcp_tools_module: Any, output_dir: Path) -> Dict[str, Any]:
         """
         Execute filesystem generation.
 
@@ -38,5 +41,5 @@ class GenerateFilesystemUseCase:
                 "output_dir": str
             }
         """
-        result = self.generator.generate(mcp_tools_module, output_dir)
+        result = await self.generator.generate(mcp_tools_module, output_dir)
         return result

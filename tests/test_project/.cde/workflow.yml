@@ -1,0 +1,94 @@
+# CDE Workflow Definition
+name: standard_workflow
+version: "1.0"
+description: Context-Driven Engineering 6-phase workflow
+
+phases:
+  - id: define
+    name: Define
+    description: Write feature specification
+    prompt_template: prompts/01_define.poml
+    inputs:
+      - user_prompt
+      - project_context
+    outputs:
+      - specification
+      - acceptance_criteria
+  
+  - id: decompose
+    name: Decompose
+    description: Break feature into tasks
+    prompt_template: prompts/02_decompose.poml
+    inputs:
+      - specification
+      - project_context
+    outputs:
+      - tasks
+      - dependencies
+  
+  - id: design
+    name: Design
+    description: Create technical design
+    prompt_template: prompts/03_design.poml
+    inputs:
+      - specification
+      - tasks
+      - architecture
+    outputs:
+      - technical_design
+      - file_changes
+  
+  - id: implement
+    name: Implement
+    description: Write code
+    prompt_template: prompts/04_implement.poml
+    inputs:
+      - technical_design
+      - tasks
+    outputs:
+      - code_changes
+      - files_modified
+  
+  - id: test
+    name: Test
+    description: Create and run tests
+    prompt_template: prompts/05_test.poml
+    inputs:
+      - code_changes
+      - specification
+    outputs:
+      - test_files
+      - test_results
+  
+  - id: review
+    name: Review
+    description: Code review and QA
+    prompt_template: prompts/06_review.poml
+    inputs:
+      - code_changes
+      - test_results
+      - specification
+    outputs:
+      - review_notes
+      - approval_status
+
+# Workflow types (can skip phases)
+workflow_types:
+  standard:
+    phases: [define, decompose, design, implement, test, review]
+  
+  quick-fix:
+    phases: [implement, test]
+    skip: [define, decompose, design, review]
+  
+  research:
+    phases: [define, decompose, design]
+    skip: [implement, test, review]
+  
+  documentation:
+    phases: [define, design]
+    skip: [decompose, implement, test, review]
+  
+  hotfix:
+    phases: [implement]
+    skip: [define, decompose, design, test, review]

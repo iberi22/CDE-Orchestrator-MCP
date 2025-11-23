@@ -1,0 +1,63 @@
+{
+    "project_analysis": {
+        "status": "Analysis complete",
+        "file_count": 433,
+        "language_stats": {
+            ".yaml": 1,
+            ".md": 154,
+            ".py": 198,
+            ".json": 16,
+            ".0": 1,
+            ".toml": 4,
+            ".ini": 1,
+            ".yml": 9,
+            ".txt": 2,
+            ".html": 2,
+            ".sh": 3,
+            ".typed": 1,
+            ".backup": 1,
+            ".rs": 12,
+            ".deprecated": 2,
+            ".rej": 1,
+            ".ps1": 13,
+            ".ts": 6,
+            ".js": 1
+        },
+        "dependency_files": [
+            "Cargo.toml",
+            "package.json",
+            "pyproject.toml"
+        ],
+        "summary": "Project 'CDE Orchestrator MCP' contains 433 files. Primary languages: .py, .md, .ps1. Found dependency files: Cargo.toml, package.json, pyproject.toml.",
+        "excluded_directories": [
+            ".cargo",
+            ".git",
+            ".gradle",
+            ".m2",
+            ".mypy_cache",
+            ".pytest_cache",
+            ".ruff_cache",
+            ".venv",
+            "__pycache__",
+            "bin",
+            "build",
+            "ci-wheels",
+            "dist",
+            "env",
+            "htmlcov",
+            "node_modules",
+            "obj",
+            "out",
+            "target",
+            "temp-wheels",
+            "vendor",
+            "venv"
+        ],
+        "performance": {
+            "engine": "python",
+            "analysis_time_ms": null
+        }
+    },
+    "onboarding_status": "analysis_completed",
+    "features": {}
+}

@@ -12,7 +12,7 @@ from ._base import tool_handler
 
 
 @tool_handler
-def cde_searchTools(query: str = "", detail_level: str = "name_and_description") -> str:
+async def cde_searchTools(query: str = "", detail_level: str = "name_and_description") -> str:
     """
     Search available CDE tools by keyword with progressive detail levels.
 
@@ -40,7 +40,7 @@ def cde_searchTools(query: str = "", detail_level: str = "name_and_description")
             - query: Search query (if provided)
 
     Examples:
-        >>> cde_searchTools("skill", detail_level="name_only")
+        >>> await cde_searchTools("skill", detail_level="name_only")
         {
           "tools": ["sourceSkill", "updateSkill"],
           "total": 2,
@@ -48,7 +48,7 @@ def cde_searchTools(query: str = "", detail_level: str = "name_and_description")
           "query": "skill"
         }
 
-        >>> cde_searchTools("workflow", detail_level="name_and_description")
+        >>> await cde_searchTools("workflow", detail_level="name_and_description")
         {
           "tools": [
             {
@@ -67,7 +67,7 @@ def cde_searchTools(query: str = "", detail_level: str = "name_and_description")
           "query": "workflow"
         }
 
-        >>> cde_searchTools("scanDocumentation", detail_level="full_schema")
+        >>> await cde_searchTools("scanDocumentation", detail_level="full_schema")
         {
           "tools": [{
             "name": "scanDocumentation",
@@ -84,7 +84,7 @@ def cde_searchTools(query: str = "", detail_level: str = "name_and_description")
           "detail_level": "full_schema"
         }
 
-        >>> cde_searchTools(detail_level="name_only")
+        >>> await cde_searchTools(detail_level="name_only")
         # Lists ALL tools (just names)
 
     **Token Impact**:
@@ -98,26 +98,26 @@ def cde_searchTools(query: str = "", detail_level: str = "name_and_description")
     **Pattern 1: Discover tools for task**
     ```python
     # Find tools related to skills
-    result = cde_searchTools("skill", detail_level="name_and_description")
+    result = await cde_searchTools("skill", detail_level="name_and_description")
     # Use returned tools: sourceSkill, updateSkill
     ```
 
     **Pattern 2: Progressive detail loading**
     ```python
     # Step 1: See what's available (minimal tokens)
-    all_tools = cde_searchTools(detail_level="name_only")
+    all_tools = await cde_searchTools(detail_level="name_only")
 
     # Step 2: Get details for relevant tools
-    workflow_tools = cde_searchTools("workflow", detail_level="name_and_description")
+    workflow_tools = await cde_searchTools("workflow", detail_level="name_and_description")
 
     # Step 3: Full schema only when needed
-    full_details = cde_searchTools("selectWorkflow", detail_level="full_schema")
+    full_details = await cde_searchTools("selectWorkflow", detail_level="full_schema")
     ```
 
     **Pattern 3: Tool discovery in workflow**
     ```python
     # Discover available documentation tools
-    tools = cde_searchTools("scan", detail_level="name_only")
+    tools = await cde_searchTools("scan", detail_level="name_only")
     # Returns: ["scanDocumentation", "analyzeDocumentation"]
 
     # Use discovered tools
@@ -158,8 +158,8 @@ def cde_searchTools(query: str = "", detail_level: str = "name_and_description")
 
     # Search or list all
     if query:
-        result = searcher.search(query, detail_level=detail_level)
+        result = await searcher.search(query, detail_level=detail_level)
     else:
-        result = searcher.list_all(detail_level=detail_level)
+        result = await searcher.list_all(detail_level=detail_level)
 
     return json.dumps(result, indent=2)

@@ -17,7 +17,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import aiohttp
+import aiofiles
 from bs4 import BeautifulSoup
+
+from cde_orchestrator.infrastructure.circuit_breaker import circuit_breaker
 
 
 @dataclass(frozen=True)
@@ -152,7 +155,7 @@ class WebResearchUseCase:
         # 5. Detect version changes (if skill file provided)
         version_info = {}
         if skill_file_path and skill_file_path.exists():
-            version_info = self._detect_version_changes(
+            version_info = await self._detect_version_changes(
                 skill_file_path, ranked_insights
             )
 
@@ -222,6 +225,12 @@ class WebResearchUseCase:
 
         return None
 
+    @circuit_breaker(
+        name="web_research_fetch",
+        failure_threshold=5,
+        timeout=60.0,
+        expected_exception=aiohttp.ClientError,
+    )
     async def _fetch_source(self, url: str, topic: str) -> Optional[ResearchSource]:
         """
         Fetch content from URL and extract relevant information.
@@ -307,6 +316,12 @@ class WebResearchUseCase:
         else:
             return "blog"
 
+    @circuit_breaker(
+        name="github_search_api",
+        failure_threshold=3,
+        timeout=120.0,
+        expected_exception=aiohttp.ClientError,
+    )
     async def _search_github(
         self, topic: str, max_results: int = 3
     ) -> List[ResearchSource]:
@@ -337,6 +352,12 @@ class WebResearchUseCase:
 
         return sources
 
+    @circuit_breaker(
+        name="duckduckgo_api",
+        failure_threshold=3,
+        timeout=90.0,
+        expected_exception=aiohttp.ClientError,
+    )
     async def _web_search(
         self, topic: str, max_results: int = 5
     ) -> List[ResearchSource]:
@@ -504,12 +525,13 @@ class WebResearchUseCase:
 
         return note
 
-    def _detect_version_changes(
+    async def _detect_version_changes(
         self, skill_file: Path, insights: List[ResearchInsight]
     ) -> Dict[str, Any]:
         """Detect version changes from skill file and insights."""
         # Read current skill content
-        content = skill_file.read_text()
+        async with aiofiles.open(skill_file, "r", encoding="utf-8") as f:
+            content = await f.read()
 
         # Extract version mentions
         version_pattern = r"version[:\s]+(\d+\.\d+(?:\.\d+)?)"

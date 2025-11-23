@@ -5,8 +5,13 @@ from typing import Optional
 from ..adapters.recipe.filesystem_recipe_repository import FileSystemRecipeRepository
 from ..adapters.state.filesystem_state_repository import FileSystemStateRepository
 from ..adapters.workflow.yaml_workflow_repository import YAMLWorkflowRepository
+from ..adapters.filesystem_project_repository import FileSystemProjectRepository
+from ..adapters.prompt.prompt_adapter import PromptAdapter
 from ..application.use_cases.manage_state import ManageStateUseCase
 from ..application.use_cases.select_workflow import SelectWorkflowUseCase
+from ..application.use_cases.start_feature import StartFeatureUseCase
+from ..application.use_cases.submit_work import SubmitWorkUseCase
+from ..application.orchestration.skill_sourcing_use_case import SkillSourcingUseCase
 from ..domain.services.recipe_service import RecipeService
 
 logger = logging.getLogger(__name__)
@@ -35,6 +40,8 @@ class DIContainer:
 
         # Repositories (with null checks)
         self.state_repository = FileSystemStateRepository(state_path)
+        self.project_repository = FileSystemProjectRepository()
+        self.prompt_adapter = PromptAdapter()
 
         # Workflow repository - only create if workflow file exists
         self._workflow_path = workflow_path
@@ -63,6 +70,20 @@ class DIContainer:
             workflow_patterns=workflow_patterns
         )
 
+        self.start_feature_use_case = StartFeatureUseCase(
+            self.project_repository,
+            lambda path: YAMLWorkflowRepository(path),
+            self.prompt_adapter
+        )
+
+        self.submit_work_use_case = SubmitWorkUseCase(
+            self.project_repository,
+            lambda path: YAMLWorkflowRepository(path),
+            self.prompt_adapter
+        )
+
+        self.skill_sourcing_use_case = SkillSourcingUseCase()
+
     def _get_workflow_repository(self) -> YAMLWorkflowRepository:
         """Lazy-load workflow repository, creating a default if needed."""
         if self._workflow_repository is None:
@@ -71,18 +92,82 @@ class DIContainer:
                     f"Workflow file not found at {self._workflow_path}, creating default"
                 )
                 self._workflow_path.parent.mkdir(parents=True, exist_ok=True)
+
+                # Create prompts directory
+                prompts_dir = self._workflow_path.parent / "prompts"
+                prompts_dir.mkdir(exist_ok=True)
+
+                # Create default prompt
+                define_poml = prompts_dir / "define.poml"
+                if not define_poml.exists():
+                    define_poml.write_text(
+                        """
+# Define Phase
+You are an expert software architect.
+Your task is to define the specification for the following feature:
+
+User Request: {{USER_PROMPT}}
+
+Project: {{PROJECT_NAME}}
+Workflow: {{WORKFLOW_TYPE}}
+
+Please provide a detailed specification including:
+1. Problem Statement
+2. Proposed Solution
+3. Acceptance Criteria
+4. Technical Considerations
+                        """.strip()
+                    )
+
                 # Create a minimal default workflow
                 import yaml
 
                 default_workflow = {
                     "name": "default_workflow",
+                    "version": "1.0.0",
                     "phases": [
-                        {"id": "define", "title": "Define"},
-                        {"id": "decompose", "title": "Decompose"},
-                        {"id": "design", "title": "Design"},
-                        {"id": "implement", "title": "Implement"},
-                        {"id": "test", "title": "Test"},
-                        {"id": "review", "title": "Review"},
+                        {
+                            "id": "define",
+                            "description": "Define the feature specification",
+                            "handler": "human_input",
+                            "prompt_recipe": "prompts/define.poml",
+                            "outputs": [{"type": "markdown", "path": "specs/features/feature.md"}]
+                        },
+                        {
+                            "id": "decompose",
+                            "description": "Break down into tasks",
+                            "handler": "agent",
+                            "prompt_recipe": "prompts/define.poml", # Reusing for demo
+                            "outputs": [{"type": "markdown", "path": "specs/tasks/tasks.md"}]
+                        },
+                        {
+                            "id": "design",
+                            "description": "Technical design",
+                            "handler": "agent",
+                            "prompt_recipe": "prompts/define.poml",
+                            "outputs": [{"type": "markdown", "path": "specs/design/design.md"}]
+                        },
+                        {
+                            "id": "implement",
+                            "description": "Implement code",
+                            "handler": "agent",
+                            "prompt_recipe": "prompts/define.poml",
+                            "outputs": [{"type": "code", "path": "src/"}]
+                        },
+                        {
+                            "id": "test",
+                            "description": "Run tests",
+                            "handler": "agent",
+                            "prompt_recipe": "prompts/define.poml",
+                            "outputs": [{"type": "report", "path": "reports/test_results.json"}]
+                        },
+                        {
+                            "id": "review",
+                            "description": "Review changes",
+                            "handler": "human_input",
+                            "prompt_recipe": "prompts/define.poml",
+                            "outputs": [{"type": "report", "path": "reports/review.md"}]
+                        },
                     ],
                 }
                 with open(self._workflow_path, "w") as f:

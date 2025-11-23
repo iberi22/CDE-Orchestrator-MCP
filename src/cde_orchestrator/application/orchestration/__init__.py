@@ -5,6 +5,7 @@ High-level use cases for intelligent workflow orchestration:
 - Workflow selection (route user prompts to optimal workflows)
 - Skill sourcing (download skills from external repos)
 - Web research (keep skills current with latest info)
+- Recipe downloading (download workflow recipes from GitHub)
 """
 
 from .skill_sourcing_use_case import (
@@ -25,6 +26,7 @@ from .workflow_selector_use_case import (
     WorkflowSelectorUseCase,
     WorkflowType,
 )
+from .recipe_downloader_use_case import RecipeDownloaderUseCase
 
 __all__ = [
     # Workflow Selection
@@ -42,4 +44,6 @@ __all__ = [
     "ResearchSource",
     "ResearchInsight",
     "SkillUpdate",
+    # Recipe Downloader
+    "RecipeDownloaderUseCase",
 ]

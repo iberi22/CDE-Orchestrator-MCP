@@ -2,9 +2,11 @@
 import re
 from pathlib import Path
 from typing import List
+import aiofiles
 
 from ...domain.entities import Recipe
 from ...domain.ports import IRecipeRepository
+from ...infrastructure.cache import cached
 
 
 class FileSystemRecipeRepository(IRecipeRepository):
@@ -15,24 +17,30 @@ class FileSystemRecipeRepository(IRecipeRepository):
     def __init__(self, recipes_dir: Path):
         self._recipes_dir = recipes_dir
 
-    def list_all(self) -> List[Recipe]:
+    async def list_all(self) -> List[Recipe]:
         """Load all POML recipes from the recipes directory."""
         if not self._recipes_dir.exists():
             return []
 
         recipes = []
+        # rglob is synchronous but fast for directory listing.
+        # Reading files will be async.
         for poml_file in self._recipes_dir.rglob("*.poml"):
             try:
-                recipe = self._parse_recipe(poml_file)
+                recipe = await self._parse_recipe(poml_file)
                 recipes.append(recipe)
             except Exception as e:
                 print(f"Warning: Failed to load recipe {poml_file}: {e}")
         return recipes
 
-    def _parse_recipe(self, poml_file: Path) -> Recipe:
-        """Parse a POML file and extract recipe metadata."""
-        with open(poml_file, "r", encoding="utf-8") as f:
-            content = f.read()
+    @cached(ttl=300, file_path=None)  # 5 minutes TTL, file_path set dynamically
+    async def _parse_recipe(self, poml_file: Path) -> Recipe:
+        """Parse a POML file and extract recipe metadata.
+
+        Cached for 5 minutes with automatic invalidation when file changes.
+        """
+        async with aiofiles.open(poml_file, "r", encoding="utf-8") as f:
+            content = await f.read()
 
         recipe_id = poml_file.stem
         category = poml_file.parent.name

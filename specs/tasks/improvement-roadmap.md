@@ -275,10 +275,10 @@ Implementar tests unitarios completos para todos los managers y models.
 Tests de integración para workflows completos y operaciones multi-componente.
 
 **Tareas:**
-- [ ] TEST-03.1: Test completo de startFeature -> submitWork flow (se hará en local por ahora)
-- [ ] TEST-03.2: Test de Git operations con repo temporal (se hará en local por ahora)
-- [ ] TEST-03.3: Test de recipe loading y context injection (se hará en local por ahora)
-- [ ] TEST-03.4: Test de onboarding flow end-to-end (se hará en local por ahora)
+- [x] TEST-03.1: Test completo de startFeature -> submitWork flow (Implementado en `tests/integration/test_feature_lifecycle.py`) ✅
+- [x] TEST-03.2: Test de Git operations con repo temporal (Implementado en `tests/integration/test_git_operations.py`) ✅
+- [x] TEST-03.3: Test de recipe loading y context injection (Implementado en `tests/integration/test_recipe_loading.py`) ✅
+- [x] TEST-03.4: Test de onboarding flow end-to-end (Implementado en `tests/integration/test_onboarding_flow.py`) ✅
 
 **Archivos Nuevos:**
 - `tests/integration/test_feature_lifecycle.py`

@@ -8,6 +8,8 @@ from cde_orchestrator.infrastructure.config import config
 from cde_orchestrator.infrastructure.logging import configure_logging, get_logger
 from mcp_tools import (
     cde_analyzeDocumentation,
+    cde_checkRecipes,
+    cde_downloadRecipes,
     cde_executeWithBestAgent,
     cde_healthCheck,
     cde_installMcpExtension,
@@ -20,6 +22,8 @@ from mcp_tools import (
     cde_selectWorkflow,
     cde_setupProject,
     cde_sourceSkill,
+    cde_startFeature,
+    cde_submitWork,
     cde_updateSkill,
 )
 from mcp_tools.full_implementation import cde_executeFullImplementation
@@ -35,6 +39,7 @@ logger = get_logger(__name__)
 def _generate_mcp_filesystem() -> None:
     """Generate ./servers/cde/ filesystem on startup."""
     try:
+        import asyncio
         import mcp_tools
         from cde_orchestrator.application.tools.generate_filesystem_use_case import (
             GenerateFilesystemUseCase,
@@ -42,7 +47,9 @@ def _generate_mcp_filesystem() -> None:
 
         project_root = Path(__file__).parent.parent
         use_case = GenerateFilesystemUseCase()
-        result = use_case.execute(mcp_tools_module=mcp_tools, output_dir=project_root)
+
+        # Run async generation in event loop
+        result = asyncio.run(use_case.execute(mcp_tools_module=mcp_tools, output_dir=project_root))
 
         logger.info(f"✅ Generated {result['total_tools']} MCP tool files")
         logger.info(f"📁 Filesystem structure: {result['output_dir']}")
@@ -57,23 +64,29 @@ app = FastMCP("CDE Orchestrator MCP")
 # Auto-generate filesystem structure on startup
 _generate_mcp_filesystem()
 
+from cde_orchestrator.infrastructure.telemetry import trace_execution
+
 # Tool Registration with Dependency Injection
-app.tool()(cde_onboardingProject)
-app.tool()(cde_publishOnboarding)
-app.tool()(cde_setupProject)
-app.tool()(cde_scanDocumentation)
-app.tool()(cde_analyzeDocumentation)
-app.tool()(cde_selectWorkflow)
-app.tool()(cde_sourceSkill)
-app.tool()(cde_updateSkill)
-app.tool()(cde_listAvailableAgents)
-app.tool()(cde_selectAgent)
-app.tool()(cde_executeWithBestAgent)
-app.tool()(cde_executeFullImplementation)  # ✅ Meta-orchestration
-app.tool()(cde_testProgressReporting)  # ✅ Test tool for status bar
-app.tool()(cde_installMcpExtension)  # ✅ Install MCP extension
-app.tool()(cde_searchTools)  # ✅ Progressive tool discovery (Anthropic pattern)
-app.tool()(cde_healthCheck)  # ✅ Health monitoring (PROD-03)
+app.tool()(trace_execution(cde_onboardingProject))
+app.tool()(trace_execution(cde_publishOnboarding))
+app.tool()(trace_execution(cde_setupProject))
+app.tool()(trace_execution(cde_scanDocumentation))
+app.tool()(trace_execution(cde_analyzeDocumentation))
+app.tool()(trace_execution(cde_selectWorkflow))
+app.tool()(trace_execution(cde_sourceSkill))
+app.tool()(trace_execution(cde_updateSkill))
+app.tool()(trace_execution(cde_startFeature))
+app.tool()(trace_execution(cde_submitWork))
+app.tool()(trace_execution(cde_downloadRecipes))  # ✅ Download recipes from GitHub
+app.tool()(trace_execution(cde_checkRecipes))     # ✅ Check recipe status
+app.tool()(trace_execution(cde_listAvailableAgents))
+app.tool()(trace_execution(cde_selectAgent))
+app.tool()(trace_execution(cde_executeWithBestAgent))
+app.tool()(trace_execution(cde_executeFullImplementation))  # ✅ Meta-orchestration
+app.tool()(trace_execution(cde_testProgressReporting))  # ✅ Test tool for status bar
+app.tool()(trace_execution(cde_installMcpExtension))  # ✅ Install MCP extension
+app.tool()(trace_execution(cde_searchTools))  # ✅ Progressive tool discovery (Anthropic pattern)
+app.tool()(trace_execution(cde_healthCheck))  # ✅ Health monitoring (PROD-03)
 
 
 # Server Entry Point

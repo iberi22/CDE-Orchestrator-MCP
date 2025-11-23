@@ -34,6 +34,9 @@ dependencies = [
     "python-dotenv",
     "lxml",
     "pathspec",
+    "aiohttp",
+    "aiofiles",
+    "psutil",  # System resource monitoring for health checks
 ]
 
 [project.urls]

@@ -6,13 +6,16 @@ Tools for workflow selection, skill sourcing, and skill updating.
 
 import json
 from pathlib import Path
-from typing import List
+from typing import Any, Dict, List
+
+from fastmcp import Context
 
 from cde_orchestrator.application.orchestration import (
     SkillSourcingUseCase,
     WebResearchUseCase,
     WorkflowSelectorUseCase,
 )
+from cde_orchestrator.infrastructure.dependency_injection import container
 
 from ._base import tool_handler
 from ._progress_reporter import get_progress_reporter
@@ -324,4 +327,68 @@ async def cde_updateSkill(
     )
     reporter.report_progress("CDE", "updateSkill", 1.0, "Skill updated")
 
+    return json.dumps(result, indent=2)
+
+
+@tool_handler
+async def cde_startFeature(
+    ctx: Context,
+    user_prompt: str,
+    project_path: str = ".",
+    workflow_type: str = "standard",
+    recipe_id: str = "ai-engineer",
+) -> str:
+    """
+    Start new feature in current project.
+
+    Args:
+        user_prompt: Feature description from user
+        project_path: Path to project (default: current directory)
+        workflow_type: Workflow variant (standard, quick-fix, etc.)
+        recipe_id: Recipe to use (ai-engineer, etc.)
+
+    Returns:
+        JSON with feature_id, phase, and prompt.
+    """
+    if project_path == ".":
+        project_path = str(Path.cwd())
+
+    result = await container.start_feature_use_case.execute(
+        project_path=project_path,
+        user_prompt=user_prompt,
+        workflow_type=workflow_type,
+        recipe_id=recipe_id
+    )
+    return json.dumps(result, indent=2)
+
+
+@tool_handler
+async def cde_submitWork(
+    ctx: Context,
+    feature_id: str,
+    phase_id: str,
+    results: Dict[str, Any],
+    project_path: str = ".",
+) -> str:
+    """
+    Submit phase results and advance workflow.
+
+    Args:
+        feature_id: Feature UUID
+        phase_id: Current phase (e.g., "define")
+        results: Phase outputs (e.g., {"specification": "..."})
+        project_path: Path to project (default: current directory)
+
+    Returns:
+        JSON with next phase prompt or completion status.
+    """
+    if project_path == ".":
+        project_path = str(Path.cwd())
+
+    result = await container.submit_work_use_case.execute(
+        project_path=project_path,
+        feature_id=feature_id,
+        phase_id=phase_id,
+        results=results
+    )
     return json.dumps(result, indent=2)

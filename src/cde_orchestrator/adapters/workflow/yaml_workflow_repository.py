@@ -1,6 +1,7 @@
 # src/cde_orchestrator/adapters/workflow/yaml_workflow_repository.py
 from pathlib import Path
 
+import aiofiles
 import yaml
 
 from ...domain.entities import Workflow, WorkflowPhase
@@ -18,10 +19,11 @@ class YAMLWorkflowRepository(IWorkflowRepository):
             raise FileNotFoundError(f"Workflow file not found at {workflow_path}")
         self._workflow_path = workflow_path
 
-    def load_workflow(self) -> Workflow:
+    async def load_workflow(self) -> Workflow:
         """Loads and validates the workflow file using Pydantic models."""
-        with open(self._workflow_path, "r") as f:
-            data = yaml.safe_load(f)
+        async with aiofiles.open(self._workflow_path, "r") as f:
+            content = await f.read()
+            data = yaml.safe_load(content)
 
         # Validate with Pydantic model first
         workflow_model = WorkflowModel(**data)

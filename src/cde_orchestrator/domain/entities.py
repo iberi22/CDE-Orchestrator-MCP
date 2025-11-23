@@ -596,6 +596,7 @@ class WorkflowPhase:
     id: str
     description: str
     prompt_recipe: str  # Path to POML file
+    handler: str = "agent"  # "agent" or "human_input"
     inputs: List[str] = field(default_factory=list)  # Expected artifact keys
     outputs: List[str] = field(default_factory=list)  # Produced artifact keys
 

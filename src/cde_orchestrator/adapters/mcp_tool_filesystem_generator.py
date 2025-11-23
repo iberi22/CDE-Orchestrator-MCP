@@ -12,11 +12,13 @@ Token Efficiency:
 - Filesystem: List files only = 377 bytes (99.0% reduction)
 """
 
+import asyncio
 import inspect
 import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import aiofiles
 from pydantic import BaseModel
 
 
@@ -41,7 +43,7 @@ class MCPToolFilesystemGenerator:
 
     Usage:
         >>> generator = MCPToolFilesystemGenerator()
-        >>> generator.generate(mcp_tools_module, output_dir=Path("."))
+        >>> await generator.generate(mcp_tools_module, output_dir=Path("."))
         >>> # Creates: ./servers/cde/startFeature.py, submitWork.py, etc.
     """
 
@@ -49,7 +51,7 @@ class MCPToolFilesystemGenerator:
         """Initialize filesystem generator."""
         self.output_dir: Optional[Path] = None
 
-    def generate(self, mcp_tools_module: Any, output_dir: Path) -> Dict[str, Any]:
+    async def generate(self, mcp_tools_module: Any, output_dir: Path) -> Dict[str, Any]:
         """
         Generate ./servers/cde/ filesystem structure.
 
@@ -68,17 +70,17 @@ class MCPToolFilesystemGenerator:
         servers_dir = output_dir / "servers" / "cde"
         servers_dir.mkdir(parents=True, exist_ok=True)
 
-        # Discover all tools
+        # Discover all tools (CPU bound, run in executor if needed, but fast enough for now)
         tools = self._discover_tools(mcp_tools_module)
 
-        # Generate one file per tool
-        generated_files = []
-        for tool in tools:
-            tool_file = self._generate_tool_file(tool, servers_dir)
-            generated_files.append(str(tool_file.relative_to(output_dir)))
+        # Generate one file per tool in parallel
+        tasks = [self._generate_tool_file(tool, servers_dir) for tool in tools]
+        tool_files = await asyncio.gather(*tasks)
+
+        generated_files = [str(f.relative_to(output_dir)) for f in tool_files]
 
         # Generate __init__.py with exports
-        init_file = self._generate_init_file(tools, servers_dir)
+        init_file = await self._generate_init_file(tools, servers_dir)
         generated_files.append(str(init_file.relative_to(output_dir)))
 
         return {
@@ -201,7 +203,7 @@ class MCPToolFilesystemGenerator:
 
         return tags or ["general"]
 
-    def _generate_tool_file(self, tool: ToolMetadata, output_dir: Path) -> Path:
+    async def _generate_tool_file(self, tool: ToolMetadata, output_dir: Path) -> Path:
         """
         Generate individual tool file.
 
@@ -298,11 +300,12 @@ TOOL_METADATA = {{
             tags_json=json.dumps(tool.tags),
         )
 
-        # Write file
-        file_path.write_text(content, encoding="utf-8")
+        # Write file async
+        async with aiofiles.open(file_path, "w", encoding="utf-8") as f:
+            await f.write(content)
         return file_path
 
-    def _generate_init_file(self, tools: List[ToolMetadata], output_dir: Path) -> Path:
+    async def _generate_init_file(self, tools: List[ToolMetadata], output_dir: Path) -> Path:
         """
         Generate __init__.py with all tool exports.
 
@@ -359,5 +362,6 @@ TOTAL_TOOLS = len(TOOLS)
 __all__ = TOOLS + ["TOTAL_TOOLS"]
 """
 
-        init_path.write_text(content, encoding="utf-8")
+        async with aiofiles.open(init_path, "w", encoding="utf-8") as f:
+            await f.write(content)
         return init_path

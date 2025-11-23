@@ -4,8 +4,11 @@ MCP Tool Search Adapter.
 Provides progressive tool discovery following Anthropic's best practices.
 """
 
+import asyncio
 import inspect
 from typing import Any, Dict, List, Literal, Optional
+
+from ..infrastructure.cache import cached
 
 DetailLevel = Literal["name_only", "name_and_description", "full_schema"]
 
@@ -21,7 +24,7 @@ class MCPToolSearcher:
 
     Usage:
         >>> searcher = MCPToolSearcher(mcp_tools_module)
-        >>> result = searcher.search("skill", detail_level="name_only")
+        >>> result = await searcher.search("skill", detail_level="name_only")
         >>> # Returns: {"tools": ["sourceSkill", "updateSkill"], "total": 2}
     """
 
@@ -33,9 +36,8 @@ class MCPToolSearcher:
             mcp_tools_module: The mcp_tools module containing all tools
         """
         self.mcp_tools_module = mcp_tools_module
-        self._tools_cache: Optional[List[Dict[str, Any]]] = None
 
-    def search(
+    async def search(
         self, query: str, detail_level: DetailLevel = "name_and_description"
     ) -> Dict[str, Any]:
         """
@@ -53,15 +55,14 @@ class MCPToolSearcher:
                 "query": str
             }
         """
-        # Lazy load and cache tools
-        if self._tools_cache is None:
-            self._tools_cache = self._discover_all_tools()
+        # Lazy load tools (cached)
+        tools = await self._discover_all_tools()
 
         # Search by keyword (case-insensitive)
         query_lower = query.lower()
         matches = [
             tool
-            for tool in self._tools_cache
+            for tool in tools
             if query_lower in tool["name"].lower()
             or query_lower in tool["description"].lower()
             or any(query_lower in tag.lower() for tag in tool.get("tags", []))
@@ -74,7 +75,7 @@ class MCPToolSearcher:
             "query": query,
         }
 
-    def list_all(self, detail_level: DetailLevel = "name_only") -> Dict[str, Any]:
+    async def list_all(self, detail_level: DetailLevel = "name_only") -> Dict[str, Any]:
         """
         List all available tools.
 
@@ -88,22 +89,29 @@ class MCPToolSearcher:
                 "detail_level": str
             }
         """
-        if self._tools_cache is None:
-            self._tools_cache = self._discover_all_tools()
+        tools = await self._discover_all_tools()
 
         return {
-            "tools": self._format_results(self._tools_cache, detail_level),
-            "total": len(self._tools_cache),
+            "tools": self._format_results(tools, detail_level),
+            "total": len(tools),
             "detail_level": detail_level,
         }
 
-    def _discover_all_tools(self) -> List[Dict[str, Any]]:
+    @cached(ttl=300)  # Cache discovered tools for 5 minutes
+    async def _discover_all_tools(self) -> List[Dict[str, Any]]:
         """
         Discover all MCP tools from the mcp_tools module.
+
+        Executed in thread pool to avoid blocking event loop during introspection.
 
         Returns:
             List of tool metadata dictionaries
         """
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, self._discover_all_tools_sync)
+
+    def _discover_all_tools_sync(self) -> List[Dict[str, Any]]:
+        """Synchronous implementation of tool discovery."""
         tools = []
 
         # Get all exported tools from __all__

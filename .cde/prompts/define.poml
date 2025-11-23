@@ -1,0 +1,4 @@
+# Define Phase
+User Request: {{USER_PROMPT}}
+Project: {{PROJECT_NAME}}
+Please provide a detailed specification.

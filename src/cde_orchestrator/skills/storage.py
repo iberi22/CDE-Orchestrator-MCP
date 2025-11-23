@@ -5,10 +5,16 @@ Handles saving/loading base and ephemeral skills from `.copilot/skills/` directo
 Manages skill lifecycle: creation, updates, archival, and cleanup.
 """
 
+import asyncio
 import json
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
+
+import aiofiles
+
+from cde_orchestrator.infrastructure.telemetry import trace_execution
 
 from .models import (
     BaseSkill,
@@ -41,7 +47,7 @@ class SkillStorageAdapter:
     │       └── task-uuid-2/
     │           ├── SKILL.md
     │           └── metadata.json
-    └── index.json             # Fast lookup index
+    │   └── index.json             # Fast lookup index
     """
 
     def __init__(self, cde_root: Optional[Path] = None):
@@ -65,8 +71,9 @@ class SkillStorageAdapter:
         self.base_skills_dir.mkdir(parents=True, exist_ok=True)
         self.ephemeral_skills_dir.mkdir(parents=True, exist_ok=True)
 
-        # Load or create index
-        self._load_index()
+        self.index: Dict[str, SkillIndexEntry] = {}
+        # Index loading is now async, must be called explicitly or lazily
+        # For backward compatibility, we initialize empty and expect load_index to be called
 
     @staticmethod
     def _find_cde_root() -> Path:
@@ -79,25 +86,31 @@ class SkillStorageAdapter:
         # Default to current directory
         return Path.cwd()
 
-    def _load_index(self) -> None:
+    async def initialize(self) -> None:
+        """Async initialization to load index."""
+        await self._load_index()
+
+    async def _load_index(self) -> None:
         """Load the skill index from disk."""
         if self.index_file.exists():
-            with open(self.index_file, "r") as f:
-                self.index = {k: SkillIndexEntry(**v) for k, v in json.load(f).items()}
+            try:
+                async with aiofiles.open(self.index_file, "r", encoding="utf-8") as f:
+                    content = await f.read()
+                    data = json.loads(content)
+                    self.index = {k: SkillIndexEntry(**v) for k, v in data.items()}
+            except Exception:
+                # If index is corrupted, start fresh
+                self.index = {}
         else:
             self.index = {}
 
-    def _save_index(self) -> None:
+    async def _save_index(self) -> None:
         """Save the skill index to disk."""
-        with open(self.index_file, "w") as f:
-            json.dump(
-                {k: v.dict() for k, v in self.index.items()},
-                f,
-                indent=2,
-                default=str,
-            )
+        async with aiofiles.open(self.index_file, "w", encoding="utf-8") as f:
+            data = {k: v.dict() for k, v in self.index.items()}
+            await f.write(json.dumps(data, indent=2, default=str))
 
-    def save_base_skill(self, skill: BaseSkill) -> Path:
+    async def save_base_skill(self, skill: BaseSkill) -> Path:
         """
         Save a base skill to persistent storage.
 
@@ -112,13 +125,13 @@ class SkillStorageAdapter:
 
         # Save SKILL.md content
         skill_file = skill_dir / "SKILL.md"
-        with open(skill_file, "w") as f:
-            f.write(skill.content)
+        async with aiofiles.open(skill_file, "w", encoding="utf-8") as f:
+            await f.write(skill.content)
 
         # Save metadata as JSON
         metadata_file = skill_dir / "metadata.json"
-        with open(metadata_file, "w") as f:
-            json.dump(skill.dict(), f, indent=2, default=str)
+        async with aiofiles.open(metadata_file, "w", encoding="utf-8") as f:
+            await f.write(json.dumps(skill.dict(), indent=2, default=str))
 
         # Update index
         self.index[skill.id] = SkillIndexEntry(
@@ -132,11 +145,11 @@ class SkillStorageAdapter:
             size_bytes=skill_file.stat().st_size,
             status=skill.status,
         )
-        self._save_index()
+        await self._save_index()
 
         return skill_dir
 
-    def save_ephemeral_skill(self, skill: EphemeralSkill) -> Path:
+    async def save_ephemeral_skill(self, skill: EphemeralSkill) -> Path:
         """
         Save an ephemeral skill to temporary storage.
 
@@ -151,13 +164,13 @@ class SkillStorageAdapter:
 
         # Save SKILL.md content
         skill_file = skill_dir / "SKILL.md"
-        with open(skill_file, "w") as f:
-            f.write(skill.content)
+        async with aiofiles.open(skill_file, "w", encoding="utf-8") as f:
+            await f.write(skill.content)
 
         # Save metadata as JSON
         metadata_file = skill_dir / "metadata.json"
-        with open(metadata_file, "w") as f:
-            json.dump(skill.dict(), f, indent=2, default=str)
+        async with aiofiles.open(metadata_file, "w", encoding="utf-8") as f:
+            await f.write(json.dumps(skill.dict(), indent=2, default=str))
 
         # Update index
         self.index[skill.id] = SkillIndexEntry(
@@ -171,11 +184,11 @@ class SkillStorageAdapter:
             size_bytes=skill_file.stat().st_size,
             status=SkillStatus.ACTIVE,
         )
-        self._save_index()
+        await self._save_index()
 
         return skill_dir
 
-    def load_base_skill(self, skill_id: str) -> Optional[BaseSkill]:
+    async def load_base_skill(self, skill_id: str) -> Optional[BaseSkill]:
         """
         Load a base skill from disk.
 
@@ -189,11 +202,12 @@ class SkillStorageAdapter:
         if not metadata_file.exists():
             return None
 
-        with open(metadata_file, "r") as f:
-            data = json.load(f)
+        async with aiofiles.open(metadata_file, "r", encoding="utf-8") as f:
+            content = await f.read()
+            data = json.loads(content)
             return BaseSkill(**data)
 
-    def load_ephemeral_skill(self, skill_id: str) -> Optional[EphemeralSkill]:
+    async def load_ephemeral_skill(self, skill_id: str) -> Optional[EphemeralSkill]:
         """
         Load an ephemeral skill from disk.
 
@@ -207,11 +221,12 @@ class SkillStorageAdapter:
         if not metadata_file.exists():
             return None
 
-        with open(metadata_file, "r") as f:
-            data = json.load(f)
+        async with aiofiles.open(metadata_file, "r", encoding="utf-8") as f:
+            content = await f.read()
+            data = json.loads(content)
             return EphemeralSkill(**data)
 
-    def delete_base_skill(self, skill_id: str) -> bool:
+    async def delete_base_skill(self, skill_id: str) -> bool:
         """
         Delete a base skill.
 
@@ -225,18 +240,17 @@ class SkillStorageAdapter:
         if not skill_dir.exists():
             return False
 
-        # Remove directory recursively
-        import shutil
-
-        shutil.rmtree(skill_dir)
+        # Remove directory recursively in executor to avoid blocking
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, shutil.rmtree, skill_dir)
 
         # Remove from index
         self.index.pop(skill_id, None)
-        self._save_index()
+        await self._save_index()
 
         return True
 
-    def delete_ephemeral_skill(self, skill_id: str) -> bool:
+    async def delete_ephemeral_skill(self, skill_id: str) -> bool:
         """
         Delete an ephemeral skill.
 
@@ -250,95 +264,139 @@ class SkillStorageAdapter:
         if not skill_dir.exists():
             return False
 
-        # Remove directory recursively
-        import shutil
-
-        shutil.rmtree(skill_dir)
+        # Remove directory recursively in executor
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, shutil.rmtree, skill_dir)
 
         # Remove from index
         self.index.pop(skill_id, None)
-        self._save_index()
+        await self._save_index()
 
         return True
 
-    def list_base_skills(self) -> List[SkillMetadata]:
+
+    @trace_execution
+    async def list_base_skills(self) -> List[SkillMetadata]:
         """
         List all base skills.
 
         Returns:
             List of skill metadata
         """
+        if not self.base_skills_dir.exists():
+            return []
+
+        # Collect tasks for parallel execution
+        tasks = []
+        for skill_dir in self.base_skills_dir.iterdir():
+            if skill_dir.is_dir():
+                tasks.append(self.load_base_skill(skill_dir.name))
+
+        if not tasks:
+            return []
+
+        # Execute in parallel
+        loaded_skills = await asyncio.gather(*tasks)
+
+        # Filter and convert to metadata
         skills = []
-        if self.base_skills_dir.exists():
-            for skill_dir in self.base_skills_dir.iterdir():
-                if skill_dir.is_dir():
-                    skill = self.load_base_skill(skill_dir.name)
-                    if skill:
-                        skills.append(
-                            SkillMetadata(
-                                id=skill.id,
-                                title=skill.title,
-                                domain=skill.domain,
-                                complexity=skill.complexity,
-                                tags=skill.tags,
-                                status=skill.status,
-                                updated_at=skill.updated_at,
-                                size_tokens=skill.size_tokens,
-                                confidence_score=skill.confidence_score,
-                            )
-                        )
+        for skill in loaded_skills:
+            if skill:
+                skills.append(
+                    SkillMetadata(
+                        id=skill.id,
+                        title=skill.title,
+                        domain=skill.domain,
+                        complexity=skill.complexity,
+                        tags=skill.tags,
+                        status=skill.status,
+                        updated_at=skill.updated_at,
+                        size_tokens=skill.size_tokens,
+                        confidence_score=skill.confidence_score,
+                    )
+                )
         return skills
 
-    def list_ephemeral_skills(self) -> List[SkillMetadata]:
+    @trace_execution
+    async def list_ephemeral_skills(self) -> List[SkillMetadata]:
         """
         List all ephemeral skills.
 
         Returns:
             List of skill metadata
         """
+        if not self.ephemeral_skills_dir.exists():
+            return []
+
+        # Collect tasks for parallel execution
+        tasks = []
+        for skill_dir in self.ephemeral_skills_dir.iterdir():
+            if skill_dir.is_dir():
+                tasks.append(self.load_ephemeral_skill(skill_dir.name))
+
+        if not tasks:
+            return []
+
+        # Execute in parallel
+        loaded_skills = await asyncio.gather(*tasks)
+
+        # Filter and convert to metadata
         skills = []
-        if self.ephemeral_skills_dir.exists():
-            for skill_dir in self.ephemeral_skills_dir.iterdir():
-                if skill_dir.is_dir():
-                    skill = self.load_ephemeral_skill(skill_dir.name)
-                    if skill:
-                        skills.append(
-                            SkillMetadata(
-                                id=skill.id,
-                                title=skill.title,
-                                domain=skill.domain,
-                                complexity=skill.complexity,
-                                tags=skill.tags,
-                                status=(
-                                    SkillStatus.ACTIVE
-                                    if not skill.is_expired
-                                    else SkillStatus.ARCHIVED
-                                ),
-                                updated_at=skill.created_at,
-                                size_tokens=skill.size_tokens,
-                                confidence_score=skill.confidence_score,
-                            )
-                        )
+        for skill in loaded_skills:
+            if skill:
+                skills.append(
+                    SkillMetadata(
+                        id=skill.id,
+                        title=skill.title,
+                        domain=skill.domain,
+                        complexity=skill.complexity,
+                        tags=skill.tags,
+                        status=(
+                            SkillStatus.ACTIVE
+                            if not skill.is_expired
+                            else SkillStatus.ARCHIVED
+                        ),
+                        updated_at=skill.created_at,
+                        size_tokens=skill.size_tokens,
+                        confidence_score=skill.confidence_score,
+                    )
+                )
         return skills
 
-    def cleanup_expired_ephemeral_skills(self) -> int:
+    async def cleanup_expired_ephemeral_skills(self) -> int:
         """
         Delete expired ephemeral skills.
 
         Returns:
             Number of skills deleted
         """
-        deleted_count = 0
-        if self.ephemeral_skills_dir.exists():
-            for skill_dir in self.ephemeral_skills_dir.iterdir():
-                if skill_dir.is_dir():
-                    skill = self.load_ephemeral_skill(skill_dir.name)
-                    if skill and skill.is_expired:
-                        if self.delete_ephemeral_skill(skill.id):
-                            deleted_count += 1
-        return deleted_count
+        if not self.ephemeral_skills_dir.exists():
+            return 0
 
-    def search_skills(
+        # Load all skills in parallel
+        tasks = []
+        for skill_dir in self.ephemeral_skills_dir.iterdir():
+            if skill_dir.is_dir():
+                tasks.append(self.load_ephemeral_skill(skill_dir.name))
+
+        if not tasks:
+            return 0
+
+        loaded_skills = await asyncio.gather(*tasks)
+
+        # Filter expired skills
+        expired_skills = [s for s in loaded_skills if s and s.is_expired]
+
+        if not expired_skills:
+            return 0
+
+        # Delete in parallel
+        delete_tasks = [self.delete_ephemeral_skill(s.id) for s in expired_skills]
+        results = await asyncio.gather(*delete_tasks)
+
+        return sum(1 for r in results if r)
+
+    async def search_skills(
         self, query: str, skill_type: Optional[SkillType] = None
     ) -> List[SkillMetadata]:
         """
@@ -356,7 +414,8 @@ class SkillStorageAdapter:
 
         # Search base skills
         if skill_type is None or skill_type == SkillType.BASE:
-            for skill in self.list_base_skills():
+            base_skills = await self.list_base_skills()
+            for skill in base_skills:
                 if (
                     query_lower in skill.title.lower()
                     or query_lower in skill.id.lower()
@@ -366,7 +425,8 @@ class SkillStorageAdapter:
 
         # Search ephemeral skills
         if skill_type is None or skill_type == SkillType.EPHEMERAL:
-            for skill in self.list_ephemeral_skills():
+            ephemeral_skills = await self.list_ephemeral_skills()
+            for skill in ephemeral_skills:
                 if (
                     query_lower in skill.title.lower()
                     or query_lower in skill.id.lower()
@@ -376,15 +436,15 @@ class SkillStorageAdapter:
 
         return results
 
-    def get_storage_stats(self) -> Dict[str, int | str]:
+    async def get_storage_stats(self) -> Dict[str, int | str]:
         """
         Get storage statistics.
 
         Returns:
             Dictionary with stats
         """
-        base_skills = self.list_base_skills()
-        ephemeral_skills = self.list_ephemeral_skills()
+        base_skills = await self.list_base_skills()
+        ephemeral_skills = await self.list_ephemeral_skills()
 
         total_base_tokens = sum(s.size_tokens for s in base_skills)
         total_ephemeral_tokens = sum(s.size_tokens for s in ephemeral_skills)

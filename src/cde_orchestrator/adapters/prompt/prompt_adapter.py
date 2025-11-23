@@ -3,15 +3,18 @@ import json
 import re
 from pathlib import Path
 from typing import Any, Dict, Iterable, Optional, Set
+import aiofiles
 
 from markupsafe import escape
+
+from ...domain.ports import IPromptRenderer
 
 
 class PromptValidationError(ValueError):
     """Raised when a prompt template fails validation or sanitization."""
 
 
-class PromptAdapter:
+class PromptAdapter(IPromptRenderer):
     """Loads POML recipes and injects sanitized context."""
 
     PLACEHOLDER_PATTERN = re.compile(r"\{\{([A-Z0-9_]+)\}\}")
@@ -28,6 +31,14 @@ class PromptAdapter:
         "REPO_SYNTHESIS",
         "CLEANUP_RECOMMENDATIONS",
         "MANAGEMENT_PRINCIPLES",
+        # Added for StartFeature/SubmitWork
+        "PROJECT_NAME",
+        "PROJECT_PATH",
+        "FEATURE_ID",
+        "WORKFLOW_TYPE",
+        "RECIPE_ID",
+        "CURRENT_PHASE",
+        "PREVIOUS_PHASE_RESULTS",
     }
 
     def __init__(
@@ -40,7 +51,7 @@ class PromptAdapter:
             allowed_placeholders or self.DEFAULT_ALLOWED_PLACEHOLDERS
         )
 
-    def load_and_prepare(self, poml_path: Path, context: Dict[str, Any]) -> str:
+    async def load_and_prepare(self, poml_path: Path, context: Dict[str, Any]) -> str:
         """
         Reads a POML file, validates placeholders, and replaces them with sanitized values.
 
@@ -54,7 +65,8 @@ class PromptAdapter:
         if not poml_path.exists():
             raise FileNotFoundError(f"POML recipe not found at {poml_path}")
 
-        content = poml_path.read_text(encoding="utf-8")
+        async with aiofiles.open(poml_path, "r", encoding="utf-8") as f:
+            content = await f.read()
 
         placeholders = set(self.PLACEHOLDER_PATTERN.findall(content))
         if not placeholders:

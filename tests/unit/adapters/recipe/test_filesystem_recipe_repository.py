@@ -43,10 +43,11 @@ def recipe_dir(tmp_path):
     return recipes_path
 
 
-def test_list_all_recipes(recipe_dir):
+@pytest.mark.asyncio
+async def test_list_all_recipes(recipe_dir):
     """Tests that all recipes are loaded and parsed correctly."""
     repo = FileSystemRecipeRepository(recipes_dir=recipe_dir)
-    recipes = repo.list_all()
+    recipes = await repo.list_all()
 
     assert len(recipes) == 2
 
@@ -55,17 +56,19 @@ def test_list_all_recipes(recipe_dir):
     assert "sprint-prioritizer" in recipe_ids
 
 
-def test_empty_recipe_dir():
+@pytest.mark.asyncio
+async def test_empty_recipe_dir():
     """Tests that an empty list is returned for a non-existent directory."""
     repo = FileSystemRecipeRepository(recipes_dir=Path("non_existent_dir"))
-    recipes = repo.list_all()
+    recipes = await repo.list_all()
     assert len(recipes) == 0
 
 
-def test_parsing_logic(recipe_dir):
+@pytest.mark.asyncio
+async def test_parsing_logic(recipe_dir):
     """Tests the parsing logic for a single recipe."""
     repo = FileSystemRecipeRepository(recipes_dir=recipe_dir)
-    recipes = repo.list_all()
+    recipes = await repo.list_all()
 
     ai_engineer = next((r for r in recipes if r.id == "ai-engineer"), None)
     assert ai_engineer is not None

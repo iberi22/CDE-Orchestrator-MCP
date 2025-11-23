@@ -161,12 +161,13 @@ class TestProgressiveDisclosure:
         print(f"  full: {full_size} bytes (baseline)")
 
 
+@pytest.mark.asyncio
 class TestToolSearch:
     """Test suite for tool search functionality."""
 
-    def test_search_tools_name_only(self):  # type: ignore
+    async def test_search_tools_name_only(self):  # type: ignore
         """Test searchTools with name_only detail level."""
-        result_json = cde_searchTools("skill", detail_level="name_only")
+        result_json = await cde_searchTools("skill", detail_level="name_only")
         result = json.loads(result_json)
 
         # Verify structure
@@ -186,9 +187,9 @@ class TestToolSearch:
         # Should find skill-related tools
         assert result["total"] >= 2  # sourceSkill, updateSkill
 
-    def test_search_tools_name_and_description(self):  # type: ignore
+    async def test_search_tools_name_and_description(self):  # type: ignore
         """Test searchTools with name_and_description detail level."""
-        result_json = cde_searchTools("workflow", detail_level="name_and_description")
+        result_json = await cde_searchTools("workflow", detail_level="name_and_description")
         result = json.loads(result_json)
 
         # Verify structure
@@ -202,9 +203,9 @@ class TestToolSearch:
             assert "description" in tool
             assert "tags" in tool
 
-    def test_search_tools_full_schema(self):  # type: ignore
+    async def test_search_tools_full_schema(self):  # type: ignore
         """Test searchTools with full_schema detail level."""
-        result_json = cde_searchTools("scan", detail_level="full_schema")
+        result_json = await cde_searchTools("scan", detail_level="full_schema")
         result = json.loads(result_json)
 
         # Verify complete structure
@@ -220,18 +221,18 @@ class TestToolSearch:
             assert "parameters" in tool
             assert "tags" in tool
 
-    def test_search_tools_no_query(self):  # type: ignore
+    async def test_search_tools_no_query(self):  # type: ignore
         """Test searchTools without query (list all)."""
-        result_json = cde_searchTools(detail_level="name_only")
+        result_json = await cde_searchTools(detail_level="name_only")
         result = json.loads(result_json)
 
         # Should list all tools
         assert "tools" in result
         assert result["total"] > 10  # CDE has 40+ tools
 
-    def test_search_tools_invalid_detail_level(self):  # type: ignore
+    async def test_search_tools_invalid_detail_level(self):  # type: ignore
         """Test searchTools with invalid detail level."""
-        result_json = cde_searchTools("test", detail_level="invalid")
+        result_json = await cde_searchTools("test", detail_level="invalid")
         result = json.loads(result_json)
 
         # Should return error
@@ -239,6 +240,7 @@ class TestToolSearch:
         assert "valid_options" in result
 
 
+@pytest.mark.asyncio
 class TestMCPToolSearcher:
     """Test suite for MCPToolSearcher adapter."""
 
@@ -251,13 +253,13 @@ class TestMCPToolSearcher:
         assert searcher is not None
         assert searcher.mcp_tools_module == mcp_tools
 
-    def test_searcher_discover_tools(self):  # type: ignore
+    async def test_searcher_discover_tools(self):  # type: ignore
         """Test tool discovery."""
         import mcp_tools
 
         searcher = MCPToolSearcher(mcp_tools)
 
-        tools = searcher._discover_all_tools()
+        tools = await searcher._discover_all_tools()
 
         # Should find multiple tools
         assert len(tools) > 10
@@ -270,14 +272,14 @@ class TestMCPToolSearcher:
             assert "parameters" in tool
             assert "tags" in tool
 
-    def test_searcher_search_by_keyword(self):  # type: ignore
+    async def test_searcher_search_by_keyword(self):  # type: ignore
         """Test keyword search."""
         import mcp_tools
 
         searcher = MCPToolSearcher(mcp_tools)
 
         # Search for "documentation" tools
-        result = searcher.search("documentation", detail_level="name_only")
+        result = await searcher.search("documentation", detail_level="name_only")
 
         assert result["total"] >= 2  # scanDocumentation, analyzeDocumentation
         assert (
@@ -285,13 +287,13 @@ class TestMCPToolSearcher:
             or "analyzeDocumentation" in result["tools"]
         )
 
-    def test_searcher_list_all(self):  # type: ignore
+    async def test_searcher_list_all(self):  # type: ignore
         """Test listing all tools."""
         import mcp_tools
 
         searcher = MCPToolSearcher(mcp_tools)
 
-        result = searcher.list_all(detail_level="name_only")
+        result = await searcher.list_all(detail_level="name_only")
 
         assert result["total"] > 10
         assert len(result["tools"]) == result["total"]
@@ -315,22 +317,23 @@ class TestMCPToolSearcher:
         assert "workflow" in tags3
 
 
+@pytest.mark.asyncio
 class TestTokenEfficiencyBenchmarks:
     """Benchmark tests for token efficiency (Anthropic's 98.7% goal)."""
 
-    def test_tool_discovery_token_reduction(self):  # type: ignore
+    async def test_tool_discovery_token_reduction(self):  # type: ignore
         """Benchmark: Tool discovery should achieve 98%+ token reduction."""
         import mcp_tools
 
         searcher = MCPToolSearcher(mcp_tools)
 
         # Simulate loading all tools upfront (traditional approach)
-        all_tools_full = searcher.list_all(detail_level="full_schema")
+        all_tools_full = await searcher.list_all(detail_level="full_schema")
         all_tools_json = json.dumps(all_tools_full)
         traditional_size = len(all_tools_json)
 
         # Progressive disclosure approach
-        name_only = searcher.list_all(detail_level="name_only")
+        name_only = await searcher.list_all(detail_level="name_only")
         name_only_json = json.dumps(name_only)
         progressive_size = len(name_only_json)
 
@@ -345,7 +348,7 @@ class TestTokenEfficiencyBenchmarks:
         # Should achieve Anthropic's 98.7% goal
         assert reduction > 95  # At least 95% reduction
 
-    def test_multi_project_token_efficiency(self):  # type: ignore
+    async def test_multi_project_token_efficiency(self):  # type: ignore
         """Benchmark: Multi-project scenario should show massive savings."""
         import mcp_tools
 
@@ -354,13 +357,13 @@ class TestTokenEfficiencyBenchmarks:
         # Traditional: Load all tools for each project
         num_projects = 3
         traditional_per_project = len(
-            json.dumps(searcher.list_all(detail_level="full_schema"))
+            json.dumps(await searcher.list_all(detail_level="full_schema"))
         )
         traditional_total = traditional_per_project * num_projects
 
         # Progressive: Discover once, use for all projects
         discovery_cost = len(
-            json.dumps(searcher.search("scan", detail_level="name_only"))
+            json.dumps(await searcher.search("scan", detail_level="name_only"))
         )
         # Each project operation is minimal (just parameters)
         operation_cost_per_project = 100  # Estimate

@@ -35,19 +35,19 @@ class IProjectRepository(ABC):
     """
 
     @abstractmethod
-    def get_by_id(self, project_id: ProjectId) -> Optional[Project]:
+    async def get_by_id(self, project_id: ProjectId) -> Optional[Project]:
         pass
 
     @abstractmethod
-    def get_by_path(self, path: str) -> Optional[Project]:
+    async def get_by_path(self, path: str) -> Optional[Project]:
         pass
 
     @abstractmethod
-    def get_or_create(self, path: str, name: Optional[str] = None) -> Project:
+    async def get_or_create(self, path: str, name: Optional[str] = None) -> Project:
         pass
 
     @abstractmethod
-    def list_all(self, limit: Optional[int] = None) -> List[Project]:
+    async def list_all(self, limit: Optional[int] = None) -> List[Project]:
         pass
 
     @abstractmethod
@@ -56,15 +56,15 @@ class IProjectRepository(ABC):
         pass
 
     @abstractmethod
-    def save(self, project: Project) -> None:
+    async def save(self, project: Project) -> None:
         pass
 
     @abstractmethod
-    def delete(self, project_id: ProjectId) -> None:
+    async def delete(self, project_id: ProjectId) -> None:
         pass
 
     @abstractmethod
-    def delete_by_path(self, path: str) -> None:
+    async def delete_by_path(self, path: str) -> None:
         pass
 
 
@@ -122,7 +122,7 @@ class IPromptRenderer(ABC):
     """
 
     @abstractmethod
-    def load_and_prepare(self, poml_path: Path, context: Dict[str, Any]) -> str:
+    async def load_and_prepare(self, poml_path: Path, context: Dict[str, Any]) -> str:
         pass
 
 
@@ -132,11 +132,11 @@ class IStateStore(ABC):
     """
 
     @abstractmethod
-    def load_state(self) -> Dict[str, Any]:
+    async def load_state(self) -> Dict[str, Any]:
         pass
 
     @abstractmethod
-    def save_state(self, state: Dict[str, Any]) -> None:
+    async def save_state(self, state: Dict[str, Any]) -> None:
         pass
 
 
@@ -146,7 +146,7 @@ class IWorkflowRepository(ABC):
     """
 
     @abstractmethod
-    def load_workflow(self) -> Workflow:
+    async def load_workflow(self) -> Workflow:
         pass
 
 
@@ -156,5 +156,54 @@ class IRecipeRepository(ABC):
     """
 
     @abstractmethod
-    def list_all(self) -> List[Recipe]:
+    async def list_all(self) -> List[Recipe]:
+        pass
+
+
+class IRecipeDownloader(ABC):
+    """
+    Port for downloading recipes from external sources (GitHub, etc.).
+    """
+
+    @abstractmethod
+    async def download_file(
+        self,
+        repo_url: str,
+        branch: str,
+        file_path: str
+    ) -> str:
+        """
+        Download a single file from a repository.
+
+        Args:
+            repo_url: Full repository URL (e.g., https://github.com/user/repo)
+            branch: Branch name (e.g., "main", "master")
+            file_path: Path to file within repo (e.g., "poml/engineering/ai-engineer.poml")
+
+        Returns:
+            File content as string
+
+        Raises:
+            Exception: If download fails
+        """
+        pass
+
+    @abstractmethod
+    async def download_directory(
+        self,
+        repo_url: str,
+        branch: str,
+        dir_path: str
+    ) -> Dict[str, str]:
+        """
+        Download all files from a directory.
+
+        Args:
+            repo_url: Full repository URL
+            branch: Branch name
+            dir_path: Directory path within repo
+
+        Returns:
+            Dict mapping file_path -> content
+        """
         pass

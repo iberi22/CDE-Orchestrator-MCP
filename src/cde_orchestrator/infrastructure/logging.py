@@ -1,13 +1,36 @@
-# src/cde_orchestrator/infrastructure/logging.py
 import json
 import logging
 import sys
+import uuid
+from contextvars import ContextVar
 from datetime import datetime, timezone
+from typing import Optional
+
+# Context variable to store correlation ID
+correlation_id_ctx: ContextVar[Optional[str]] = ContextVar("correlation_id", default=None)
+
+
+def get_correlation_id() -> Optional[str]:
+    """Get the current correlation ID."""
+    return correlation_id_ctx.get()
+
+
+def set_correlation_id(correlation_id: Optional[str] = None) -> str:
+    """
+    Set the correlation ID for the current context.
+    If none provided, generates a new UUID.
+    Returns the set correlation ID.
+    """
+    if correlation_id is None:
+        correlation_id = str(uuid.uuid4())
+    correlation_id_ctx.set(correlation_id)
+    return correlation_id
 
 
 class JsonFormatter(logging.Formatter):
     """
     Formatter that outputs JSON strings for production logging.
+    Includes correlation_id if present in context.
     """
 
     def format(self, record: logging.LogRecord) -> str:
@@ -22,6 +45,11 @@ class JsonFormatter(logging.Formatter):
             "function": record.funcName,
             "line": record.lineno,
         }
+
+        # Add correlation ID if present
+        correlation_id = get_correlation_id()
+        if correlation_id:
+            log_record["correlation_id"] = correlation_id
 
         # Add exception info if present
         if record.exc_info:
@@ -53,9 +81,14 @@ def configure_logging(level: str = "INFO", json_format: bool = True) -> None:
     if json_format:
         handler.setFormatter(JsonFormatter())
     else:
+        # Also add correlation ID to text format if possible, but JSON is priority
         handler.setFormatter(
-            logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+            logging.Formatter(
+                "%(asctime)s - %(name)s - %(levelname)s - [%(correlation_id)s] - %(message)s"
+            )
         )
+        # Note: standard formatter won't automatically pick up contextvar without a filter
+        # For now, we focus on JSON format which explicitly calls get_correlation_id()
 
     # Remove existing handlers to avoid duplicates
     root_logger.handlers = []

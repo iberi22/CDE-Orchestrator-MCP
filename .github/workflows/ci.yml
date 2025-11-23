@@ -40,6 +40,39 @@ jobs:
         # Skip mypy temporarily (40+ type errors need fixing)
         SKIP=mypy pre-commit run --all-files
 
-    - name: Test with pytest
+    - name: Test with pytest and coverage
       run: |
-        pytest tests/ -v --tb=short --asyncio-mode=auto 2>&1 | head -100
+        pytest tests/ -v --tb=short --asyncio-mode=auto \
+          --cov=src/cde_orchestrator \
+          --cov-report=term-missing \
+          --cov-report=xml:coverage.xml \
+          --cov-report=html:htmlcov \
+          --cov-fail-under=60
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v4
+      if: always()
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+    - name: Archive coverage reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-reports
+        path: |
+          coverage.xml
+          htmlcov/
+        retention-days: 30
+
+    - name: Check code quality
+      run: |
+        echo "=== Code Quality Metrics ==="
+        echo "Total lines of code:"
+        find src -name "*.py" | xargs wc -l | tail -1
+        echo ""
+        echo "Test coverage summary:"
+        coverage report --skip-covered

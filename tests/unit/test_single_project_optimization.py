@@ -14,7 +14,8 @@ import pytest
 class TestSingleProjectOptimization:
     """Validate single project management is rock-solid."""
 
-    def test_single_project_state_isolation(self, tmp_path: Path) -> None:
+    @pytest.mark.asyncio
+    async def test_single_project_state_isolation(self, tmp_path: Path) -> None:
         """Ensure project state is properly isolated in .cde/state.json."""
         from cde_orchestrator.adapters.filesystem_project_repository import (
             FileSystemProjectRepository,
@@ -29,7 +30,7 @@ class TestSingleProjectOptimization:
         project.activate()
 
         # Save state
-        repo.save(project)
+        await repo.save(project)
 
         # Verify state file exists
         state_file = tmp_path / ".cde" / "state.json"
@@ -43,7 +44,7 @@ class TestSingleProjectOptimization:
         assert state_data["status"] == ProjectStatus.ACTIVE.value
 
         # Load and verify
-        loaded = repo.get_or_create(project_path)
+        loaded = await repo.get_or_create(project_path)
         assert loaded.id == project.id
         assert loaded.name == project.name
         assert loaded.status == ProjectStatus.ACTIVE
@@ -71,7 +72,8 @@ class TestSingleProjectOptimization:
         feature.complete()
         assert feature.status == FeatureStatus.COMPLETED
 
-    def test_single_project_context_loading(self, tmp_path: Path) -> None:
+    @pytest.mark.asyncio
+    async def test_single_project_context_loading(self, tmp_path: Path) -> None:
         """Verify efficient context loading for single project."""
         from cde_orchestrator.adapters.filesystem_project_repository import (
             FileSystemProjectRepository,
@@ -88,13 +90,13 @@ class TestSingleProjectOptimization:
         (tmp_path / "README.md").write_text("# Test Project")
 
         project = Project.create(name="TestProject", path=project_path)
-        repo.save(project)
+        await repo.save(project)
 
         # Load project (should be fast)
         import time
 
         start = time.time()
-        loaded = repo.get_or_create(project_path)
+        loaded = await repo.get_or_create(project_path)
         duration = time.time() - start
 
         assert loaded is not None
@@ -144,7 +146,8 @@ class TestSingleProjectOptimization:
 class TestSingleProjectPerformance:
     """Performance benchmarks for single project operations."""
 
-    def test_project_load_performance(self, tmp_path: Path) -> None:
+    @pytest.mark.asyncio
+    async def test_project_load_performance(self, tmp_path: Path) -> None:
         """Benchmark project loading time."""
         import time
 
@@ -158,13 +161,13 @@ class TestSingleProjectPerformance:
 
         # Create project
         project = Project.create(name="TestProject", path=project_path)
-        repo.save(project)
+        await repo.save(project)
 
         # Benchmark 10 loads
         times = []
         for _ in range(10):
             start = time.time()
-            repo.get_or_create(project_path)
+            await repo.get_or_create(project_path)
             times.append(time.time() - start)
 
         avg_time = sum(times) / len(times)
@@ -189,7 +192,8 @@ class TestSingleProjectPerformance:
         avg_time = sum(times) / len(times)
         assert avg_time < 0.001, f"Avg feature creation {avg_time:.4f}s > 1ms"
 
-    def test_state_persistence_performance(self, tmp_path: Path) -> None:
+    @pytest.mark.asyncio
+    async def test_state_persistence_performance(self, tmp_path: Path) -> None:
         """Benchmark state save/load cycles."""
         import time
 
@@ -211,8 +215,8 @@ class TestSingleProjectPerformance:
         times = []
         for _ in range(10):
             start = time.time()
-            repo.save(project)
-            repo.get_or_create(project_path)
+            await repo.save(project)
+            await repo.get_or_create(project_path)
             times.append(time.time() - start)
 
         avg_time = sum(times) / len(times)
@@ -240,7 +244,7 @@ class TestSingleProjectIntegration:
         # Initialize project
         project = Project.create(name="TestProject", path=project_path)
         project.activate()
-        repo.save(project)
+        await repo.save(project)
 
         # Start feature
         feature = project.start_feature("Add user authentication")
@@ -248,7 +252,8 @@ class TestSingleProjectIntegration:
         assert len(project.features) == 1
         assert project.features[0].prompt == "Add user authentication"
 
-    def test_project_state_recovery_after_crash(self, tmp_path: Path) -> None:
+    @pytest.mark.asyncio
+    async def test_project_state_recovery_after_crash(self, tmp_path: Path) -> None:
         """Verify project state can be recovered after simulated crash."""
         from cde_orchestrator.adapters.filesystem_project_repository import (
             FileSystemProjectRepository,
@@ -269,10 +274,10 @@ class TestSingleProjectIntegration:
         feature1.complete()
 
         # Save state
-        repo.save(project1)
+        await repo.save(project1)
 
         # Simulate crash - load fresh instance
-        project2 = repo.get_or_create(project_path)
+        project2 = await repo.get_or_create(project_path)
 
         # Verify state recovered
         assert project2.name == "TestProject"
@@ -280,7 +285,8 @@ class TestSingleProjectIntegration:
         assert project2.features[0].status == FeatureStatus.COMPLETED
         assert project2.features[1].status == FeatureStatus.DEFINING
 
-    def test_project_migration_handling(self, tmp_path: Path) -> None:
+    @pytest.mark.asyncio
+    async def test_project_migration_handling(self, tmp_path: Path) -> None:
         """Verify graceful handling of state format changes."""
         from datetime import datetime, timezone
 
@@ -308,6 +314,6 @@ class TestSingleProjectIntegration:
         state_file.write_text(json.dumps(valid_state))
 
         # Load should work correctly
-        project = repo.get_or_create(project_path)
+        project = await repo.get_or_create(project_path)
         assert project.name == "OldProject"
         assert hasattr(project, "created_at")  # Should have all fields

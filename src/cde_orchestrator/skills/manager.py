@@ -39,6 +39,10 @@ class SkillManager:
         self.detector = SkillRequirementDetector()
         self._ephemeral_cache: Dict[str, EphemeralSkill] = {}
 
+    async def initialize(self) -> None:
+        """Async initialization."""
+        await self.storage.initialize()
+
     def analyze_task(self, task_description: str) -> SkillRequirement:
         """
         Analyze a task to determine skill requirements.
@@ -51,7 +55,7 @@ class SkillManager:
         """
         return self.detector.analyze_task(task_description)
 
-    def get_base_skill(self, skill_id: str) -> Optional[BaseSkill]:
+    async def get_base_skill(self, skill_id: str) -> Optional[BaseSkill]:
         """
         Retrieve a base skill by ID.
 
@@ -61,9 +65,9 @@ class SkillManager:
         Returns:
             BaseSkill or None if not found
         """
-        return self.storage.load_base_skill(skill_id)
+        return await self.storage.load_base_skill(skill_id)
 
-    def get_ephemeral_skill(self, skill_id: str) -> Optional[EphemeralSkill]:
+    async def get_ephemeral_skill(self, skill_id: str) -> Optional[EphemeralSkill]:
         """
         Retrieve an ephemeral skill by ID.
 
@@ -82,14 +86,14 @@ class SkillManager:
                 del self._ephemeral_cache[skill_id]
 
         # Load from storage
-        loaded_skill = self.storage.load_ephemeral_skill(skill_id)
+        loaded_skill = await self.storage.load_ephemeral_skill(skill_id)
         if loaded_skill and not loaded_skill.is_expired:
             self._ephemeral_cache[skill_id] = loaded_skill
             return loaded_skill
 
         return None
 
-    def prepare_skills_for_task(
+    async def prepare_skills_for_task(
         self, task_description: str, task_id: str
     ) -> List[BaseSkill | EphemeralSkill]:
         """
@@ -116,13 +120,13 @@ class SkillManager:
         skills: List[BaseSkill | EphemeralSkill] = []
 
         # Find matching base skills
-        base_skills = self._find_matching_base_skills(
+        base_skills = await self._find_matching_base_skills(
             requirement.domain, requirement.knowledge_gaps
         )
         skills.extend(base_skills)
 
         # Try to find existing ephemeral skills that match
-        matching_ephemeral = self._find_matching_ephemeral_skills(
+        matching_ephemeral = await self._find_matching_ephemeral_skills(
             task_id, requirement.knowledge_gaps
         )
         skills.extend(matching_ephemeral)
@@ -140,7 +144,7 @@ class SkillManager:
 
         return skills
 
-    def _find_matching_base_skills(
+    async def _find_matching_base_skills(
         self, domain: SkillDomain, knowledge_gaps: List[str]
     ) -> List[BaseSkill]:
         """
@@ -156,10 +160,10 @@ class SkillManager:
         matching_skills: List[BaseSkill] = []
 
         # Get all base skills
-        all_skills = self.storage.list_base_skills()
+        all_skills = await self.storage.list_base_skills()
 
         for skill_metadata in all_skills:
-            skill = self.get_base_skill(skill_metadata.id)
+            skill = await self.get_base_skill(skill_metadata.id)
             if not skill:
                 continue
 
@@ -176,7 +180,7 @@ class SkillManager:
 
         return matching_skills
 
-    def _find_matching_ephemeral_skills(
+    async def _find_matching_ephemeral_skills(
         self, task_id: str, knowledge_gaps: List[str]
     ) -> List[EphemeralSkill]:
         """
@@ -192,10 +196,10 @@ class SkillManager:
         matching_skills: List[EphemeralSkill] = []
 
         # Get all ephemeral skills
-        all_skills = self.storage.list_ephemeral_skills()
+        all_skills = await self.storage.list_ephemeral_skills()
 
         for skill_metadata in all_skills:
-            skill = self.get_ephemeral_skill(skill_metadata.id)
+            skill = await self.get_ephemeral_skill(skill_metadata.id)
             if not skill or skill.is_expired:
                 continue
 
@@ -229,14 +233,14 @@ class SkillManager:
 
         return list(covered)
 
-    def cleanup_expired_skills(self) -> Dict[str, Any]:
+    async def cleanup_expired_skills(self) -> Dict[str, Any]:
         """
         Clean up expired ephemeral skills.
 
         Returns:
             Dictionary with cleanup statistics
         """
-        deleted_count = self.storage.cleanup_expired_ephemeral_skills()
+        deleted_count = await self.storage.cleanup_expired_ephemeral_skills()
         self._ephemeral_cache.clear()
 
         return {
@@ -244,16 +248,16 @@ class SkillManager:
             "cleanup_time": datetime.now(timezone.utc).isoformat(),
         }
 
-    def get_storage_stats(self) -> Dict:
+    async def get_storage_stats(self) -> Dict:
         """
         Get statistics about stored skills.
 
         Returns:
             Dictionary with storage stats
         """
-        return self.storage.get_storage_stats()
+        return await self.storage.get_storage_stats()
 
-    def search_skills(self, query: str) -> List:
+    async def search_skills(self, query: str) -> List:
         """
         Search for skills by query.
 
@@ -263,9 +267,9 @@ class SkillManager:
         Returns:
             List of matching skill metadata
         """
-        return self.storage.search_skills(query)
+        return await self.storage.search_skills(query)
 
-    def list_all_skills(self) -> Dict[str, List]:
+    async def list_all_skills(self) -> Dict[str, List]:
         """
         List all available skills.
 
@@ -273,11 +277,11 @@ class SkillManager:
             Dictionary with base and ephemeral skills
         """
         return {
-            "base": self.storage.list_base_skills(),
-            "ephemeral": self.storage.list_ephemeral_skills(),
+            "base": await self.storage.list_base_skills(),
+            "ephemeral": await self.storage.list_ephemeral_skills(),
         }
 
-    def save_base_skill(self, skill: BaseSkill) -> Path:
+    async def save_base_skill(self, skill: BaseSkill) -> Path:
         """
         Save a base skill to storage.
 
@@ -287,9 +291,9 @@ class SkillManager:
         Returns:
             Path to saved skill directory
         """
-        return self.storage.save_base_skill(skill)
+        return await self.storage.save_base_skill(skill)
 
-    def save_ephemeral_skill(self, skill: EphemeralSkill) -> Path:
+    async def save_ephemeral_skill(self, skill: EphemeralSkill) -> Path:
         """
         Save an ephemeral skill to storage.
 
@@ -301,9 +305,9 @@ class SkillManager:
         """
         # Add to cache
         self._ephemeral_cache[skill.id] = skill
-        return self.storage.save_ephemeral_skill(skill)
+        return await self.storage.save_ephemeral_skill(skill)
 
-    def delete_base_skill(self, skill_id: str) -> bool:
+    async def delete_base_skill(self, skill_id: str) -> bool:
         """
         Delete a base skill.
 
@@ -313,9 +317,9 @@ class SkillManager:
         Returns:
             True if deleted successfully
         """
-        return self.storage.delete_base_skill(skill_id)
+        return await self.storage.delete_base_skill(skill_id)
 
-    def delete_ephemeral_skill(self, skill_id: str) -> bool:
+    async def delete_ephemeral_skill(self, skill_id: str) -> bool:
         """
         Delete an ephemeral skill.
 
@@ -327,4 +331,4 @@ class SkillManager:
         """
         # Remove from cache if present
         self._ephemeral_cache.pop(skill_id, None)
-        return self.storage.delete_ephemeral_skill(skill_id)
+        return await self.storage.delete_ephemeral_skill(skill_id)

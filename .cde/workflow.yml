@@ -1,0 +1,45 @@
+name: default_workflow
+phases:
+- description: Define the feature specification
+  handler: human_input
+  id: define
+  outputs:
+  - path: specs/features/feature.md
+    type: markdown
+  prompt_recipe: .cde/prompts/define.poml
+- description: Break down into tasks
+  handler: agent
+  id: decompose
+  outputs:
+  - path: specs/tasks/tasks.md
+    type: markdown
+  prompt_recipe: .cde/prompts/define.poml
+- description: Technical design
+  handler: agent
+  id: design
+  outputs:
+  - path: specs/design/design.md
+    type: markdown
+  prompt_recipe: .cde/prompts/define.poml
+- description: Implement code
+  handler: agent
+  id: implement
+  outputs:
+  - path: src/
+    type: code
+  prompt_recipe: .cde/prompts/define.poml
+- description: Run tests
+  handler: agent
+  id: test
+  outputs:
+  - path: reports/test_results.json
+    type: report
+  prompt_recipe: .cde/prompts/define.poml
+- description: Review changes
+  handler: human_input
+  id: review
+  outputs:
+  - path: reports/review.md
+    type: report
+  prompt_recipe: .cde/prompts/define.poml
+version: 1.0.0

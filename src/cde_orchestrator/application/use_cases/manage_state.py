@@ -20,17 +20,17 @@ class ManageStateUseCase:
         self._state_store = state_store
         self._last_state_snapshot: Dict[str, Any] = {}
 
-    def load_and_validate_state(self) -> Dict[str, Any]:
+    async def load_and_validate_state(self) -> Dict[str, Any]:
         """Loads, migrates, and validates the state."""
-        raw_state = self._state_store.load_state()
+        raw_state = await self._state_store.load_state()
         migrated_state = self._migrate_state(raw_state)
         self._last_state_snapshot = migrated_state
         return migrated_state
 
-    def save_state(self, state: Dict[str, Any]) -> None:
+    async def save_state(self, state: Dict[str, Any]) -> None:
         """Validates and saves the application state."""
         validated_state = self._validate_state(state)
-        self._state_store.save_state(validated_state)
+        await self._state_store.save_state(validated_state)
         self._log_state_changes(validated_state)
         self._last_state_snapshot = validated_state
 

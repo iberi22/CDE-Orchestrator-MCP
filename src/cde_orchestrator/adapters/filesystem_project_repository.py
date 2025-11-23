@@ -25,6 +25,8 @@ For LLMs:
 
 import json
 import logging
+import asyncio
+import aiofiles
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import AsyncIterator, List, Optional
@@ -54,8 +56,8 @@ class FileSystemProjectRepository(IProjectRepository):
     Examples:
         >>> repo = FileSystemProjectRepository()
         >>> project = Project.create("My Project", "/tmp/my-project")
-        >>> repo.save(project)
-        >>> loaded = repo.get_or_create("/tmp/my-project")
+        >>> await repo.save(project)
+        >>> loaded = await repo.get_or_create("/tmp/my-project")
         >>> assert loaded.name == "My Project"
     """
 
@@ -63,7 +65,7 @@ class FileSystemProjectRepository(IProjectRepository):
         """Initialize repository (stateless, no configuration needed)."""
         self._logger = logger
 
-    def get_by_id(self, project_id: ProjectId) -> Optional[Project]:
+    async def get_by_id(self, project_id: ProjectId) -> Optional[Project]:
         """
         Retrieve project by ID.
 
@@ -88,7 +90,7 @@ class FileSystemProjectRepository(IProjectRepository):
         )
         return None
 
-    def get_by_path(self, path: str) -> Optional[Project]:
+    async def get_by_path(self, path: str) -> Optional[Project]:
         """
         Find project by filesystem path.
 
@@ -99,7 +101,7 @@ class FileSystemProjectRepository(IProjectRepository):
             Project if .cde/state.json exists, None otherwise
 
         Examples:
-            >>> repo.get_by_path("E:\\\\scripts-python\\\\my-project")
+            >>> await repo.get_by_path("E:\\\\scripts-python\\\\my-project")
             Project(name='my-project', ...)
         """
         project_path = Path(path)
@@ -110,12 +112,12 @@ class FileSystemProjectRepository(IProjectRepository):
             return None
 
         try:
-            return self._load_from_file(state_file)
+            return await self._load_from_file(state_file)
         except Exception as e:
             self._logger.error(f"Failed to load project from {state_file}: {e}")
             return None
 
-    def get_or_create(self, path: str, name: Optional[str] = None) -> Project:
+    async def get_or_create(self, path: str, name: Optional[str] = None) -> Project:
         """
         Get existing project or create new one.
 
@@ -131,11 +133,11 @@ class FileSystemProjectRepository(IProjectRepository):
             Existing or newly created Project
 
         Examples:
-            >>> project = repo.get_or_create("E:\\\\projects\\\\my-app")
+            >>> project = await repo.get_or_create("E:\\\\projects\\\\my-app")
             >>> project.name
             'my-app'
         """
-        existing = self.get_by_path(path)
+        existing = await self.get_by_path(path)
         if existing:
             return existing
 
@@ -146,7 +148,7 @@ class FileSystemProjectRepository(IProjectRepository):
         self._logger.info(f"Creating new project: {project_name} at {path}")
         return Project.create(name=project_name, path=path)
 
-    def list_all(self, limit: Optional[int] = None) -> List[Project]:
+    async def list_all(self, limit: Optional[int] = None) -> List[Project]:
         """
         Get all registered projects.
 
@@ -172,7 +174,7 @@ class FileSystemProjectRepository(IProjectRepository):
         )
         return []
 
-    async def list_all_async(
+    def list_all_async(
         self, limit: Optional[int] = None
     ) -> AsyncIterator[Project]:
         """
@@ -186,10 +188,12 @@ class FileSystemProjectRepository(IProjectRepository):
         """
         # Empty async generator - must yield something to be valid generator
         # but loop never executes
-        for _ in []:  # pragma: no cover
-            yield  # type: ignore
+        async def _gen():
+            for _ in []:  # pragma: no cover
+                yield  # type: ignore
+        return _gen()
 
-    def save(self, project: Project) -> None:
+    async def save(self, project: Project) -> None:
         """
         Persist project state to .cde/state.json.
 
@@ -207,7 +211,7 @@ class FileSystemProjectRepository(IProjectRepository):
         Examples:
             >>> project = Project.create("Test", "/tmp/test")
             >>> project.activate()
-            >>> repo.save(project)
+            >>> await repo.save(project)
             >>> # File now exists at /tmp/test/.cde/state.json
         """
         project_path = Path(project.path)
@@ -226,11 +230,12 @@ class FileSystemProjectRepository(IProjectRepository):
 
             # Atomic write: temp file + rename
             temp_file = state_file.with_suffix(".json.tmp")
-            with open(temp_file, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
+            async with aiofiles.open(temp_file, "w", encoding="utf-8") as f:
+                await f.write(json.dumps(data, indent=2, ensure_ascii=False))
 
             # Atomic rename (overwrites state.json)
-            temp_file.replace(state_file)
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(None, temp_file.replace, state_file)
 
             self._logger.info(f"Saved project {project.id} to {state_file}")
 
@@ -238,7 +243,7 @@ class FileSystemProjectRepository(IProjectRepository):
             self._logger.error(f"Failed to save project {project.id}: {e}")
             raise DomainError(f"Failed to save project: {e}") from e
 
-    def delete(self, project_id: ProjectId) -> None:
+    async def delete(self, project_id: ProjectId) -> None:
         """
         Remove project state file.
 
@@ -263,7 +268,7 @@ class FileSystemProjectRepository(IProjectRepository):
             "Use get_by_path() to load project, then delete_by_path()."
         )
 
-    def delete_by_path(self, path: str) -> None:
+    async def delete_by_path(self, path: str) -> None:
         """
         Delete project state file by path.
 
@@ -274,7 +279,7 @@ class FileSystemProjectRepository(IProjectRepository):
             ProjectNotFoundError: If state file doesn't exist
 
         Examples:
-            >>> repo.delete_by_path("E:\\\\projects\\\\old-project")
+            >>> await repo.delete_by_path("E:\\\\projects\\\\old-project")
         """
         project_path = Path(path)
         state_file = project_path / ".cde" / "state.json"
@@ -283,7 +288,8 @@ class FileSystemProjectRepository(IProjectRepository):
             raise ProjectNotFoundError(f"No state file at {state_file}")
 
         try:
-            state_file.unlink()
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(None, state_file.unlink)
             self._logger.info(f"Deleted state file: {state_file}")
         except Exception as e:
             self._logger.error(f"Failed to delete {state_file}: {e}")
@@ -343,7 +349,7 @@ class FileSystemProjectRepository(IProjectRepository):
             "metadata": feature.metadata,
         }
 
-    def _load_from_file(self, state_file: Path) -> Project:
+    async def _load_from_file(self, state_file: Path) -> Project:
         """
         Deserialize Project from JSON file.
 
@@ -357,8 +363,9 @@ class FileSystemProjectRepository(IProjectRepository):
             DomainError: If JSON is invalid or missing required fields
         """
         try:
-            with open(state_file, "r", encoding="utf-8") as f:
-                data = json.load(f)
+            async with aiofiles.open(state_file, "r", encoding="utf-8") as f:
+                content = await f.read()
+                data = json.loads(content)
 
             # Reconstruct project
             project = Project(
