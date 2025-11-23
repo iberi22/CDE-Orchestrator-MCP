@@ -17,8 +17,12 @@ llm_summary: |
 
 ## Phase 1: Foundation & Local CEO (Current)
 
-**Goal:** Establish the "CEO" logic within the current local environment (`.venv`).
+**Goal:** Establish the "CEO" logic within the current local environment (`.venv`) ensuring full functionality on Windows without Docker.
 
+- [ ] **Windows Local Compatibility:**
+  - [ ] Ensure all paths and subprocess calls are Windows-compatible (PowerShell/CMD).
+  - [ ] Verify `gh copilot` and other CLI tools work natively in the local `.venv`.
+  - [ ] Implement local process management (instead of containers) for running agents.
 - [ ] **Refactor Architecture:**
   - [ ] Define the "CEO" domain model (managing "Employees" vs just "Tools").
   - [ ] Implement `AgentManager` to handle CLI-based agents (Copilot, etc.) locally.
