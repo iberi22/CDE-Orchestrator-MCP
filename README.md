@@ -1,34 +1,42 @@
 ---
-title: CDE Orchestrator MCP
+title: Nexus AI (formerly CDE Orchestrator)
 description: '[![CI](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/workflows/ci.yml/badge.svg)](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/wo'
 type: guide
 status: active
 created: '2025-11-02'
-updated: '2025-11-09'
-author: CDE Team
+updated: '2025-11-23'
+author: Nexus AI Team
 tags:
 - api
 - architecture
 - documentation
 - mcp
-- migration
 - orchestration
-- progressive-disclosure
-- token-optimization
-- multi-project
-llm_summary: "User guide for CDE Orchestrator MCP focusing on professional single-project management.\n
-  Implements deep context awareness and robust workflow orchestration.\n
-  Reference when working with guide documentation."
+- nexus-ai
+- ceo-agent
+- multi-agent
+llm_summary: "User guide for Nexus AI (formerly CDE Orchestrator).
+  The AI CEO that manages software development like a company.
+  Orchestrates agents, manages high-availability tools, and runs in Docker."
 ---
 
-# CDE Orchestrator MCP
+# Nexus AI (formerly CDE Orchestrator)
 
 [![CI](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/workflows/ci.yml/badge.svg)](https://github.com/iberi22/CDE-Orchestrator-MCP/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/iberi22/CDE-Orchestrator-MCP/branch/main/graph/badge.svg)](https://codecov.io/gh/iberi22/CDE-Orchestrator-MCP)
 [![Python Versions](https://img.shields.io/badge/python-3.14+-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-AGPL3-red)](LICENSE-DUAL.md)
 
-The CDE Orchestrator is the reference implementation of the **Context-Driven Engineering (CDE)** methodology for AI-assisted software development with continuous research and improvement. It is a smart MCP (Model Context Protocol) server designed to guide AI coding assistants through a structured, phase-based software development lifecycle with built-in research, dependency analysis, and project intelligence gathering.
+**Nexus AI** is the evolution of the CDE Orchestrator into a comprehensive **AI CEO** system. It is designed to manage software development projects like a company, orchestrating multiple specialized agents, managing high-availability tools, and running securely within a containerized environment.
+
+## 🧠 The Vision: AI CEO
+
+Nexus AI goes beyond simple tool execution. It acts as the **Chief Executive Officer** of your AI workforce:
+
+*   **Orchestration:** Breaks down complex features into tasks and delegates them to specialized "Employee" agents (Coder, QA, DevOps).
+*   **High Availability:** Ensures tools (web scrapers, linters, test runners) are always available via a scalable worker queue system.
+*   **Internal Runtime:** Runs CLI-based agents (like GitHub Copilot CLI) securely within its own environment (Docker/VPS).
+*   **Context-Driven:** Maintains deep project context and enforces governance across all activities.
 
 ## ⚖️ License - Fair & Ethical
 
@@ -81,13 +89,111 @@ We offer **enterprise-grade services** while keeping the software 100% open sour
 - 🎓 Research institutions managing 100+ projects
 - 💼 Consulting firms needing white-label solutions
 
-📧 **Interested?** Contact us: [enterprise@cde-orchestrator.dev](mailto:enterprise@cde-orchestrator.dev)
+📧 **Interested?** Contact us: [enterprise@nexus-ai.dev](mailto:enterprise@nexus-ai.dev)
 
 📄 **Learn more:** Contact us for full details.
 
 ---
 
-> **📋 Project Status:** Currently in active improvement phase. See [Executive Summary](specs/design/executive_summary_v2.md) for roadmap and [Improvement Roadmap](specs/tasks/improvement-roadmap.md) for detailed tasks.
+## 📋 Project Status
+
+**Current Phase:** ✅ Phase 1 Complete (2025-11-23) | ⏸️ Phase 2 Ready (Docker Optional)
+
+### Nexus AI Transformation Progress
+
+| Phase | Status | Description | Completion |
+|-------|--------|-------------|------------|
+| **Phase 1** | ✅ **COMPLETE** | Foundation & Local CEO | **100%** |
+| **Phase 2** | ⏸️ **READY** | Docker Containerization (Optional) | 90% (files ready) |
+| **Phase 3** | ⏸️ Pending | High Availability & Async | 0% |
+| **Phase 4** | ⏸️ Pending | Multi-Agent Orchestration | 0% |
+| **Phase 5** | ⏸️ Pending | VPS/Cloud Deployment | 0% |
+
+### Phase 1 Achievements ✅
+
+**Validation Date:** 2025-11-23
+**Status:** ✅ 25/25 Tests Passing
+**Deployment:** PRODUCTION-READY (Local)
+
+**Core Components:**
+- ✅ **Rust Module:** `cde_rust_core-0.2.0` compiled and installed
+  - 12 parallel threads (Rayon auto-detected)
+  - High-speed documentation scanning
+  - Workflow validation
+  - Project structure analysis
+- ✅ **MCP Server:** FastMCP with 25 registered tools
+  - Tool discovery and registration
+  - Async/sync tool compatibility
+  - Structured logging and telemetry
+- ✅ **AI Orchestration:** Complete workflow system
+  - `cde_selectWorkflow` - Intelligent routing
+  - `cde_executeWithBestAgent` - Multi-agent execution
+  - `cde_startFeature` / `cde_submitWork` - Workflow management
+- ✅ **Validation Suite:** Comprehensive testing
+  - 6 validation phases
+  - 25 automated tests
+  - Performance benchmarking
+
+**Performance Metrics:**
+- Server startup: **< 2s**
+- Rust module load: **< 1s**
+- Memory usage: **~50MB** (server only)
+- Parallel threads: **12** (auto-detected)
+
+**Quick Start:** See [QUICKSTART_LOCAL.md](QUICKSTART_LOCAL.md) for immediate usage
+
+**Full Details:** [Local Validation Report](LOCAL_VALIDATION_REPORT.md) | [Estado del Proyecto](RESUMEN_ESTADO_PROYECTO.md)
+
+---
+
+## 🚀 Quick Start (Local - Recommended)
+
+### Prerequisites
+- Python 3.11+ (tested with 3.14.0)
+- Rust toolchain (tested with 1.88.0)
+
+### Option 1: Automated (Recommended)
+
+```powershell
+# Clone repository
+git clone https://github.com/iberi22/CDE-Orchestrator-MCP.git
+cd CDE-Orchestrator-MCP
+
+# Run validation and start server
+.\start_local.ps1 -Validate
+```
+
+### Option 2: Manual
+
+```powershell
+# 1. Setup virtual environment
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -e .
+
+# 2. Compile Rust module
+cd rust_core
+maturin develop --release
+cd ..
+
+# 3. Validate installation
+python validate_local.py
+
+# 4. Start server
+$env:PYTHONPATH = "$PWD\src"
+python src/server.py
+```
+
+### What You Get
+
+- **MCP Server**: 25 AI orchestration tools
+- **Rust Performance**: 12-thread parallel processing
+- **Validation Suite**: Automated testing
+- **Documentation**: Complete guides and specs
+
+See [QUICKSTART_LOCAL.md](QUICKSTART_LOCAL.md) for detailed instructions.
+
+---
 
 ## Core Concepts
 

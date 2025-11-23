@@ -6,9 +6,11 @@ from fastmcp import FastMCP
 
 from cde_orchestrator.infrastructure.config import config
 from cde_orchestrator.infrastructure.logging import configure_logging, get_logger
+from cde_orchestrator.infrastructure.telemetry import trace_execution
 from mcp_tools import (
     cde_analyzeDocumentation,
     cde_checkRecipes,
+    cde_delegateToJules,
     cde_downloadRecipes,
     cde_executeWithBestAgent,
     cde_healthCheck,
@@ -25,6 +27,13 @@ from mcp_tools import (
     cde_startFeature,
     cde_submitWork,
     cde_updateSkill,
+)
+from mcp_tools.ceo_orchestration import (
+    cde_cancelTask,
+    cde_delegateTask,
+    cde_getTaskStatus,
+    cde_getWorkerStats,
+    cde_listActiveTasks,
 )
 from mcp_tools.full_implementation import cde_executeFullImplementation
 from mcp_tools.test_progress import cde_testProgressReporting
@@ -67,8 +76,6 @@ app = FastMCP("CDE Orchestrator MCP")
 # Auto-generate filesystem structure on startup
 _generate_mcp_filesystem()
 
-from cde_orchestrator.infrastructure.telemetry import trace_execution
-
 # Tool Registration with Dependency Injection
 app.tool()(trace_execution(cde_onboardingProject))
 app.tool()(trace_execution(cde_publishOnboarding))
@@ -84,6 +91,7 @@ app.tool()(trace_execution(cde_downloadRecipes))  # ✅ Download recipes from Gi
 app.tool()(trace_execution(cde_checkRecipes))  # ✅ Check recipe status
 app.tool()(trace_execution(cde_listAvailableAgents))
 app.tool()(trace_execution(cde_selectAgent))
+app.tool()(trace_execution(cde_delegateToJules))  # ✅ Jules AI agent delegation
 app.tool()(trace_execution(cde_executeWithBestAgent))
 app.tool()(trace_execution(cde_executeFullImplementation))  # ✅ Meta-orchestration
 app.tool()(trace_execution(cde_testProgressReporting))  # ✅ Test tool for status bar
@@ -92,6 +100,13 @@ app.tool()(
     trace_execution(cde_searchTools)
 )  # ✅ Progressive tool discovery (Anthropic pattern)
 app.tool()(trace_execution(cde_healthCheck))  # ✅ Health monitoring (PROD-03)
+
+# CEO Orchestration Tools (Phase 1)
+app.tool()(trace_execution(cde_delegateTask))  # ✅ Delegate tasks to agents
+app.tool()(trace_execution(cde_getTaskStatus))  # ✅ Poll task status
+app.tool()(trace_execution(cde_listActiveTasks))  # ✅ List active tasks
+app.tool()(trace_execution(cde_getWorkerStats))  # ✅ Worker pool stats
+app.tool()(trace_execution(cde_cancelTask))  # ✅ Cancel tasks
 
 
 # Server Entry Point

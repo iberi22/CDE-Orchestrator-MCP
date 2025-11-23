@@ -7,6 +7,7 @@ mod filesystem;
 mod documentation;
 mod workflow_validator;
 mod project_scanner;
+mod process_manager;
 
 static INIT: Once = Once::new();
 
@@ -105,5 +106,12 @@ fn cde_rust_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(analyze_documentation_quality_py, m)?)?;
     m.add_function(wrap_pyfunction!(validate_workflows_py, m)?)?;
     m.add_function(wrap_pyfunction!(scan_project_py, m)?)?;
+
+    // Process Manager functions
+    m.add_function(wrap_pyfunction!(process_manager::spawn_agents_parallel, m)?)?;
+    m.add_function(wrap_pyfunction!(process_manager::spawn_agent_async, m)?)?;
+    m.add_function(wrap_pyfunction!(process_manager::monitor_process_health, m)?)?;
+    m.add_function(wrap_pyfunction!(process_manager::kill_process, m)?)?;
+
     Ok(())
 }
