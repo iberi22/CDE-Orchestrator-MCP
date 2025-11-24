@@ -1,14 +1,13 @@
-from typing import Any, Dict, Optional, Callable
 from pathlib import Path
-from datetime import datetime
+from typing import Any, Callable, Dict
 
 from pydantic import BaseModel, Field, field_validator
 
-from cde_orchestrator.domain.entities import Project, Feature, FeatureStatus
+from cde_orchestrator.domain.entities import Feature, FeatureStatus
 from cde_orchestrator.domain.ports import (
     IProjectRepository,
-    IWorkflowRepository,
     IPromptRenderer,
+    IWorkflowRepository,
 )
 from cde_orchestrator.domain.validation import sanitize_string
 
@@ -26,6 +25,7 @@ class SubmitWorkInput(BaseModel):
     def sanitize_strings(cls, value: str) -> str:
         """Sanitize string inputs."""
         return sanitize_string(value, max_length=500)
+
 
 class SubmitWorkUseCase:
     """
@@ -91,18 +91,20 @@ class SubmitWorkUseCase:
         # 2. Find feature
         feature = project.get_feature(feature_id)
         if not feature:
-            raise ValueError(f"Feature {feature_id} not found in project {project_path}")
+            raise ValueError(
+                f"Feature {feature_id} not found in project {project_path}"
+            )
 
         # 3. Validate phase
         if feature.current_phase != phase_id:
-             # Warning or error? For now, we assume the agent knows what it's doing,
-             # but strictly we should check.
-             pass
+            # Warning or error? For now, we assume the agent knows what it's doing,
+            # but strictly we should check.
+            pass
 
         # 4. Get workflow
         workflow_path = Path(project_path) / ".cde" / "workflow.yml"
         if not workflow_path.exists():
-             raise FileNotFoundError(f"Workflow file not found at {workflow_path}")
+            raise FileNotFoundError(f"Workflow file not found at {workflow_path}")
 
         workflow_repo = self.workflow_repo_factory(workflow_path)
         workflow = await workflow_repo.load_workflow()
@@ -123,7 +125,7 @@ class SubmitWorkUseCase:
                 "USER_PROMPT": feature.prompt,
                 "WORKFLOW_TYPE": feature.workflow_type,
                 "CURRENT_PHASE": next_phase.id,
-                "PREVIOUS_PHASE_RESULTS": results
+                "PREVIOUS_PHASE_RESULTS": results,
             }
 
             rendered_prompt = await self.prompt_renderer.load_and_prepare(
@@ -133,7 +135,7 @@ class SubmitWorkUseCase:
             response = {
                 "status": "ok",
                 "phase": next_phase.id,
-                "prompt": rendered_prompt
+                "prompt": rendered_prompt,
             }
         else:
             # No next phase, complete feature
@@ -143,10 +145,7 @@ class SubmitWorkUseCase:
             # If we are in REVIEWING status, we can complete
             if feature.status == FeatureStatus.REVIEWING:
                 feature.complete()
-                response = {
-                    "status": "completed",
-                    "feature_id": feature.id
-                }
+                response = {"status": "completed", "feature_id": feature.id}
             else:
                 # If we are not in REVIEWING but ran out of phases, something might be wrong
                 # or the workflow is shorter. We'll try to complete anyway if the domain allows,
@@ -158,16 +157,13 @@ class SubmitWorkUseCase:
                 # For now, we'll try to complete and catch error or just return status.
                 try:
                     feature.complete()
-                    response = {
-                        "status": "completed",
-                        "feature_id": feature.id
-                    }
+                    response = {"status": "completed", "feature_id": feature.id}
                 except ValueError as e:
                     # If we can't complete, we just return the status as is (maybe it's already completed?)
                     response = {
-                        "status": "completed", # effectively
+                        "status": "completed",  # effectively
                         "feature_id": feature.id,
-                        "message": str(e)
+                        "message": str(e),
                     }
 
         # 7. Save project
@@ -200,7 +196,9 @@ class SubmitWorkUseCase:
                 "review": "Phase 6: Review",
             }
 
-            current_phase_label = phase_map.get(feature.current_phase, feature.current_phase)
+            current_phase_label = phase_map.get(
+                feature.current_phase, feature.current_phase
+            )
 
             # Find section for current phase and mark it as started
             lines = content.split("\n")

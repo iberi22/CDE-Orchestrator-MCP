@@ -165,7 +165,9 @@ class JulesAsyncAdapter(ICodeExecutor):
         self.default_timeout = default_timeout
         self.require_plan_approval = require_plan_approval
         self._client: Optional[AsyncJulesClient] = None
-        self._progress_reporter = get_progress_reporter() if get_progress_reporter else None
+        self._progress_reporter = (
+            get_progress_reporter() if get_progress_reporter else None
+        )
 
     async def _get_client(self) -> AsyncJulesClient:
         """Get or create Jules client (lazy initialization)."""
@@ -499,7 +501,10 @@ class JulesAsyncAdapter(ICodeExecutor):
         if self._progress_reporter:
             try:
                 self._progress_reporter.report_progress(
-                    "CDE", "executeWithBestAgent", min(max(percentage, 0.0), 0.99), message
+                    "CDE",
+                    "executeWithBestAgent",
+                    min(max(percentage, 0.0), 0.99),
+                    message,
                 )
             except Exception:
                 # Do not break execution if progress reporting fails
@@ -514,7 +519,9 @@ class JulesAsyncAdapter(ICodeExecutor):
         except AttributeError:
             return str(state)
 
-    def _progress_from_state(self, state_name: str, elapsed: float, timeout: int) -> float:
+    def _progress_from_state(
+        self, state_name: str, elapsed: float, timeout: int
+    ) -> float:
         """
         Heuristic progress estimator combining Jules state and elapsed time.
 

@@ -5,9 +5,26 @@ Provides Pydantic-based validation to prevent invalid inputs.
 """
 import json
 from functools import wraps
-from typing import Any, Callable, Type
+from typing import Any, Callable, Optional, Type
 
 from pydantic import BaseModel, ConfigDict, ValidationError
+
+
+def sanitize_string(value: str, max_length: Optional[int] = None) -> str:
+    """
+    Sanitize a string by stripping whitespace and limiting length.
+
+    Args:
+        value: The string to sanitize
+        max_length: Maximum allowed length (optional)
+
+    Returns:
+        Sanitized string
+    """
+    sanitized = value.strip()
+    if max_length and len(sanitized) > max_length:
+        sanitized = sanitized[:max_length]
+    return sanitized
 
 
 def validate_input(model: Type[BaseModel]) -> Callable:
@@ -64,31 +81,6 @@ def validate_input(model: Type[BaseModel]) -> Callable:
         return wrapper
 
     return decorator
-
-
-def sanitize_string(value: str, max_length: int = 10000) -> str:
-    """
-    Sanitize string input by removing dangerous characters and limiting length.
-
-    Args:
-        value: String to sanitize
-        max_length: Maximum allowed length
-
-    Returns:
-        Sanitized string
-    """
-    if not isinstance(value, str):
-        return str(value)
-
-    # Trim to max length
-    sanitized = value[:max_length]
-
-    # Remove null bytes and other control characters
-    sanitized = "".join(
-        char for char in sanitized if ord(char) >= 32 or char in "\n\r\t"
-    )
-
-    return sanitized
 
 
 def validate_file_path(path: str, allowed_extensions: list | None = None) -> bool:
