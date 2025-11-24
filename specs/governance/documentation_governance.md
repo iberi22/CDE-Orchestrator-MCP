@@ -217,22 +217,30 @@ No `.md` files are allowed in the root of the repository **except** project-leve
 
 ## 📂 Directory Structure & Rules
 
-### 1. **`/specs/features/`** - Feature Specifications
+### 1. **`/specs/[feature-name]/`** - Feature Specifications (Spec-Kit Standard) 🆕
 
-**Purpose**: Document user-facing features and requirements
-**Ownership**: Feature authors
-**Pattern**: `feature-<feature_name>.md` or `<feature_name>.md`
+**Purpose**: Self-contained directory for all feature documentation (Spec, Plan, Tasks)
+**Ownership**: Feature authors & AI Agents
+**Structure**:
+- `spec.md`: Product Requirements Document (PRD)
+- `plan.md`: Technical Implementation Plan
+- `tasks.md`: Executable Task List (Status tracked here)
+- `research.md`: Feature-specific research (Optional)
 
 **Examples**:
-- `specs/features/user-authentication.md`
-- `specs/features/multi-project-management.md`
-- `specs/features/integrated-management-system.md`
+- `specs/user-authentication/spec.md`
+- `specs/multi-project-support/plan.md`
 
-**Rule**: Every new feature **must** start with a spec in this directory before any code is written.
+**Rule**: Every new feature **must** use this folder structure.
+
+### 2. **`/specs/features/`** - Legacy Feature Specifications (Deprecated) ⚠️
+
+**Purpose**: Legacy location for feature specs.
+**Status**: **DEPRECATED**. Do not create new files here. Migrate active features to `specs/[feature-name]/`.
 
 ---
 
-### 2. **`/specs/design/`** - Technical Designs & Architecture
+### 3. **`/specs/design/`** - Technical Designs & Architecture
 
 **Purpose**: Document internal implementation, architecture decisions, technical approaches
 **Ownership**: Technical leads / architects
@@ -283,9 +291,9 @@ No `.md` files are allowed in the root of the repository **except** project-leve
 
 ---
 
-### 5. **`/agent-docs/`** - Agent-Generated Documentation 🆕
+### 6. **`/agent-docs/`** - Agent-Generated Documentation 🆕
 
-**Purpose**: Store transitory agent outputs (session summaries, execution reports, feedback, research)
+**Purpose**: Store transitory agent outputs (session summaries, feedback, general research)
 **Ownership**: AI agents (automated)
 **Pattern**: `<category>/<type>-<topic>-<YYYY-MM>.md`
 **Lifecycle**: Preserved indefinitely, except `research/` (auto-archived after 90 days)
@@ -296,8 +304,16 @@ No `.md` files are allowed in the root of the repository **except** project-leve
    - Pattern: `session-<topic>-<YYYY-MM-DD>.md`
    - Example: `session-onboarding-review-2025-01-15.md`
 
-2. **`agent-docs/execution/`** - Workflow execution reports
-   - Pattern: `execution-<workflow>-<YYYY-MM-DD>.md`
+2. **`agent-docs/execution/`** - Workflow execution reports (DEPRECATED for Features) ⚠️
+   - **Note**: Feature execution status is now tracked in `specs/[feature]/tasks.md`.
+   - Use this ONLY for non-feature workflows (e.g., maintenance scripts).
+
+3. **`agent-docs/feedback/`** - Agent feedback & analysis
+   - Pattern: `feedback-<topic>-<YYYY-MM>.md`
+
+4. **`agent-docs/research/`** - General Research
+   - **Note**: Feature-specific research goes to `specs/[feature]/research.md`.
+   - Use this for cross-cutting research (e.g., "Python 3.14 capabilities").
    - Example: `execution-onboarding-2025-01.md`
 
 3. **`agent-docs/feedback/`** - Analysis and recommendations

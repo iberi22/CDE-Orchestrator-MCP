@@ -339,6 +339,7 @@ class FileSystemProjectRepository(IProjectRepository):
         return {
             "id": feature.id,
             "project_id": str(feature.project_id),
+            "name": feature.name,
             "prompt": feature.prompt,
             "status": feature.status.value,
             "current_phase": feature.current_phase,
@@ -384,6 +385,7 @@ class FileSystemProjectRepository(IProjectRepository):
                 feature = Feature(
                     id=feature_data["id"],
                     project_id=ProjectId(feature_data["project_id"]),
+                    name=feature_data.get("name", f"feature-{feature_data['id'][:8]}"),
                     prompt=feature_data["prompt"],
                     status=FeatureStatus(feature_data["status"]),
                     current_phase=feature_data["current_phase"],

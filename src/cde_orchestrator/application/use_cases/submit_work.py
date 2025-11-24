@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional, Callable
 from pathlib import Path
+from datetime import datetime
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -172,4 +173,54 @@ class SubmitWorkUseCase:
         # 7. Save project
         await self.project_repo.save(project)
 
+        # 8. Update Spec-Kit tasks.md with current progress
+        self._update_spec_kit_tasks(project_path, feature)
+
         return response
+
+    def _update_spec_kit_tasks(self, project_path: str, feature: Feature) -> None:
+        """Update tasks.md in the feature's spec directory with current phase status."""
+        feature_dir = Path(project_path) / "specs" / feature.name
+        tasks_path = feature_dir / "tasks.md"
+
+        if not tasks_path.exists():
+            return  # Skip if tasks.md doesn't exist yet
+
+        try:
+            content = tasks_path.read_text(encoding="utf-8")
+
+            # Update phase status based on current_phase
+            # Format: [ ] T### [phase-name] description
+            phase_map = {
+                "define": "Phase 1: Define",
+                "decompose": "Phase 2: Decompose",
+                "design": "Phase 3: Design",
+                "implement": "Phase 4: Implement",
+                "test": "Phase 5: Test",
+                "review": "Phase 6: Review",
+            }
+
+            current_phase_label = phase_map.get(feature.current_phase, feature.current_phase)
+
+            # Find section for current phase and mark it as started
+            lines = content.split("\n")
+            updated = False
+
+            for i, line in enumerate(lines):
+                # Mark tasks in current phase as in progress
+                if current_phase_label in line and "##" in line:
+                    # Found the phase section
+                    for j in range(i + 1, min(i + 20, len(lines))):
+                        if lines[j].startswith("- [ ]"):
+                            lines[j] = lines[j].replace("- [ ]", "- [>]", 1)
+                            updated = True
+                            break
+                        elif lines[j].startswith("##"):
+                            # Hit next section
+                            break
+
+            if updated:
+                tasks_path.write_text("\n".join(lines), encoding="utf-8")
+        except Exception:
+            # Silently fail if update doesn't work
+            pass

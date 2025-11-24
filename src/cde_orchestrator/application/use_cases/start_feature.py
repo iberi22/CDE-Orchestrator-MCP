@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional, Callable
 from pathlib import Path
+from datetime import datetime
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -104,6 +105,9 @@ class StartFeatureUseCase:
         # 3. Start feature
         feature = project.start_feature(user_prompt, workflow_type)
 
+        # 3.1 Initialize Spec-Kit structure
+        self._initialize_spec_kit(project_path, feature, user_prompt)
+
         # 4. Get workflow and initial phase
         # Load workflow from the project's .cde directory
         workflow_path = Path(project_path) / ".cde" / "workflow.yml"
@@ -151,3 +155,30 @@ class StartFeatureUseCase:
             "prompt": rendered_prompt,
             "workflow_type": workflow_type,
         }
+
+    def _initialize_spec_kit(
+        self, project_path: str, feature: Feature, user_prompt: str
+    ) -> None:
+        """Initialize Spec-Kit directory structure and spec.md."""
+        project_root = Path(project_path)
+        feature_dir = project_root / "specs" / feature.name
+        feature_dir.mkdir(parents=True, exist_ok=True)
+
+        template_path = project_root / "specs" / "templates" / "spec.md"
+        spec_path = feature_dir / "spec.md"
+
+        if template_path.exists():
+            content = template_path.read_text(encoding="utf-8")
+            # Replace placeholders
+            content = content.replace("[FEATURE NAME]", feature.name)
+            content = content.replace("[###-feature-name]", feature.name)
+            content = content.replace("[DATE]", datetime.now().strftime("%Y-%m-%d"))
+            content = content.replace("[AUTHOR]", "AI Agent")
+            content = content.replace("$ARGUMENTS", user_prompt)
+
+            spec_path.write_text(content, encoding="utf-8")
+        else:
+            # Fallback if template missing
+            spec_path.write_text(
+                f"# Feature: {feature.name}\n\n{user_prompt}", encoding="utf-8"
+            )

@@ -49,6 +49,12 @@ else:
 from ...domain.exceptions import DomainError
 from ...domain.ports import ICodeExecutor
 
+try:
+    # Optional progress reporting to MCP status bar (no hard dependency)
+    from mcp_tools._progress_reporter import get_progress_reporter
+except Exception:  # pragma: no cover - best-effort import
+    get_progress_reporter = None  # type: ignore
+
 
 class JulesError(DomainError):
     """Base exception for Jules adapter errors."""
@@ -159,6 +165,7 @@ class JulesAsyncAdapter(ICodeExecutor):
         self.default_timeout = default_timeout
         self.require_plan_approval = require_plan_approval
         self._client: Optional[AsyncJulesClient] = None
+        self._progress_reporter = get_progress_reporter() if get_progress_reporter else None
 
     async def _get_client(self) -> AsyncJulesClient:
         """Get or create Jules client (lazy initialization)."""
@@ -204,6 +211,7 @@ class JulesAsyncAdapter(ICodeExecutor):
         try:
             # 1. Resolve source
             source_id = await self._resolve_source(client, project_path)
+            self._report_progress(0.18, "Jules: fuente de repo resuelta")
 
             # 2. Extract context
             branch = context.get("branch", "main")
@@ -220,16 +228,20 @@ class JulesAsyncAdapter(ICodeExecutor):
                 starting_branch=branch,
                 require_plan_approval=require_approval,
             )
+            self._report_progress(0.32, f"Jules: sesión creada ({session.id})")
 
             # 4. Handle plan approval if required
             if require_approval:
                 session = await self._handle_plan_approval(client, session.id)
+                self._report_progress(0.45, "Jules: plan aprobado, ejecutando...")
 
             # 5. Wait for completion (unless detached)
             if not detached:
-                session = await client.sessions.wait_for_completion(
-                    session.id, poll_interval=5, timeout=timeout
+                session = await self._wait_with_progress(
+                    client, session.id, timeout, poll_interval=5
                 )
+            else:
+                self._report_progress(0.5, "Jules: ejecución en modo detach")
 
             # 6. Collect activities
             activities = await client.activities.list_all(session.id)
@@ -369,7 +381,50 @@ class JulesAsyncAdapter(ICodeExecutor):
             if session.state in [SessionState.FAILED, SessionState.COMPLETED]:
                 return session
 
+            self._report_progress(0.4, f"Jules: esperando plan ({session.state.value})")
             await asyncio.sleep(2)
+
+    async def _wait_with_progress(
+        self,
+        client: AsyncJulesClient,
+        session_id: str,
+        timeout: int,
+        poll_interval: int = 5,
+    ) -> Session:
+        """
+        Wait for completion with periodic progress reporting.
+
+        Sends heartbeats to the MCP status bar so long-running Jules
+        executions show visible progress instead of appearing stuck.
+        """
+        start = asyncio.get_event_loop().time()
+        last_report = start
+
+        while True:
+            session = await client.sessions.get(session_id)
+            state_name = self._state_name(session.state)
+
+            elapsed = asyncio.get_event_loop().time() - start
+            percentage = self._progress_from_state(state_name, elapsed, timeout)
+            if elapsed - last_report >= poll_interval or percentage >= 0.98:
+                self._report_progress(percentage, f"Jules: {state_name.lower()}")
+                last_report = asyncio.get_event_loop().time()
+
+            if SessionState and session.state in (
+                SessionState.FAILED,
+                SessionState.COMPLETED,
+            ):
+                return session
+
+            if state_name in {"FAILED", "COMPLETED", "CANCELLED"}:
+                return session
+
+            if elapsed > timeout:
+                raise JulesExecutionError(
+                    f"Timed out after {timeout}s waiting for Jules session {session_id} ({state_name})"
+                )
+
+            await asyncio.sleep(poll_interval)
 
     def _extract_modified_files(self, activities: List[Activity]) -> List[str]:
         """
@@ -438,6 +493,45 @@ class JulesAsyncAdapter(ICodeExecutor):
                     )
 
         return "\n".join(lines)
+
+    def _report_progress(self, percentage: float, message: str) -> None:
+        """Send progress to MCP status bar if reporter is available."""
+        if self._progress_reporter:
+            try:
+                self._progress_reporter.report_progress(
+                    "CDE", "executeWithBestAgent", min(max(percentage, 0.0), 0.99), message
+                )
+            except Exception:
+                # Do not break execution if progress reporting fails
+                pass
+
+    def _state_name(self, state: Any) -> str:
+        """Return a safe state name string for progress messages."""
+        if state is None:
+            return "UNKNOWN"
+        try:
+            return state.value
+        except AttributeError:
+            return str(state)
+
+    def _progress_from_state(self, state_name: str, elapsed: float, timeout: int) -> float:
+        """
+        Heuristic progress estimator combining Jules state and elapsed time.
+
+        Provides a smooth percentage so the MCP status bar shows movement
+        during long waits while avoiding jumps back in progress.
+        """
+        base = {
+            "CREATED": 0.25,
+            "PLAN_GENERATING": 0.35,
+            "AWAITING_PLAN_APPROVAL": 0.42,
+            "RUNNING": 0.55,
+            "COMPLETED": 0.98,
+            "FAILED": 0.98,
+        }.get(state_name.upper(), 0.5)
+
+        time_progress = 0.35 + min(elapsed / max(timeout, 1) * 0.6, 0.6)
+        return max(base, time_progress)
 
     async def close(self) -> None:
         """Close Jules client connection."""

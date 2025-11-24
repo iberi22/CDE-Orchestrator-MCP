@@ -318,6 +318,7 @@ class Feature:
 
     id: str
     project_id: ProjectId
+    name: str  # Slugified name for directory structure
     prompt: str  # Original user request
     status: FeatureStatus
     current_phase: str
@@ -329,7 +330,11 @@ class Feature:
 
     @classmethod
     def create(
-        cls, project_id: ProjectId, prompt: str, workflow_type: str = "default"
+        cls,
+        project_id: ProjectId,
+        prompt: str,
+        workflow_type: str = "default",
+        name: Optional[str] = None,
     ) -> "Feature":
         """
         Factory method: Create new feature with enforced invariants.
@@ -338,6 +343,7 @@ class Feature:
             project_id: Parent project identifier
             prompt: User's feature request
             workflow_type: Workflow variant to use
+            name: Optional slugified name (generated from prompt if missing)
 
         Returns:
             New Feature instance in DEFINING status
@@ -355,10 +361,22 @@ class Feature:
         if not prompt or not prompt.strip():
             raise ValueError("Feature prompt cannot be empty")
 
+        if not name:
+            # Generate slug from prompt
+            # "Add user authentication" -> "add-user-authentication"
+            slug = prompt.lower().replace(" ", "-")
+            # Remove non-alphanumeric chars except hyphen
+            slug = "".join(c for c in slug if c.isalnum() or c == "-")
+            # Truncate to reasonable length
+            name = slug[:50].strip("-")
+            if not name:
+                name = f"feature-{uuid4().hex[:8]}"
+
         now = datetime.now(timezone.utc)
         return cls(
             id=str(uuid4()),
             project_id=project_id,
+            name=name,
             prompt=prompt.strip(),
             status=FeatureStatus.DEFINING,
             current_phase="define",
@@ -501,13 +519,16 @@ class Project:
             metadata={},
         )
 
-    def start_feature(self, prompt: str, workflow_type: str = "default") -> Feature:
+    def start_feature(
+        self, prompt: str, workflow_type: str = "default", name: Optional[str] = None
+    ) -> Feature:
         """
         Business rule: Create and register new feature.
 
         Args:
             prompt: User's feature request
             workflow_type: Workflow variant to use
+            name: Optional slugified name
 
         Returns:
             Created Feature instance
@@ -527,7 +548,10 @@ class Project:
             )
 
         feature = Feature.create(
-            project_id=self.id, prompt=prompt, workflow_type=workflow_type
+            project_id=self.id,
+            prompt=prompt,
+            workflow_type=workflow_type,
+            name=name,
         )
 
         self.features.append(feature)

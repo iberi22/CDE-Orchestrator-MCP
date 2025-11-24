@@ -815,6 +815,9 @@ async def cde_executeWithBestAgent(
         )
 
         orchestrator = MultiAgentOrchestrator()
+        reporter.report_progress(
+            "CDE", "executeWithBestAgent", 0.25, "Seleccionando agente óptimo..."
+        )
 
         # Register available agents
         available_agents = []
@@ -921,6 +924,9 @@ async def cde_executeWithBestAgent(
             project_path=Path(project_path),
             prompt=task_description,
             context=context,
+        )
+        reporter.report_progress(
+            "CDE", "executeWithBestAgent", 0.9, "Recuperando resultados del agente..."
         )
 
         execution_time = time.time() - start_time
