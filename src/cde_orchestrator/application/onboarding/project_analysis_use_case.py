@@ -56,7 +56,19 @@ class ProjectAnalysisUseCase:
         "*.lock",  # Lock files
     }
 
-    def execute(self, project_path: str) -> Dict[str, Any]:
+    async def execute(
+        self, project_path: str, enrich_context: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Analyze project structure and optionally enrich with deep context.
+
+        Args:
+            project_path: Path to project root
+            enrich_context: If True, performs deep analysis (Git, docs, frameworks)
+
+        Returns:
+            Analysis results with optional enriched context
+        """
         # Import here to avoid circular import
         from mcp_tools._progress_http import report_progress_http
 
@@ -65,14 +77,53 @@ class ProjectAnalysisUseCase:
         # Try Rust-accelerated analysis first (10x faster, ~50ms)
         try:
             result = self._execute_rust(project_path, report_progress_http)
-            report_progress_http("onboardingProject", 1.0, "Analysis complete (Rust)")
-            return result
+            report_progress_http(
+                "onboardingProject", 0.5, "Basic analysis complete (Rust)"
+            )
         except Exception as e:
             logger.warning(f"Rust analysis failed, falling back to Python: {e}")
             # Fallback to Python implementation (~500ms)
             result = self._execute_python(project_path, report_progress_http)
-            report_progress_http("onboardingProject", 1.0, "Analysis complete (Python)")
-            return result
+            report_progress_http(
+                "onboardingProject", 0.5, "Basic analysis complete (Python)"
+            )
+
+        # Enrich with deep context if requested
+        if enrich_context:
+            try:
+                from .project_context_enricher import ProjectContextEnricher
+
+                report_progress_http(
+                    "onboardingProject",
+                    0.6,
+                    "Enriching context (Git, docs, frameworks)",
+                )
+
+                enricher = ProjectContextEnricher(Path(project_path))
+                enriched_context = await enricher.enrich(result)
+
+                # Add enriched data to result
+                result["enriched"] = enricher.to_dict(enriched_context)
+                result["summary"] = self._generate_enriched_summary(
+                    result, enriched_context
+                )
+
+                report_progress_http(
+                    "onboardingProject", 1.0, "Analysis complete (enriched)"
+                )
+                logger.info("Context enrichment successful")
+
+            except Exception as e:
+                logger.warning(
+                    f"Context enrichment failed: {e}. Returning basic analysis."
+                )
+                report_progress_http(
+                    "onboardingProject", 1.0, "Analysis complete (basic)"
+                )
+        else:
+            report_progress_http("onboardingProject", 1.0, "Analysis complete")
+
+        return result
 
     def _execute_rust(
         self, project_path: str, report_progress_http: Callable[[str, float, str], None]
@@ -238,3 +289,52 @@ class ProjectAnalysisUseCase:
                 found_files.append(file.name)
 
         return sorted(list(set(found_files)))
+
+    def _generate_enriched_summary(
+        self, basic_result: Dict[str, Any], context: Any
+    ) -> str:
+        """
+        Generate enriched summary with deep context.
+
+        Args:
+            basic_result: Basic analysis result
+            context: EnrichedProjectContext instance
+
+        Returns:
+            Human-readable summary with enriched information
+        """
+        project_name = (
+            Path(context.architecture_description).name
+            if hasattr(context, "architecture_description")
+            else "Project"
+        )
+
+        # Tech stack summary
+        tech_summary = (
+            ", ".join(context.tech_stack[:5]) if context.tech_stack else "Not detected"
+        )
+
+        # Commit activity
+        commit_count = len(context.recent_commits)
+        commit_summary = (
+            f"{commit_count} commits in last 30 days ({context.commit_frequency})"
+        )
+
+        # Architecture
+        arch_summary = (
+            f"{context.architecture_pattern}"
+            if context.architecture_pattern != "Unknown"
+            else "Not detected"
+        )
+
+        summary = (
+            f"Project analysis complete. "
+            f"Files: {basic_result['file_count']}. "
+            f"Type: {context.project_type}. "
+            f"Architecture: {arch_summary}. "
+            f"Tech Stack: {tech_summary}. "
+            f"Git Activity: {commit_summary}. "
+            f"Frameworks: {', '.join(context.detected_frameworks) if context.detected_frameworks else 'None detected'}."
+        )
+
+        return summary

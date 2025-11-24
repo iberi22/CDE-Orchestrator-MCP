@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, TypedDict
 
-from cde_orchestrator.ai_assistant_configurator import AIAssistantConfigurator
+from cde_orchestrator.application.ai_config import AIConfigUseCase
 from cde_orchestrator.domain.ports import IGitAdapter
 
 logger = logging.getLogger(__name__)
@@ -358,15 +358,18 @@ class SpecKitStructureGenerator:
 
     def __init__(self, project_root: Path):
         self.project_root = project_root
-        self.ai_configurator = AIAssistantConfigurator(project_root)
+        self.ai_configurator = AIConfigUseCase(project_root)
 
-    def create_structure(self, plan: Dict[str, Any]) -> Dict[str, Any]:
+    def create_structure(
+        self, plan: Dict[str, Any], enriched_context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """
         Create the directory structure according to plan.
-        Now includes AI assistant configuration files.
+        Now includes AI assistant configuration files with enriched context.
 
         Args:
             plan: Onboarding plan from analyzer
+            enriched_context: Enriched project context for AI config generation
 
         Returns:
             Dict with creation results
@@ -399,6 +402,7 @@ class SpecKitStructureGenerator:
             ai_results = self.ai_configurator.generate_config_files(
                 agents=None,  # Auto-detect + defaults
                 force=False,  # Don't overwrite existing
+                enriched_context=enriched_context,  # Pass enriched context
             )
             results["ai_assistants"] = ai_results
 

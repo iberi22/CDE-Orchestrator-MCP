@@ -26,10 +26,19 @@ logger = logging.getLogger(__name__)
 @tool_handler
 async def cde_onboardingProject(ctx: Context, project_path: str = ".") -> str:
     """
-    Analyzes project structure and performs onboarding setup.
+    Analyzes project structure and performs comprehensive onboarding setup.
+
+    Includes deep context enrichment:
+    - Git history analysis (commits, branches, contributors)
+    - Documentation synthesis (README, CONTRIBUTING, dependencies)
+    - Framework detection (FastAPI, Next.js, FastMCP, etc.)
+    - Architecture pattern identification (Hexagonal, Clean, etc.)
 
     Args:
         project_path: The path to the project to analyze (defaults to current dir).
+
+    Returns:
+        JSON string with enriched project analysis
     """
     reporter = get_progress_reporter()
     reporter.reset()
@@ -46,16 +55,17 @@ async def cde_onboardingProject(ctx: Context, project_path: str = ".") -> str:
         "CDE", "onboardingProject", 0.3, f"Analyzing {project_path}..."
     )
 
-    analysis_result = analysis_use_case.execute(project_path)
+    # Run async analysis with enrichment
+    analysis_result = await analysis_use_case.execute(project_path, enrich_context=True)
 
     # Add status field expected by tests
     analysis_result["status"] = "Analysis complete"
 
     try:
-        state = container.manage_state_use_case.load_and_validate_state()
+        state = await container.manage_state_use_case.load_and_validate_state()
         state["project_analysis"] = analysis_result
         state["onboarding_status"] = "analysis_completed"
-        container.manage_state_use_case.save_state(state)
+        await container.manage_state_use_case.save_state(state)
     except Exception as e:
         logger.warning(f"Could not save state: {e}")
 
@@ -89,7 +99,7 @@ async def cde_setupProject(
 
 
 @tool_handler
-def cde_publishOnboarding(
+async def cde_publishOnboarding(
     documents: Dict[str, str], project_path: str = ".", approve: bool = True
 ) -> str:
     """
@@ -112,9 +122,9 @@ def cde_publishOnboarding(
     # Update state only if successful
     if result["status"] == "success":
         try:
-            state = container.manage_state_use_case.load_and_validate_state()
+            state = await container.manage_state_use_case.load_and_validate_state()
             state["published_documents"] = result["files_written"]
-            container.manage_state_use_case.save_state(state)
+            await container.manage_state_use_case.save_state(state)
         except Exception as e:
             logger.warning(f"Could not save state: {e}")
 

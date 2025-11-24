@@ -172,7 +172,10 @@ class AIConfigUseCase:
                 return False
 
     def generate_config_files(
-        self, agents: Optional[List[str]] = None, force: bool = False
+        self,
+        agents: Optional[List[str]] = None,
+        force: bool = False,
+        enriched_context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Generate configuration files for specified AI assistants.
@@ -180,6 +183,7 @@ class AIConfigUseCase:
         Args:
             agents: List of agent keys to configure (None = auto-detect + defaults)
             force: Whether to overwrite existing files
+            enriched_context: Enriched project context from analysis (optional)
 
         Returns:
             Dictionary with generation results
@@ -218,7 +222,9 @@ class AIConfigUseCase:
                         continue
 
                     try:
-                        self._generate_root_instruction_file(config_file)
+                        self._generate_root_instruction_file(
+                            config_file, enriched_context
+                        )
                         results["generated"].append(str(file_path))
                         logger.info(f"Generated {config_file}")
                     except Exception as e:
@@ -238,7 +244,9 @@ class AIConfigUseCase:
             try:
                 # Generate agent-specific config
                 if agent_key == "copilot":
-                    self._generate_copilot_config(agent_folder, force, results)
+                    self._generate_copilot_config(
+                        agent_folder, force, results, enriched_context
+                    )
                 elif agent_key == "gemini":
                     self._generate_gemini_config(agent_folder, force, results)
                 # Add more agent-specific handlers as needed
@@ -249,12 +257,15 @@ class AIConfigUseCase:
 
         return results
 
-    def _generate_root_instruction_file(self, filename: str) -> None:
+    def _generate_root_instruction_file(
+        self, filename: str, enriched_context: Optional[Dict[str, Any]] = None
+    ) -> None:
         """
         Generate root-level instruction files (AGENTS.md, GEMINI.md).
 
         Args:
             filename: Name of the file to generate
+            enriched_context: Enriched project context (optional)
         """
         # Ensure project root exists (especially in temp dirs during tests)
         self.project_root.mkdir(parents=True, exist_ok=True)
@@ -264,9 +275,9 @@ class AIConfigUseCase:
         project_name = self.project_root.name
 
         if filename == "AGENTS.md":
-            content = self._get_agents_md_template(project_name)
+            content = self._get_agents_md_template(project_name, enriched_context)
         elif filename == "GEMINI.md":
-            content = self._get_gemini_md_template(project_name)
+            content = self._get_gemini_md_template(project_name, enriched_context)
         else:
             raise ValueError(f"Unknown instruction file: {filename}")
 
@@ -275,7 +286,11 @@ class AIConfigUseCase:
         file_path.write_text(content, encoding="utf-8")
 
     def _generate_copilot_config(
-        self, agent_folder: Path, force: bool, results: Dict[str, Any]
+        self,
+        agent_folder: Path,
+        force: bool,
+        results: Dict[str, Any],
+        enriched_context: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         Generate GitHub Copilot configuration.
@@ -284,6 +299,7 @@ class AIConfigUseCase:
             agent_folder: Path to .github/ folder
             force: Whether to overwrite existing files
             results: Results dictionary to update
+            enriched_context: Enriched project context (optional)
         """
         agent_folder.mkdir(parents=True, exist_ok=True)
 
@@ -294,9 +310,90 @@ class AIConfigUseCase:
             return
 
         project_name = self.project_root.name
-        content = self._get_copilot_instructions_template(project_name)
+        content = self._get_copilot_instructions_template(
+            project_name, enriched_context
+        )
         instructions_file.write_text(content, encoding="utf-8")
         results["generated"].append(str(instructions_file))
+
+    def _extract_context_data(
+        self, enriched_context: Optional[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """
+        Extract and format data from enriched context.
+
+        Args:
+            enriched_context: Enriched project context
+
+        Returns:
+            Dictionary with formatted context data
+        """
+        if not enriched_context:
+            return {
+                "architecture": "[Architecture pattern]",
+                "project_type": "[Project type]",
+                "tech_stack": "[Tech stack]",
+                "frameworks": "[Frameworks]",
+                "recent_commits_count": 0,
+                "commit_frequency": "[Commit frequency]",
+                "active_branches": "[Branches]",
+                "main_contributors": "[Contributors]",
+                "build_commands": [],
+                "test_commands": [],
+                "primary_language": "[Primary language]",
+            }
+
+        return {
+            "architecture": enriched_context.get(
+                "architecture_description", "[Architecture pattern]"
+            ),
+            "project_type": enriched_context.get("project_type", "[Project type]"),
+            "tech_stack": ", ".join(enriched_context.get("tech_stack", [])[:5])
+            or "[Tech stack]",
+            "frameworks": ", ".join(enriched_context.get("detected_frameworks", []))
+            or "[Frameworks]",
+            "recent_commits_count": len(enriched_context.get("recent_commits", [])),
+            "commit_frequency": enriched_context.get(
+                "commit_frequency", "[Commit frequency]"
+            ),
+            "active_branches": ", ".join(
+                enriched_context.get("active_branches", [])[:3]
+            )
+            or "[Branches]",
+            "main_contributors": ", ".join(
+                enriched_context.get("main_contributors", [])[:3]
+            )
+            or "[Contributors]",
+            "build_commands": enriched_context.get("build_commands", [])[:3],
+            "test_commands": enriched_context.get("test_commands", [])[:3],
+            "primary_language": self._get_primary_language(enriched_context),
+        }
+
+    def _get_primary_language(self, enriched_context: Dict[str, Any]) -> str:
+        """Get primary language from language stats."""
+        lang_stats = enriched_context.get("language_stats", {})
+        if not lang_stats:
+            return "[Primary language]"
+
+        # Find language with most files
+        primary = max(lang_stats.items(), key=lambda x: x[1], default=None)
+        if primary:
+            ext = primary[0]
+            # Map extensions to language names
+            lang_map = {
+                ".py": "Python",
+                ".js": "JavaScript",
+                ".ts": "TypeScript",
+                ".java": "Java",
+                ".go": "Go",
+                ".rs": "Rust",
+                ".cpp": "C++",
+                ".c": "C",
+                ".rb": "Ruby",
+                ".php": "PHP",
+            }
+            return lang_map.get(ext, ext.lstrip(".").upper())
+        return "[Primary language]"
 
     def _generate_gemini_config(
         self, agent_folder: Path, force: bool, results: Dict[str, Any]
@@ -315,16 +412,34 @@ class AIConfigUseCase:
         # For now, GEMINI.md in root is sufficient
         logger.debug(f"Gemini configuration folder created: {agent_folder}")
 
-    def _get_agents_md_template(self, project_name: str) -> str:
+    def _get_agents_md_template(
+        self, project_name: str, enriched_context: Optional[Dict[str, Any]] = None
+    ) -> str:
         """
-        Generate AGENTS.md content template.
+        Generate AGENTS.md content template with enriched context.
 
         Args:
             project_name: Name of the project
+            enriched_context: Enriched project context (optional)
 
         Returns:
             Content for AGENTS.md
         """
+        # Extract context data
+        ctx = self._extract_context_data(enriched_context)
+
+        # Format build commands section
+        build_cmds = (
+            "\n".join([f"# {cmd}" for cmd in ctx["build_commands"]])
+            if ctx["build_commands"]
+            else "# [Your build command]"
+        )
+        test_cmds = (
+            "\n".join([f"# {cmd}" for cmd in ctx["test_commands"]])
+            if ctx["test_commands"]
+            else "# [Your test command]"
+        )
+
         return f"""# {project_name} - Agent Instructions
 
 > Format: AGENTS.md (OpenAI Standard)
@@ -335,10 +450,19 @@ class AIConfigUseCase:
 ---
 ## 🎯 Project Overview
 
-What: [Brief description of what this project does]
-Scale: [Project scale/scope information]
-Architecture: [Architecture pattern used - e.g., Hexagonal, Clean, MVC]
-Language: [Primary language and version]
+What: {ctx['architecture']}
+Scale: {ctx['project_type']}
+Architecture: {ctx['architecture']}
+Language: {ctx['primary_language']}
+Tech Stack: {ctx['tech_stack']}
+Frameworks: {ctx['frameworks']}
+
+---
+## 📊 Recent Activity
+
+- {ctx['recent_commits_count']} commits in last 30 days ({ctx['commit_frequency']})
+- Active branches: {ctx['active_branches']}
+- Main contributors: {ctx['main_contributors']}
 
 ---
 ## 📁 Quick Navigation
@@ -367,10 +491,12 @@ tests/               # Test suites
 ---
 ## 🏗️ Architecture Rules
 
-[Add architecture-specific rules here based on your project]
+Architecture Pattern: {ctx['architecture']}
 
-### Example: Dependency Rules
-- Dependencies point INWARD: Infrastructure -> Application -> Domain
+### Dependency Rules
+- Dependencies should follow clean architecture principles
+- Keep business logic independent of frameworks and infrastructure
+
 ---
 ## 🛠️ Development Workflow
 
@@ -381,7 +507,7 @@ tests/               # Test suites
 
 ### Making Changes
 1. Create/update spec: `specs/features/your-feature.md`
-2. Follow architecture pattern: [Your pattern]
+2. Follow architecture pattern: {ctx['architecture']}
 3. Write tests first: TDD approach
 4. Run validation: Pre-commit hooks
 
@@ -390,10 +516,14 @@ tests/               # Test suites
 
 ### File Placement (MANDATORY)
 - Features: `specs/features/` - User-facing functionality
+- Design: `specs/design/` - Technical decisions
+- API: `specs/api/` - API documentation
+
 ### Metadata Requirement
 All `.md` files in `specs/` MUST include YAML frontmatter:
 ```yaml
 ---
+title: "Document Title"
 description: "One-sentence summary"
 type: "feature|design|api|review"
 status: "draft|active|deprecated"
@@ -401,6 +531,7 @@ created: "YYYY-MM-DD"
 updated: "YYYY-MM-DD"
 author: "Name or Agent ID"
 ---
+```
 
 ---
 ## 🧪 Testing Strategy
@@ -414,7 +545,21 @@ tests/
 ```
 
 ---
-## Common Pitfalls
+## 🚀 Quick Commands Reference
+
+```bash
+# Build project
+{build_cmds}
+
+# Run tests
+{test_cmds}
+
+# Format code
+# [Your format command]
+```
+
+---
+## ⚠️ Common Pitfalls
 
 ### DON'T
 1. Skip writing specifications before code
@@ -429,45 +574,41 @@ tests/
 4. Use semantic commit messages: `feat:`, `fix:`, `docs:`, `refactor:`
 
 ---
-## Finding Information
+## 🔍 Finding Information
 
 ### Key Documents
 - Architecture: `specs/design/architecture/README.md`
+- Features: `specs/features/`
+- API Docs: `specs/api/`
+
 ---
-## When Stuck
+## 💡 When Stuck
 
 1. Check specs: `specs/features/` or `specs/design/`
 2. Search code: Use semantic search or grep
 3. Review constitution: `memory/constitution.md`
 
 ---
-## Quick Commands Reference
-
-```bash
-# Run tests
-[Your test command]
-
-# Build project
-[Your build command]
-
-# Format code
-[Your format command]
-```
-
----
 For detailed GitHub Copilot instructions: see `.github/copilot-instructions.md`
 For Google AI Studio (Gemini) instructions: see `GEMINI.md` (if using Gemini)
 """
 
-    def _get_gemini_md_template(self, project_name: str) -> str:
+    def _get_gemini_md_template(
+        self, project_name: str, enriched_context: Optional[Dict[str, Any]] = None
+    ) -> str:
         """
-        Generate GEMINI.md content template.
+        Generate GEMINI.md content template with enriched context.
 
         Args:
+            project_name: Name of the project
+            enriched_context: Enriched project context (optional)
 
         Returns:
             Content for GEMINI.md
         """
+        # Extract context data
+        ctx = self._extract_context_data(enriched_context)
+
         return f"""# {project_name} - Gemini AI Instructions
 > Format: GEMINI.md (Google AI Studio Standard)
 > Target: Google Gemini AI (AI Studio, Gemini CLI, IDX)
@@ -475,16 +616,27 @@ For Google AI Studio (Gemini) instructions: see `GEMINI.md` (if using Gemini)
 > Context Window: 1M+ tokens
 
 
-## Project Overview
+## 🎯 Project Overview
 
-What: [Brief description of what this project does]
-Scale: [Project scale/scope information]
-Language: [Primary language and version]
+What: {ctx['architecture']}
+Scale: {ctx['project_type']}
+Architecture: {ctx['architecture']}
+Language: {ctx['primary_language']}
+Tech Stack: {ctx['tech_stack']}
+Frameworks: {ctx['frameworks']}
+
+---
+
+## 📊 Recent Activity
+
+- {ctx['recent_commits_count']} commits in last 30 days ({ctx['commit_frequency']})
+- Active branches: {ctx['active_branches']}
+- Main contributors: {ctx['main_contributors']}
 
 ---
 
 ## Quick Navigation
-[Same as AGENTS.md - see that file for structure]
+[See AGENTS.md for full project navigation and documentation rules]
 
 ---
 
@@ -513,7 +665,7 @@ Use When:
 Example:
 ```
 Here is our architecture diagram [image]. Analyze how the current
-codebase matches this design and identify Any discrepancies.
+codebase matches this design and identify any discrepancies.
 ```
 
 ### 3. Function Calling and Structured Outputs
@@ -523,68 +675,6 @@ When Generating Code:
 - Define response_schema for type-safe outputs
 - Leverage function calling for complex operations
 
-Example (Python):
-```python
-# Request structured analysis
-response = model.generate_content(
-    prompt,
-    generation_config={{
-        "response_mime_type": "application/json",
-        "response_schema": AnalysisSchema
-    }}
-)
-```
-
-### 4. Parallel Processing with Gemini CLI
-
-**For Research Tasks**:
-```powershell
-# Run multiple analyses in parallel (Windows PowerShell)
-$jobs = @(
-    (Start-Job -ScriptBlock {{ gemini --model=gemini-2.5-flash "Analyze architecture patterns in this codebase" }}),
-    (Start-Job -ScriptBlock {{ gemini --model=gemini-2.5-flash "Review test coverage and suggest improvements" }}),
-    (Start-Job -ScriptBlock {{ gemini --model=gemini-2.5-flash "Identify technical debt and refactoring opportunities" }})
-)
-
-$jobs | Wait-Job | Receive-Job
-```
-
----
-
-## 🏗️ Architecture Rules
-
-[Same as AGENTS.md]
-
----
-
-## 🛠️ Development Workflow
-
-[Same as AGENTS.md]
-
----
-
-## 📝 Documentation Rules
-
-[Same as AGENTS.md]
-
----
-
-## 🧪 Testing Strategy
-
-[Same as AGENTS.md]
-
----
-
-## ⚠️ Common Pitfalls
-
-[Same as AGENTS.md]
-
----
-
-## 🔍 Finding Information
-
-[Same as AGENTS.md]
-
 ---
 
 ## 💡 Pro Tips for Gemini
@@ -592,87 +682,123 @@ $jobs | Wait-Job | Receive-Job
 1. **Leverage Context Window**: Request full file contents, not summaries
 2. **Batch Operations**: Analyze multiple files simultaneously
 3. **Structured Outputs**: Use JSON schema for predictable responses
-4. **Parallel Research**: Use Gemini CLI with background jobs for research
-5. **Multimodal Analysis**: Include diagrams and images in your prompts
+4. **Parallel Research**: Use Gemini CLI with background jobs
+5. **Multimodal Analysis**: Include diagrams and images in prompts
 
 ---
 
 **Your 1M+ token context window is a superpower. When analyzing code or designing solutions, request FULL file contents instead of summaries.**
+
+For complete instructions and workflow: see `AGENTS.md`
 """
 
-    def _get_copilot_instructions_template(self, project_name: str) -> str:
+    def _get_copilot_instructions_template(
+        self, project_name: str, enriched_context: Optional[Dict[str, Any]] = None
+    ) -> str:
         """
-        Generate GitHub Copilot instructions template.
+        Generate GitHub Copilot instructions template with enriched context.
 
         Args:
             project_name: Name of the project
+            enriched_context: Enriched project context (optional)
 
         Returns:
             Content for .github/copilot-instructions.md
         """
+        # Extract context data
+        ctx = self._extract_context_data(enriched_context)
+
+        # Format build/test commands
+        build_cmds = (
+            "\n".join([f"# {cmd}" for cmd in ctx["build_commands"]])
+            if ctx["build_commands"]
+            else "# [Your build command]"
+        )
+        test_cmds = (
+            "\n".join([f"# {cmd}" for cmd in ctx["test_commands"]])
+            if ctx["test_commands"]
+            else "# [Your test command]"
+        )
+
         return f"""---
 description: GitHub Copilot custom instructions for {project_name}
 ---
 
 # GitHub Copilot Instructions - {project_name}
 
-## Project Overview
+## 🎯 Project Overview
 
-[Brief description of the project]
+What: {ctx['architecture']}
+Scale: {ctx['project_type']}
+Architecture: {ctx['architecture']}
+Language: {ctx['primary_language']}
+Tech Stack: {ctx['tech_stack']}
+Frameworks: {ctx['frameworks']}
 
-## Architecture
+## 📊 Recent Activity
 
-[Architecture pattern and key principles]
+- {ctx['recent_commits_count']} commits in last 30 days ({ctx['commit_frequency']})
+- Active branches: {ctx['active_branches']}
+- Main contributors: {ctx['main_contributors']}
 
-## Code Standards
+## 🏗️ Architecture
+
+Pattern: {ctx['architecture']}
+
+### Key Principles
+- Follow clean architecture boundaries
+- Keep business logic independent of frameworks
+- Dependencies point inward
+
+## 📝 Code Standards
 
 ### Language & Style
-- Language: [Primary language]
-- Style Guide: [Style guide reference]
-- Formatting: [Formatter used]
+- Language: {ctx['primary_language']}
+- Frameworks: {ctx['frameworks']}
+- Follow project conventions consistently
 
 ### Testing
-- Test Framework: [Framework name]
-- Coverage Target: [Percentage]
 - Test Location: `tests/`
+- Write tests for all new functionality
+- Maintain high test coverage
 
-## File Organization
+## 📁 File Organization
 
 ```
-[Project structure]
+src/                 # Source code
+specs/               # Documentation (Spec-Kit)
+tests/               # Test suites
 ```
 
-## Common Patterns
-
-### [Pattern 1]
-```[language]
-# Example code showing the pattern
-```
-
-### [Pattern 2]
-```[language]
-# Example code showing the pattern
-```
-
-## DO's
+## ✅ DO's
 
 - Write specifications before implementation
 - Follow architecture patterns strictly
 - Add tests for new functionality
-- Use semantic commit messages
+- Use semantic commit messages: `feat:`, `fix:`, `docs:`, `refactor:`
 
-## DON'Ts
+## ❌ DON'Ts
 
 - Don't skip writing specs
 - Don't put logic in wrong layer
 - Don't skip tests
 - Don't make breaking changes without updating docs
 
-## Resources
+## 🚀 Quick Commands
+
+```bash
+# Build project
+{build_cmds}
+
+# Run tests
+{test_cmds}
+```
+
+## 📚 Resources
 
 - Full Guidelines: `AGENTS.md`
 - Architecture: `specs/design/architecture/README.md`
-- Constitution: `memory/constitution.md`
+- Constitution: `memory/constitution.md` (if exists)
 """
 
     def get_configuration_summary(self) -> Dict[str, Any]:
