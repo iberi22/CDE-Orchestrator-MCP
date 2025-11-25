@@ -12,7 +12,6 @@ import logging
 import os
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from fastmcp import Context
 
@@ -102,7 +101,11 @@ async def cde_syncTemplates(
 
             # Backup existing
             if template_path.exists() and not force:
-                backup_path = template_path.with_suffix(".md.backup")
+                backup_path = templates_dir / f"{template_name}.backup"
+                # Remove old backup if exists
+                if backup_path.exists():
+                    backup_path.unlink()
+                    logger.info(f"Removed old backup: {backup_path}")
                 template_path.rename(backup_path)
                 logger.info(f"Backed up {template_name} to {backup_path}")
 
@@ -159,9 +162,7 @@ async def cde_syncTemplates(
         logger.warning(f"Failed to apply customizations: {e}")
         customizations_applied = []
 
-    reporter.report_progress(
-        "CDE", "syncTemplates", 0.8, "Validating conformity..."
-    )
+    reporter.report_progress("CDE", "syncTemplates", 0.8, "Validating conformity...")
 
     # Validate conformity
     conformity_score = 0
@@ -169,7 +170,7 @@ async def cde_syncTemplates(
     try:
         validate_script = scripts_dir / "validate_spec_kit_conformity.py"
 
-        result = subprocess.run(
+        subprocess_result = subprocess.run(
             [
                 "python",
                 str(validate_script),
@@ -184,7 +185,9 @@ async def cde_syncTemplates(
 
         # Parse conformity report
         report_path = templates_dir / "conformity-report.json"
-        if report_path.exists():
+        if subprocess_result.returncode != 0:
+            logger.warning(f"Validation script failed: {subprocess_result.stderr}")
+        elif report_path.exists():
             with open(report_path) as f:
                 report = json.load(f)
                 conformity_score = report.get("average_score", 0)
@@ -212,7 +215,7 @@ async def cde_syncTemplates(
     else:
         recommendations.append("⚠️ Customizations may have failed, check manually")
 
-    result = {
+    response = {
         "status": "success",
         "templates_synced": downloaded,
         "customizations_applied": customizations_applied,
@@ -228,7 +231,7 @@ async def cde_syncTemplates(
         ],
     }
 
-    return json.dumps(result, indent=2)
+    return json.dumps(response, indent=2)
 
 
 @tool_handler
@@ -303,9 +306,7 @@ async def cde_validateSpec(
             indent=2,
         )
 
-    reporter.report_progress(
-        "CDE", "validateSpec", 0.5, "Running validation checks..."
-    )
+    reporter.report_progress("CDE", "validateSpec", 0.5, "Running validation checks...")
 
     # Run validation script
     try:
@@ -314,42 +315,76 @@ async def cde_validateSpec(
 
         output_path = spec_path / "validation-report.json"
 
+        cmd_args = [
+            "python",
+            str(validate_script),
+            "--spec",
+            str(spec_path),
+            "--min-score",
+            "95" if strict else "0",
+            "--output",
+            str(output_path),
+        ]
+
+        if strict:
+            cmd_args.append("--fail-on-low-score")
+
         result = subprocess.run(
-            [
-                "python",
-                str(validate_script),
-                "--spec",
-                str(spec_path),
-                "--min-score",
-                "95" if strict else "0",
-                "--fail-on-low-score" if strict else "--no-fail",
-                "--output",
-                str(output_path),
-            ],
+            cmd_args,
             capture_output=True,
             text=True,
         )
+
+        # Log subprocess output for debugging
+        if result.returncode != 0:
+            logger.error(f"Validation script failed: {result.stderr}")
+            return json.dumps(
+                {
+                    "status": "error",
+                    "error": f"Validation script failed with code {result.returncode}",
+                    "stderr": result.stderr,
+                    "stdout": result.stdout,
+                },
+                indent=2,
+            )
 
         # Parse validation report
         if output_path.exists():
             with open(output_path) as f:
                 report = json.load(f)
         else:
-            report = {"error": "Validation report not generated"}
+            logger.error(f"Validation report not found at {output_path}")
+            return json.dumps(
+                {
+                    "status": "error",
+                    "error": "Validation report not generated",
+                    "expected_path": str(output_path),
+                    "stdout": result.stdout,
+                    "stderr": result.stderr,
+                },
+                indent=2,
+            )
 
         reporter.report_progress("CDE", "validateSpec", 1.0, "Validation complete")
 
         # Extract results
-        conformity_score = report.get("average_score", 0)
-        issues = report.get("issues", [])
-        passed_checks = report.get("passed_checks", [])
+        conformity_score = float(report.get("average_score", 0))
+        issues = []
+        passed_checks = []
+
+        # Extract issues from all templates
+        results = report.get("results", {})
+        if isinstance(results, dict):
+            for template_name, template_data in results.items():
+                template_issues = template_data.get("issues", [])
+                issues.extend(template_issues)
+                template_passed = template_data.get("passed_checks", [])
+                passed_checks.extend(template_passed)
 
         # Generate recommendations
         recommendations = []
         if conformity_score >= 95:
-            recommendations.append(
-                f"✅ Excellent conformity ({conformity_score:.1f}%)"
-            )
+            recommendations.append(f"✅ Excellent conformity ({conformity_score:.1f}%)")
         elif conformity_score >= 85:
             recommendations.append(
                 f"⚠️ Good conformity ({conformity_score:.1f}%), minor improvements needed"
@@ -367,7 +402,9 @@ async def cde_validateSpec(
         if errors:
             recommendations.append(f"🔴 Fix {len(errors)} errors (high priority)")
         if warnings:
-            recommendations.append(f"🟡 Address {len(warnings)} warnings (medium priority)")
+            recommendations.append(
+                f"🟡 Address {len(warnings)} warnings (medium priority)"
+            )
         if info:
             recommendations.append(f"🔵 Consider {len(info)} suggestions (optional)")
 

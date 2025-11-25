@@ -1,0 +1,114 @@
+{
+  "directory": "E:\\scripts-python\\CDE Orchestrator MCP\\specs\\ai-assistant-config",
+  "templates_validated": 3,
+  "average_score": 83.33333333333333,
+  "min_score_required": 0,
+  "passed": true,
+  "results": {
+    "spec.md": {
+      "template": "E:\\scripts-python\\CDE Orchestrator MCP\\specs\\ai-assistant-config\\spec.md",
+      "conformity_score": 70,
+      "passed_checks": [
+        "\u2705 YAML frontmatter complete and valid",
+        "\u2705 Naming conventions followed",
+        "\u2705 No broken internal links"
+      ],
+      "issues": [
+        {
+          "category": "section",
+          "severity": "error",
+          "message": "Missing required section: ## Summary",
+          "location": ""
+        },
+        {
+          "category": "section",
+          "severity": "error",
+          "message": "Missing required section: ## User Stories",
+          "location": ""
+        },
+        {
+          "category": "section",
+          "severity": "error",
+          "message": "Missing required section: ## Acceptance Criteria",
+          "location": ""
+        }
+      ],
+      "recommendations": [
+        "\u27a1\ufe0f Add missing sections: ## Summary, ## User Stories, ## Acceptance Criteria",
+        "\u2705 Template is mostly conformant, minor improvements needed"
+      ],
+      "metadata": {
+        "file_size": 13066,
+        "line_count": 266,
+        "has_frontmatter": true,
+        "spec_kit_reference": [
+          "## Summary",
+          "## User Stories",
+          "## Requirements",
+          "## Acceptance Criteria"
+        ]
+      }
+    },
+    "plan.md": {
+      "template": "E:\\scripts-python\\CDE Orchestrator MCP\\specs\\ai-assistant-config\\plan.md",
+      "conformity_score": 80,
+      "passed_checks": [
+        "\u2705 YAML frontmatter complete and valid",
+        "\u2705 Naming conventions followed",
+        "\u2705 No broken internal links"
+      ],
+      "issues": [
+        {
+          "category": "section",
+          "severity": "error",
+          "message": "Missing required section: ## Overview",
+          "location": ""
+        },
+        {
+          "category": "section",
+          "severity": "error",
+          "message": "Missing required section: ## Implementation Details",
+          "location": ""
+        }
+      ],
+      "recommendations": [
+        "\u27a1\ufe0f Add missing sections: ## Overview, ## Implementation Details",
+        "\u2705 Template is mostly conformant, minor improvements needed"
+      ],
+      "metadata": {
+        "file_size": 9641,
+        "line_count": 314,
+        "has_frontmatter": true,
+        "spec_kit_reference": [
+          "## Overview",
+          "## Architecture",
+          "## Implementation Details",
+          "## Testing Strategy"
+        ]
+      }
+    },
+    "tasks.md": {
+      "template": "E:\\scripts-python\\CDE Orchestrator MCP\\specs\\ai-assistant-config\\tasks.md",
+      "conformity_score": 100,
+      "passed_checks": [
+        "\u2705 YAML frontmatter complete and valid",
+        "\u2705 Required sections present",
+        "\u2705 Task format correct",
+        "\u2705 Naming conventions followed",
+        "\u2705 No broken internal links"
+      ],
+      "issues": [],
+      "recommendations": [
+        "\u2705 Template is fully conformant with Spec-Kit standards"
+      ],
+      "metadata": {
+        "file_size": 8614,
+        "line_count": 214,
+        "has_frontmatter": true,
+        "spec_kit_reference": [
+          "## Tasks"
+        ]
+      }
+    }
+  }
+}

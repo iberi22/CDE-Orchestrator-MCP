@@ -20,11 +20,18 @@ Usage:
 import argparse
 import json
 import re
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+# Fix encoding for Windows terminals
+if sys.platform == "win32":
+    import io
+
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 # Spec-Kit Standard Configurations
 SPEC_KIT_REFERENCES = {
@@ -172,16 +179,16 @@ def validate_frontmatter(
 
     # Check required fields
     required_fields = reference.get("required_fields", [])
-    for field in required_fields:
-        if field not in frontmatter:
+    for req_field in required_fields:
+        if req_field not in frontmatter:
             issues.append(
                 ValidationIssue(
                     category="frontmatter",
                     severity="error",
-                    message=f"Missing required field: {field}",
+                    message=f"Missing required field: {req_field}",
                 )
             )
-        elif not frontmatter[field]:
+        elif not frontmatter[req_field]:
             issues.append(
                 ValidationIssue(
                     category="frontmatter",
@@ -230,9 +237,11 @@ def validate_sections(content: str, reference: dict[str, Any]) -> list[Validatio
     return issues
 
 
-def validate_task_format(content: str, reference: dict[str, Any]) -> list[ValidationIssue]:
+def validate_task_format(
+    content: str, reference: dict[str, Any]
+) -> list[ValidationIssue]:
     """Validate task format for tasks.md."""
-    issues = []
+    issues: list[ValidationIssue] = []
 
     if "task_pattern" not in reference:
         return issues  # Not a tasks.md file
@@ -241,14 +250,15 @@ def validate_task_format(content: str, reference: dict[str, Any]) -> list[Valida
     if "## Tasks" not in content:
         return issues  # Already caught by section validation
 
-    tasks_section = content.split("## Tasks")[1].split("##")[0] if "## Tasks" in content else ""
+    tasks_section = (
+        content.split("## Tasks")[1].split("##")[0] if "## Tasks" in content else ""
+    )
 
     # Extract numbered list items
     task_pattern = re.compile(r"^\s*\d+\.\s+(.+)$", re.MULTILINE)
     tasks = task_pattern.findall(tasks_section)
 
     # Validate each task
-    expected_pattern = reference["task_pattern"]
     for idx, task in enumerate(tasks, 1):
         if not re.match(r"\[P\d+\]\s+\[.*?\]\s+.+", task):
             issues.append(
@@ -263,7 +273,9 @@ def validate_task_format(content: str, reference: dict[str, Any]) -> list[Valida
     return issues
 
 
-def validate_naming(file_path: Path, reference: dict[str, Any]) -> list[ValidationIssue]:
+def validate_naming(
+    file_path: Path, reference: dict[str, Any]
+) -> list[ValidationIssue]:
     """Validate file naming conventions."""
     issues = []
     naming_pattern = reference.get("naming_pattern")
@@ -365,16 +377,24 @@ def generate_recommendations(issues: list[ValidationIssue]) -> list[str]:
 
     # General best practices
     if not issues:
-        recommendations.append("✅ Template is fully conformant with Spec-Kit standards")
+        recommendations.append(
+            "✅ Template is fully conformant with Spec-Kit standards"
+        )
     elif len(issues) <= 3:
-        recommendations.append("✅ Template is mostly conformant, minor improvements needed")
+        recommendations.append(
+            "✅ Template is mostly conformant, minor improvements needed"
+        )
     else:
-        recommendations.append("⚠️ Template needs significant updates for Spec-Kit conformity")
+        recommendations.append(
+            "⚠️ Template needs significant updates for Spec-Kit conformity"
+        )
 
     return recommendations
 
 
-def validate_template(template_path: Path, spec_kit_reference: dict[str, Any]) -> ValidationResult:
+def validate_template(
+    template_path: Path, spec_kit_reference: dict[str, Any]
+) -> ValidationResult:
     """Perform comprehensive template validation."""
     if not template_path.exists():
         return ValidationResult(
@@ -528,7 +548,7 @@ def main() -> None:
     summary = validate_directory(target_dir, args.min_score)
 
     # Print summary
-    print(f"\n📊 Validation Summary")
+    print("\n📊 Validation Summary")
     print(f"  Templates validated: {summary['templates_validated']}")
     print(f"  Average score: {summary['average_score']:.1f}/100")
     print(f"  Status: {'✅ PASSED' if summary['passed'] else '❌ FAILED'}")

@@ -1,0 +1,253 @@
+{
+  "directory": "E:\\scripts-python\\CDE Orchestrator MCP\\specs\\templates",
+  "templates_validated": 3,
+  "average_score": 10.0,
+  "min_score_required": 0,
+  "passed": true,
+  "results": {
+    "spec.md": {
+      "template": "E:\\scripts-python\\CDE Orchestrator MCP\\specs\\templates\\spec.md",
+      "conformity_score": 0,
+      "passed_checks": [
+        "\u2705 Naming conventions followed",
+        "\u2705 No broken internal links"
+      ],
+      "issues": [
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: title",
+          "location": ""
+        },
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: description",
+          "location": ""
+        },
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: type",
+          "location": ""
+        },
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: status",
+          "location": ""
+        },
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: created",
+          "location": ""
+        },
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: updated",
+          "location": ""
+        },
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: author",
+          "location": ""
+        },
+        {
+          "category": "section",
+          "severity": "error",
+          "message": "Missing required section: ## Summary",
+          "location": ""
+        },
+        {
+          "category": "section",
+          "severity": "error",
+          "message": "Missing required section: ## User Stories",
+          "location": ""
+        },
+        {
+          "category": "section",
+          "severity": "error",
+          "message": "Missing required section: ## Acceptance Criteria",
+          "location": ""
+        }
+      ],
+      "recommendations": [
+        "\u27a1\ufe0f Add missing YAML frontmatter fields: title, description, type, status, created, updated, author",
+        "\u27a1\ufe0f Add missing sections: ## Summary, ## User Stories, ## Acceptance Criteria",
+        "\u26a0\ufe0f Template needs significant updates for Spec-Kit conformity"
+      ],
+      "metadata": {
+        "file_size": 5514,
+        "line_count": 157,
+        "has_frontmatter": true,
+        "spec_kit_reference": [
+          "## Summary",
+          "## User Stories",
+          "## Requirements",
+          "## Acceptance Criteria"
+        ]
+      }
+    },
+    "plan.md": {
+      "template": "E:\\scripts-python\\CDE Orchestrator MCP\\specs\\templates\\plan.md",
+      "conformity_score": 0,
+      "passed_checks": [
+        "\u2705 Naming conventions followed",
+        "\u2705 No broken internal links"
+      ],
+      "issues": [
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: title",
+          "location": ""
+        },
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: description",
+          "location": ""
+        },
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: type",
+          "location": ""
+        },
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: status",
+          "location": ""
+        },
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: created",
+          "location": ""
+        },
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: updated",
+          "location": ""
+        },
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: author",
+          "location": ""
+        },
+        {
+          "category": "section",
+          "severity": "error",
+          "message": "Missing required section: ## Overview",
+          "location": ""
+        },
+        {
+          "category": "section",
+          "severity": "error",
+          "message": "Missing required section: ## Architecture",
+          "location": ""
+        },
+        {
+          "category": "section",
+          "severity": "error",
+          "message": "Missing required section: ## Implementation Details",
+          "location": ""
+        },
+        {
+          "category": "section",
+          "severity": "error",
+          "message": "Missing required section: ## Testing Strategy",
+          "location": ""
+        }
+      ],
+      "recommendations": [
+        "\u27a1\ufe0f Add missing YAML frontmatter fields: title, description, type, status, created, updated, author",
+        "\u27a1\ufe0f Add missing sections: ## Overview, ## Architecture, ## Implementation Details, ## Testing Strategy",
+        "\u26a0\ufe0f Template needs significant updates for Spec-Kit conformity"
+      ],
+      "metadata": {
+        "file_size": 3671,
+        "line_count": 105,
+        "has_frontmatter": false,
+        "spec_kit_reference": [
+          "## Overview",
+          "## Architecture",
+          "## Implementation Details",
+          "## Testing Strategy"
+        ]
+      }
+    },
+    "tasks.md": {
+      "template": "E:\\scripts-python\\CDE Orchestrator MCP\\specs\\templates\\tasks.md",
+      "conformity_score": 30,
+      "passed_checks": [
+        "\u2705 Task format correct",
+        "\u2705 Naming conventions followed",
+        "\u2705 No broken internal links"
+      ],
+      "issues": [
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: title",
+          "location": ""
+        },
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: type",
+          "location": ""
+        },
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: status",
+          "location": ""
+        },
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: created",
+          "location": ""
+        },
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: updated",
+          "location": ""
+        },
+        {
+          "category": "frontmatter",
+          "severity": "error",
+          "message": "Missing required field: author",
+          "location": ""
+        },
+        {
+          "category": "section",
+          "severity": "error",
+          "message": "Missing required section: ## Tasks",
+          "location": ""
+        }
+      ],
+      "recommendations": [
+        "\u27a1\ufe0f Add missing YAML frontmatter fields: title, type, status, created, updated, author",
+        "\u27a1\ufe0f Add missing sections: ## Tasks",
+        "\u26a0\ufe0f Template needs significant updates for Spec-Kit conformity"
+      ],
+      "metadata": {
+        "file_size": 9177,
+        "line_count": 252,
+        "has_frontmatter": true,
+        "spec_kit_reference": [
+          "## Tasks"
+        ]
+      }
+    }
+  }
+}
