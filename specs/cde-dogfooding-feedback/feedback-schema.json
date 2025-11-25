@@ -1,0 +1,308 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CDE MCP Tool Feedback Schema",
+  "description": "Structured feedback schema for CDE MCP tool testing and dogfooding",
+  "type": "object",
+  "required": ["tool_name", "category", "test_date", "tested_by", "result", "feedback"],
+  "properties": {
+    "tool_name": {
+      "type": "string",
+      "description": "Name of the CDE tool (e.g., cde_selectWorkflow)",
+      "pattern": "^cde_[a-zA-Z]+$"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "orchestration",
+        "documentation",
+        "agents",
+        "ceo_orchestration",
+        "onboarding",
+        "recipes",
+        "extensions",
+        "health",
+        "utilities",
+        "full_implementation"
+      ],
+      "description": "Tool category for organization"
+    },
+    "test_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of test execution"
+    },
+    "tested_by": {
+      "type": "string",
+      "description": "Who performed the test (e.g., 'GitHub Copilot', 'Manual Testing')"
+    },
+    "test_scenario": {
+      "type": "string",
+      "description": "Brief description of test scenario"
+    },
+    "input": {
+      "type": "object",
+      "description": "Input parameters passed to the tool",
+      "additionalProperties": true
+    },
+    "expected_output": {
+      "type": "object",
+      "description": "Expected output structure/values",
+      "additionalProperties": true
+    },
+    "actual_output": {
+      "type": "object",
+      "description": "Actual output received from tool",
+      "additionalProperties": true
+    },
+    "result": {
+      "type": "string",
+      "enum": ["success", "partial", "failure"],
+      "description": "Overall test result"
+    },
+    "feedback": {
+      "type": "object",
+      "required": ["usability", "accuracy", "performance", "documentation"],
+      "properties": {
+        "usability": {
+          "type": "object",
+          "required": ["rating", "comments"],
+          "properties": {
+            "rating": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5,
+              "description": "Usability rating (1=poor, 5=excellent)"
+            },
+            "comments": {
+              "type": "string",
+              "description": "Detailed usability feedback"
+            }
+          }
+        },
+        "accuracy": {
+          "type": "object",
+          "required": ["rating", "comments"],
+          "properties": {
+            "rating": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5,
+              "description": "Accuracy rating (1=poor, 5=excellent)"
+            },
+            "comments": {
+              "type": "string",
+              "description": "How well output matched expectations"
+            }
+          }
+        },
+        "performance": {
+          "type": "object",
+          "required": ["duration_ms"],
+          "properties": {
+            "duration_ms": {
+              "type": "number",
+              "description": "Execution time in milliseconds"
+            },
+            "memory_mb": {
+              "type": "number",
+              "description": "Memory usage in megabytes (optional)"
+            },
+            "comments": {
+              "type": "string",
+              "description": "Performance observations"
+            }
+          }
+        },
+        "documentation": {
+          "type": "object",
+          "required": ["rating", "comments"],
+          "properties": {
+            "rating": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5,
+              "description": "Documentation quality (1=poor, 5=excellent)"
+            },
+            "comments": {
+              "type": "string",
+              "description": "Documentation clarity and completeness feedback"
+            },
+            "missing_examples": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "List of missing example scenarios"
+            }
+          }
+        },
+        "errors_encountered": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["error_type", "message"],
+            "properties": {
+              "error_type": {
+                "type": "string",
+                "description": "Type of error (e.g., ValueError, NetworkError)"
+              },
+              "message": {
+                "type": "string",
+                "description": "Error message"
+              },
+              "stack_trace": {
+                "type": "string",
+                "description": "Stack trace (if available)"
+              },
+              "reproducible": {
+                "type": "boolean",
+                "description": "Whether error is consistently reproducible"
+              }
+            }
+          },
+          "description": "List of errors encountered during testing"
+        },
+        "improvement_suggestions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Specific actionable improvement suggestions"
+        },
+        "edge_cases_tested": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["scenario", "result"],
+            "properties": {
+              "scenario": {
+                "type": "string",
+                "description": "Edge case scenario tested"
+              },
+              "result": {
+                "type": "string",
+                "enum": ["pass", "fail", "unexpected"],
+                "description": "Result of edge case test"
+              },
+              "notes": {
+                "type": "string",
+                "description": "Additional notes about edge case behavior"
+              }
+            }
+          },
+          "description": "Edge cases tested and their results"
+        }
+      }
+    },
+    "spec_kit_conformity": {
+      "type": "object",
+      "description": "Spec-Kit conformity check (if applicable)",
+      "properties": {
+        "applies": {
+          "type": "boolean",
+          "description": "Whether Spec-Kit conformity applies to this tool"
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Conformity score (0-100)"
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of conformity issues found"
+        }
+      }
+    },
+    "token_efficiency": {
+      "type": "object",
+      "description": "Token efficiency metrics (for documentation tools)",
+      "properties": {
+        "applies": {
+          "type": "boolean",
+          "description": "Whether token efficiency applies to this tool"
+        },
+        "tokens_consumed": {
+          "type": "integer",
+          "description": "Number of tokens consumed"
+        },
+        "baseline_tokens": {
+          "type": "integer",
+          "description": "Baseline token count (without optimization)"
+        },
+        "reduction_percentage": {
+          "type": "number",
+          "description": "Token reduction percentage"
+        }
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Other tools this tool depends on"
+    },
+    "follow_up_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action", "priority"],
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "Follow-up action to take"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["critical", "high", "medium", "low"],
+            "description": "Priority level"
+          },
+          "assignee": {
+            "type": "string",
+            "description": "Who should handle this action"
+          },
+          "github_issue": {
+            "type": "string",
+            "description": "GitHub issue URL (if created)"
+          }
+        }
+      },
+      "description": "Follow-up actions needed based on feedback"
+    },
+    "test_artifacts": {
+      "type": "object",
+      "description": "Paths to test artifacts",
+      "properties": {
+        "screenshots": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Paths to screenshots"
+        },
+        "logs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Paths to log files"
+        },
+        "output_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Paths to generated output files"
+        }
+      }
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes or observations"
+    }
+  }
+}
