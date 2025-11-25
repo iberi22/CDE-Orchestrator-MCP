@@ -13,6 +13,7 @@ from mcp_tools import (
     cde_delegateToJules,
     cde_downloadRecipes,
     cde_executeWithBestAgent,
+    cde_generateSpec,
     cde_healthCheck,
     cde_installMcpExtension,
     cde_listAvailableAgents,
@@ -26,7 +27,9 @@ from mcp_tools import (
     cde_sourceSkill,
     cde_startFeature,
     cde_submitWork,
+    cde_syncTemplates,
     cde_updateSkill,
+    cde_validateSpec,
 )
 from mcp_tools.ceo_orchestration import (
     cde_cancelTask,
@@ -80,6 +83,7 @@ _generate_mcp_filesystem()
 app.tool()(trace_execution(cde_onboardingProject))
 app.tool()(trace_execution(cde_publishOnboarding))
 app.tool()(trace_execution(cde_setupProject))
+app.tool()(trace_execution(cde_generateSpec))  # ✅ Professional spec generator
 app.tool()(trace_execution(cde_scanDocumentation))
 app.tool()(trace_execution(cde_analyzeDocumentation))
 app.tool()(trace_execution(cde_selectWorkflow))
