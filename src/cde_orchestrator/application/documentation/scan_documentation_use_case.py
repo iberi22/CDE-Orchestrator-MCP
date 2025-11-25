@@ -232,6 +232,10 @@ class ScanDocumentationUseCase:
             "scanDocumentation", 0.0, f"Found {len(md_files)} markdown files to scan"
         )
 
+        # Determine batch size for progress reporting (every 10 files or 10% of total, whichever is smaller)
+        total_files = len(md_files)
+        batch_size = max(1, min(10, total_files // 10))
+
         for idx, md_file in enumerate(md_files):
             relative = md_file.relative_to(project)
             file_info: Dict[str, Any] = {
@@ -274,13 +278,15 @@ class ScanDocumentationUseCase:
             }:
                 results["orphaned_docs"].append(str(relative))  # type: ignore
 
-            # Report progress after each file
-            progress = (idx + 1) / len(md_files)
-            report_progress_http(
-                "scanDocumentation",
-                progress,
-                f"Scanned {idx + 1}/{len(md_files)} files",
-            )
+            # Report progress in batches (every N files or at completion)
+            # This reduces HTTP overhead from 100+ requests to ~10 requests
+            if (idx + 1) % batch_size == 0 or (idx + 1) == total_files:
+                progress = (idx + 1) / total_files
+                report_progress_http(
+                    "scanDocumentation",
+                    progress,
+                    f"Scanned {idx + 1}/{total_files} files",
+                )
 
         # Populate by_location
         results["by_location"] = {

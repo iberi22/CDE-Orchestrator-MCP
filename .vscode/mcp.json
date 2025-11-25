@@ -1,6 +1,6 @@
 {
   "servers": {
-    "CDE_Orchestrator": {
+    "CDE": {
       "command": "python",
       "args": [
         "src/server.py",

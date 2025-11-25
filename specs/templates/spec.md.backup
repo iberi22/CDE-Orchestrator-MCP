@@ -1,7 +1,17 @@
 ---
-llm_summary: Feature specification with user stories, requirements, and acceptance
-  criteria. Defines WHAT the feature does and WHY it's needed.
----# Feature Specification: [FEATURE NAME]
+title: "Feature Specification: [FEATURE NAME]"
+description: "Product Requirements Document (PRD) for [FEATURE NAME]"
+type: "feature"
+status: "draft"
+created: "[DATE]"
+updated: "[DATE]"
+author: "[AUTHOR]"
+llm_summary: |
+  PRD for [FEATURE NAME].
+  Defines user stories, functional requirements, and acceptance criteria.
+---
+
+## Feature Specification: [FEATURE NAME]
 
 **Feature Branch**: `[###-feature-name]`
 **Created**: [DATE]
@@ -101,56 +111,3 @@ llm_summary: Feature specification with user stories, requirements, and acceptan
 ### Key Entities *(include if feature involves data)*
 
 - **[Entity 1]**: [What it represents, key attributes without implementation]
-- **[Entity 2]**: [What it represents, relationships to other entities]
-
-## Success Criteria *(mandatory)*
-
-<!--
-  ACTION REQUIRED: Define measurable success criteria.
-  These must be technology-agnostic and measurable.
--->
-
-### Measurable Outcomes
-
-- **SC-001**: [Measurable metric, e.g., "Users can complete account creation in under 2 minutes"]
-- **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
-- **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
-- **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
-
-
-## 🛠️ MCP Tools Available
-
-**Note**: This is a CDE extension to help AI agents discover relevant tools.
-
-For this feature, consider using:
-
-- **`cde_selectWorkflow`** - Analyze task complexity and recommend optimal workflow
-- **`cde_sourceSkill`** - Download relevant skills from awesome-claude-skills
-- **`cde_startFeature`** - Initialize feature directory with spec/plan/tasks
-- **`cde_submitWork`** - Submit phase results and advance workflow
-- **`cde_validateSpec`** - Validate generated specs against Spec-Kit standard
-
-**Full Tool List**: Use `cde_searchTools("")` to list all 27+ available tools.
-
-**Examples**:
-```python
-# Analyze complexity before starting
-result = cde_selectWorkflow("Add user authentication module")
-# → Returns: workflow_type, complexity, recipe_id, required_skills
-
-# Start feature with recommended workflow
-result = cde_startFeature(
-    user_prompt="Add user authentication",
-    workflow_type="standard",
-    recipe_id="ai-engineer"
-)
-# → Creates: specs/add-user-authentication/{spec.md, plan.md, tasks.md}
-
-# Submit phase work
-result = cde_submitWork(
-    feature_id="uuid",
-    phase_id="define",
-    results={"specification": "..."}
-)
-# → Advances to next phase, returns prompt for next work
-```

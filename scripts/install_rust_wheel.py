@@ -38,7 +38,9 @@ def get_python_tag() -> str:
     return f"cp{version_info.major}{version_info.minor}"
 
 
-def download_rust_wheel(repo: str = "iberi22/CDE-Orchestrator-MCP", tag: str = "latest") -> bool:
+def download_rust_wheel(
+    repo: str = "iberi22/CDE-Orchestrator-MCP", tag: str = "latest"
+) -> bool:
     """Download the appropriate Rust wheel from GitHub releases."""
 
     platform_tag = get_platform_tag()
@@ -84,6 +86,8 @@ def download_rust_wheel(repo: str = "iberi22/CDE-Orchestrator-MCP", tag: str = "
     # Download wheel
     temp_dir = Path("temp-wheels")
     temp_dir.mkdir(exist_ok=True)
+    if wheel_name is None:
+        return False
     wheel_path = temp_dir / wheel_name
 
     try:
@@ -136,9 +140,9 @@ def main() -> None:
 
     # Check if already installed
     try:
-        import cde_rust_core
+        import cde_rust_core  # noqa: F401
 
-        print("ℹ️  Rust module already installed")
+        print("✅ Rust module already installed")
         response = input("Do you want to reinstall? (y/N): ")
         if response.lower() != "y":
             print("✅ Using existing installation")

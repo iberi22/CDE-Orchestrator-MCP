@@ -193,6 +193,38 @@ python src/server.py
 
 See [QUICKSTART_LOCAL.md](QUICKSTART_LOCAL.md) for detailed instructions.
 
+### Configure MCP in Other Projects
+
+To use CDE Orchestrator tools in other projects, create `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "CDE_Orchestrator": {
+      "command": "python",
+      "args": [
+        "E:\\scripts-python\\CDE Orchestrator MCP\\src\\server.py",
+        "--scan-paths",
+        "E:\\your-project-path"
+      ],
+      "env": {
+        "PYTHONPATH": "E:\\scripts-python\\CDE Orchestrator MCP\\src",
+        "CDE_AUTO_DISCOVER": "true",
+        "CDE_LOG_LEVEL": "INFO"
+      }
+    }
+  }
+}
+```
+
+**Key Points:**
+
+* Use **absolute paths** for both `server.py` and `PYTHONPATH`
+* Replace `E:\your-project-path` with your actual project directory
+* Use double backslashes `\\` in JSON paths for Windows
+
+For detailed setup, see [Configuration Guide](docs/configuration-guide.md).
+
 ---
 
 ## Core Concepts

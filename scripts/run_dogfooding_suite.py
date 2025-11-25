@@ -126,7 +126,7 @@ def run_task(task_id: str) -> None:
         elif task_id == "T024":
             func = cde_updateSkill
             args = ["redis-caching"]
-            kwargs = {"topics": ["redis 7.x breaking changes"]}
+            kwargs = {"topics": ["redis 7.x breaking changes"]}  # type: ignore[dict-item]
 
         elif task_id == "T025":
             func = cde_selectWorkflow
@@ -194,9 +194,9 @@ def run_task(task_id: str) -> None:
 
         if func:
             if inspect.iscoroutinefunction(func):
-                result = asyncio.run(func(*args, **kwargs))
+                result = asyncio.run(func(*args, **kwargs))  # type: ignore[arg-type]
             else:
-                result = func(*args, **kwargs)
+                result = func(*args, **kwargs)  # type: ignore[arg-type]
                 if inspect.iscoroutine(result):
                     result = asyncio.run(result)
 

@@ -25,6 +25,7 @@ serde_yaml = "0.9"  # Para YAML frontmatter parsing
 num_cpus = "1.16"   # Para auto-detectar CPU cores
 ignore = "0.4"      # Para parsear .gitignore rules
 sysinfo = "0.33"    # Para process monitoring (CPU, memoria)
+chrono = "0.4"      # Para Git date parsing
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }

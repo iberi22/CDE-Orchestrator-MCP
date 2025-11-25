@@ -5,6 +5,7 @@ use std::sync::Once;
 
 mod filesystem;
 mod documentation;
+mod git_analyzer;
 mod workflow_validator;
 mod project_scanner;
 mod process_manager;
@@ -96,6 +97,21 @@ fn scan_project_py(
     }
 }
 
+/// Analyzes Git repository with parallel processing.
+/// Returns comprehensive Git insights including commits, branches, contributors, and code churn.
+#[pyfunction]
+fn analyze_git_repository_py(repo_path: String, days: i64) -> PyResult<String> {
+    match git_analyzer::analyze_git_repository(&repo_path, days) {
+        Ok(analysis) => {
+            let json_result = serde_json::to_string(&analysis).map_err(|e| {
+                PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to serialize result: {}", e))
+            })?;
+            Ok(json_result)
+        }
+        Err(e) => Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(e)),
+    }
+}
+
 /// A Python module implemented in Rust.
 #[pymodule]
 fn cde_rust_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -106,6 +122,7 @@ fn cde_rust_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(analyze_documentation_quality_py, m)?)?;
     m.add_function(wrap_pyfunction!(validate_workflows_py, m)?)?;
     m.add_function(wrap_pyfunction!(scan_project_py, m)?)?;
+    m.add_function(wrap_pyfunction!(analyze_git_repository_py, m)?)?;
 
     // Process Manager functions
     m.add_function(wrap_pyfunction!(process_manager::spawn_agents_parallel, m)?)?;
