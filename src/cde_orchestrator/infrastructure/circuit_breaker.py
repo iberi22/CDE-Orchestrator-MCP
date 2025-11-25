@@ -27,7 +27,7 @@ import asyncio
 import time
 from enum import Enum
 from functools import wraps
-from typing import Any, Callable, Optional, Type, TypeVar
+from typing import Any, Callable, Dict, Optional, Type, TypeVar
 
 from cde_orchestrator.infrastructure.logging import get_logger
 from cde_orchestrator.infrastructure.telemetry import log_metric

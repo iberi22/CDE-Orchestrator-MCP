@@ -67,25 +67,51 @@ cp specs/templates/tasks.md specs/my-feature/
 # Edit frontmatter: [FEATURE NAME], [DATE], [AUTHOR]
 ```
 
-### 🔄 Template Synchronization (NEW: 2025-11-24)
+### 🔄 Template Synchronization (NEW: 2025-11-25)
 
-Keep templates in sync with GitHub Spec-Kit:
+Keep local templates in sync with the official GitHub Spec-Kit standard. This workflow ensures that all generated specifications adhere to the latest best practices, while preserving CDE-specific customizations.
 
-```python
-# Manual sync (download + customize + validate)
-cde_syncTemplates(project_path=".", force=False)
+**Validated Workflow**:
 
-# Validate existing specs
-cde_validateSpec(spec_directory="specs/my-feature", strict=True)
-```
+1.  **Check for Updates (Dry Run)**:
+    Run the sync tool without forcing an overwrite. If templates are up-to-date, it will report a `skipped` status.
 
-**Features**:
-- Downloads latest templates from github/spec-kit
-- Applies CDE customizations (llm_summary, MCP Tools, etc.)
-- Validates conformity (target: 95%+)
-- Automated weekly sync via GitHub Actions
+    ```python
+    # Returns 'skipped' if no updates are needed
+    cde_syncTemplates(project_path=".", force=False)
+    ```
 
-📖 **Templates**: `specs/templates/` (spec, plan, tasks)
+2.  **Force Sync (If Needed)**:
+    If updates are available or templates are corrupted, use `force=True` to back up the existing templates and download fresh copies.
+
+    ```python
+    # Backs up local templates and downloads the latest versions
+    cde_syncTemplates(project_path=".", force=True)
+    ```
+
+3.  **Validate a Specification**:
+    After generating a new specification, or to check an existing one, use the validation tool. It provides a conformity score and a detailed list of issues.
+
+    ```python
+    # Analyzes a spec directory and returns a conformity score
+    cde_validateSpec(spec_directory="specs/ai-assistant-config", strict=False)
+    ```
+
+4.  **Enforce Quality with Strict Mode**:
+    For CI/CD or pre-commit checks, use `strict=True`. The tool will return a `warning` status if the conformity score is below 95%, making it easy to integrate into automated quality gates.
+
+    ```python
+    # Fails if conformity score is less than 95%
+    cde_validateSpec(spec_directory="specs/ai-assistant-config", strict=True)
+    ```
+
+**Key Features**:
+- **Safe by Default**: `force=False` prevents accidental overwrites.
+- **Detailed Validation**: Checks frontmatter, structure, naming, and content quality.
+- **CI/CD Ready**: `strict=True` mode for automated quality checks.
+- **CDE Customizations**: Automatically applies and preserves CDE-specific sections and fields.
+
+📖 **Full Documentation**: `specs/spec-kit-synchronization/tasks.md`
 
 ---
 

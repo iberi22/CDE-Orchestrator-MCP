@@ -1,4 +1,7 @@
-# Implementation Plan: [FEATURE]
+---
+llm_summary: Technical implementation plan with architecture, design decisions, and
+  testing strategy. Defines HOW the feature will be built.
+---# Implementation Plan: [FEATURE]
 
 **Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
 **Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
@@ -102,3 +105,79 @@ directories captured above]
 |-----------|------------|-------------------------------------|
 | [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
 | [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+
+
+## 🏗️ Hexagonal Architecture Patterns
+
+**Note**: This is a CDE extension for projects using Hexagonal Architecture (Ports & Adapters).
+
+### Pattern Overview
+
+```
+External Systems → Adapters → Application (Use Cases) → Domain (Entities)
+```
+
+**Key Principles**:
+- Dependencies point INWARD only (Domain never imports infrastructure)
+- Domain contains business logic, NO framework dependencies
+- Ports define interfaces (contracts)
+- Adapters implement ports (infrastructure details)
+
+### Implementation Guidelines
+
+**Domain Layer** (`domain/entities.py`):
+```python
+# ✅ Rich domain models with behavior
+class Feature:
+    def advance_phase(self, next_phase: str):
+        if self.status == FeatureStatus.COMPLETED:
+            raise ValueError("Cannot advance completed feature")
+        self.current_phase = next_phase
+```
+
+**Ports Layer** (`domain/ports.py`):
+```python
+# ✅ Define interfaces
+class IFeatureRepository(ABC):
+    @abstractmethod
+    def get_by_id(self, feature_id: str) -> Optional[Feature]:
+        pass
+
+    @abstractmethod
+    def save(self, feature: Feature) -> None:
+        pass
+```
+
+**Application Layer** (`application/use_cases/`):
+```python
+# ✅ Orchestration logic
+class StartFeatureUseCase:
+    def __init__(self, repo: IFeatureRepository):
+        self.repo = repo
+
+    def execute(self, input_data: Dict) -> Dict:
+        project = self.repo.get_by_id(input_data["project_id"])
+        feature = project.start_feature(input_data["prompt"])
+        return {"status": "success", "feature_id": feature.id}
+```
+
+**Adapters Layer** (`adapters/`):
+```python
+# ✅ Infrastructure implementations
+class FilesystemFeatureRepository(IFeatureRepository):
+    def get_by_id(self, feature_id: str) -> Optional[Feature]:
+        path = self.base_path / f"{feature_id}.json"
+        if not path.exists():
+            return None
+        data = json.loads(path.read_text())
+        return Feature.from_dict(data)
+```
+
+### Testing Strategy
+
+- **Domain**: Pure unit tests (no I/O, fast)
+- **Use Cases**: Integration tests with mock adapters
+- **Adapters**: Integration tests with real infrastructure
+- **E2E**: Full flows (rare, expensive)
+
+**Reference**: `specs/design/architecture/README.md`
