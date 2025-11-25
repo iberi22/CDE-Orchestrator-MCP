@@ -1,0 +1,135 @@
+name: Build Rust Wheels
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'rust_core/**'
+      - '.github/workflows/build-rust-wheels.yml'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build-wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Install maturin
+        run: pip install maturin
+
+      - name: Build wheel (Release - Optimized)
+        run: |
+          cd rust_core
+          maturin build --release --strip --out ../dist
+        env:
+          RUSTFLAGS: "-C target-cpu=native -C opt-level=3 -C lto=fat"
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: dist/*.whl
+          retention-days: 7
+
+  publish-wheels:
+    name: Publish wheels to GitHub Release
+    needs: build-wheels
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          path: dist
+          merge-multiple: true
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*.whl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  create-latest-release:
+    name: Create/Update Latest Release
+    needs: build-wheels
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          path: dist
+          merge-multiple: true
+
+      - name: Delete existing latest release
+        continue-on-error: true
+        run: |
+          gh release delete latest --yes --repo ${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create latest release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: latest
+          name: Latest Rust Wheels (Auto-built)
+          body: |
+            🚀 **Auto-built Rust wheels** from latest `main` branch
+
+            ## Installation
+
+            Download the wheel for your platform and Python version:
+
+            ```bash
+            # Example for Python 3.14 on Windows
+            pip install cde_rust_core-0.2.0-cp314-cp314-win_amd64.whl
+            ```
+
+            ## Performance Optimizations
+
+            These wheels are compiled with:
+            - `--release` mode (maximum optimization)
+            - `target-cpu=native` (CPU-specific optimizations)
+            - `opt-level=3` (aggressive optimizations)
+            - `lto=fat` (link-time optimization)
+
+            ## Platforms
+
+            - ✅ Windows (x86_64)
+            - ✅ Linux (x86_64)
+            - ✅ macOS (x86_64, ARM64)
+
+            ## Python Versions
+
+            - Python 3.10, 3.11, 3.12, 3.13, 3.14
+
+            ---
+
+            **Built**: ${{ github.event.head_commit.timestamp }}
+            **Commit**: ${{ github.sha }}
+          files: dist/*.whl
+          prerelease: false
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
