@@ -67,6 +67,24 @@ cp specs/templates/tasks.md specs/my-feature/
 # Edit frontmatter: [FEATURE NAME], [DATE], [AUTHOR]
 ```
 
+### 🔄 Template Synchronization (NEW: 2025-11-24)
+
+Keep templates in sync with GitHub Spec-Kit:
+
+```python
+# Manual sync (download + customize + validate)
+cde_syncTemplates(project_path=".", force=False)
+
+# Validate existing specs
+cde_validateSpec(spec_directory="specs/my-feature", strict=True)
+```
+
+**Features**:
+- Downloads latest templates from github/spec-kit
+- Applies CDE customizations (llm_summary, MCP Tools, etc.)
+- Validates conformity (target: 95%+)
+- Automated weekly sync via GitHub Actions
+
 📖 **Templates**: `specs/templates/` (spec, plan, tasks)
 
 ---
