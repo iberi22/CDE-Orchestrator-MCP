@@ -23,9 +23,9 @@ logger = logging.getLogger(__name__)
 
 # Spec-Kit template URLs
 SPEC_KIT_TEMPLATES = {
-    "spec.md": "https://raw.githubusercontent.com/github/spec-kit/main/templates/spec.md",
-    "plan.md": "https://raw.githubusercontent.com/github/spec-kit/main/templates/plan.md",
-    "tasks.md": "https://raw.githubusercontent.com/github/spec-kit/main/templates/tasks.md",
+    "spec.md": "https://raw.githubusercontent.com/github/spec-kit/main/templates/spec-template.md",
+    "plan.md": "https://raw.githubusercontent.com/github/spec-kit/main/templates/plan-template.md",
+    "tasks.md": "https://raw.githubusercontent.com/github/spec-kit/main/templates/tasks-template.md",
 }
 
 
