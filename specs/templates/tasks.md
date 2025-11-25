@@ -1,6 +1,7 @@
 ---
-
-description: "Task list template for feature implementation"
+description: Task list template for feature implementation
+llm_summary: Executable task checklist organized by phases (define → decompose → design
+  → implement → test → review). Tracks implementation progress and dependencies.
 ---
 
 # Tasks: [FEATURE NAME]
@@ -249,3 +250,61 @@ With multiple developers:
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
+
+
+## 🔄 Phase Tracking
+
+**Note**: This is a CDE extension for tracking feature development phases.
+
+### CDE Workflow Phases
+
+```
+define → decompose → design → implement → test → review
+```
+
+### Task-to-Phase Mapping
+
+Map tasks in this file to CDE workflow phases for automated progress tracking:
+
+| Phase | Tasks | Focus |
+|-------|-------|-------|
+| **Define** | T001-T010 | Specification, requirements analysis |
+| **Decompose** | T011-T020 | Task breakdown, dependencies |
+| **Design** | T021-T030 | Architecture, patterns, interfaces |
+| **Implement** | T031-T050 | Code implementation, adapters |
+| **Test** | T051-T060 | Unit tests, integration tests, validation |
+| **Review** | T061-T067 | Code review, documentation, cleanup |
+
+### Using `cde_submitWork`
+
+When completing a phase, use:
+
+```python
+result = cde_submitWork(
+    feature_id="uuid",
+    phase_id="define",
+    results={
+        "specification": "Complete spec with user stories and requirements",
+        "files_created": ["specs/my-feature/spec.md"],
+        "next_phase_ready": True
+    }
+)
+# → Returns prompt for next phase (decompose)
+```
+
+### Workflow Configuration
+
+Phase definitions are in `.cde/workflow.yml`. Example:
+
+```yaml
+phases:
+  - id: define
+    name: "Define Feature"
+    inputs: ["user_prompt", "project_context"]
+    outputs: ["specification", "user_stories"]
+
+  - id: decompose
+    name: "Decompose Tasks"
+    inputs: ["specification"]
+    outputs: ["task_breakdown", "dependencies"]
+```

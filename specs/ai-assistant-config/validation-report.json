@@ -1,12 +1,12 @@
 {
-  "directory": "E:\\scripts-python\\CDE Orchestrator MCP\\specs\\ai-assistant-config",
+  "directory": "/app/specs/ai-assistant-config",
   "templates_validated": 3,
   "average_score": 83.33333333333333,
   "min_score_required": 0,
   "passed": true,
   "results": {
     "spec.md": {
-      "template": "E:\\scripts-python\\CDE Orchestrator MCP\\specs\\ai-assistant-config\\spec.md",
+      "template": "/app/specs/ai-assistant-config/spec.md",
       "conformity_score": 70,
       "passed_checks": [
         "\u2705 YAML frontmatter complete and valid",
@@ -38,7 +38,7 @@
         "\u2705 Template is mostly conformant, minor improvements needed"
       ],
       "metadata": {
-        "file_size": 13066,
+        "file_size": 12801,
         "line_count": 266,
         "has_frontmatter": true,
         "spec_kit_reference": [
@@ -50,7 +50,7 @@
       }
     },
     "plan.md": {
-      "template": "E:\\scripts-python\\CDE Orchestrator MCP\\specs\\ai-assistant-config\\plan.md",
+      "template": "/app/specs/ai-assistant-config/plan.md",
       "conformity_score": 80,
       "passed_checks": [
         "\u2705 YAML frontmatter complete and valid",
@@ -76,7 +76,7 @@
         "\u2705 Template is mostly conformant, minor improvements needed"
       ],
       "metadata": {
-        "file_size": 9641,
+        "file_size": 9328,
         "line_count": 314,
         "has_frontmatter": true,
         "spec_kit_reference": [
@@ -88,7 +88,7 @@
       }
     },
     "tasks.md": {
-      "template": "E:\\scripts-python\\CDE Orchestrator MCP\\specs\\ai-assistant-config\\tasks.md",
+      "template": "/app/specs/ai-assistant-config/tasks.md",
       "conformity_score": 100,
       "passed_checks": [
         "\u2705 YAML frontmatter complete and valid",
@@ -102,7 +102,7 @@
         "\u2705 Template is fully conformant with Spec-Kit standards"
       ],
       "metadata": {
-        "file_size": 8614,
+        "file_size": 8401,
         "line_count": 214,
         "has_frontmatter": true,
         "spec_kit_reference": [

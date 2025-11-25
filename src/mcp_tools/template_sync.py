@@ -81,10 +81,34 @@ async def cde_syncTemplates(
     reporter.reset()
     reporter.report_progress("CDE", "syncTemplates", 0.1, "Initializing sync...")
 
+    if not project_path:
+        logger.error("Validation failed: project_path cannot be empty.")
+        return json.dumps(
+            {
+                "status": "error",
+                "error": "Invalid input",
+                "message": "The 'project_path' argument cannot be empty.",
+            },
+            indent=2,
+        )
+
     if project_path == ".":
         project_path = os.getcwd()
 
     templates_dir = Path(project_path) / "specs" / "templates"
+
+    # If not forcing, check if templates already exist.
+    if not force and any((templates_dir / f).exists() for f in SPEC_KIT_TEMPLATES):
+        logger.info("Templates already exist and force=False. Skipping sync.")
+        return json.dumps(
+            {
+                "status": "skipped",
+                "message": f"Templates already exist in {templates_dir}. Use force=True to overwrite.",
+                "templates_directory": str(templates_dir),
+            },
+            indent=2,
+        )
+
     templates_dir.mkdir(parents=True, exist_ok=True)
 
     reporter.report_progress(
@@ -292,16 +316,29 @@ async def cde_validateSpec(
     reporter.reset()
     reporter.report_progress("CDE", "validateSpec", 0.1, "Initializing validation...")
 
+    if not spec_directory:
+        logger.error("Validation failed: spec_directory cannot be empty.")
+        return json.dumps(
+            {
+                "status": "error",
+                "error": "Invalid input",
+                "message": "The 'spec_directory' argument cannot be empty.",
+            },
+            indent=2,
+        )
+
     if project_path == ".":
         project_path = os.getcwd()
 
     spec_path = Path(project_path) / spec_directory
 
     if not spec_path.exists():
+        logger.error(f"Validation failed: Spec directory not found at {spec_path}")
         return json.dumps(
             {
                 "status": "error",
-                "error": f"Spec directory not found: {spec_path}",
+                "error": "Directory not found",
+                "message": f"The specified directory does not exist: {spec_path}",
             },
             indent=2,
         )
@@ -335,13 +372,21 @@ async def cde_validateSpec(
             text=True,
         )
 
-        # Log subprocess output for debugging
+        # Log script output for debugging, but don't fail immediately
         if result.returncode != 0:
-            logger.error(f"Validation script failed: {result.stderr}")
+            logger.warning(
+                f"Validation script exited with code {result.returncode} "
+                f"(expected in strict mode). Stderr: {result.stderr}"
+            )
+
+        # Prioritize parsing the report, as it may exist even if the script "failed"
+        if not output_path.exists():
+            logger.error(f"Validation report not found at {output_path}")
             return json.dumps(
                 {
                     "status": "error",
-                    "error": f"Validation script failed with code {result.returncode}",
+                    "error": "Validation report was not generated.",
+                    "details": "The validation script failed to produce an output file.",
                     "stderr": result.stderr,
                     "stdout": result.stdout,
                 },
@@ -349,21 +394,8 @@ async def cde_validateSpec(
             )
 
         # Parse validation report
-        if output_path.exists():
-            with open(output_path) as f:
-                report = json.load(f)
-        else:
-            logger.error(f"Validation report not found at {output_path}")
-            return json.dumps(
-                {
-                    "status": "error",
-                    "error": "Validation report not generated",
-                    "expected_path": str(output_path),
-                    "stdout": result.stdout,
-                    "stderr": result.stderr,
-                },
-                indent=2,
-            )
+        with open(output_path) as f:
+            report = json.load(f)
 
         reporter.report_progress("CDE", "validateSpec", 1.0, "Validation complete")
 
@@ -371,59 +403,65 @@ async def cde_validateSpec(
         conformity_score = float(report.get("average_score", 0))
         issues = []
         passed_checks = []
+        files_analyzed = []
 
         # Extract issues from all templates
         results = report.get("results", {})
         if isinstance(results, dict):
+            files_analyzed = list(results.keys())
             for template_name, template_data in results.items():
                 template_issues = template_data.get("issues", [])
                 issues.extend(template_issues)
                 template_passed = template_data.get("passed_checks", [])
                 passed_checks.extend(template_passed)
 
+        # New: Categorize issues for test compatibility
+        categories_map = {
+            "file": "required_files",
+            "frontmatter": "yaml_frontmatter",
+            "naming": "naming_conventions",
+            "link": "content_quality",
+            "task_format": "content_quality",
+            "section": "structure",
+        }
+        categorized_issues = {
+            "required_files": [],
+            "yaml_frontmatter": [],
+            "naming_conventions": [],
+            "content_quality": [],
+            "structure": [],
+        }
+
+        for issue in issues:
+            script_category = issue.get("category", "unknown")
+            test_category = categories_map.get(script_category)
+            if test_category and test_category in categorized_issues:
+                categorized_issues[test_category].append(issue)
+
         # Generate recommendations
         recommendations = []
         if conformity_score >= 95:
             recommendations.append(f"✅ Excellent conformity ({conformity_score:.1f}%)")
-        elif conformity_score >= 85:
-            recommendations.append(
-                f"⚠️ Good conformity ({conformity_score:.1f}%), minor improvements needed"
-            )
         else:
             recommendations.append(
                 f"❌ Low conformity ({conformity_score:.1f}%), review issues below"
             )
 
-        # Categorize issues by severity
         errors = [i for i in issues if i.get("severity") == "error"]
-        warnings = [i for i in issues if i.get("severity") == "warning"]
-        info = [i for i in issues if i.get("severity") == "info"]
-
         if errors:
             recommendations.append(f"🔴 Fix {len(errors)} errors (high priority)")
-        if warnings:
-            recommendations.append(
-                f"🟡 Address {len(warnings)} warnings (medium priority)"
-            )
-        if info:
-            recommendations.append(f"🔵 Consider {len(info)} suggestions (optional)")
 
         result_data = {
             "status": "success" if conformity_score >= 95 or not strict else "warning",
             "conformity_score": conformity_score,
+            "overall_score": conformity_score,  # For test compatibility
+            "categories": categorized_issues,
+            "files_analyzed": files_analyzed,
             "total_issues": len(issues),
-            "errors": len(errors),
-            "warnings": len(warnings),
-            "info": len(info),
             "issues": issues,
             "passed_checks": passed_checks,
             "recommendations": recommendations,
             "validation_report": str(output_path),
-            "next_steps": [
-                "Review validation report for details",
-                "Fix errors and warnings",
-                "Re-run validation after fixes",
-            ],
         }
 
         return json.dumps(result_data, indent=2)
