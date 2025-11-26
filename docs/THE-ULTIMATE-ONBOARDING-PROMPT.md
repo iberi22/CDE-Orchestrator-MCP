@@ -4,7 +4,7 @@ description: Single prompt for complete CDE integration from 0% to 100%
 type: guide
 status: active
 created: '2025-11-24'
-updated: '2025-11-24'
+updated: '2025-11-26'
 author: Nexus AI Team
 tags:
   - onboarding
@@ -17,38 +17,66 @@ llm_summary: "The definitive prompt for complete CDE integration. One command to
 # 🚀 The Ultimate CDE Onboarding Prompt
 
 > **Purpose**: Single prompt for complete CDE integration from scratch or any implementation stage
+> **Version**: 2.0 - Optimized for actual tool execution
 > **Time**: 2-5 minutes for complete setup
 > **Output**: Fully configured project with CDE orchestrating all development
 
 ---
 
-## 🎯 The One Prompt to Rule Them All
+## 🎯 The Professional Onboarding Prompt
 
 Copy and paste this into GitHub Copilot Chat in your project:
 
-```
-@workspace I want to integrate CDE Orchestrator as the complete orchestration system for this project.
+```markdown
+@workspace I need to integrate CDE Orchestrator as the complete development orchestration system for this project.
 
-⚠️ CRITICAL: You MUST execute these MCP tools (not just reference them):
+⚠️ IMPORTANT: You MUST EXECUTE these MCP tools in sequence (not just describe them):
 
-1. **EXECUTE** cde_onboardingProject() to analyze current project state
-2. **EXECUTE** cde_setupProject() to create project structure
-3. **SHOW** .vscode/mcp.json configuration needed (I will create it manually)
-4. **EXECUTE** cde_healthCheck() to verify all 27 CDE tools are available
-5. **EXECUTE** cde_generateSpec("next feature description") to generate professional spec
-6. **EXECUTE** cde_selectWorkflow("next feature description") to recommend optimal workflow
+## Phase 1: Project Analysis
+**EXECUTE** `cde_onboardingProject()` to perform deep analysis:
+- File count and language distribution
+- Framework and architecture detection
+- Git history insights (commits, contributors, age)
+- AI assistant configurations detected
 
-⚠️ DO NOT just list what these tools do - EXECUTE them and show the actual results.
+## Phase 2: Project Setup
+**EXECUTE** `cde_setupProject()` to create CDE structure:
+- .cde/workflow.yml (6-phase workflow config)
+- AGENTS.md (AI agent guidelines)
+- specs/templates/ (Spec-Kit templates)
+- memory/constitution.md (project principles)
 
-After executing each tool, provide:
-- ✅ Tool executed successfully
-- 📊 Actual output/results
-- 📝 What was created/analyzed
-- ➡️ Next step
+## Phase 3: Health Verification
+**EXECUTE** `cde_healthCheck()` to verify:
+- All 25 CDE tools are registered
+- Python/Rust components working
+- MCP server healthy
 
-For step 3 (mcp.json), provide the exact configuration I need to create manually, then wait for me to confirm before continuing to step 4.
+## Phase 4: Workflow Selection
+**EXECUTE** `cde_selectWorkflow("[DESCRIBE YOUR NEXT FEATURE HERE]")` to get:
+- Recommended workflow type (standard, quick-fix, research)
+- Complexity assessment (trivial → epic)
+- Duration estimate
+- Required skills
 
-Execute all steps sequentially and show REAL results for each phase.
+## Phase 5: Spec Generation
+**EXECUTE** `cde_generateSpec("[YOUR FEATURE DESCRIPTION]")` to create:
+- specs/[feature]/spec.md (Product Requirements)
+- specs/[feature]/plan.md (Technical Design)
+- specs/[feature]/tasks.md (Implementation Checklist)
+
+## Output Requirements
+For EACH phase, show:
+- ✅ Tool executed successfully with actual output
+- 📊 Key metrics and insights
+- 📝 Files created or analyzed
+- ➡️ Transition to next phase
+
+If any tool fails, run `cde_healthCheck()` and report the issue.
+
+**My next feature to implement**: [DESCRIBE YOUR FEATURE HERE]
+
+Execute all phases and provide a comprehensive onboarding report.
 ```
 
 ---
@@ -60,6 +88,7 @@ Execute all steps sequentially and show REAL results for each phase.
 **⚠️ CRITICAL: The agent MUST execute the actual MCP tool, not just describe it.**
 
 **Execution**:
+
 ```python
 # Agent must invoke this via MCP, not just describe it
 cde_onboardingProject(project_path=".")
@@ -70,7 +99,8 @@ cde_onboardingProject(project_path=".")
 ✅ "Executing cde_onboardingProject()... [shows actual results]"
 
 **Output**:
-- 📁 **570+ files analyzed** (Python, JS, TS, etc.)
+
+- 📁 **Files analyzed** (Python, JS, TS, etc.)
 - 🐍 **Python version detected** (3.11+, 3.14, etc.)
 - 🏗️ **Architecture pattern** (Hexagonal, Clean, MVC, etc.)
 - 📚 **Framework detection** (FastAPI, Next.js, React, etc.)
@@ -78,6 +108,7 @@ cde_onboardingProject(project_path=".")
 - 🤖 **AI tools present** (Copilot, Gemini, Claude, etc.)
 
 **Example Result**:
+
 ```json
 {
   "status": "Analysis complete",
@@ -102,28 +133,27 @@ cde_onboardingProject(project_path=".")
 ### Phase 2: Project Setup (cde_setupProject)
 
 **Execution**:
+
 ```python
 cde_setupProject(project_path=".", force=False)
 ```
 
 **Creates**:
+
 - ✅ `.cde/workflow.yml` - 6-phase CDE workflow
 - ✅ `AGENTS.md` - AI agent instructions
-- ✅ `GEMINI.md` - Gemini-specific instructions
-- ✅ `.github/copilot-instructions.md` - Copilot instructions
 - ✅ `.gitignore` - Enhanced ignore patterns
-- ✅ `specs/` - Feature specification templates
+- ✅ `specs/templates/` - Spec-Kit templates
 - ✅ `memory/constitution.md` - Project principles
 
 **Output**:
+
 ```json
 {
   "status": "success",
   "files_written": [
     ".cde/workflow.yml",
     "AGENTS.md",
-    "GEMINI.md",
-    ".github/copilot-instructions.md",
     ".gitignore",
     "specs/templates/spec.md",
     "specs/templates/plan.md",
@@ -135,19 +165,80 @@ cde_setupProject(project_path=".", force=False)
 
 ---
 
-### Phase 3: MCP Configuration (Manual + Verification)
+### Phase 3: Health Verification (cde_healthCheck)
 
-**For External Projects** (outside CDE Orchestrator repo):
+**Execution**:
 
-Create `.vscode/mcp.json`:
+```python
+cde_healthCheck()
+```
+
+**Output**:
 
 ```json
 {
-  "servers": {
-    "CDE_Orchestrator": {
-      "command": "python",
-      "args": [
-        "E:\\scripts-python\\CDE Orchestrator MCP\\src\\server.py",
+  "status": "healthy",
+  "tools_registered": 25,
+  "python_healthy": true,
+  "rust_healthy": true
+}
+```
+
+---
+
+### Phase 4: Workflow Selection (cde_selectWorkflow)
+
+**Execution**:
+
+```python
+cde_selectWorkflow("Add Redis caching to authentication module")
+```
+
+**Output**:
+
+```json
+{
+  "workflow_type": "standard",
+  "complexity": "moderate",
+  "estimated_duration": "2-4 hours",
+  "recipe_id": "ai-engineer",
+  "required_skills": ["redis-caching", "auth-patterns"],
+  "confidence": 0.85
+}
+```
+
+---
+
+### Phase 5: Spec Generation (cde_generateSpec)
+
+**Execution**:
+
+```python
+cde_generateSpec("Add Redis caching to authentication module")
+```
+
+**Creates**:
+
+- `specs/add-redis-caching-to-authentication/spec.md` - PRD
+- `specs/add-redis-caching-to-authentication/plan.md` - Technical Design
+- `specs/add-redis-caching-to-authentication/tasks.md` - Implementation Checklist
+
+---
+
+## 🔧 Available CDE Tools (25 Total)
+
+| Category | Tools |
+|----------|-------|
+| **Onboarding** | `cde_onboardingProject`, `cde_setupProject`, `cde_publishOnboarding` |
+| **Spec-Kit** | `cde_generateSpec`, `cde_syncTemplates`, `cde_validateSpec` |
+| **Workflow** | `cde_selectWorkflow`, `cde_startFeature`, `cde_submitWork` |
+| **Skills** | `cde_sourceSkill`, `cde_updateSkill` |
+| **Documentation** | `cde_scanDocumentation`, `cde_analyzeDocumentation` |
+| **Agents** | `cde_delegateToJules`, `cde_listAvailableAgents`, `cde_selectAgent`, `cde_executeWithBestAgent` |
+| **Git** | `cde_analyzeGit` |
+| **System** | `cde_healthCheck`, `cde_searchTools`, `cde_installMcpExtension` |
+| **Recipes** | `cde_downloadRecipes`, `cde_checkRecipes` |
+| **Execution** | `cde_executeFullImplementation`, `cde_testProgressReporting` |
         "--scan-paths",
         "E:\\your-project-path"
       ],
