@@ -94,7 +94,7 @@ async def cde_setupProject(
     if project_path == ".":
         project_path = os.getcwd()
 
-    result = setup_use_case.execute(project_path, force)
+    result = await setup_use_case.execute(project_path, force)
     return json.dumps(result, indent=2)
 
 

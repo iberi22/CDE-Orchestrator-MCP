@@ -2,12 +2,12 @@
 # Add project root to path
 import sys
 import tempfile
-import unittest
 from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
-
-from unittest.mock import MagicMock  # noqa: E402
 
 from src.cde_orchestrator.application.onboarding.project_analysis_use_case import (  # noqa: E402
     ProjectAnalysisUseCase,
@@ -20,8 +20,9 @@ from src.cde_orchestrator.application.onboarding.publishing_use_case import (  #
 )
 
 
-class TestOnboardingUseCases(unittest.TestCase):
-    def test_project_setup_use_case(self):
+class TestOnboardingUseCases:
+    @pytest.mark.asyncio
+    async def test_project_setup_use_case(self):
         """
         Verify that ProjectSetupUseCase orchestrates analysis and publishing.
         """
@@ -29,12 +30,14 @@ class TestOnboardingUseCases(unittest.TestCase):
         mock_analysis_uc = MagicMock(spec=ProjectAnalysisUseCase)
         mock_publishing_uc = MagicMock(spec=PublishingUseCase)
 
-        # Mock return values
-        mock_analysis_uc.execute.return_value = {
-            "language_stats": {".py": 10},
-            "dependency_files": ["requirements.txt"],
-            "summary": "A Python project.",
-        }
+        # Mock return values - use AsyncMock for async execute
+        mock_analysis_uc.execute = AsyncMock(
+            return_value={
+                "language_stats": {".py": 10},
+                "dependency_files": ["requirements.txt"],
+                "summary": "A Python project.",
+            }
+        )
         mock_publishing_uc.execute.return_value = {
             "status": "success",
             "files_written": [".gitignore", "AGENTS.md"],
@@ -43,7 +46,8 @@ class TestOnboardingUseCases(unittest.TestCase):
         # Instantiate the use case with mocks
         setup_use_case = ProjectSetupUseCase(mock_analysis_uc, mock_publishing_uc)
 
-        result = setup_use_case.execute("/fake/project")
+        # Run async test
+        result = await setup_use_case.execute("/fake/project")
 
         # Verify that dependencies were called
         mock_analysis_uc.execute.assert_called_once_with("/fake/project")
@@ -75,10 +79,11 @@ This document provides instructions for AI agents working on this repository.
         )
 
         # Verify the final report
-        self.assertEqual(result["status"], "success")
-        self.assertEqual(result["files_written"], [".gitignore", "AGENTS.md"])
+        assert result["status"] == "success"
+        assert result["files_written"] == [".gitignore", "AGENTS.md"]
 
-    def test_project_analysis_use_case(self):
+    @pytest.mark.asyncio
+    async def test_project_analysis_use_case(self):
         """
         Verify that ProjectAnalysisUseCase correctly analyzes a dummy project.
         """
@@ -89,12 +94,13 @@ This document provides instructions for AI agents working on this repository.
             (project_path / "requirements.txt").touch()
 
             use_case = ProjectAnalysisUseCase()
-            result = use_case.execute(str(project_path))
+            # execute is now async
+            result = await use_case.execute(str(project_path))
 
-            self.assertEqual(result["file_count"], 2)
-            self.assertIn(".py", result["language_stats"])
-            self.assertEqual(result["language_stats"][".py"], 1)
-            self.assertEqual(result["dependency_files"], ["requirements.txt"])
+            assert result["file_count"] == 2
+            assert ".py" in result["language_stats"]
+            assert result["language_stats"][".py"] == 1
+            assert result["dependency_files"] == ["requirements.txt"]
 
     def test_publishing_use_case(self):
         """
@@ -108,15 +114,13 @@ This document provides instructions for AI agents working on this repository.
             use_case = PublishingUseCase()
             result = use_case.execute(str(project_path), documents)
 
-            self.assertEqual(result["status"], "success")
-            self.assertEqual(len(result["files_written"]), 2)
+            assert result["status"] == "success"
+            assert len(result["files_written"]) == 2
 
-            self.assertTrue((project_path / "README.md").exists())
-            self.assertTrue((project_path / "docs" / "guide.md").exists())
-            self.assertEqual(
-                (project_path / "docs" / "guide.md").read_text(), "A guide."
-            )
+            assert (project_path / "README.md").exists()
+            assert (project_path / "docs" / "guide.md").exists()
+            assert (project_path / "docs" / "guide.md").read_text() == "A guide."
 
 
 if __name__ == "__main__":
-    unittest.main()
+    pytest.main([__file__, "-v"])

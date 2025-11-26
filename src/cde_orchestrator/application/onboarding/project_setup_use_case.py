@@ -20,7 +20,7 @@ class ProjectSetupUseCase:
         self._analysis_use_case = analysis_use_case
         self._publishing_use_case = publishing_use_case
 
-    def execute(self, project_path: str, force: bool = False) -> Dict[str, Any]:
+    async def execute(self, project_path: str, force: bool = False) -> Dict[str, Any]:
         """
         Executes the project setup process.
 
@@ -31,8 +31,8 @@ class ProjectSetupUseCase:
         Returns:
             A dictionary summarizing the actions taken.
         """
-        # Step 1: Analyze the project
-        analysis_result = self._analysis_use_case.execute(project_path)
+        # Step 1: Analyze the project (async)
+        analysis_result = await self._analysis_use_case.execute(project_path)
 
         # Step 2: Generate content for config files
         documents_to_publish = {}
