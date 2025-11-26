@@ -25,37 +25,45 @@ Este documento contiene **EL PROMPT DEFINITIVO** que orquesta TODO el sistema CD
 ```markdown
 @workspace I need to integrate CDE Orchestrator as the complete development orchestration system for this project.
 
-⚠️ IMPORTANT: You MUST EXECUTE these MCP tools in sequence (not just describe them):
+⚠️ CRITICAL: You MUST use the `mcp_cde` MCP server tools. Do NOT just describe - EXECUTE each tool!
+
+## Available MCP Tools (from mcp_cde server)
+These are the exact tool names you must invoke:
+- `mcp_cde_cde_onboardingProject` - Deep project analysis
+- `mcp_cde_cde_setupProject` - Create CDE structure
+- `mcp_cde_cde_healthCheck` - Verify system health
+- `mcp_cde_cde_selectWorkflow` - Recommend optimal workflow
+- `mcp_cde_cde_generateSpec` - Generate Spec-Kit documentation
 
 ## Phase 1: Project Analysis
-**EXECUTE** `cde_onboardingProject()` to perform deep analysis:
+**EXECUTE** MCP tool `mcp_cde_cde_onboardingProject` with parameter `project_path="."` to perform deep analysis:
 - File count and language distribution
 - Framework and architecture detection
 - Git history insights (commits, contributors, age)
 - AI assistant configurations detected
 
 ## Phase 2: Project Setup
-**EXECUTE** `cde_setupProject()` to create CDE structure:
+**EXECUTE** MCP tool `mcp_cde_cde_setupProject` with parameter `project_path="."` to create CDE structure:
 - .cde/workflow.yml (6-phase workflow config)
 - AGENTS.md (AI agent guidelines)
 - specs/templates/ (Spec-Kit templates)
 - memory/constitution.md (project principles)
 
 ## Phase 3: Health Verification
-**EXECUTE** `cde_healthCheck()` to verify:
+**EXECUTE** MCP tool `mcp_cde_cde_healthCheck` (no parameters needed) to verify:
 - All 25 CDE tools are registered
 - Python/Rust components working
 - MCP server healthy
 
 ## Phase 4: Workflow Selection
-**EXECUTE** `cde_selectWorkflow("[DESCRIBE YOUR NEXT FEATURE HERE]")` to get:
+**EXECUTE** MCP tool `mcp_cde_cde_selectWorkflow` with parameter `user_prompt="[DESCRIBE YOUR NEXT FEATURE HERE]"` to get:
 - Recommended workflow type (standard, quick-fix, research)
 - Complexity assessment (trivial → epic)
 - Duration estimate
 - Required skills
 
 ## Phase 5: Spec Generation
-**EXECUTE** `cde_generateSpec("[YOUR FEATURE DESCRIPTION]")` to create:
+**EXECUTE** MCP tool `mcp_cde_cde_generateSpec` with parameter `feature_description="[YOUR FEATURE DESCRIPTION]"` to create:
 - specs/[feature]/spec.md (Product Requirements)
 - specs/[feature]/plan.md (Technical Design)
 - specs/[feature]/tasks.md (Implementation Checklist)
@@ -67,11 +75,13 @@ For EACH phase, show:
 - 📝 Files created or analyzed
 - ➡️ Transition to next phase
 
-If any tool fails, run `cde_healthCheck()` and report the issue.
+If any tool fails, run `mcp_cde_cde_healthCheck` and report the issue.
+
+⚠️ REMINDER: Use the actual MCP tools from `mcp_cde` server, not function calls!
 
 **My next feature to implement**: [DESCRIBE YOUR FEATURE HERE]
 
-Execute all phases and provide a comprehensive onboarding report.
+Execute all 5 phases using the MCP tools and provide a comprehensive onboarding report.
 ```
 
 ---
