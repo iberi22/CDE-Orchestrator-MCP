@@ -1,3 +1,13 @@
+---
+title: Quick Reference Onboarding
+description: Legacy documentation file
+type: guide
+status: archived
+created: '2025-11-27'
+updated: '2025-11-27'
+author: Legacy
+---
+
 # 🚀 CDE Onboarding - Quick Reference Card
 
 > **Print this. Keep it visible. Use it always.**

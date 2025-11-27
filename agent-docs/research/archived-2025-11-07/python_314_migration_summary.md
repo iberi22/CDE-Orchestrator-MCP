@@ -3,8 +3,8 @@ title: Resumen Ejecutivo - Migración Python 3.14
 description: '| Documento | Ubicación | Contenido | |-----------|-----------|-----------|'
 type: guide
 status: draft
-created: '2025-11-02'
-updated: '2025-11-02'
+created: "2025-11-02"
+updated: "2025-11-02"
 author: Auto-Generated
 tags:
 - mcp

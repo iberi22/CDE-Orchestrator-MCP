@@ -36,6 +36,8 @@ dependencies = [
     "pathspec",
     "aiohttp",
     "aiofiles",
+    "beautifulsoup4",
+    "psutil",
 ]
 
 [project.urls]
