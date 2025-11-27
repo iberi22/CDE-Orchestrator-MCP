@@ -21,6 +21,8 @@ try:
     GIT_AVAILABLE = True
 except ImportError:
     GIT_AVAILABLE = False
+    Repo = Any  # type: ignore
+    GitCommandError = Exception  # type: ignore
 
 logger = logging.getLogger(__name__)
 

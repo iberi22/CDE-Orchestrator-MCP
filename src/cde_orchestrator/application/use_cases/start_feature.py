@@ -161,26 +161,43 @@ class StartFeatureUseCase:
     def _initialize_spec_kit(
         self, project_path: str, feature: Feature, user_prompt: str
     ) -> None:
-        """Initialize Spec-Kit directory structure and spec.md."""
+        """Initialize Spec-Kit directory structure and spec.md, plan.md, tasks.md."""
         project_root = Path(project_path)
         feature_dir = project_root / "specs" / feature.name
         feature_dir.mkdir(parents=True, exist_ok=True)
+        templates_dir = project_root / "specs" / "templates"
 
-        template_path = project_root / "specs" / "templates" / "spec.md"
+        replacements = {
+            "[FEATURE NAME]": feature.name,
+            "[FEATURE]": feature.name,
+            "[###-feature-name]": feature.name,
+            "[DATE]": datetime.now().strftime("%Y-%m-%d"),
+            "[AUTHOR]": "AI Agent",
+            "$ARGUMENTS": user_prompt,
+            "[USER PROMPT]": user_prompt,
+            "[link]": f"/specs/{feature.name}/spec.md",
+        }
+
+        files_to_copy = ["spec.md", "plan.md", "tasks.md"]
+
+        for filename in files_to_copy:
+            template_path = templates_dir / filename
+            target_path = feature_dir / filename
+            self._process_template(template_path, target_path, replacements)
+
+        # Fallback if spec.md template was missing and not created
         spec_path = feature_dir / "spec.md"
-
-        if template_path.exists():
-            content = template_path.read_text(encoding="utf-8")
-            # Replace placeholders
-            content = content.replace("[FEATURE NAME]", feature.name)
-            content = content.replace("[###-feature-name]", feature.name)
-            content = content.replace("[DATE]", datetime.now().strftime("%Y-%m-%d"))
-            content = content.replace("[AUTHOR]", "AI Agent")
-            content = content.replace("$ARGUMENTS", user_prompt)
-
-            spec_path.write_text(content, encoding="utf-8")
-        else:
-            # Fallback if template missing
-            spec_path.write_text(
+        if not spec_path.exists():
+             spec_path.write_text(
                 f"# Feature: {feature.name}\n\n{user_prompt}", encoding="utf-8"
             )
+
+    def _process_template(
+        self, template_path: Path, target_path: Path, replacements: Dict[str, str]
+    ) -> None:
+        """Process a single template file with replacements."""
+        if template_path.exists():
+            content = template_path.read_text(encoding="utf-8")
+            for placeholder, value in replacements.items():
+                content = content.replace(placeholder, value)
+            target_path.write_text(content, encoding="utf-8")

@@ -1,7 +1,14 @@
 ---
-llm_summary: Feature specification with user stories, requirements, and acceptance
-  criteria. Defines WHAT the feature does and WHY it's needed.
----# Feature Specification: [FEATURE NAME]
+title: [FEATURE NAME]
+description: Specification for [FEATURE NAME]
+type: feature
+status: draft
+created: [DATE]
+updated: [DATE]
+author: [AUTHOR]
+llm_summary: Feature specification with user stories, requirements, and acceptance criteria. Defines WHAT the feature does and WHY it's needed.
+---
+# Feature Specification: [FEATURE NAME]
 
 **Feature Branch**: `[###-feature-name]`
 **Created**: [DATE]

@@ -3,8 +3,8 @@ title: CDE Orchestrator MCP - Jules Configuration
 description: This directory contains Jules-specific configuration files.
 type: guide
 status: draft
-created: '2025-11-20'
-updated: '2025-11-20'
+created: "2025-11-20"
+updated: "2025-11-20"
 author: Auto-Generated
 tags:
 - api

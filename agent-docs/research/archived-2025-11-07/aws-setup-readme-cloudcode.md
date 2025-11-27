@@ -3,8 +3,8 @@ title: CloudCode CLI + AWS Bedrock Setup Guide
 description: 'Este entorno proporciona: ```powershell .\setup-cloudcode-bedrock.ps1'
 type: guide
 status: draft
-created: '2025-11-20'
-updated: '2025-11-20'
+created: "2025-11-20"
+updated: "2025-11-20"
 author: Auto-Generated
 tags:
 - api
