@@ -8,6 +8,7 @@ Validates that all markdown files comply with DOCUMENTATION_GOVERNANCE.md rules:
 - YAML frontmatter with required fields
 - Naming conventions (lowercase, hyphens, ISO dates)
 - Agent-docs subdirectory structure
+- Spec Kit Completeness (spec.md, plan.md, tasks.md in feature dirs)
 
 Usage:
     python scripts/validation/validate-docs.py --all              # Audit all docs
@@ -52,7 +53,6 @@ ROOT_EXCEPTIONS = {
     "CODE_OF_CONDUCT.md",
     "LICENSE",
     "AGENTS.md",
-    "GEMINI.md",
     ".github/copilot-instructions.md",
 }
 
@@ -72,6 +72,7 @@ DISALLOWED_ROOT_PATTERNS = [
     r"^JULIUS.*\.md$",  # Block any JULIUS_*.md in root
     r"^WEEK-.*\.md$",  # Block WEEK-*.md in root (should be in agent-docs/execution/)
     r"^TEST.*\.md$",  # Block TEST_*.md in root
+    r"^GEMINI.*\.md$", # Block GEMINI files
 ]
 
 VALID_TYPES = {
@@ -84,9 +85,10 @@ VALID_TYPES = {
     "execution",
     "feedback",
     "research",
+    "migration",
 }
 
-VALID_STATUSES = {"draft", "active", "deprecated", "archived"}
+VALID_STATUSES = {"draft", "active", "deprecated", "archived", "completed"}
 
 # Line limit for documentation files (excluding root exceptions)
 MAX_LINES = 1500
@@ -95,10 +97,7 @@ MAX_LINES_EXCEPTIONS = ROOT_EXCEPTIONS | {
 }
 
 ALLOWED_DIRECTORIES = {
-    "specs/features": "feature",
-    "specs/design": "design",
-    "specs/tasks": "task",
-    "specs/governance": "governance",
+    "specs": "feature",  # General specs bucket, refine logic handles subdirs
     "agent-docs/execution": "execution",
     "agent-docs/sessions": "session",
     "agent-docs/feedback": "feedback",
@@ -129,6 +128,32 @@ SKIP_PATHS = {
     "venv",
     "htmlcov",
     ".pre-commit-hooks.yaml",
+}
+
+NON_FEATURE_DIRS = {
+    "templates",
+    "design",
+    "governance",
+    "legacy-migration",
+    "features", # Legacy
+    "tasks",    # Legacy
+    "plans",    # Legacy
+    "api",
+    "cde-dogfooding-feedback",
+    "spec-kit-synchronization", # Seems like a feature but maybe infrastructure? Treating as feature for now unless excluded.
+}
+
+# Actually spec-kit-synchronization IS a feature. Removing from exclusion if possible, or keeping if it's special.
+# I'll keep the list minimal.
+NON_FEATURE_DIRS = {
+    "templates",
+    "design",
+    "governance",
+    "legacy-migration",
+    "features",
+    "tasks",
+    "plans",
+    "api",
 }
 
 
@@ -178,21 +203,11 @@ def validate_location(file_path: str) -> Optional[ValidationError]:
         if filename in ROOT_EXCEPTIONS:
             return None  # OK
 
-        # Check disallowed patterns
-        for pattern in DISALLOWED_ROOT_PATTERNS:
-            if re.match(pattern, filename, re.IGNORECASE):
-                return ValidationError(
-                    file_path,
-                    "LOCATION",
-                    "[ERR] '.md' files not allowed in root. Move to: agent-docs/execution/, agent-docs/sessions/, specs/design/, etc.",
-                    "error",
-                )
-
-        # Generic root check
+        # Strict fail for any other root MD file
         return ValidationError(
             file_path,
             "LOCATION",
-            f"[ERR] '.md' files in root must be in ROOT_EXCEPTIONS list. Got: {filename}",
+            f"[ERR] '.md' files NOT allowed in root (except {', '.join(sorted(ROOT_EXCEPTIONS))}). Move to specs/legacy-migration/ or correct folder.",
             "error",
         )
 
@@ -215,6 +230,10 @@ def validate_naming(file_path: str) -> Optional[ValidationError]:
 
     # Skip if in .github/ (special case)
     if ".github" in file_path:
+        return None
+
+    # Allow README.md, SKILL.md, SKILL_TEMPLATE.md in any case (Standard conventions)
+    if filename.upper() in ["README.MD", "SKILL.MD", "SKILL_TEMPLATE.MD"]:
         return None
 
     # Check for uppercase letters (except in .md extension)
@@ -412,12 +431,7 @@ def validate_agent_docs_structure(file_path: str) -> Optional[ValidationError]:
 
 
 def validate_line_count(file_path: str) -> Optional[ValidationError]:
-    """Validate that file does not exceed maximum line count (800 lines).
-
-    Exceptions:
-    - Root-level exceptions (README.md, AGENTS.md, etc.)
-    - Archived files (specs/design/archive/*)
-    """
+    """Validate that file does not exceed maximum line count (800 lines)."""
     path = Path(file_path)
 
     # Check if file is in exceptions
@@ -425,6 +439,10 @@ def validate_line_count(file_path: str) -> Optional[ValidationError]:
         return None
 
     if "archive" in path.parts:
+        return None
+
+    # Skip legacy migration files
+    if "legacy-migration" in path.parts:
         return None
 
     try:
@@ -437,7 +455,6 @@ def validate_line_count(file_path: str) -> Optional[ValidationError]:
                 message=(
                     f"Document exceeds maximum line count: {line_count} lines (max: {MAX_LINES}). "
                     f"Consider splitting into multiple modular documents. "
-                    f"See specs/design/architecture/ for example. "
                     f"Over by: {line_count - MAX_LINES} lines"
                 ),
                 severity="error",
@@ -452,6 +469,21 @@ def validate_line_count(file_path: str) -> Optional[ValidationError]:
 
     return None
 
+def validate_spec_kit_completeness(root_dir: str = ".") -> List[ValidationError]:
+    """Ensure all feature directories have spec.md, plan.md, tasks.md."""
+    errors = []
+    specs_dir = Path(root_dir) / "specs"
+    if not specs_dir.exists():
+        return errors
+
+    for feature_dir in specs_dir.iterdir():
+        if feature_dir.is_dir() and feature_dir.name not in NON_FEATURE_DIRS:
+            # Check for required files
+            required = ["spec.md", "plan.md", "tasks.md"]
+            missing = [f for f in required if not (feature_dir / f).exists()]
+            if missing:
+                 errors.append(ValidationError(str(feature_dir), "SPECKIT", f"[ERR] Feature directory missing Spec Kit files: {', '.join(missing)}", "error"))
+    return errors
 
 def validate_file(file_path: str) -> List[ValidationError]:
     """Validate a single markdown file."""
@@ -467,7 +499,7 @@ def validate_file(file_path: str) -> List[ValidationError]:
     if naming_error:
         errors.append(naming_error)
 
-    # Validate line count (800-line limit)
+    # Validate line count
     line_count_error = validate_line_count(file_path)
     if line_count_error:
         errors.append(line_count_error)
@@ -565,12 +597,6 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Validate documentation governance compliance",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  python scripts/validation/validate-docs.py --all              # Audit all docs
-  python scripts/validation/validate-docs.py --staged            # Validate staged files (pre-commit)
-  python scripts/validation/validate-docs.py file1.md file2.md # Validate specific files
-        """,
     )
     parser.add_argument(
         "--all", action="store_true", help="Validate all markdown files"
@@ -591,8 +617,8 @@ Examples:
     elif args.files:
         files_to_check = args.files
     else:
-        parser.print_help()
-        return 1
+        # Default to checking all if no args provided (useful for CI)
+        files_to_check = find_all_md_files()
 
     if not files_to_check:
         print("ℹ️  No files to validate.")
@@ -603,6 +629,11 @@ Examples:
     for file_path in files_to_check:
         errors = validate_file(file_path)
         all_errors.extend(errors)
+
+    # Check Spec Kit completeness (only when running --all or default)
+    if args.all or (not args.files and not args.staged):
+         spec_kit_errors = validate_spec_kit_completeness()
+         all_errors.extend(spec_kit_errors)
 
     # Print report
     has_errors = print_report(all_errors, args.verbose)
