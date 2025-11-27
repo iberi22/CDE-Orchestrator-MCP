@@ -308,6 +308,15 @@ See [AGENTS.md - Progressive Disclosure](AGENTS.md#multi-project-support-with-pr
 - `cde_sourceSkill(skill: str)`: Searches for a skill in the skill library.
 - `cde_updateSkill(skill: str, source: str)`: Updates a skill from a specified source.
 
+## Performance
+
+The CDE Orchestrator MCP includes a caching layer to significantly speed up repeated project analysis operations.
+
+- **Initial Analysis:** The first time a project is analyzed, it may take a few seconds.
+- **Cached Analysis:** Subsequent analyses are served from a local cache, typically completing in milliseconds.
+
+For detailed benchmark results, see [specs/BENCHMARK.md](specs/BENCHMARK.md).
+
 ## Requirements
 
 - **Python 3.14+** (minimum required version)

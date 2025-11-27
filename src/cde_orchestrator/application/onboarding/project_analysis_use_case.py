@@ -7,6 +7,9 @@ from typing import Any, Callable, Dict, List
 
 import pathspec
 
+from cde_orchestrator.infrastructure.cache import CacheManager
+from cde_orchestrator.infrastructure.file_watcher import start_file_watcher
+
 logger = logging.getLogger(__name__)
 
 
@@ -56,6 +59,17 @@ class ProjectAnalysisUseCase:
         "*.lock",  # Lock files
     }
 
+    def __init__(self):
+        self.cache_manager = CacheManager()
+        self.watch_files = [".gitignore", "pyproject.toml", "package.json"]
+        self.active_watchers = {}
+
+    def stop(self):
+        """Stops all active file watchers."""
+        for watcher in self.active_watchers.values():
+            watcher.stop()
+        self.active_watchers = {}
+
     async def execute(
         self, project_path: str, enrich_context: bool = True
     ) -> Dict[str, Any]:
@@ -72,7 +86,25 @@ class ProjectAnalysisUseCase:
         # Import here to avoid circular import
         from mcp_tools._progress_http import report_progress_http
 
+        # Generate cache key
+        cache_key = self.cache_manager.generate_cache_key(project_path, self.watch_files)
+
+        # Check cache first
+        cached_result = self.cache_manager.get(cache_key)
+        if cached_result:
+            logger.info(f"Cache hit for project: {project_path}")
+            report_progress_http("onboardingProject", 1.0, "Analysis complete (cached)")
+            return cached_result
+
+        logger.info(f"Cache miss for project: {project_path}")
         report_progress_http("onboardingProject", 0.0, "Starting project analysis")
+
+        # Start file watcher if not already active for this project
+        if project_path not in self.active_watchers:
+            callback = lambda: self.cache_manager.invalidate(cache_key)
+            self.active_watchers[project_path] = start_file_watcher(
+                project_path, self.watch_files, callback
+            )
 
         # Try Rust-accelerated analysis first (10x faster, ~50ms)
         try:
@@ -122,6 +154,9 @@ class ProjectAnalysisUseCase:
                 )
         else:
             report_progress_http("onboardingProject", 1.0, "Analysis complete")
+
+        # Store result in cache
+        self.cache_manager.set(cache_key, result)
 
         return result
 

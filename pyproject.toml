@@ -36,6 +36,8 @@ dependencies = [
     "pathspec",
     "aiohttp",
     "aiofiles",
+    "watchdog>=3.0.0",
+    "diskcache",
 ]
 
 [project.urls]

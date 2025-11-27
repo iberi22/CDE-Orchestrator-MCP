@@ -6,7 +6,7 @@ from typing import Any, Dict
 
 import psutil
 
-from cde_orchestrator.infrastructure.cache import get_cache
+from cde_orchestrator.infrastructure.cache import CacheManager
 from cde_orchestrator.infrastructure.circuit_breaker import get_circuit_breaker_registry
 from cde_orchestrator.infrastructure.rate_limiter import get_rate_limiter
 from cde_orchestrator.rust_utils import RUST_AVAILABLE
@@ -26,6 +26,7 @@ class CheckHealthUseCase:
     """
 
     def __init__(self, project_root: Path | None = None):
+        self.cache_manager = CacheManager()
         """
         Initialize health check use case.
 
@@ -98,8 +99,7 @@ class CheckHealthUseCase:
         issues = []
 
         # Check critical components
-        cache = get_cache()
-        if cache is None:
+        if self.cache_manager is None:
             issues.append("Cache not initialized")
 
         # Check disk space (need at least 100MB)
@@ -139,8 +139,7 @@ class CheckHealthUseCase:
     def _check_cache(self) -> Dict[str, Any]:
         """Check cache health and metrics."""
         try:
-            cache = get_cache()
-            metrics = cache.get_metrics()
+            metrics = self.cache_manager.get_stats()
 
             # Cache is healthy if hit rate > 0.3 or not enough requests yet
             hit_rate = metrics.get("hit_rate", 0.0)
