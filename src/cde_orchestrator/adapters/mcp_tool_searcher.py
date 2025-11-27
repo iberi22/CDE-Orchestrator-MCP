@@ -8,7 +8,7 @@ import asyncio
 import inspect
 from typing import Any, Dict, List, Literal
 
-from ..infrastructure.cache import cached
+from ..infrastructure.cache import CacheManager
 
 DetailLevel = Literal["name_only", "name_and_description", "full_schema"]
 
@@ -29,6 +29,7 @@ class MCPToolSearcher:
     """
 
     def __init__(self, mcp_tools_module: Any) -> None:
+        self.cache_manager = CacheManager()
         """
         Initialize tool searcher.
 
@@ -97,7 +98,6 @@ class MCPToolSearcher:
             "detail_level": detail_level,
         }
 
-    @cached(ttl=300)  # Cache discovered tools for 5 minutes
     async def _discover_all_tools(self) -> List[Dict[str, Any]]:
         """
         Discover all MCP tools from the mcp_tools module.
@@ -107,8 +107,15 @@ class MCPToolSearcher:
         Returns:
             List of tool metadata dictionaries
         """
+        cache_key = "mcp_tools"
+        cached_tools = self.cache_manager.get(cache_key)
+        if cached_tools:
+            return cached_tools
+
         loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(None, self._discover_all_tools_sync)
+        tools = await loop.run_in_executor(None, self._discover_all_tools_sync)
+        self.cache_manager.set(cache_key, tools, expire=300)  # Cache for 5 minutes
+        return tools
 
     def _discover_all_tools_sync(self) -> List[Dict[str, Any]]:
         """Synchronous implementation of tool discovery."""

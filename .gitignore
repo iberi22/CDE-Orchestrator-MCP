@@ -56,6 +56,7 @@ Thumbs.db
 
 # Local CDE state (do not version runtime state)
 .cde/state.json
+.cde*/cache/
 
 # Logs
 *.log

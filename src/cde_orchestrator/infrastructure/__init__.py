@@ -7,6 +7,6 @@ Provides:
 - Cache strategies (cache_strategies.py)
 """
 
-from .cache import CacheManager, cached
+from .cache import CacheManager
 
-__all__ = ["CacheManager", "cached"]
+__all__ = ["CacheManager"]
