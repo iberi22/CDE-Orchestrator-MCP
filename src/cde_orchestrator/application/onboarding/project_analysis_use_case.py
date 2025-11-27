@@ -1,4 +1,5 @@
 # src/cde_orchestrator/application/onboarding/project_analysis_use_case.py
+import asyncio
 import json
 import logging
 from collections import Counter
@@ -83,7 +84,7 @@ class ProjectAnalysisUseCase:
         except Exception as e:
             logger.warning(f"Rust analysis failed, falling back to Python: {e}")
             # Fallback to Python implementation (~500ms)
-            result = self._execute_python(project_path, report_progress_http)
+            result = await self._execute_python(project_path, report_progress_http)
             report_progress_http(
                 "onboardingProject", 0.5, "Basic analysis complete (Python)"
             )
@@ -177,13 +178,13 @@ class ProjectAnalysisUseCase:
         except Exception as e:
             raise Exception(f"Rust analysis error: {e}")
 
-    def _execute_python(
+    async def _execute_python(
         self, project_path: str, report_progress_http: Callable[[str, float, str], None]
     ) -> Dict[str, Any]:
         """Fallback Python implementation (~500ms)."""
         project = Path(project_path)
 
-        files = self._list_files(project, report_progress_http)
+        files = await self._list_files(project, report_progress_http)
         language_stats = self._analyze_languages(files)
         dependency_files = self._find_dependency_files(files)
 
@@ -212,19 +213,23 @@ class ProjectAnalysisUseCase:
             },
         }
 
-    def _list_files(
+    async def _list_files(
         self,
         project_path: Path,
         report_progress_http: Callable[[str, float, str], None],
     ) -> List[Path]:
         """Lists all files in the project, respecting .gitignore and excluding common dependency directories."""
-        gitignore_path = project_path / ".gitignore"
-        spec = None
-        if gitignore_path.exists():
-            with open(gitignore_path, "r") as f:
-                spec = pathspec.PathSpec.from_lines("gitwildmatch", f)
 
-        all_files = list(project_path.rglob("*"))
+        def _read_gitignore():
+            gitignore_path = project_path / ".gitignore"
+            if gitignore_path.exists():
+                with open(gitignore_path, "r") as f:
+                    return pathspec.PathSpec.from_lines("gitwildmatch", f)
+            return None
+
+        spec = await asyncio.to_thread(_read_gitignore)
+
+        all_files = await asyncio.to_thread(list, project_path.rglob("*"))
         total_items = len(all_files)
 
         files_to_process = []
