@@ -1,10 +1,12 @@
 # src/cde_orchestrator/application/onboarding/project_analysis_use_case.py
+import asyncio
 import json
 import logging
 from collections import Counter
 from pathlib import Path
 from typing import Any, Callable, Dict, List
 
+import aiofiles
 import pathspec
 
 logger = logging.getLogger(__name__)
@@ -83,7 +85,7 @@ class ProjectAnalysisUseCase:
         except Exception as e:
             logger.warning(f"Rust analysis failed, falling back to Python: {e}")
             # Fallback to Python implementation (~500ms)
-            result = self._execute_python(project_path, report_progress_http)
+            result = await self._execute_python(project_path, report_progress_http)
             report_progress_http(
                 "onboardingProject", 0.5, "Basic analysis complete (Python)"
             )
@@ -177,13 +179,13 @@ class ProjectAnalysisUseCase:
         except Exception as e:
             raise Exception(f"Rust analysis error: {e}")
 
-    def _execute_python(
+    async def _execute_python(
         self, project_path: str, report_progress_http: Callable[[str, float, str], None]
     ) -> Dict[str, Any]:
         """Fallback Python implementation (~500ms)."""
         project = Path(project_path)
 
-        files = self._list_files(project, report_progress_http)
+        files = await self._list_files(project, report_progress_http)
         language_stats = self._analyze_languages(files)
         dependency_files = self._find_dependency_files(files)
 
@@ -212,7 +214,7 @@ class ProjectAnalysisUseCase:
             },
         }
 
-    def _list_files(
+    async def _list_files(
         self,
         project_path: Path,
         report_progress_http: Callable[[str, float, str], None],
@@ -221,10 +223,13 @@ class ProjectAnalysisUseCase:
         gitignore_path = project_path / ".gitignore"
         spec = None
         if gitignore_path.exists():
-            with open(gitignore_path, "r") as f:
-                spec = pathspec.PathSpec.from_lines("gitwildmatch", f)
+            async with aiofiles.open(gitignore_path, "r") as f:
+                content = await f.read()
+                spec = pathspec.PathSpec.from_lines("gitwildmatch", content.splitlines())
 
-        all_files = list(project_path.rglob("*"))
+        # Run blocking rglob in thread pool
+        loop = asyncio.get_running_loop()
+        all_files = await loop.run_in_executor(None, lambda: list(project_path.rglob("*")))
         total_items = len(all_files)
 
         files_to_process = []

@@ -1,7 +1,7 @@
 ---
 title: Spec-Kit Synchronization - Task Checklist
 description: Executable checklist for implementing and testing the Spec-Kit Synchronization feature.
-type: tasks
+type: task
 status: completed
 created: 2025-11-25
 updated: 2025-11-25

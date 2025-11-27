@@ -1,8 +1,8 @@
 ---
-updated: '2025-11-07'
+updated: "2025-11-07"
 author: Skill Creator
 status: draft
-created: '2025-11-07'
+created: "2025-11-07"
 type: skill
 title: '[SKILL_NAME] Skill Template'
 description: Brief description of what this skill teaches (50-150 characters)

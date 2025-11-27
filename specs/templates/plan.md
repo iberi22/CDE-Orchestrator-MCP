@@ -1,7 +1,14 @@
 ---
-llm_summary: Technical implementation plan with architecture, design decisions, and
-  testing strategy. Defines HOW the feature will be built.
----# Implementation Plan: [FEATURE]
+title: Implementation Plan - [FEATURE NAME]
+description: Technical plan for [FEATURE NAME]
+type: design
+status: draft
+created: [DATE]
+updated: [DATE]
+author: [AUTHOR]
+llm_summary: Technical implementation plan with architecture, design decisions, and testing strategy. Defines HOW the feature will be built.
+---
+# Implementation Plan: [FEATURE]
 
 **Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
 **Input**: Feature specification from `/specs/[###-feature-name]/spec.md`

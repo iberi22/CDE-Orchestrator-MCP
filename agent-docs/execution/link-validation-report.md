@@ -1,3 +1,13 @@
+---
+title: Link Validation Report
+description: Legacy documentation file
+type: execution_report
+status: archived
+created: '2025-11-27'
+updated: '2025-11-27'
+author: Legacy
+---
+
 # Link Validation Report
 Generated: 2025-11-20T19:57:13.832340
 
@@ -240,8 +250,8 @@ Generated: 2025-11-20T19:57:13.832340
 - `mcp-status-bar\node_modules\optionator\README.md` Line 4: `htt
 type: guide
 status: draft
-created: '2025-11-20'
-updated: '2025-11-20'
+created: "2025-11-20"
+updated: "2025-11-20"
 author: Auto-Generated
 tags:
 - readme
