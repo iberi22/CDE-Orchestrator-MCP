@@ -4,8 +4,8 @@ description: 'The CDE Orchestrator is a smart MCP (Model Context Protocol) serve
   that implements Context-Driven Engineering (CDE) methodology. It guides AI coding '
 type: guide
 status: draft
-created: '2025-11-20'
-updated: '2025-11-20'
+created: "2025-11-20"
+updated: "2025-11-20"
 author: Auto-Generated
 tags:
 - api

@@ -1,3 +1,13 @@
+---
+title: AI Agent Instructions
+description: Core guidelines for AI agents working on CDE Orchestrator
+type: governance
+status: active
+created: 2025-11-24
+updated: 2025-11-24
+author: CDE Team
+---
+
 # AI Agent Instructions - CDE Orchestrator MCP
 
 > **Quick Reference for AI Coding Agents**

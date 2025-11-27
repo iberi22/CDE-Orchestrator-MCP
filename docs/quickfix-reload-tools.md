@@ -1,7 +1,7 @@
 ---
 title: Quick Fix - Tool Not Found (cde_generateSpec)
 description: 30-second fix for "tool not found" errors
-type: quickfix
+type: guide
 status: active
 created: '2025-11-24'
 updated: '2025-11-24'

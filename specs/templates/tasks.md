@@ -1,9 +1,13 @@
 ---
-description: Task list template for feature implementation
-llm_summary: Executable task checklist organized by phases (define → decompose → design
-  → implement → test → review). Tracks implementation progress and dependencies.
+title: Tasks - [FEATURE NAME]
+description: Tasks for [FEATURE NAME]
+type: task
+status: draft
+created: [DATE]
+updated: [DATE]
+author: [AUTHOR]
+llm_summary: Executable task checklist organized by phases (define → decompose → design → implement → test → review). Tracks implementation progress and dependencies.
 ---
-
 # Tasks: [FEATURE NAME]
 
 **Input**: Design documents from `/specs/[###-feature-name]/`

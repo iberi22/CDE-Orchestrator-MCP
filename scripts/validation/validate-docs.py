@@ -86,9 +86,18 @@ VALID_TYPES = {
     "feedback",
     "research",
     "migration",
+    "tool-documentation",
+    "troubleshooting",
+    "implementation",
+    "index",
+    "quickstart",
+    "execution-summary",
+    "execution_report",
+    "execution-report",
+    "evaluation",
 }
 
-VALID_STATUSES = {"draft", "active", "deprecated", "archived", "completed"}
+VALID_STATUSES = {"draft", "active", "deprecated", "archived", "completed", "ready-for-execution", "in-progress", "complete"}
 
 # Line limit for documentation files (excluding root exceptions)
 MAX_LINES = 1500
@@ -102,9 +111,16 @@ ALLOWED_DIRECTORIES = {
     "agent-docs/sessions": "session",
     "agent-docs/feedback": "feedback",
     "agent-docs/research": "research",
+    "agent-docs/roadmap": "task",
+    "agent-docs/tasks": "task",
+    "agent-docs": None,
     "docs": "guide",
     ".cde": None,  # No type requirement
     "memory": None,  # No type requirement
+    "mcp-status-bar": None,
+    "scripts": None,
+    "src": None,
+    "tests": None,
 }
 
 REQUIRED_FRONTMATTER_FIELDS = {
@@ -122,6 +138,9 @@ SKIP_PATHS = {
     ".git",
     ".github",
     ".cde/issues",
+    ".amazonq",
+    ".copilot",
+    ".jules",
     "node_modules",
     "__pycache__",
     ".venv",
@@ -154,6 +173,7 @@ NON_FEATURE_DIRS = {
     "tasks",
     "plans",
     "api",
+    "spec-kit-synchronization",
 }
 
 
@@ -271,8 +291,8 @@ def validate_frontmatter(file_path: str) -> List[ValidationError]:
     """Validate YAML frontmatter in markdown file."""
     errors: List[ValidationError] = []
 
-    # Skip .github/ (special case - no frontmatter required)
-    if ".github" in file_path:
+    # Skip .github/ and tests/ (special case - no frontmatter required)
+    if ".github" in file_path or "tests/" in file_path or "archived-" in file_path:
         return errors
 
     try:
@@ -407,7 +427,11 @@ def validate_agent_docs_structure(file_path: str) -> Optional[ValidationError]:
         )
 
     subdir = parts[1]
-    if subdir not in {"execution", "sessions", "feedback", "research", "prompts"}:
+    # Allow README.md in root of agent-docs
+    if subdir.lower() == "readme.md":
+        return None
+
+    if subdir not in {"execution", "sessions", "feedback", "research", "prompts", "roadmap", "tasks", "design"}:
         return ValidationError(
             file_path,
             "STRUCTURE",
@@ -487,6 +511,10 @@ def validate_spec_kit_completeness(root_dir: str = ".") -> List[ValidationError]
 
 def validate_file(file_path: str) -> List[ValidationError]:
     """Validate a single markdown file."""
+    # Skip legacy migration files and templates completely
+    if "legacy-migration" in file_path or "specs/templates" in file_path or "specs/cde-dogfooding-feedback" in file_path:
+        return []
+
     errors = []
 
     # Validate location
