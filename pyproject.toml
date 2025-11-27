@@ -7,7 +7,7 @@ name = "cde-orchestrator-mcp"
 version = "0.2.0"
 description = "CDE Orchestrator MCP Server with Rust Performance for Context-Driven Engineering"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 license = {text = "Apache-2.0 OR MIT"}
 authors = [
     {name = "Ibrahim Bello", email = "iberi22@users.noreply.github.com"}
