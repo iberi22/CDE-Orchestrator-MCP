@@ -1,8 +1,8 @@
 ---
-updated: '2025-11-07'
+updated: "2025-11-07"
 author: Jules AI Agent
 status: draft
-created: '2025-11-07'
+created: "2025-11-07"
 type: guide
 title: Readme Aider
 description: A summary of the document.

@@ -4,8 +4,8 @@ description: 'This directory stores **agent-generated documentation** separate f
   permanent project specifications. Key principles:'
 type: guide
 status: draft
-created: '2025-11-02'
-updated: '2025-11-02'
+created: "2025-11-02"
+updated: "2025-11-02"
 author: Auto-Generated
 tags:
 - deployment

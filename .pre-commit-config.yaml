@@ -47,3 +47,12 @@ repos:
   #       types: [python]
   #       pass_filenames: false
   #       args: ["src"]
+
+  - repo: local
+    hooks:
+      - id: validate-docs
+        name: Validate Documentation Governance
+        entry: python scripts/validation/validate-docs.py
+        language: system
+        types: [markdown]
+        pass_filenames: true

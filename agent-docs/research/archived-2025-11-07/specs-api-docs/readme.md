@@ -1,6 +1,6 @@
 ---
 author: Auto-Generated
-created: '2025-11-02'
+created: "2025-11-02"
 description: This directory contains API specifications and contracts for CDE Orchestrator
   MCP.
 llm_summary: "User guide for API Specifications.\n  This directory contains API specifications\
@@ -16,7 +16,7 @@ tags:
 - workflow
 title: API Specifications
 type: design
-updated: '2025-11-02'
+updated: "2025-11-02"
 ---
 
 # API Specifications

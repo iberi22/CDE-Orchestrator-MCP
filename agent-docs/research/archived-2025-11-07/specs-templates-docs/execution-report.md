@@ -3,8 +3,8 @@ title: 'Execution Report: [Workflow/Task Name]'
 description: '| Step | Status | Duration | Output | Notes | |------|--------|----------|--------|-------|'
 type: guide
 status: draft
-created: '2025-11-02'
-updated: '2025-11-02'
+created: "2025-11-02"
+updated: "2025-11-02"
 author: Auto-Generated
 tags:
 - documentation

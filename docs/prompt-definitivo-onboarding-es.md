@@ -1,3 +1,13 @@
+---
+title: Prompt Definitivo Onboarding Es
+description: Legacy documentation file
+type: guide
+status: archived
+created: '2025-11-27'
+updated: '2025-11-27'
+author: Legacy
+---
+
 # 🎯 EL PROMPT DEFINITIVO - CDE Onboarding Profesional
 
 > **Propósito**: Un solo prompt para integración completa de CDE desde 0% hasta 100%

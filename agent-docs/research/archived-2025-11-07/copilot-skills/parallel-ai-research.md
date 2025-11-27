@@ -4,8 +4,8 @@ description: '```powershell Start-Job -ScriptBlock { gemini --yolo "query" } -Na
   "Research"'
 type: guide
 status: draft
-created: '2025-11-20'
-updated: '2025-11-20'
+created: "2025-11-20"
+updated: "2025-11-20"
 author: Auto-Generated
 tags:
 - ai
